@@ -19,6 +19,8 @@ export type BookDetails = {
 
 export type Community = { community_id: string; community_name: string }
 
+export type District = { district_id: string; district_name: string }
+
 export type Fees = {
   segment_id: string
   fees_type_id: string
@@ -43,5 +45,7 @@ export type Program = {
 }
 
 export type QualifiedExam = { qualified_exam_id: string; qualified_exam_name: string }
+
+export type State = { state_id: string; state_name: string }
 
 export type Religions = { religion_id: string; religion_name: string }

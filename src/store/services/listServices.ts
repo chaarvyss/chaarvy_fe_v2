@@ -2,7 +2,18 @@ import { urlConstants } from 'src/constants/urlConstants'
 import api from './api'
 import { UsersListResponse } from 'src/lib/interfaces'
 import { HttpRequestMethods } from '..'
-import { AddOnCourse, Community, Gender, Language, Occupation, Program, QualifiedExam, Religions } from 'src/lib/types'
+import {
+  AddOnCourse,
+  Community,
+  District,
+  Gender,
+  Language,
+  Occupation,
+  Program,
+  QualifiedExam,
+  Religions,
+  State
+} from 'src/lib/types'
 import { CacheTag } from './cacheTag'
 
 const listServicesApi = api.injectEndpoints({
@@ -39,6 +50,15 @@ const listServicesApi = api.injectEndpoints({
         return {
           method: HttpRequestMethods.GET,
           url: urlConstants.list.communities
+        }
+      }
+    }),
+    getDistrictsList: build.query<District[], string>({
+      query: state_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.communities,
+          params: { state_id }
         }
       }
     }),
@@ -89,6 +109,14 @@ const listServicesApi = api.injectEndpoints({
           url: urlConstants.list.religions
         }
       }
+    }),
+    getStateList: build.query<State[], void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.states
+        }
+      }
     })
   })
 })
@@ -104,5 +132,7 @@ export const {
   useGetOccupationsListQuery,
   useGetQualifiedExamsListQuery,
   useGetReligionsListQuery,
-  useGetUsersListQuery
+  useGetUsersListQuery,
+  useGetDistrictsListQuery,
+  useGetStateListQuery
 } = listServicesApi

@@ -12,6 +12,7 @@ export const urlConstants = {
   list: {
     addOnCourse: `${interRoutePrefix.list}/addon_courses`,
     communities: `${interRoutePrefix.list}/communities`,
+    districts: `${interRoutePrefix.list}/districts`,
     feesTypes: `${interRoutePrefix.list}/fee-types`,
     genders: `${interRoutePrefix.list}/genders`,
     languages: `${interRoutePrefix.list}/languages`,
@@ -19,6 +20,7 @@ export const urlConstants = {
     programs: `${interRoutePrefix.list}/programs`,
     qualifiedExams: `${interRoutePrefix.list}/qualified-exams`,
     religions: `${interRoutePrefix.list}/religions`,
+    states: `${interRoutePrefix.list}/states`,
     users: `${interRoutePrefix.list}/users`
   },
   admin: {
