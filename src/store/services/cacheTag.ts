@@ -1,3 +1,4 @@
 export enum CacheTag {
-  ListUsers = 'listUsers'
+  ListUsers = 'listUsers',
+  ListPrograms = 'listPrograms'
 }

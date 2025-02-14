@@ -1,11 +1,13 @@
 import { fetchBaseQuery, retry } from '@reduxjs/toolkit/query'
 import { sessionStorageKeys } from 'src/lib/enums'
+import { ContentTypes, httpHeaders } from 'src/store'
 
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_URL,
   prepareHeaders: headers => {
     const accessToken = sessionStorage.getItem(sessionStorageKeys.accessToken)
     const clcode = sessionStorage.getItem(sessionStorageKeys.clientCode)
+    headers.set(httpHeaders.CONTENT_TYPE, ContentTypes.JSON)
     if (accessToken) {
       headers.set('Authorization', `Bearer ${accessToken}`)
     }
@@ -20,8 +22,7 @@ const baseQuery = fetchBaseQuery({
 const baseQueryWithRetry = retry(
   async (args, api, extraOptions) => {
     let { url, params = {}, ...rest } = args
-
-    // Remove undefined, null, and empty string values, and serialize values correctly
+    console.log(params, 'params')
     let filteredParams = Object.fromEntries(
       Object.entries(params)
         .filter(([_, value]) => value !== undefined && value !== null && value !== '')
@@ -31,7 +32,6 @@ const baseQueryWithRetry = retry(
         ])
     )
 
-    // Generate query string correctly
     let extUrl = Object.keys(filteredParams).length > 0 ? `?${new URLSearchParams(filteredParams).toString()}` : ''
 
     url = `${url}${extUrl}`

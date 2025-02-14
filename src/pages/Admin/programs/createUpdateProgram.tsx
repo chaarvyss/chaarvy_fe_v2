@@ -1,8 +1,10 @@
-import { MenuItem, Select, TextField } from '@mui/material'
-import { Box, Button, FormControl, Grid, InputLabel } from '@muiElements'
+import { TextField } from '@mui/material'
+import { Box, Button, Grid, InputLabel } from '@muiElements'
 import { ChangeEvent, useEffect, useState } from 'react'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Program } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
+import { useCreateProgramMutation, useUpdateProgramMutation } from 'src/store/services/adminServices'
 
 export interface CreateProgram {
   program_name: string
@@ -15,17 +17,45 @@ interface CreateUpdateProgramProps {
 }
 
 const CreateOrUpdateProgramModal = ({ selectedProgram, isOpen, onClose }: CreateUpdateProgramProps) => {
-  const createProgramFooter = () => {
-    return (
-      <Box display='flex' justifyContent='center'>
-        <Button variant='contained'>{selectedProgram ? 'Edit' : 'Create'} Program</Button>
-      </Box>
-    )
-  }
-
   const [programDetails, setProgramDetails] = useState<CreateProgram>({
     program_name: ''
   })
+  const { triggerToast } = useToast()
+  const [CreateProgram] = useCreateProgramMutation()
+  const [updateProgram] = useUpdateProgramMutation()
+
+  const handleSubmit = () => {
+    if (selectedProgram) {
+      updateProgram({ program_name: programDetails.program_name, id: selectedProgram.program_id })
+        .unwrap()
+        .then(response => {
+          triggerToast(response, { variant: ToastVariants.SUCCESS })
+          onClose()
+        })
+        .catch(e => {
+          triggerToast(e.data, { variant: ToastVariants.ERROR })
+        })
+    } else {
+      CreateProgram({ program_name: programDetails.program_name })
+        .unwrap()
+        .then(() => {
+          onClose()
+        })
+        .catch(e => {
+          triggerToast(e.data, { variant: ToastVariants.ERROR })
+        })
+    }
+  }
+
+  const createProgramFooter = () => {
+    return (
+      <Box display='flex' justifyContent='center'>
+        <Button onClick={handleSubmit} variant='contained'>
+          {selectedProgram ? 'Edit' : 'Create'} Program
+        </Button>
+      </Box>
+    )
+  }
 
   useEffect(() => {
     setProgramDetails({

@@ -9,7 +9,7 @@ const authServiceApi = api.injectEndpoints({
       query: ({ username, password, clcode }) => {
         return {
           body: { username, password },
-          headers: { [httpHeaders.CONTENT_TYPE]: ContentTypes.JSON, [httpHeaders.CLCODE]: clcode },
+          headers: { [httpHeaders.CLCODE]: clcode },
           method: HttpRequestMethods.POST,
           url: urlConstants.auth.login
         }

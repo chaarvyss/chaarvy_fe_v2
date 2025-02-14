@@ -8,8 +8,7 @@ const style = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   boxShadow: 24,
-  bgColor: 'white',
-  width: '80%'
+  bgColor: 'white'
 }
 
 interface ChaarvyModalProps {
@@ -20,7 +19,6 @@ interface ChaarvyModalProps {
   shouldRestrictCloseOnOuterClick?: boolean
   onClose: () => void
   title?: string
-  size?: string // in percentage
 }
 
 const ChaarvyModal = ({
@@ -30,14 +28,9 @@ const ChaarvyModal = ({
   footer,
   shouldWarnOnClose,
   shouldRestrictCloseOnOuterClick,
-  title,
-  size
+  title
 }: ChaarvyModalProps) => {
   const [isWarnOnCloseOpen, setIsWarnOnCloseOpen] = useState<boolean>(false)
-
-  if (size) {
-    style['width'] = size
-  }
 
   const WarnOnCloseModal = () => {
     return (

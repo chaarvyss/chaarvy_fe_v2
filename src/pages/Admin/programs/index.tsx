@@ -1,22 +1,16 @@
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@muiElements'
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Card, Typography } from '@muiElements'
 import React, { useEffect, useState } from 'react'
 import { TableHeaders } from 'src/lib/interfaces'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import { Program } from 'src/lib/types'
-import { Card, Typography } from '@mui/material'
 import CreateOrUpdateProgramModal from './createUpdateProgram'
 import ProgramBooksModal from './program_books_modal'
 import ProgramFeesModal from './program_fees_modal'
 import { useLazyGetProgramsListQuery } from 'src/store/services/listServices'
-
-const programs: Program[] = [
-  {
-    program_id: 'asdfas',
-    program_name: 'msc',
-    status: 1
-  }
-]
+import Tag from 'src/reusable_components/tag'
+import { useUpdateProgramStatusMutation } from 'src/store/services/adminServices'
+import { useToast, ToastVariants } from 'src/@core/context/toastContext'
 
 const headers: TableHeaders[] = [
   { label: 's#' },
@@ -38,29 +32,32 @@ const Programs = () => {
     books_details_list_modal: false
   })
 
+  const { triggerToast } = useToast()
+
   const [fetchProgramsList, { data: programsListData }] = useLazyGetProgramsListQuery()
+  const [updateProgramStatus] = useUpdateProgramStatusMutation()
 
-  console.log(programsListData)
-  const [selectedProgram, setSelectedProgram] = useState<Program>() // for using program_id to update
-
+  const [selectedProgram, setSelectedProgram] = useState<Program>()
   const handleCreateProgram = () => {
     setShowModal({ ...showModal, create_program_modal: true })
   }
 
   useEffect(() => {
-    setSelectedProgram(undefined)
-    fetchProgramsList({ active_only: true })
-  }, [showModal])
+    fetchProgramsList(false)
+  }, [])
 
   const handleProgramModalClose = () => {
+    setSelectedProgram(undefined)
     setShowModal({ ...showModal, create_program_modal: false })
   }
 
   const handleBooksModalClose = () => {
+    setSelectedProgram(undefined)
     setShowModal({ ...showModal, books_details_list_modal: false })
   }
 
   const handleFeesModalClose = () => {
+    setSelectedProgram(undefined)
     setShowModal({ ...showModal, fees_details_list_modal: false })
   }
 
@@ -119,11 +116,20 @@ const Programs = () => {
     ]
   }
 
+  const handleUpdateStatus = (id: string) => {
+    updateProgramStatus(id)
+      .unwrap()
+      .then(e => triggerToast(e, { variant: ToastVariants.SUCCESS }))
+      .catch(e => {
+        triggerToast(e.data, { variant: ToastVariants.ERROR })
+      })
+  }
+
   return (
     <>
       <TableTilteHeader title='Programs' buttonTitle='Create Program' onButtonClick={handleCreateProgram} />
       <Card>
-        {programs.length > 0 ? (
+        {(programsListData ?? []).length > 0 ? (
           <TableContainer>
             <Table>
               <TableHead>
@@ -134,11 +140,13 @@ const Programs = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {programs.map((eachProgram, index) => (
+                {(programsListData ?? []).map((eachProgram: Program, index) => (
                   <TableRow>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{eachProgram.program_name}</TableCell>
-                    <TableCell>{eachProgram.status}</TableCell>
+                    <TableCell>{eachProgram?.program_name}</TableCell>
+                    <TableCell>
+                      <Tag status={eachProgram?.status} onClick={() => handleUpdateStatus(eachProgram.program_id)} />
+                    </TableCell>
                     <TableCell>
                       <DropDownMenu dropDownMenuOptions={getKebabOptions(eachProgram)} />
                     </TableCell>
@@ -152,23 +160,22 @@ const Programs = () => {
             <Typography>No Programs Available</Typography>
           </Box>
         )}
-
-        <CreateOrUpdateProgramModal
-          selectedProgram={selectedProgram}
-          isOpen={showModal.create_program_modal}
-          onClose={handleProgramModalClose}
-        />
-        <ProgramBooksModal
-          selectedProgram={selectedProgram}
-          isOpen={showModal.books_details_list_modal}
-          onClose={handleBooksModalClose}
-        />
-        <ProgramFeesModal
-          selectedProgram={selectedProgram}
-          isOpen={showModal.fees_details_list_modal}
-          onClose={handleFeesModalClose}
-        />
       </Card>
+      <CreateOrUpdateProgramModal
+        selectedProgram={selectedProgram}
+        isOpen={showModal.create_program_modal}
+        onClose={handleProgramModalClose}
+      />
+      <ProgramBooksModal
+        selectedProgram={selectedProgram}
+        isOpen={showModal.books_details_list_modal}
+        onClose={handleBooksModalClose}
+      />
+      <ProgramFeesModal
+        selectedProgram={selectedProgram}
+        isOpen={showModal.fees_details_list_modal}
+        onClose={handleFeesModalClose}
+      />
     </>
   )
 }
