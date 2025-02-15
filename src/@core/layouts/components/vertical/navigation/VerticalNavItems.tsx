@@ -5,6 +5,7 @@ import { NavLink, NavSectionTitle, VerticalNavItemsType } from 'src/@core/layout
 // ** Custom Menu Components
 import VerticalNavLink from './VerticalNavLink'
 import VerticalNavSectionTitle from './VerticalNavSectionTitle'
+import { Typography } from '@muiElements'
 
 interface Props {
   settings: Settings

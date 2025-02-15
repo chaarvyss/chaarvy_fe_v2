@@ -22,7 +22,6 @@ const baseQuery = fetchBaseQuery({
 const baseQueryWithRetry = retry(
   async (args, api, extraOptions) => {
     let { url, params = {}, ...rest } = args
-    console.log(params, 'params')
     let filteredParams = Object.fromEntries(
       Object.entries(params)
         .filter(([_, value]) => value !== undefined && value !== null && value !== '')
@@ -45,7 +44,12 @@ const baseQueryWithErrorHandling: typeof baseQueryWithRetry = async (args, api, 
   const result = await baseQueryWithRetry(args, api, extraOptions)
   if (result.error) {
     const status = result.error?.status
-    console.error('API Error:', status, result.error.data)
+    if (status == 401) {
+      sessionStorage.clear()
+      window.location.replace('/login')
+    } else {
+      console.error('API Error:', status, result.error.data)
+    }
   }
   return result
 }
