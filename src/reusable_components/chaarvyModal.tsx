@@ -8,24 +8,29 @@ const style = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   boxShadow: 24,
-  bgColor: 'white'
+  bgColor: 'white',
+  size: '100%',
+  maxHeight: '90vh',
+  overflow: 'auto'
 }
 
 interface ChaarvyModalProps {
   children: ReactChild
   footer?: ReactChild
   isOpen: boolean
+  modalSize?: string
+  onClose: () => void
   shouldWarnOnClose?: boolean
   shouldRestrictCloseOnOuterClick?: boolean
-  onClose: () => void
   title?: string
 }
 
 const ChaarvyModal = ({
   isOpen,
-  onClose,
   children,
   footer,
+  modalSize,
+  onClose,
   shouldWarnOnClose,
   shouldRestrictCloseOnOuterClick,
   title
@@ -71,11 +76,24 @@ const ChaarvyModal = ({
     }
   }
 
+  const getModalSize = () => {
+    return modalSize ?? 'col-12 col-md-6 col-lg-4'
+  }
+
   return (
     <>
       <Modal open={isOpen} {...(!!shouldRestrictCloseOnOuterClick ? {} : { onClose: handleModalClose })}>
-        <Card sx={style}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 4 }}>
+        <Card className={getModalSize()} sx={style}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: 4,
+              overFlow: 'auto',
+              height: '100%'
+            }}
+          >
             <Typography variant='h5'>{title}</Typography>
             <Close onClick={handleModalClose} sx={{ cursor: 'pointer' }} />
           </Box>

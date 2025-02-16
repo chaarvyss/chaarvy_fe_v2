@@ -12,13 +12,25 @@ export const Tag = ({ status, onClick }: TagProps) => {
     switch (status) {
       case 0:
         return (
-          <Typography bgcolor={red.A100} color={red.A700} padding='0px 8px' borderRadius={50}>
+          <Typography
+            onClick={() => onClick?.()}
+            bgcolor={red.A100}
+            color={red.A700}
+            padding='0px 8px'
+            borderRadius={50}
+          >
             Inactive
           </Typography>
         )
       case 1:
         return (
-          <Typography bgcolor={green.A100} color={green.A700} padding='0px 8px' borderRadius={50}>
+          <Typography
+            onClick={() => onClick?.()}
+            bgcolor={green.A100}
+            color={green.A700}
+            padding='0px 8px'
+            borderRadius={50}
+          >
             Active
           </Typography>
         )
@@ -27,7 +39,7 @@ export const Tag = ({ status, onClick }: TagProps) => {
     }
   }
   return (
-    <Box display='flex' style={{ cursor: 'pointer' }} onClick={() => onClick?.()}>
+    <Box display='flex' style={{ cursor: 'pointer' }}>
       {getJsx()}
     </Box>
   )

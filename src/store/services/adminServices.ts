@@ -8,6 +8,17 @@ interface UpdateProgramRequest {
   program_name: string
 }
 
+interface UpdateFeesTypeRequest {
+  id?: string
+  fees_type: string
+}
+
+interface ProgramSegmentRequest {
+  id?: string
+  program_id: string
+  segment_id: string
+}
+
 const adminServiceApi = api.injectEndpoints({
   endpoints: build => ({
     createProgram: build.mutation<string, UpdateProgramRequest>({
@@ -16,6 +27,36 @@ const adminServiceApi = api.injectEndpoints({
         return {
           method: HttpRequestMethods.POST,
           url: urlConstants.admin.add.program,
+          params
+        }
+      }
+    }),
+    createProgramSegment: build.mutation<string, ProgramSegmentRequest>({
+      invalidatesTags: [CacheTag.ListProgramSegments],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.add.programSegment,
+          body
+        }
+      }
+    }),
+    createFeesType: build.mutation<string, string>({
+      invalidatesTags: [CacheTag.ListFeesTypes],
+      query: fees_type => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.add.feesType,
+          params: { fees_type }
+        }
+      }
+    }),
+    updateFeesType: build.mutation<string, UpdateFeesTypeRequest>({
+      invalidatesTags: [CacheTag.ListFeesTypes],
+      query: params => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.update.feesType,
           params
         }
       }
@@ -43,4 +84,11 @@ const adminServiceApi = api.injectEndpoints({
   })
 })
 
-export const { useCreateProgramMutation, useUpdateProgramMutation, useUpdateProgramStatusMutation } = adminServiceApi
+export const {
+  useCreateProgramMutation,
+  useUpdateProgramMutation,
+  useUpdateProgramStatusMutation,
+  useCreateFeesTypeMutation,
+  useUpdateFeesTypeMutation,
+  useCreateProgramSegmentMutation
+} = adminServiceApi

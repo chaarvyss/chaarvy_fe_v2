@@ -22,16 +22,18 @@ export type Community = { community_id: string; community_name: string }
 export type District = { district_id: string; district_name: string }
 
 export type Fees = {
-  segment_id: string
-  fees_type_id: string
+  program_fees_id: string
   fees_type: string
   fees: number
 }
 
+export type FeesTypesResponse = {
+  fees_type: string
+  fees_type_id: string
+}
 export type FeesDetails = {
-  segment: string
-  segment_id: string
-  fees: Fees[]
+  program_name: string
+  segments: Segment[]
 }
 
 export type Gender = { gender_id: string; gender_name: string }
@@ -44,8 +46,15 @@ export type Program = {
   status?: number
 }
 
+export type ProgramDetails = {
+  program_segment_id: string
+  segment_name: string
+}
 export type QualifiedExam = { qualified_exam_id: string; qualified_exam_name: string }
-
+export type Segment = {
+  segment_name: string
+  segment_id: string
+  fees: Fees[]
+}
 export type State = { state_id: string; state_name: string }
-
 export type Religions = { religion_id: string; religion_name: string }

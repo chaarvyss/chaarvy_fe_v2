@@ -11,6 +11,9 @@ import { useLazyGetProgramsListQuery } from 'src/store/services/listServices'
 import Tag from 'src/reusable_components/tag'
 import { useUpdateProgramStatusMutation } from 'src/store/services/adminServices'
 import { useToast, ToastVariants } from 'src/@core/context/toastContext'
+import ProgramViewModal from './program_view_modal'
+
+import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
 
 const headers: TableHeaders[] = [
   { label: 's#' },
@@ -23,19 +26,23 @@ interface ProgramModals {
   create_program_modal: boolean
   fees_details_list_modal: boolean
   books_details_list_modal: boolean
+  view_program_details_modal: boolean
 }
 
 const Programs = () => {
   const [showModal, setShowModal] = useState<ProgramModals>({
     create_program_modal: false,
     fees_details_list_modal: false,
-    books_details_list_modal: false
+    books_details_list_modal: false,
+    view_program_details_modal: false
   })
 
   const { triggerToast } = useToast()
 
   const [fetchProgramsList, { data: programsListData }] = useLazyGetProgramsListQuery()
   const [updateProgramStatus] = useUpdateProgramStatusMutation()
+
+  const [fetchProgramSegment] = useLazyGetProgramSegmentDetailsQuery()
 
   const [selectedProgram, setSelectedProgram] = useState<Program>()
   const handleCreateProgram = () => {
@@ -61,6 +68,11 @@ const Programs = () => {
     setShowModal({ ...showModal, fees_details_list_modal: false })
   }
 
+  const handleProgramViewModalClose = () => {
+    setSelectedProgram(undefined)
+    setShowModal({ ...showModal, view_program_details_modal: false })
+  }
+
   const handleKebabOptionClick = (program: Program, option: 'Edit' | 'view' | 'books' | 'fees') => {
     setSelectedProgram(program)
     switch (option) {
@@ -68,8 +80,8 @@ const Programs = () => {
         handleCreateProgram()
         break
       case 'view':
-        // TODO: need to show program name, program description if any
-        alert(`${program.program_id}View clicked`)
+        fetchProgramSegment(program.program_id)
+        setShowModal({ ...showModal, view_program_details_modal: true })
         break
       case 'fees':
         /*
@@ -171,11 +183,20 @@ const Programs = () => {
         isOpen={showModal.books_details_list_modal}
         onClose={handleBooksModalClose}
       />
-      <ProgramFeesModal
-        selectedProgram={selectedProgram}
-        isOpen={showModal.fees_details_list_modal}
-        onClose={handleFeesModalClose}
-      />
+      {showModal.fees_details_list_modal && (
+        <ProgramFeesModal
+          selectedProgram={selectedProgram}
+          isOpen={showModal.fees_details_list_modal}
+          onClose={handleFeesModalClose}
+        />
+      )}
+      {showModal.view_program_details_modal && (
+        <ProgramViewModal
+          isOpen={showModal.view_program_details_modal}
+          onClose={handleProgramViewModalClose}
+          selectedProgram={selectedProgram}
+        />
+      )}
     </>
   )
 }

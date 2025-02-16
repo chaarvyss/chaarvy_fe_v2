@@ -85,7 +85,7 @@ const LoginPage = () => {
         .unwrap()
         .then(response => {
           let res = response as any
-          dispatch(setAvailablePermissionsData(response.permissions))
+          dispatch(setAvailablePermissionsData(response.permission))
           triggerToast('Login Successful', { variant: ToastVariants.SUCCESS })
           sessionStorage.setItem(sessionStorageKeys.accessToken, res.data.authToken)
           sessionStorage.setItem(sessionStorageKeys.clientCode, res.data.clcode)

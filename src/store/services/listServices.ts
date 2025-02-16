@@ -6,12 +6,15 @@ import {
   AddOnCourse,
   Community,
   District,
+  Fees,
+  FeesTypesResponse,
   Gender,
   Language,
   Occupation,
   Program,
   QualifiedExam,
   Religions,
+  Segment,
   State
 } from 'src/lib/types'
 import { CacheTag } from './cacheTag'
@@ -62,7 +65,8 @@ const listServicesApi = api.injectEndpoints({
         }
       }
     }),
-    getFeesTypesList: build.query<Community[], void>({
+    getFeesTypesList: build.query<FeesTypesResponse[], void>({
+      providesTags: [CacheTag.ListFeesTypes],
       query: () => {
         return {
           method: HttpRequestMethods.GET,
@@ -110,6 +114,14 @@ const listServicesApi = api.injectEndpoints({
         }
       }
     }),
+    getSegmentsList: build.query<Segment[], void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.segments
+        }
+      }
+    }),
     getStateList: build.query<State[], void>({
       query: () => {
         return {
@@ -124,15 +136,15 @@ const listServicesApi = api.injectEndpoints({
 export const {
   useLazyGetUsersListQuery,
   useLazyGetProgramsListQuery,
-  useGetAddonCoursesListQuery,
-  useGetCommunitiesListQuery,
-  useGetFeesTypesListQuery,
-  useGetGendersListQuery,
-  useGetLanguagesListQuery,
-  useGetOccupationsListQuery,
-  useGetQualifiedExamsListQuery,
-  useGetReligionsListQuery,
-  useGetUsersListQuery,
-  useGetDistrictsListQuery,
-  useGetStateListQuery
+  useLazyGetAddonCoursesListQuery,
+  useLazyGetCommunitiesListQuery,
+  useLazyGetFeesTypesListQuery,
+  useLazyGetGendersListQuery,
+  useLazyGetLanguagesListQuery,
+  useLazyGetOccupationsListQuery,
+  useLazyGetQualifiedExamsListQuery,
+  useLazyGetReligionsListQuery,
+  useLazyGetDistrictsListQuery,
+  useLazyGetStateListQuery,
+  useGetSegmentsListQuery
 } = listServicesApi

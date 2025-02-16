@@ -11,10 +11,12 @@ import Magnify from 'mdi-material-ui/Magnify'
 import Menu from 'mdi-material-ui/Menu'
 import MessageOutline from 'mdi-material-ui/MessageOutline'
 import Close from 'mdi-material-ui/Close'
+import Check from 'mdi-material-ui/Check'
 
 export {
   AccountOutline,
   ArrowUpDropCircleOutline,
+  Check,
   CogOutline,
   Close,
   CurrencyUsd,

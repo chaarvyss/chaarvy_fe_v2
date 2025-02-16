@@ -18,6 +18,7 @@ import '../../styles/globals.css'
 import store from 'src/store'
 import { ToastProvider } from 'src/@core/context/toastContext'
 import { ToastContainer } from 'react-toastify'
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 type ExtendedAppProps = AppProps & {
   Component: NextPage

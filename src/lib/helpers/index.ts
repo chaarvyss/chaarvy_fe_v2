@@ -1,7 +1,7 @@
 import store from 'src/store'
 
 export const isPermitted = (permissionId: string) => {
-  return store.getState().permission.data.includes(permissionId)
+  return store.getState().permission?.data?.includes(permissionId)
 }
 
 export const getEmptyKeysList = (object: Object) => {
