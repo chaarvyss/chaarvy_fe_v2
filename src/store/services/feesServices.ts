@@ -1,7 +1,7 @@
 import { urlConstants } from 'src/constants/urlConstants'
 import api from './api'
 import { HttpRequestMethods } from '..'
-import { FeesDetails } from 'src/lib/types'
+import { ProgramFeesDetailsResponse } from 'src/lib/types'
 import { CacheTag } from './cacheTag'
 
 interface ProgramFeesRequest {
@@ -23,7 +23,7 @@ export interface CreateProgramFeesRequest {
 
 const feeServiceApi = api.injectEndpoints({
   endpoints: build => ({
-    getProgramFeesDetails: build.query<FeesDetails, ProgramFeesRequest>({
+    getProgramFeesDetails: build.query<ProgramFeesDetailsResponse, ProgramFeesRequest>({
       providesTags: [CacheTag.ProgramFees],
       query: params => {
         return {

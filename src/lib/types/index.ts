@@ -4,17 +4,11 @@ export type AddOnCourse = {
   status: number
 }
 
-export type Book = {
-  segment_id: string
+export type BooksTypesResponse = {
   book_id: string
   book_name: string
   pages: number
-}
-
-export type BookDetails = {
-  segment: string
-  segment_id: string
-  books: Book[]
+  price: number
 }
 
 export type Community = { community_id: string; community_name: string }
@@ -31,9 +25,9 @@ export type FeesTypesResponse = {
   fees_type: string
   fees_type_id: string
 }
-export type FeesDetails = {
-  program_name: string
-  segments: Segment[]
+
+export type FeesSegment = Segment & {
+  fees: Fees[]
 }
 
 export type Gender = { gender_id: string; gender_name: string }
@@ -50,11 +44,17 @@ export type ProgramDetails = {
   program_segment_id: string
   segment_name: string
 }
+
+export type ProgramFeesDetailsResponse = {
+  program_name: string
+  segments: FeesSegment[]
+}
+
 export type QualifiedExam = { qualified_exam_id: string; qualified_exam_name: string }
 export type Segment = {
   segment_name: string
   segment_id: string
-  fees: Fees[]
 }
-export type State = { state_id: string; state_name: string }
+
 export type Religions = { religion_id: string; religion_name: string }
+export type State = { state_id: string; state_name: string }

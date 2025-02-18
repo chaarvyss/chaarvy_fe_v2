@@ -2,7 +2,7 @@ import { TextField } from '@mui/material'
 import { Box, Button, Grid, InputLabel } from '@muiElements'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { Fees } from 'src/lib/types'
+import { FeesTypesResponse } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { useCreateFeesTypeMutation, useUpdateFeesTypeMutation } from 'src/store/services/adminServices'
 
@@ -11,7 +11,7 @@ export interface CreateFeesType {
 }
 
 interface CreateUpdateFeesTypeProps {
-  selectedFeesType?: Fees
+  selectedFeesType?: FeesTypesResponse
   isOpen: boolean
   onClose: () => void
 }

@@ -3,21 +3,36 @@ import { Box, Card, Table, TableBody, TableCell, TableContainer, TableHead, Tabl
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import { useLazyGetFeesTypesListQuery } from 'src/store/services/listServices'
 import { TableHeaders } from 'src/lib/interfaces'
-import { Fees, FeesTypesResponse } from 'src/lib/types'
+import { BooksTypesResponse, Fees } from 'src/lib/types'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
-import CreateOrUpdateFeesTypeModal from './createFeesModal'
+import CreateOrUpdateBookModal, { BookTypeRequest } from './createBookModal'
+
+const booksTypes: BooksTypesResponse[] = [
+  {
+    book_id: 'test-book',
+    book_name: 'm-1',
+    pages: 44,
+    price: 250
+  },
+  {
+    book_id: 'test-book2',
+    book_name: 'm-2',
+    pages: 84,
+    price: 200
+  }
+]
 
 const FeesTypes = () => {
   const [fetchFeesTypes, { data: getFeesTypes }] = useLazyGetFeesTypesListQuery()
-  const [isFeesTypeModalOpen, setIsFeesTypeModalOpen] = useState<boolean>(false)
-  const [selectedFeesType, setSelectedFeesType] = useState<FeesTypesResponse>()
+  const [isBookModalOpen, setIsFeesTypeModalOpen] = useState<boolean>(false)
+  const [selectedBook, setSelectedBook] = useState<BooksTypesResponse>()
 
   useEffect(() => {
     fetchFeesTypes()
   }, [])
 
   const handleOnModalClose = () => {
-    setSelectedFeesType(undefined)
+    setSelectedBook(undefined)
     setIsFeesTypeModalOpen(false)
   }
 
@@ -25,8 +40,8 @@ const FeesTypes = () => {
     setIsFeesTypeModalOpen(true)
   }
 
-  const handleKebabOptionClick = (feesType: FeesTypesResponse, option: 'Edit') => {
-    setSelectedFeesType(feesType)
+  const handleKebabOptionClick = (Book: BooksTypesResponse, option: 'Edit') => {
+    setSelectedBook(Book)
     switch (option) {
       case 'Edit':
         setIsFeesTypeModalOpen(true)
@@ -34,22 +49,28 @@ const FeesTypes = () => {
     }
   }
 
-  const getKebabOptions = (eachFeesType: FeesTypesResponse) => {
+  const getKebabOptions = (eachBook: BooksTypesResponse) => {
     return [
       {
-        id: eachFeesType.fees_type_id,
+        id: '',
         label: 'Edit',
-        onOptionClick: () => handleKebabOptionClick(eachFeesType, 'Edit')
+        onOptionClick: () => handleKebabOptionClick(eachBook, 'Edit')
       }
     ]
   }
 
-  const headers: TableHeaders[] = [{ label: 'S#' }, { label: 'Fees type' }, { label: 'Action', width: '100px' }]
+  const headers: TableHeaders[] = [
+    { label: 'S#' },
+    { label: 'Book Name' },
+    { label: 'Pages' },
+    { label: 'Price' },
+    { label: 'Action', width: '100px' }
+  ]
   return (
     <>
-      <TableTilteHeader title='Fees types' buttonTitle='Add Fees Type' onButtonClick={handleAddFees} />
+      <TableTilteHeader title='Books' buttonTitle='Add Book' onButtonClick={handleAddFees} />
       <Card>
-        {(getFeesTypes ?? []).length > 0 ? (
+        {(booksTypes ?? []).length > 0 ? (
           <TableContainer>
             <Table>
               <TableHead>
@@ -60,13 +81,15 @@ const FeesTypes = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {(getFeesTypes ?? []).map((eachFeesType: FeesTypesResponse, index) => (
+                {(booksTypes ?? []).map((eachBook: BooksTypesResponse, index) => (
                   <TableRow>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{eachFeesType?.fees_type}</TableCell>
+                    <TableCell>{eachBook?.book_name}</TableCell>
+                    <TableCell>{eachBook?.pages}</TableCell>
+                    <TableCell>{eachBook?.price}</TableCell>
 
                     <TableCell>
-                      <DropDownMenu dropDownMenuOptions={getKebabOptions(eachFeesType)} />
+                      <DropDownMenu dropDownMenuOptions={getKebabOptions(eachBook)} />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -75,15 +98,11 @@ const FeesTypes = () => {
           </TableContainer>
         ) : (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Typography>No Fees types Available</Typography>
+            <Typography>No Books Available</Typography>
           </Box>
         )}
       </Card>
-      <CreateOrUpdateFeesTypeModal
-        isOpen={isFeesTypeModalOpen}
-        selectedFeesType={selectedFeesType}
-        onClose={handleOnModalClose}
-      />
+      <CreateOrUpdateBookModal isOpen={isBookModalOpen} selectedBook={selectedBook} onClose={handleOnModalClose} />
     </>
   )
 }
