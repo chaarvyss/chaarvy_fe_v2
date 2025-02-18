@@ -26,6 +26,19 @@ export type FeesTypesResponse = {
   fees_type_id: string
 }
 
+export type Books = {
+  program_book_id: string
+  program_id: string
+  segment_id: string
+  book_id: string
+  book_name: string
+  quantity: number
+}
+
+export type BooksSegment = Segment & {
+  books: Books[]
+}
+
 export type FeesSegment = Segment & {
   fees: Fees[]
 }
@@ -38,6 +51,11 @@ export type Program = {
   program_id: string
   program_name: string
   status?: number
+}
+
+export type ProgramBooksDetails = {
+  program_name: string
+  segments: BooksSegment[]
 }
 
 export type ProgramDetails = {

@@ -1,35 +1,16 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Box, Card, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@muiElements'
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
-import { useLazyGetFeesTypesListQuery } from 'src/store/services/listServices'
+import { useGetBooksListQuery } from 'src/store/services/listServices'
 import { TableHeaders } from 'src/lib/interfaces'
 import { BooksTypesResponse, Fees } from 'src/lib/types'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import CreateOrUpdateBookModal, { BookTypeRequest } from './createBookModal'
 
-const booksTypes: BooksTypesResponse[] = [
-  {
-    book_id: 'test-book',
-    book_name: 'm-1',
-    pages: 44,
-    price: 250
-  },
-  {
-    book_id: 'test-book2',
-    book_name: 'm-2',
-    pages: 84,
-    price: 200
-  }
-]
-
 const FeesTypes = () => {
-  const [fetchFeesTypes, { data: getFeesTypes }] = useLazyGetFeesTypesListQuery()
+  const { data: booksTypes } = useGetBooksListQuery()
   const [isBookModalOpen, setIsFeesTypeModalOpen] = useState<boolean>(false)
   const [selectedBook, setSelectedBook] = useState<BooksTypesResponse>()
-
-  useEffect(() => {
-    fetchFeesTypes()
-  }, [])
 
   const handleOnModalClose = () => {
     setSelectedBook(undefined)

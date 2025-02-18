@@ -34,6 +34,11 @@ const navigation = (): VerticalNavItemsType => {
       path: '/Admin/feesTypes'
     },
     {
+      title: 'Books',
+      icon: HomeOutline,
+      path: '/Admin/books'
+    },
+    {
       title: 'Programs',
       icon: HomeOutline,
       path: '/Admin/programs'

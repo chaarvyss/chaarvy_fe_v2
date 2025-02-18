@@ -4,6 +4,7 @@ import { UsersListResponse } from 'src/lib/interfaces'
 import { HttpRequestMethods } from '..'
 import {
   AddOnCourse,
+  BooksTypesResponse,
   Community,
   District,
   Fees,
@@ -12,6 +13,7 @@ import {
   Language,
   Occupation,
   Program,
+  ProgramBooksDetails,
   QualifiedExam,
   Religions,
   Segment,
@@ -21,30 +23,21 @@ import { CacheTag } from './cacheTag'
 
 const listServicesApi = api.injectEndpoints({
   endpoints: build => ({
-    getUsersList: build.query<UsersListResponse[], void>({
-      query: () => {
-        return {
-          method: HttpRequestMethods.GET,
-          url: urlConstants.list.users
-        }
-      }
-    }),
-    getProgramsList: build.query<Program[], boolean>({
-      providesTags: [CacheTag.ListPrograms],
-      query: active_only => {
-        return {
-          method: HttpRequestMethods.GET,
-          url: urlConstants.list.programs,
-          params: { active_only }
-        }
-      }
-    }),
     getAddonCoursesList: build.query<AddOnCourse[], boolean>({
       query: onlyActive => {
         return {
           method: HttpRequestMethods.GET,
           url: urlConstants.list.addOnCourse,
           params: { onlyActive }
+        }
+      }
+    }),
+    getBooksList: build.query<BooksTypesResponse[], void>({
+      providesTags: [CacheTag.ListBooks],
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.books
         }
       }
     }),
@@ -98,6 +91,27 @@ const listServicesApi = api.injectEndpoints({
         }
       }
     }),
+    getProgramsList: build.query<Program[], boolean>({
+      providesTags: [CacheTag.ListPrograms],
+      query: active_only => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.programs,
+          params: { active_only }
+        }
+      }
+    }),
+
+    getProgramBooksList: build.query<ProgramBooksDetails, string>({
+      providesTags: [CacheTag.ListProgramBooks],
+      query: program_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.programBooks,
+          params: { program_id }
+        }
+      }
+    }),
     getQualifiedExamsList: build.query<QualifiedExam[], void>({
       query: () => {
         return {
@@ -129,22 +143,33 @@ const listServicesApi = api.injectEndpoints({
           url: urlConstants.list.states
         }
       }
+    }),
+    getUsersList: build.query<UsersListResponse[], void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.users
+        }
+      }
     })
   })
 })
 
 export const {
-  useLazyGetUsersListQuery,
-  useLazyGetProgramsListQuery,
+  useGetSegmentsListQuery,
+  useGetBooksListQuery,
+  useGetProgramsListQuery,
   useLazyGetAddonCoursesListQuery,
   useLazyGetCommunitiesListQuery,
+  useLazyGetDistrictsListQuery,
   useLazyGetFeesTypesListQuery,
   useLazyGetGendersListQuery,
   useLazyGetLanguagesListQuery,
   useLazyGetOccupationsListQuery,
+  useLazyGetProgramBooksListQuery,
+  useLazyGetProgramsListQuery,
   useLazyGetQualifiedExamsListQuery,
   useLazyGetReligionsListQuery,
-  useLazyGetDistrictsListQuery,
   useLazyGetStateListQuery,
-  useGetSegmentsListQuery
+  useLazyGetUsersListQuery
 } = listServicesApi

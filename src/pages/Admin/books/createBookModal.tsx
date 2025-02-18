@@ -4,7 +4,7 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { BooksTypesResponse } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import { useCreateFeesTypeMutation, useUpdateFeesTypeMutation } from 'src/store/services/adminServices'
+import { useCreateBookMutation, useUpdateBookMutation } from 'src/store/services/adminServices'
 
 export interface BookTypeRequest {
   book_name: string
@@ -25,8 +25,8 @@ const CreateOrUpdateBookModal = ({ selectedBook, isOpen, onClose }: CreateUpdate
     price: 0
   })
   const { triggerToast } = useToast()
-  const [CreateFeesType] = useCreateFeesTypeMutation()
-  const [updateFeesType] = useUpdateFeesTypeMutation()
+  const [createBook] = useCreateBookMutation()
+  const [updateBook] = useUpdateBookMutation()
 
   const resetState = () => {
     setBookType({ book_name: '', pages: 0, price: 0 })
@@ -34,36 +34,35 @@ const CreateOrUpdateBookModal = ({ selectedBook, isOpen, onClose }: CreateUpdate
 
   const handleSubmit = () => {
     if (selectedBook) {
-      alert('editing')
-      // updateFeesType({ fees_type: FeesTypeDetails.fees_type, id: selectedFeesType.fees_type_id })
-      //   .unwrap()
-      //   .then(response => {
-      //     resetState()
-      //     triggerToast(response, { variant: ToastVariants.SUCCESS })
-      //     onClose()
-      //   })
-      //   .catch(e => {
-      //     triggerToast(e.data, { variant: ToastVariants.ERROR })
-      //   })
+      updateBook({ book_id: selectedBook.book_id, ...bookType })
+        .unwrap()
+        .then(response => {
+          resetState()
+          triggerToast(response, { variant: ToastVariants.SUCCESS })
+          onClose()
+        })
+        .catch(e => {
+          triggerToast(e.data, { variant: ToastVariants.ERROR })
+        })
     } else {
-      alert('creating')
-      // CreateFeesType(FeesTypeDetails.fees_type)
-      //   .unwrap()
-      //   .then(response => {
-      //     resetState()
-      //     triggerToast(response, { variant: ToastVariants.SUCCESS })
-      //     onClose()
-      //   })
-      //   .catch(e => {
-      //     triggerToast(e.data, { variant: ToastVariants.ERROR })
-      //   })
+      createBook(bookType)
+        .unwrap()
+        .then(response => {
+          resetState()
+          triggerToast(response, { variant: ToastVariants.SUCCESS })
+          onClose()
+        })
+        .catch(e => {
+          triggerToast(e.data, { variant: ToastVariants.ERROR })
+        })
     }
   }
+  const shouldDisableSubmitButton = Object.values(bookType).some(value => value === '' || value === 0)
 
-  const createFeesTypeFooter = () => {
+  const createBookFooter = () => {
     return (
       <Box display='flex' justifyContent='center'>
-        <Button onClick={handleSubmit} variant='contained'>
+        <Button disabled={shouldDisableSubmitButton} onClick={handleSubmit} variant='contained'>
           {selectedBook?.book_id ? 'Edit' : 'Create'}
         </Button>
       </Box>
@@ -89,7 +88,7 @@ const CreateOrUpdateBookModal = ({ selectedBook, isOpen, onClose }: CreateUpdate
       isOpen={isOpen}
       onClose={resetFeesTypeDetails}
       title={`${selectedBook?.book_id ? 'Edit' : 'Create'} Book`}
-      footer={createFeesTypeFooter()}
+      footer={createBookFooter()}
       shouldWarnOnClose
       shouldRestrictCloseOnOuterClick
     >

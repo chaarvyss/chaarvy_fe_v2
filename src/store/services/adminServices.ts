@@ -3,17 +3,34 @@ import api from './api'
 import { HttpRequestMethods } from '..'
 import { CacheTag } from './cacheTag'
 
-interface UpdateProgramRequest {
+type CreateBook = {
+  book_name: string
+  pages: number
+  price: number
+}
+
+type CreateProgramBookRequest = {
+  program_book_id?: string
+  program_id: string
+  segment_id: string
+  book_id: string
+  quantity: number
+}
+
+type UpdateBook = CreateBook & {
+  book_id: string
+}
+type UpdateProgramRequest = {
   id?: string
   program_name: string
 }
 
-interface UpdateFeesTypeRequest {
+type UpdateFeesTypeRequest = {
   id?: string
   fees_type: string
 }
 
-interface ProgramSegmentRequest {
+type ProgramSegmentRequest = {
   id?: string
   program_id: string
   segment_id: string
@@ -21,6 +38,16 @@ interface ProgramSegmentRequest {
 
 const adminServiceApi = api.injectEndpoints({
   endpoints: build => ({
+    createBook: build.mutation<string, CreateBook>({
+      invalidatesTags: [CacheTag.ListBooks],
+      query: params => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.add.book,
+          body: params
+        }
+      }
+    }),
     createProgram: build.mutation<string, UpdateProgramRequest>({
       invalidatesTags: [CacheTag.ListPrograms],
       query: params => {
@@ -28,6 +55,16 @@ const adminServiceApi = api.injectEndpoints({
           method: HttpRequestMethods.POST,
           url: urlConstants.admin.add.program,
           params
+        }
+      }
+    }),
+    createProgramBook: build.mutation<string, CreateProgramBookRequest>({
+      invalidatesTags: [CacheTag.ListProgramBooks],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.add.programBook,
+          body
         }
       }
     }),
@@ -51,6 +88,16 @@ const adminServiceApi = api.injectEndpoints({
         }
       }
     }),
+    updateBook: build.mutation<string, UpdateBook>({
+      invalidatesTags: [CacheTag.ListBooks],
+      query: params => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.update.book,
+          body: params
+        }
+      }
+    }),
     updateFeesType: build.mutation<string, UpdateFeesTypeRequest>({
       invalidatesTags: [CacheTag.ListFeesTypes],
       query: params => {
@@ -71,6 +118,16 @@ const adminServiceApi = api.injectEndpoints({
         }
       }
     }),
+    updateProgramBook: build.mutation<string, CreateProgramBookRequest>({
+      invalidatesTags: [CacheTag.ListProgramBooks],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.update.programBook,
+          body
+        }
+      }
+    }),
     updateProgramStatus: build.mutation<string, string>({
       invalidatesTags: [CacheTag.ListPrograms],
       query: id => {
@@ -85,10 +142,14 @@ const adminServiceApi = api.injectEndpoints({
 })
 
 export const {
-  useCreateProgramMutation,
-  useUpdateProgramMutation,
-  useUpdateProgramStatusMutation,
+  useCreateBookMutation,
   useCreateFeesTypeMutation,
+  useCreateProgramMutation,
+  useCreateProgramBookMutation,
+  useUpdateBookMutation,
   useUpdateFeesTypeMutation,
-  useCreateProgramSegmentMutation
+  useUpdateProgramMutation,
+  useUpdateProgramBookMutation,
+  useCreateProgramSegmentMutation,
+  useUpdateProgramStatusMutation
 } = adminServiceApi

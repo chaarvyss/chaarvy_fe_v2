@@ -13,6 +13,7 @@ export const urlConstants = {
   },
   list: {
     addOnCourse: `${interRoutePrefix.list}/addon_courses`,
+    books: `${interRoutePrefix.list}/books`,
     communities: `${interRoutePrefix.list}/communities`,
     districts: `${interRoutePrefix.list}/districts`,
     feesTypes: `${interRoutePrefix.list}/fee-types`,
@@ -20,6 +21,7 @@ export const urlConstants = {
     languages: `${interRoutePrefix.list}/languages`,
     occupations: `${interRoutePrefix.list}/occupations`,
     programs: `${interRoutePrefix.list}/programs`,
+    programBooks: `${interRoutePrefix.list}/program-book-detail`,
     qualifiedExams: `${interRoutePrefix.list}/qualified-exams`,
     religions: `${interRoutePrefix.list}/religions`,
     segments: `${interRoutePrefix.list}/segments`,
@@ -28,13 +30,17 @@ export const urlConstants = {
   },
   admin: {
     add: {
+      book: `${interRoutePrefix.admin}/add-book`,
       feesType: `${interRoutePrefix.admin}/add-fees-type`,
       program: `${interRoutePrefix.admin}/add-program`,
+      programBook: `${interRoutePrefix.admin}/add-program-book`,
       programSegment: `${interRoutePrefix.admin}/add-program-segment`
     },
     update: {
+      book: `${interRoutePrefix.admin}/update-book`,
       feesType: `${interRoutePrefix.admin}/update-fees-type`,
       program: `${interRoutePrefix.admin}/update-program`,
+      programBook: `${interRoutePrefix.admin}/update-program-book`,
       programStatus: `${interRoutePrefix.admin}/update-program-status`,
       programSegment: `${interRoutePrefix.admin}/update-program-segment`
     }

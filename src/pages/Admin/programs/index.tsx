@@ -178,11 +178,13 @@ const Programs = () => {
         isOpen={showModal.create_program_modal}
         onClose={handleProgramModalClose}
       />
-      <ProgramBooksModal
-        selectedProgram={selectedProgram}
-        isOpen={showModal.books_details_list_modal}
-        onClose={handleBooksModalClose}
-      />
+      {showModal.books_details_list_modal && (
+        <ProgramBooksModal
+          selectedProgram={selectedProgram}
+          isOpen={showModal.books_details_list_modal}
+          onClose={handleBooksModalClose}
+        />
+      )}
       {showModal.fees_details_list_modal && (
         <ProgramFeesModal
           selectedProgram={selectedProgram}
