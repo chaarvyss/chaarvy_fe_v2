@@ -59,6 +59,7 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
   const [createFeesApi] = useCreateProgramFeesMutation()
 
   const onCreateProgramFeeClick = () => {
+    setCreateProgramFeesDetails({ ...createProgramFeeDetails, program_id: selectedProgram?.program_id ?? '' })
     fetchProgramsList(true)
     fetchFeesTypesList()
     setIsCreateProgramFeesModalOpen(true)
@@ -77,6 +78,11 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
   const handleKebabOptionClick = (feeDetail: Fees, option: 'Edit') => {
     switch (option) {
       case 'Edit':
+        setCreateProgramFeesDetails({
+          ...createProgramFeeDetails,
+          segment_id: feeDetail.segment_id,
+          program_id: selectedProgram?.program_id ?? ''
+        })
         setFeesDetail(feeDetail)
         break
     }
@@ -163,6 +169,7 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
             <Select
               required
               label='Program'
+              disabled={!!selectedProgram}
               onChange={handleCreateProgramFeesDetalilsUpdate('program_id')}
               value={createProgramFeeDetails.program_id}
             >
@@ -176,6 +183,7 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
             <Select
               required
               label='Segment'
+              disabled={createProgramFeeDetails.segment_id !== ''}
               onChange={handleCreateProgramFeesDetalilsUpdate('segment_id')}
               value={createProgramFeeDetails.segment_id}
             >
@@ -307,5 +315,4 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
 
 export default ProgramFeesModal
 
-// TODO: Need to fix program and segment id from where the edit or create add program button is clicked
 // TODO: Need to remove add program fees button when fees types are matched with available fees types in fees response list

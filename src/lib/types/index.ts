@@ -17,6 +17,7 @@ export type District = { district_id: string; district_name: string }
 
 export type Fees = {
   program_fees_id: string
+  segment_id: string
   fees_type: string
   fees: number
 }
