@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
+
 import { Box, Card, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@muiElements'
-import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
-import { useGetBooksListQuery } from 'src/store/services/listServices'
 import { TableHeaders } from 'src/lib/interfaces'
 import { BooksTypesResponse, Fees } from 'src/lib/types'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
+import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
+import { useGetBooksListQuery } from 'src/store/services/listServices'
+
 import CreateOrUpdateBookModal, { BookTypeRequest } from './createBookModal'
 
 const FeesTypes = () => {
@@ -47,6 +49,7 @@ const FeesTypes = () => {
     { label: 'Price' },
     { label: 'Action', width: '100px' }
   ]
+
   return (
     <>
       <TableTilteHeader title='Books' buttonTitle='Add Book' onButtonClick={handleAddFees} />

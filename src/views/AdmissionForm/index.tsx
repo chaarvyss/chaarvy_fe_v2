@@ -1,9 +1,11 @@
-import React, { SyntheticEvent, useState } from 'react'
-import StudentBaseDetails from './studentBaseDetails'
-import { Card, MuiTab } from '@muiElements'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Box, styled, TabProps } from '@mui/material'
+import React, { SyntheticEvent, useState } from 'react'
+
 import { AccountOutline } from '@mdiElements'
+import { Card, MuiTab } from '@muiElements'
+
+import StudentBaseDetails from './studentBaseDetails'
 
 const Tab = styled(MuiTab)<TabProps>(({ theme }) => ({
   [theme.breakpoints.down('md')]: {

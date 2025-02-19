@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
+
 import { Box, Card, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@muiElements'
-import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
-import { useLazyGetFeesTypesListQuery } from 'src/store/services/listServices'
 import { TableHeaders } from 'src/lib/interfaces'
 import { Fees, FeesTypesResponse } from 'src/lib/types'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
+import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
+import { useLazyGetFeesTypesListQuery } from 'src/store/services/listServices'
+
 import CreateOrUpdateFeesTypeModal from './createFeesModal'
 
 const FeesTypes = () => {
@@ -45,6 +47,7 @@ const FeesTypes = () => {
   }
 
   const headers: TableHeaders[] = [{ label: 'S#' }, { label: 'Fees type' }, { label: 'Action', width: '100px' }]
+
   return (
     <>
       <TableTilteHeader title='Fees types' buttonTitle='Add Fees Type' onButtonClick={handleAddFees} />

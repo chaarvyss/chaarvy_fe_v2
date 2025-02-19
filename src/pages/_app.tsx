@@ -6,6 +6,7 @@ import Head from 'next/head'
 import { Router } from 'next/router'
 import NProgress from 'nprogress'
 import { Provider } from 'react-redux'
+import { ToastContainer } from 'react-toastify'
 
 import type { NextPage } from 'next'
 import { SettingsConsumer, SettingsProvider } from 'src/@core/context/settingsContext'
@@ -17,7 +18,6 @@ import 'react-perfect-scrollbar/dist/css/styles.css'
 import '../../styles/globals.css'
 import store from 'src/store'
 import { ToastProvider } from 'src/@core/context/toastContext'
-import { ToastContainer } from 'react-toastify'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 type ExtendedAppProps = AppProps & {

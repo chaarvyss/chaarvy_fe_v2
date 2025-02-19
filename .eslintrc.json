@@ -56,7 +56,7 @@
     "eslint-comments/no-unused-disable": "error",
     "eslint-comments/require-description": ["error", { "terms": ["TODO", "FIXME"] }]
   },
-  "plugins": ["import", "prettier"],
+  "plugins": ["import", "prettier", "eslint-comments"],
   "settings": {
     "import/parsers": {
       "@typescript-eslint/parser": [".ts", ".tsx"]

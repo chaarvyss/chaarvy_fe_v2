@@ -1,8 +1,7 @@
 import { combineReducers } from '@reduxjs/toolkit'
 
-import api from '../services/api'
-
 import permission from '../permissionSlice'
+import api from '../services/api'
 
 const rootReducer = combineReducers({
   [api.reducerPath]: api.reducer,

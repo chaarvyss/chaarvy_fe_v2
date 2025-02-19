@@ -1,7 +1,5 @@
 import { urlConstants } from 'src/constants/urlConstants'
-import api from './api'
 import { UsersListResponse } from 'src/lib/interfaces'
-import { HttpRequestMethods } from '..'
 import {
   AddOnCourse,
   BooksTypesResponse,
@@ -19,6 +17,10 @@ import {
   Segment,
   State
 } from 'src/lib/types'
+
+import { HttpRequestMethods } from '..'
+
+import api from './api'
 import { CacheTag } from './cacheTag'
 
 const listServicesApi = api.injectEndpoints({

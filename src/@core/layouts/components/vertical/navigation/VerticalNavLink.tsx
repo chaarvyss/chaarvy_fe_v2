@@ -3,6 +3,7 @@ import { purple, grey } from '@mui/material/colors'
 import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
 import { useRouter } from 'next/router'
+
 // ** Types
 import { Settings } from 'src/@core/context/settingsContext'
 import { NavLink } from 'src/@core/layouts/types'
@@ -30,6 +31,7 @@ const VerticalNavLink = ({ item, settings }: Props) => {
     if (settings.mode == 'dark') {
       return isNavLinkActive() ? purple[400] : ''
     }
+
     return isNavLinkActive() ? purple[700] : ''
   }
 
@@ -37,6 +39,7 @@ const VerticalNavLink = ({ item, settings }: Props) => {
     if (settings.mode == 'dark') {
       return isNavLinkActive() ? 'white' : ''
     }
+
     return isNavLinkActive() ? 'white' : grey.A700
   }
 

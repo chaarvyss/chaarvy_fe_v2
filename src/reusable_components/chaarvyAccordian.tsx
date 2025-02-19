@@ -1,6 +1,7 @@
+import React from 'react'
+
 import { ArrowUpDropCircleOutline } from '@mdiElements'
 import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@muiElements'
-import React from 'react'
 
 interface ChaarvyAccordianProps {
   children: React.ReactNode

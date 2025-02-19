@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Permissions } from 'src/constants/permissions'
 import { isPermitted } from 'src/lib/helpers'
@@ -96,7 +97,7 @@ const Users = () => {
   }
 
   const getUserTableHeader = () => {
-    let props: TableTitleHeaderProps = {
+    const props: TableTitleHeaderProps = {
       title: 'Users',
       stats: salesData,
       onButtonClick: handleCreateUserClick
@@ -105,6 +106,7 @@ const Users = () => {
     if (isPermitted(Permissions.CREATE_USER)) {
       props['buttonTitle'] = 'Create User'
     }
+
     return props
   }
 

@@ -16,6 +16,7 @@ import {
   Typography
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
+
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
 import { Books, Program, ProgramBooksDetails } from 'src/lib/types'
@@ -69,6 +70,7 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
     { label: 's#' },
     { label: 'Book Name' },
     { label: 'Quantity' },
+
     // { label: 'Stock' },
     { label: 'Actions', width: '100px' }
   ]
@@ -132,6 +134,7 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
         label: 'Edit',
         onOptionClick: () => handleKebabOptionClick(eachBook, 'Edit')
       }
+
       // {
       //   id: eachBook.book_id,
       //   label: 'Remove Book',
@@ -201,9 +204,7 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
               label='Program'
               onChange={handleChange('program_id')}
             >
-              {programsList?.map(each => (
-                <MenuItem value={each.program_id}>{each.program_name}</MenuItem>
-              ))}
+              {programsList?.map(each => <MenuItem value={each.program_id}>{each.program_name}</MenuItem>)}
             </Select>
           </FormControl>
           <FormControl sx={{ mb: 4 }} fullWidth>
@@ -216,9 +217,7 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
               label='Segment'
               onChange={handleChange('segment_id')}
             >
-              {segmentsList?.map(each => (
-                <MenuItem value={each.segment_id}>{each.segment_name}</MenuItem>
-              ))}
+              {segmentsList?.map(each => <MenuItem value={each.segment_id}>{each.segment_name}</MenuItem>)}
             </Select>
           </FormControl>
           <FormControl sx={{ mb: 4 }} fullWidth>
@@ -231,9 +230,7 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
               label='Segment'
               onChange={e => setBookDetail({ ...bookDetail, book_id: e.target.value })}
             >
-              {booksList?.map(each => (
-                <MenuItem value={each.book_id}>{each.book_name}</MenuItem>
-              ))}
+              {booksList?.map(each => <MenuItem value={each.book_id}>{each.book_name}</MenuItem>)}
             </Select>
           </FormControl>
           <TextField

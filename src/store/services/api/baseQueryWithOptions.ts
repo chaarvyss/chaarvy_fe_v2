@@ -1,4 +1,5 @@
 import { fetchBaseQuery, retry } from '@reduxjs/toolkit/query'
+
 import { sessionStorageKeys } from 'src/lib/enums'
 import { ContentTypes, httpHeaders } from 'src/store'
 
@@ -14,6 +15,7 @@ const baseQuery = fetchBaseQuery({
     if (clcode) {
       headers.set('clcode', clcode)
     }
+
     return headers
   },
   timeout: 5000
@@ -22,7 +24,7 @@ const baseQuery = fetchBaseQuery({
 const baseQueryWithRetry = retry(
   async (args, api, extraOptions) => {
     let { url, params = {}, ...rest } = args
-    let filteredParams = Object.fromEntries(
+    const filteredParams = Object.fromEntries(
       Object.entries(params)
         .filter(([_, value]) => value !== undefined && value !== null && value !== '')
         .map(([key, value]) => [
@@ -31,7 +33,7 @@ const baseQueryWithRetry = retry(
         ])
     )
 
-    let extUrl = Object.keys(filteredParams).length > 0 ? `?${new URLSearchParams(filteredParams).toString()}` : ''
+    const extUrl = Object.keys(filteredParams).length > 0 ? `?${new URLSearchParams(filteredParams).toString()}` : ''
 
     url = `${url}${extUrl}`
 
@@ -51,6 +53,7 @@ const baseQueryWithErrorHandling: typeof baseQueryWithRetry = async (args, api, 
       console.error('API Error:', status, result.error.data)
     }
   }
+
   return result
 }
 

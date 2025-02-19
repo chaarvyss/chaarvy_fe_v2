@@ -16,6 +16,7 @@ import LogoutVariant from 'mdi-material-ui/LogoutVariant'
 import MessageOutline from 'mdi-material-ui/MessageOutline'
 import { useRouter } from 'next/router'
 import { useState, SyntheticEvent, Fragment } from 'react'
+
 import { PagePath } from 'src/constants/pagePathConstants'
 
 // ** Styled Components

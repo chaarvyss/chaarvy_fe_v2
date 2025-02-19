@@ -3,6 +3,7 @@ import Box, { BoxProps } from '@mui/material/Box'
 import Fab from '@mui/material/Fab'
 import { styled } from '@mui/material/styles'
 import ArrowUp from 'mdi-material-ui/ArrowUp'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 // ** MUI Imports
@@ -21,7 +22,6 @@ import themeConfig from 'src/configs/themeConfig'
 import Footer from './components/shared-components/footer'
 import AppBar from './components/vertical/appBar'
 import Navigation from './components/vertical/navigation'
-import { useRouter } from 'next/navigation'
 
 // ** Styled Component
 
@@ -66,7 +66,7 @@ const VerticalLayout = (props: LayoutProps) => {
   const router = useRouter()
 
   useEffect(() => {
-    let token = sessionStorage.getItem('accessToken')
+    const token = sessionStorage.getItem('accessToken')
     if (!token) {
       router.push('/login')
     }

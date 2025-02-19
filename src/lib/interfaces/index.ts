@@ -1,6 +1,6 @@
 import { ReactElement } from 'react'
 
-import { ThemeColor } from './@core/layouts/types'
+import { ThemeColor } from '../../@core/layouts/types'
 
 export interface LoginProps {
   clcode: string

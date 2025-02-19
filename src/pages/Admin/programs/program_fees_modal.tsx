@@ -1,7 +1,10 @@
-import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@muiElements'
-import { Check, Close } from '@mdiElements'
 import { SelectChangeEvent, TextField } from '@mui/material'
+import { FormControl, Input, InputLabel, MenuItem, Select } from '@mui/material'
 import React, { useEffect, useState } from 'react'
+
+import { Check, Close } from '@mdiElements'
+import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@muiElements'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
 import { Fees, Program } from 'src/lib/types'
 import ChaarvyAccordian from 'src/reusable_components/chaarvyAccordian'
@@ -13,8 +16,6 @@ import {
   useLazyGetProgramFeesDetailsQuery,
   useUpdateProgramFeesMutation
 } from 'src/store/services/feesServices'
-import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { FormControl, Input, InputLabel, MenuItem, Select } from '@mui/material'
 import {
   useGetSegmentsListQuery,
   useLazyGetFeesTypesListQuery,

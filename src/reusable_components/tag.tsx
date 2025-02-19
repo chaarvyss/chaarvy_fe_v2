@@ -1,6 +1,7 @@
 import { green, red } from '@mui/material/colors'
-import { Box, Typography } from '@muiElements'
 import React from 'react'
+
+import { Box, Typography } from '@muiElements'
 
 interface TagProps {
   status?: number
@@ -38,6 +39,7 @@ export const Tag = ({ status, onClick }: TagProps) => {
         return null
     }
   }
+
   return (
     <Box display='flex' style={{ cursor: 'pointer' }}>
       {getJsx()}

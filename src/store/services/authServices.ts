@@ -1,7 +1,9 @@
 import { urlConstants } from 'src/constants/urlConstants'
-import api from './api'
 import { LoginProps, LoginResponse } from 'src/lib/interfaces'
+
 import { ContentTypes, httpHeaders, HttpRequestMethods } from '..'
+
+import api from './api'
 
 const authServiceApi = api.injectEndpoints({
   endpoints: build => ({

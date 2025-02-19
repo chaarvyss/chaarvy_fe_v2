@@ -1,6 +1,8 @@
 import { urlConstants } from 'src/constants/urlConstants'
-import api from './api'
+
 import { HttpRequestMethods } from '..'
+
+import api from './api'
 import { CacheTag } from './cacheTag'
 
 type CreateBook = {

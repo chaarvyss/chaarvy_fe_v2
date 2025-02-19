@@ -1,5 +1,6 @@
 // ** React Import
 import Box, { BoxProps } from '@mui/material/Box'
+import { purple } from '@mui/material/colors'
 import List from '@mui/material/List'
 import { styled, useTheme } from '@mui/material/styles'
 import { ReactNode, useRef, useState } from 'react'
@@ -19,7 +20,6 @@ import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 import Drawer from './Drawer'
 import VerticalNavHeader from './VerticalNavHeader'
 import VerticalNavItems from './VerticalNavItems'
-import { purple } from '@mui/material/colors'
 
 // ** Util Import
 

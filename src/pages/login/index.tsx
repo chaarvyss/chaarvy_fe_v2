@@ -1,12 +1,19 @@
+import { CardProps } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
-
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from 'react'
-
 import { useDispatch } from 'react-redux'
-import { setAvailablePermissionsData } from 'src/store/permissionSlice'
 
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import BlankLayout from 'src/@core/layouts/BlankLayout'
+import themeConfig from 'src/configs/themeConfig'
+import { sessionStorageKeys } from 'src/lib/enums'
+import { getEmptyKeysList } from 'src/lib/helpers'
+import { LoginProps } from 'src/lib/interfaces'
+import { setAvailablePermissionsData } from 'src/store/permissionSlice'
+import { useLoginMutation } from 'src/store/services/authServices'
+import { EyeOutline, EyeOffOutline } from 'src/utils/mdiElements'
 import {
   Box,
   Button,
@@ -21,20 +28,8 @@ import {
   Typography
 } from 'src/utils/muiElements'
 
-import { EyeOutline, EyeOffOutline } from 'src/utils/mdiElements'
-
-import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-
-import BlankLayout from 'src/@core/layouts/BlankLayout'
-import themeConfig from 'src/configs/themeConfig'
-import { sessionStorageKeys } from 'src/lib/enums'
-import { getEmptyKeysList } from 'src/lib/helpers'
-import { LoginProps } from 'src/lib/interfaces'
-import { useLoginMutation } from 'src/store/services/authServices'
-
 // ** Demo Imports
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
-import { CardProps } from '@mui/material'
 
 interface State {
   clcode: string
@@ -56,6 +51,7 @@ const LinkStyled = styled('a')(({ theme }) => ({
 
 const LoginPage = () => {
   const dispatch = useDispatch()
+
   // ** State
   const [values, setValues] = useState<LoginProps>({
     clcode: '',
@@ -78,13 +74,13 @@ const LoginPage = () => {
 
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    let emptyKeys = getEmptyKeysList(values)
+    const emptyKeys = getEmptyKeysList(values)
 
     if (emptyKeys?.length == 0) {
       login(values)
         .unwrap()
         .then(response => {
-          let res = response as any
+          const res = response as any
           dispatch(setAvailablePermissionsData(response.permission))
           triggerToast('Login Successful', { variant: ToastVariants.SUCCESS })
           sessionStorage.setItem(sessionStorageKeys.accessToken, res.data.authToken)

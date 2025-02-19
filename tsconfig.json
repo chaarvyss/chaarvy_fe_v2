@@ -19,6 +19,7 @@
     "paths": {
       "apexcharts": ["./node_modules/apexcharts-clevision"],
       "apexcharts/*": ["./node_modules/apexcharts-clevision/*"],
+      "@core/*": ["src/core/*"],
       "@muiElements": ["src/utils/muiElements"],
       "@mdiElements": ["src/utils/mdiElements"]
     }

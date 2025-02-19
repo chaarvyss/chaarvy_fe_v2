@@ -1,19 +1,20 @@
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Card, Typography } from '@muiElements'
 import React, { useEffect, useState } from 'react'
+
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Card, Typography } from '@muiElements'
+import { useToast, ToastVariants } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
+import { Program } from 'src/lib/types'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
-import { Program } from 'src/lib/types'
+import Tag from 'src/reusable_components/tag'
+import { useUpdateProgramStatusMutation } from 'src/store/services/adminServices'
+import { useLazyGetProgramsListQuery } from 'src/store/services/listServices'
+import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
+
 import CreateOrUpdateProgramModal from './createUpdateProgram'
 import ProgramBooksModal from './program_books_modal'
 import ProgramFeesModal from './program_fees_modal'
-import { useLazyGetProgramsListQuery } from 'src/store/services/listServices'
-import Tag from 'src/reusable_components/tag'
-import { useUpdateProgramStatusMutation } from 'src/store/services/adminServices'
-import { useToast, ToastVariants } from 'src/@core/context/toastContext'
 import ProgramViewModal from './program_view_modal'
-
-import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
 
 const headers: TableHeaders[] = [
   { label: 's#' },

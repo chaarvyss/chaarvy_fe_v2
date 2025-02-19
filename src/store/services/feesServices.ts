@@ -1,7 +1,9 @@
 import { urlConstants } from 'src/constants/urlConstants'
-import api from './api'
-import { HttpRequestMethods } from '..'
 import { ProgramFeesDetailsResponse } from 'src/lib/types'
+
+import { HttpRequestMethods } from '..'
+
+import api from './api'
 import { CacheTag } from './cacheTag'
 
 interface ProgramFeesRequest {
