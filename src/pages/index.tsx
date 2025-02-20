@@ -1,10 +1,11 @@
-import ApexChartWrapper from 'src/@core/styles/libs/react-apexcharts'
+import { Box, Typography } from '@muiElements'
 
 const Dashboard = () => {
   return (
-    <ApexChartWrapper>
-      <p>asdf</p>
-    </ApexChartWrapper>
+    <Box display='flex' justifyContent='center' alignItems='center'>
+      <Typography variant='h2'>Welcome to Chaarvy Software solutions</Typography>
+      <Typography variant='body1'>We are coming soon with Dashboard</Typography>
+    </Box>
   )
 }
 
