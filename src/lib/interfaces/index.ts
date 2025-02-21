@@ -8,6 +8,12 @@ export interface LoginProps {
   password: string
 }
 
+export interface ChangePasswordProps {
+  oldPassword: string
+  newPassword: string
+  confirmPassword: string
+}
+
 export interface LoginResponse {
   authToken: string
   name: string

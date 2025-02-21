@@ -54,6 +54,14 @@ export type Program = {
   status?: number
 }
 
+export type ProgramAddonCourseResponse = {
+  program_addon_course_id: string
+  program_id: string
+  addon_course_id: string
+  addon_coures_fees: number
+  addon_course_name: string
+}
+
 export type ProgramBooksDetails = {
   program_name: string
   segments: BooksSegment[]

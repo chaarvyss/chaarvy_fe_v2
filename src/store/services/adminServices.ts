@@ -11,6 +11,13 @@ type CreateBook = {
   price: number
 }
 
+export type CreateProgramAddonRequest = {
+  id?: string
+  program_id: string
+  addon_course_id: string
+  fees: number
+}
+
 type CreateProgramBookRequest = {
   program_book_id?: string
   program_id: string
@@ -19,9 +26,15 @@ type CreateProgramBookRequest = {
   quantity: number
 }
 
+type updateAddonCourse = {
+  id: string
+  addon_course_name: string
+}
+
 type UpdateBook = CreateBook & {
   book_id: string
 }
+
 type UpdateProgramRequest = {
   id?: string
   program_name: string
@@ -40,6 +53,16 @@ type ProgramSegmentRequest = {
 
 const adminServiceApi = api.injectEndpoints({
   endpoints: build => ({
+    createAddonCourse: build.mutation<string, string>({
+      invalidatesTags: [CacheTag.ListAddonCourse],
+      query: addon_course_name => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.add.addonCourse,
+          params: { addon_course_name }
+        }
+      }
+    }),
     createBook: build.mutation<string, CreateBook>({
       invalidatesTags: [CacheTag.ListBooks],
       query: params => {
@@ -57,6 +80,16 @@ const adminServiceApi = api.injectEndpoints({
           method: HttpRequestMethods.POST,
           url: urlConstants.admin.add.program,
           params
+        }
+      }
+    }),
+    createProgramAddon: build.mutation<string, CreateProgramAddonRequest>({
+      invalidatesTags: [CacheTag.ListProgramAddon],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.add.programAddon,
+          body
         }
       }
     }),
@@ -100,6 +133,26 @@ const adminServiceApi = api.injectEndpoints({
         }
       }
     }),
+    updateAddonCourse: build.mutation<string, updateAddonCourse>({
+      invalidatesTags: [CacheTag.ListAddonCourse],
+      query: params => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.update.addonCourse,
+          params
+        }
+      }
+    }),
+    updateAddonCourseStatus: build.mutation<string, string>({
+      invalidatesTags: [CacheTag.ListAddonCourse],
+      query: id => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.update.addonCourseStatus,
+          params: { id }
+        }
+      }
+    }),
     updateFeesType: build.mutation<string, UpdateFeesTypeRequest>({
       invalidatesTags: [CacheTag.ListFeesTypes],
       query: params => {
@@ -117,6 +170,16 @@ const adminServiceApi = api.injectEndpoints({
           method: HttpRequestMethods.POST,
           url: urlConstants.admin.update.program,
           params
+        }
+      }
+    }),
+    updateProgramAddon: build.mutation<string, CreateProgramAddonRequest>({
+      invalidatesTags: [CacheTag.ListProgramAddon],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.update.programAddon,
+          body
         }
       }
     }),
@@ -144,13 +207,18 @@ const adminServiceApi = api.injectEndpoints({
 })
 
 export const {
+  useCreateAddonCourseMutation,
   useCreateBookMutation,
   useCreateFeesTypeMutation,
   useCreateProgramMutation,
+  useCreateProgramAddonMutation,
   useCreateProgramBookMutation,
+  useUpdateAddonCourseMutation,
+  useUpdateAddonCourseStatusMutation,
   useUpdateBookMutation,
   useUpdateFeesTypeMutation,
   useUpdateProgramMutation,
+  useUpdateProgramAddonMutation,
   useUpdateProgramBookMutation,
   useCreateProgramSegmentMutation,
   useUpdateProgramStatusMutation

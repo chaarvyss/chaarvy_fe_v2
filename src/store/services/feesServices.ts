@@ -23,6 +23,12 @@ export interface CreateProgramFeesRequest {
   segment_id: string
 }
 
+export interface CreateProgramAddonCourseRequest {
+  program_id: string
+  addon_course_id: string
+  fees: number
+}
+
 const feeServiceApi = api.injectEndpoints({
   endpoints: build => ({
     getProgramFeesDetails: build.query<ProgramFeesDetailsResponse, ProgramFeesRequest>({

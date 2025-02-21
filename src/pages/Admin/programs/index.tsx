@@ -15,6 +15,7 @@ import CreateOrUpdateProgramModal from './createUpdateProgram'
 import ProgramBooksModal from './program_books_modal'
 import ProgramFeesModal from './program_fees_modal'
 import ProgramViewModal from './program_view_modal'
+import ProgramAddonCourseModal from './program_addon_courses_modal'
 
 const headers: TableHeaders[] = [
   { label: 's#' },
@@ -28,6 +29,7 @@ interface ProgramModals {
   fees_details_list_modal: boolean
   books_details_list_modal: boolean
   view_program_details_modal: boolean
+  program_addon_details_modal: boolean
 }
 
 const Programs = () => {
@@ -35,7 +37,8 @@ const Programs = () => {
     create_program_modal: false,
     fees_details_list_modal: false,
     books_details_list_modal: false,
-    view_program_details_modal: false
+    view_program_details_modal: false,
+    program_addon_details_modal: false
   })
 
   const { triggerToast } = useToast()
@@ -74,7 +77,12 @@ const Programs = () => {
     setShowModal({ ...showModal, view_program_details_modal: false })
   }
 
-  const handleKebabOptionClick = (program: Program, option: 'Edit' | 'view' | 'books' | 'fees') => {
+  const handleProgramAddonModalClose = () => {
+    setSelectedProgram(undefined)
+    setShowModal({ ...showModal, program_addon_details_modal: false })
+  }
+
+  const handleKebabOptionClick = (program: Program, option: 'addon' | 'Edit' | 'view' | 'books' | 'fees') => {
     setSelectedProgram(program)
     switch (option) {
       case 'Edit':
@@ -85,26 +93,19 @@ const Programs = () => {
         setShowModal({ ...showModal, view_program_details_modal: true })
         break
       case 'fees':
-        /*
-        fees details
-        year / semester
-        s# | fee Particulars | fees | action
-        */
         setShowModal({ ...showModal, fees_details_list_modal: true })
         break
       case 'books':
-        /*
-          books details
-          year / semester
-            s# | book name | price | current_stock
-          */
         setShowModal({ ...showModal, books_details_list_modal: true })
+        break
+      case 'addon':
+        setShowModal({ ...showModal, program_addon_details_modal: true })
         break
     }
   }
 
   const getKebabOptions = (eachProgram: Program) => {
-    // TODO: edit program, books, fees
+    // TODO: edit program, books, fees, addon
     return [
       {
         id: eachProgram.program_id,
@@ -125,6 +126,11 @@ const Programs = () => {
         id: eachProgram.program_id,
         label: 'Fees details',
         onOptionClick: () => handleKebabOptionClick(eachProgram, 'fees')
+      },
+      {
+        id: eachProgram.program_id,
+        label: 'Addon programs',
+        onOptionClick: () => handleKebabOptionClick(eachProgram, 'addon')
       }
     ]
   }
@@ -197,6 +203,13 @@ const Programs = () => {
         <ProgramViewModal
           isOpen={showModal.view_program_details_modal}
           onClose={handleProgramViewModalClose}
+          selectedProgram={selectedProgram}
+        />
+      )}
+      {showModal.program_addon_details_modal && (
+        <ProgramAddonCourseModal
+          isOpen={showModal.program_addon_details_modal}
+          onClose={handleProgramAddonModalClose}
           selectedProgram={selectedProgram}
         />
       )}

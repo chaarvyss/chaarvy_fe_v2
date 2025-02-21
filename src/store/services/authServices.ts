@@ -1,7 +1,7 @@
 import { urlConstants } from 'src/constants/urlConstants'
-import { LoginProps, LoginResponse } from 'src/lib/interfaces'
+import { ChangePasswordProps, LoginProps, LoginResponse } from 'src/lib/interfaces'
 
-import { ContentTypes, httpHeaders, HttpRequestMethods } from '..'
+import { httpHeaders, HttpRequestMethods } from '..'
 
 import api from './api'
 
@@ -16,8 +16,17 @@ const authServiceApi = api.injectEndpoints({
           url: urlConstants.auth.login
         }
       }
+    }),
+    changePassword: build.mutation<string, ChangePasswordProps>({
+      query: body => {
+        return {
+          body,
+          method: HttpRequestMethods.POST,
+          url: urlConstants.auth.changePassword
+        }
+      }
     })
   })
 })
 
-export const { useLoginMutation } = authServiceApi
+export const { useLoginMutation, useChangePasswordMutation } = authServiceApi

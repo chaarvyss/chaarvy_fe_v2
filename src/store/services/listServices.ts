@@ -11,6 +11,7 @@ import {
   Language,
   Occupation,
   Program,
+  ProgramAddonCourseResponse,
   ProgramBooksDetails,
   QualifiedExam,
   Religions,
@@ -26,6 +27,7 @@ import { CacheTag } from './cacheTag'
 const listServicesApi = api.injectEndpoints({
   endpoints: build => ({
     getAddonCoursesList: build.query<AddOnCourse[], boolean>({
+      providesTags: [CacheTag.ListAddonCourse],
       query: onlyActive => {
         return {
           method: HttpRequestMethods.GET,
@@ -103,7 +105,16 @@ const listServicesApi = api.injectEndpoints({
         }
       }
     }),
-
+    getProgramAddonList: build.query<ProgramAddonCourseResponse[], string>({
+      providesTags: [CacheTag.ListProgramAddon],
+      query: program_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.programAddon,
+          params: { program_id }
+        }
+      }
+    }),
     getProgramBooksList: build.query<ProgramBooksDetails, string>({
       providesTags: [CacheTag.ListProgramBooks],
       query: program_id => {
@@ -161,13 +172,14 @@ export const {
   useGetSegmentsListQuery,
   useGetBooksListQuery,
   useGetProgramsListQuery,
-  useLazyGetAddonCoursesListQuery,
+  useGetAddonCoursesListQuery,
   useLazyGetCommunitiesListQuery,
   useLazyGetDistrictsListQuery,
   useLazyGetFeesTypesListQuery,
   useLazyGetGendersListQuery,
   useLazyGetLanguagesListQuery,
   useLazyGetOccupationsListQuery,
+  useLazyGetProgramAddonListQuery,
   useLazyGetProgramBooksListQuery,
   useLazyGetProgramsListQuery,
   useLazyGetQualifiedExamsListQuery,
