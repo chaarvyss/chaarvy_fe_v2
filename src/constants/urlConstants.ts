@@ -1,9 +1,11 @@
 const interPrefix = 'inter'
 const interRoutePrefix = {
   admin: `${interPrefix}/admin`,
+  admisions: `${interPrefix}/admissions`,
   auth: `${interPrefix}/auth`,
   fees: `${interPrefix}/fees`,
   list: `${interPrefix}/list`,
+  program: `${interPrefix}/program`,
   view: `${interPrefix}/view`
 }
 
@@ -22,8 +24,6 @@ export const urlConstants = {
     languages: `${interRoutePrefix.list}/languages`,
     occupations: `${interRoutePrefix.list}/occupations`,
     programs: `${interRoutePrefix.list}/programs`,
-    programAddon: `${interRoutePrefix.list}/program-addon-course`,
-    programBooks: `${interRoutePrefix.list}/program-book-detail`,
     qualifiedExams: `${interRoutePrefix.list}/qualified-exams`,
     religions: `${interRoutePrefix.list}/religions`,
     segments: `${interRoutePrefix.list}/segments`,
@@ -35,6 +35,7 @@ export const urlConstants = {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
       book: `${interRoutePrefix.admin}/add-book`,
       feesType: `${interRoutePrefix.admin}/add-fees-type`,
+      language: `${interRoutePrefix.admin}/add-language`,
       program: `${interRoutePrefix.admin}/add-program`,
       programAddon: `${interRoutePrefix.admin}/add-program-addon-course`,
       programBook: `${interRoutePrefix.admin}/add-program-book`,
@@ -45,6 +46,7 @@ export const urlConstants = {
       addonCourseStatus: `${interRoutePrefix.admin}/update-addon-course-status`,
       book: `${interRoutePrefix.admin}/update-book`,
       feesType: `${interRoutePrefix.admin}/update-fees-type`,
+      language: `${interRoutePrefix.admin}/update-language`,
       program: `${interRoutePrefix.admin}/update-program`,
       programAddon: `${interRoutePrefix.admin}/update-program-addon-course`,
       programBook: `${interRoutePrefix.admin}/update-program-book`,
@@ -52,10 +54,21 @@ export const urlConstants = {
       programSegment: `${interRoutePrefix.admin}/update-program-segment`
     }
   },
+  admissions: {
+    createAdmission: `${interRoutePrefix.admisions}/create-admission`
+  },
   fees: {
     getprogramFees: `${interRoutePrefix.fees}/program-fee-detail`,
     updateprogramFees: `${interRoutePrefix.fees}/update_program_fees`,
     createProgramFees: `${interRoutePrefix.fees}/add-program-fees`
+  },
+  program: {
+    programAddon: `${interRoutePrefix.program}/program-addon-course`,
+    programBooks: `${interRoutePrefix.program}/program-book-detail`,
+    getProgramSecondLanguages: `${interRoutePrefix.program}/program-second-language`,
+    getProgramMediums: `${interRoutePrefix.program}/program-mediums`,
+    updateProgramSecondLanguages: `${interRoutePrefix.program}/update-program-second-language`,
+    updateProgramMediums: `${interRoutePrefix.program}/update-program-mediums`
   },
   view: {
     programSegments: `${interRoutePrefix.view}/program-segment`

@@ -45,6 +45,10 @@ type UpdateFeesTypeRequest = {
   fees_type: string
 }
 
+export type UpdateLanguageRequest = {
+  id?: string
+  language_name?: string
+}
 type ProgramSegmentRequest = {
   id?: string
   program_id: string
@@ -70,6 +74,16 @@ const adminServiceApi = api.injectEndpoints({
           method: HttpRequestMethods.POST,
           url: urlConstants.admin.add.book,
           body: params
+        }
+      }
+    }),
+    createLanguage: build.mutation<string, string>({
+      invalidatesTags: [CacheTag.ListLanguages],
+      query: language_name => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.add.language,
+          params: { language_name }
         }
       }
     }),
@@ -163,6 +177,16 @@ const adminServiceApi = api.injectEndpoints({
         }
       }
     }),
+    updateLangugage: build.mutation<string, UpdateLanguageRequest>({
+      invalidatesTags: [CacheTag.ListLanguages],
+      query: params => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.update.language,
+          params
+        }
+      }
+    }),
     updateProgram: build.mutation<string, UpdateProgramRequest>({
       invalidatesTags: [CacheTag.ListPrograms],
       query: params => {
@@ -210,6 +234,7 @@ export const {
   useCreateAddonCourseMutation,
   useCreateBookMutation,
   useCreateFeesTypeMutation,
+  useCreateLanguageMutation,
   useCreateProgramMutation,
   useCreateProgramAddonMutation,
   useCreateProgramBookMutation,
@@ -217,6 +242,7 @@ export const {
   useUpdateAddonCourseStatusMutation,
   useUpdateBookMutation,
   useUpdateFeesTypeMutation,
+  useUpdateLangugageMutation,
   useUpdateProgramMutation,
   useUpdateProgramAddonMutation,
   useUpdateProgramBookMutation,

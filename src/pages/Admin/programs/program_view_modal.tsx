@@ -21,7 +21,10 @@ import { Program } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { useCreateProgramSegmentMutation } from 'src/store/services/adminServices'
 import { useGetSegmentsListQuery } from 'src/store/services/listServices'
+import { useLazyGetProgramSecondLanguagesListQuery } from 'src/store/services/programServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
+import ProgramSecondLanguage from './program_second_language'
+import ProgramMediums from './program_mediums'
 
 interface ProgramView {
   selectedProgram?: Program
@@ -33,7 +36,6 @@ const ProgramViewModal = ({ selectedProgram, isOpen, onClose }: ProgramView) => 
   const { triggerToast } = useToast()
   const { data: segments } = useGetSegmentsListQuery()
   const [fetchProgramSegment, { data: programSegmentDetails }] = useLazyGetProgramSegmentDetailsQuery()
-
   const [createProgramSegment] = useCreateProgramSegmentMutation()
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false)
   const [selectedSegment, setSelectedSegment] = useState<string>()
@@ -108,7 +110,7 @@ const ProgramViewModal = ({ selectedProgram, isOpen, onClose }: ProgramView) => 
 
   return (
     <>
-      <ChaarvyModal isOpen={isOpen} onClose={onClose} title={selectedProgram?.program_name}>
+      <ChaarvyModal isOpen={isOpen} onClose={onClose} title={selectedProgram?.program_name} modalSize='col-12 col-md-6'>
         <>
           {programSegmentDetails && programSegmentDetails?.length > 0 ? (
             <TableContainer>
@@ -139,6 +141,11 @@ const ProgramViewModal = ({ selectedProgram, isOpen, onClose }: ProgramView) => 
             </>
           )}
           {showAddSegmentButton() && <Button onClick={() => setIsEditModalOpen(true)}>Add program segment</Button>}
+
+          <Box gap='24px'>
+            <ProgramSecondLanguage program_id={selectedProgram?.program_id as string} />
+            <ProgramMediums program_id={selectedProgram?.program_id as string} />
+          </Box>
         </>
       </ChaarvyModal>
       {addProgramSegmentModal()}

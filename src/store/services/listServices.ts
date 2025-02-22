@@ -80,6 +80,7 @@ const listServicesApi = api.injectEndpoints({
       }
     }),
     getLanguagesList: build.query<Language[], void>({
+      providesTags: [CacheTag.ListLanguages],
       query: () => {
         return {
           method: HttpRequestMethods.GET,
@@ -102,26 +103,6 @@ const listServicesApi = api.injectEndpoints({
           method: HttpRequestMethods.GET,
           url: urlConstants.list.programs,
           params: { active_only }
-        }
-      }
-    }),
-    getProgramAddonList: build.query<ProgramAddonCourseResponse[], string>({
-      providesTags: [CacheTag.ListProgramAddon],
-      query: program_id => {
-        return {
-          method: HttpRequestMethods.GET,
-          url: urlConstants.list.programAddon,
-          params: { program_id }
-        }
-      }
-    }),
-    getProgramBooksList: build.query<ProgramBooksDetails, string>({
-      providesTags: [CacheTag.ListProgramBooks],
-      query: program_id => {
-        return {
-          method: HttpRequestMethods.GET,
-          url: urlConstants.list.programBooks,
-          params: { program_id }
         }
       }
     }),
@@ -173,17 +154,15 @@ export const {
   useGetBooksListQuery,
   useGetProgramsListQuery,
   useGetAddonCoursesListQuery,
-  useLazyGetCommunitiesListQuery,
+  useGetCommunitiesListQuery,
   useLazyGetDistrictsListQuery,
   useLazyGetFeesTypesListQuery,
-  useLazyGetGendersListQuery,
-  useLazyGetLanguagesListQuery,
-  useLazyGetOccupationsListQuery,
-  useLazyGetProgramAddonListQuery,
-  useLazyGetProgramBooksListQuery,
+  useGetGendersListQuery,
+  useGetLanguagesListQuery,
+  useGetOccupationsListQuery,
   useLazyGetProgramsListQuery,
-  useLazyGetQualifiedExamsListQuery,
-  useLazyGetReligionsListQuery,
+  useGetQualifiedExamsListQuery,
+  useGetReligionsListQuery,
   useLazyGetStateListQuery,
   useLazyGetUsersListQuery
 } = listServicesApi

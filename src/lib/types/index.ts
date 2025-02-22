@@ -46,7 +46,7 @@ export type FeesSegment = Segment & {
 
 export type Gender = { gender_id: string; gender_name: string }
 
-export type Language = { languages_id: string; languages_name: string }
+export type Language = { languages_id: string; languages_name: string; status: number }
 export type Occupation = { occupation_id: string; occupation_name: string }
 export type Program = {
   program_id: string
@@ -75,6 +75,11 @@ export type ProgramDetails = {
 export type ProgramFeesDetailsResponse = {
   program_name: string
   segments: FeesSegment[]
+}
+
+export type ProgramSecondLanguagesResponse = {
+  language_id: string
+  language_name: string
 }
 
 export type QualifiedExam = { qualified_exam_id: string; qualified_exam_name: string }

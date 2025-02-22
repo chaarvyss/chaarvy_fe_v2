@@ -11,11 +11,7 @@ import ChaarvyAccordian from 'src/reusable_components/chaarvyAccordian'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
 
-import {
-  useGetAddonCoursesListQuery,
-  useLazyGetProgramAddonListQuery,
-  useLazyGetProgramsListQuery
-} from 'src/store/services/listServices'
+import { useGetAddonCoursesListQuery, useLazyGetProgramsListQuery } from 'src/store/services/listServices'
 import { CreateProgramAddonCourseRequest } from 'src/store/services/feesServices'
 import {
   CreateProgramAddonRequest,
@@ -24,6 +20,7 @@ import {
   useUpdateProgramAddonMutation
 } from 'src/store/services/adminServices'
 import { Pencil } from 'mdi-material-ui'
+import { useLazyGetProgramAddonListQuery } from 'src/store/services/programServices'
 
 interface ProgramFeesDetailsProps {
   selectedProgram?: Program
