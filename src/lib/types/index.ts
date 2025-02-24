@@ -64,7 +64,6 @@ export type InputFields = {
   customInput?: ReactElement
   placeholder?: string
   onChange: (e: any) => void
-  isRequired?: boolean
   caption?: string
   menuOptions?: MenuOptions[]
   showYearDropdown?: boolean

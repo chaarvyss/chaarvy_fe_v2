@@ -57,11 +57,18 @@ const mandatoryFields = [
   'second_language',
   'student_email',
   'student_aadhar',
-  'student_name'
+  'student_name',
+  'dob',
+  'gender'
 ]
 
+type ErrorObject = {
+  errorkey: string
+  error: string
+}
+
 const StudentBaseDetails = () => {
-  const [errors, setErrors] = useState<Array<string>>([])
+  const [errors, setErrors] = useState<Array<ErrorObject>>([])
   const [admissionId, setAdmissionId] = useState<string>()
   const [studentImg, setStudentImg] = useState(null)
   const [applicationDetails, setApplicationDetails] = useState<CreateStudentAdmissionRequest>()
@@ -91,31 +98,39 @@ const StudentBaseDetails = () => {
       if (prop === 'program_id') {
         getDependentData(event.target.value)
       }
-      setApplicationDetails({ ...applicationDetails, [prop]: event.target.value })
+
+      setApplicationDetails({ ...applicationDetails, [prop]: event?.target?.value ?? event })
     }
 
-  const validateField = (key: keyof CreateStudentAdmissionRequest, value: any): string | null => {
+  const validateField = (
+    key: keyof CreateStudentAdmissionRequest,
+    value: any
+  ): { errorkey: string; error: string } | null => {
+    if (key == 'dob') return dob ? null : { errorkey: key, error: '* Required.' }
     if (!value) {
-      return `${key.replace(/_/g, ' ')} is required.`
+      return { errorkey: key, error: '* Required' }
     }
 
     switch (key) {
       case 'student_email':
-        return /\S+@\S+\.\S+/.test(value) ? null : 'Invalid email format.'
+        return /\S+@\S+\.\S+/.test(value) ? null : { errorkey: key, error: 'Invalid email format.' }
       case 'contact_no_1':
+        return /^[6-9]\d{9}$/.test(value) ? null : { errorkey: key, error: 'Invalid phone number.' }
       case 'contact_no_2':
-        return /^[6-9]\d{9}$/.test(value) ? null : 'Invalid phone number.'
+        return /^[6-9]\d{9}$/.test(value) ? null : { errorkey: key, error: 'Invalid phone number.' }
       case 'student_aadhar':
+        return /^\d{12}$/.test(value) ? null : { errorkey: key, error: 'Invalid Aadhar number. It must be 12 digits.' }
       case 'father_aadhar':
+        return /^\d{12}$/.test(value) ? null : { errorkey: key, error: 'Invalid Aadhar number. It must be 12 digits.' }
       case 'mother_aadhar':
-        return /^\d{12}$/.test(value) ? null : 'Invalid Aadhar number. It must be 12 digits.'
+        return /^\d{12}$/.test(value) ? null : { errorkey: key, error: 'Invalid Aadhar number. It must be 12 digits.' }
       default:
         return null
     }
   }
 
   const validateForm = (): boolean => {
-    const newErrors: string[] = []
+    const newErrors: ErrorObject[] = []
 
     mandatoryFields.forEach(field => {
       const key = field as keyof CreateStudentAdmissionRequest
@@ -126,8 +141,6 @@ const StudentBaseDetails = () => {
     setErrors(newErrors)
     return newErrors.length === 0
   }
-
-  console.log(errors, 'errorss')
 
   const handleSubmit = () => {
     if (!validateForm()) {
@@ -156,7 +169,6 @@ const StudentBaseDetails = () => {
       value: applicationDetails?.student_name,
       placeholder: 'Student Name',
       onChange: handleChange('student_name'),
-      isRequired: true,
       caption: 'As per SSC Records'
     },
     {
@@ -194,7 +206,6 @@ const StudentBaseDetails = () => {
       type: InputTypes.SELECT,
       id: `${TOP_LEVEL_ID}__joining-group`,
       label: 'Group',
-      isRequired: true,
       key: 'program_id',
       value: applicationDetails?.program_id,
       onChange: handleChange('program_id'),
@@ -206,7 +217,6 @@ const StudentBaseDetails = () => {
       type: InputTypes.SELECT,
       id: `${TOP_LEVEL_ID}__medium`,
       label: 'Medium',
-      isRequired: true,
       key: 'medium',
       value: applicationDetails?.medium,
       onChange: handleChange('medium'),
@@ -218,7 +228,6 @@ const StudentBaseDetails = () => {
       type: InputTypes.SELECT,
       id: `${TOP_LEVEL_ID}__second-language`,
       label: 'Second Language',
-      isRequired: true,
       key: 'second_language',
       value: applicationDetails?.second_language,
       onChange: handleChange('second_language'),
@@ -230,8 +239,7 @@ const StudentBaseDetails = () => {
       type: InputTypes.DATE,
       id: `${TOP_LEVEL_ID}__student-dob`,
       label: '',
-      key: '',
-      isRequired: true,
+      key: 'dob',
       value: dob,
       customInput: <CustomDateElement label='Birth Date' />,
       onChange: (date: Date) => setDob(date)
@@ -318,7 +326,6 @@ const StudentBaseDetails = () => {
       type: InputTypes.INPUT,
       variant: InputVariants.NUMBER,
       id: `${TOP_LEVEL_ID}__student-aadhar-number`,
-      isRequired: true,
       key: 'student_aadhar',
       label: 'Student Aadhar',
       value: applicationDetails?.student_aadhar,
@@ -337,7 +344,6 @@ const StudentBaseDetails = () => {
       type: InputTypes.INPUT,
       variant: InputVariants.NUMBER,
       id: `${TOP_LEVEL_ID}__mother-aadhar-number`,
-      isRequired: true,
       key: 'mother_aadhar',
       label: 'Mother Aadhar',
       value: applicationDetails?.mother_aadhar,
@@ -367,6 +373,10 @@ const StudentBaseDetails = () => {
     }
   ]
 
+  const getHadError = (key: string) => {
+    return errors.find(each => each.errorkey === key)
+  }
+
   const renderInputFields = () =>
     fields.map(
       ({
@@ -374,7 +384,6 @@ const StudentBaseDetails = () => {
         id,
         customInput,
         label,
-        isRequired,
         placeholder,
         onChange,
         key,
@@ -388,30 +397,33 @@ const StudentBaseDetails = () => {
           {type === InputTypes.INPUT ? (
             <>
               <TextField
-                required={isRequired}
+                required={mandatoryFields.includes(key)}
                 fullWidth
                 id={id}
+                error={!!getHadError(key)}
                 label={label}
                 value={value}
                 placeholder={placeholder ?? ''}
                 onChange={onChange}
               />
               {caption && <small>{caption}</small>}
+              {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
             </>
           ) : type === InputTypes.SELECT ? (
-            <FormControl fullWidth required={isRequired}>
+            <FormControl fullWidth required={mandatoryFields.includes(key)}>
               <InputLabel>{label}</InputLabel>
-              <Select label={label} id={id} value={value} onChange={onChange}>
+              <Select label={label} id={id} value={value} onChange={onChange} error={!!getHadError(key)}>
                 {(menuOptions ?? []).map(({ value, label }) => (
                   <MenuItem key={value} value={value}>
                     {label}
                   </MenuItem>
                 ))}
               </Select>
+              {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
             </FormControl>
           ) : type === InputTypes.RADIO ? (
             <Grid item xs={12}>
-              <FormControl required>
+              <FormControl required error={!!getHadError(key)}>
                 <FormLabel id={id}>{label}</FormLabel>
                 <RadioGroup
                   row
@@ -429,13 +441,14 @@ const StudentBaseDetails = () => {
                     <FormControlLabel value={each.value} control={<Radio />} label={each.label} />
                   ))}
                 </RadioGroup>
+                {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
               </FormControl>
             </Grid>
           ) : type === InputTypes.DATE ? (
             <Grid item xs={12}>
               <DatePicker
                 selected={dob}
-                required={isRequired}
+                required={mandatoryFields.includes(key)}
                 showYearDropdown={showYearDropdown}
                 showMonthDropdown={showMonthDropdown}
                 placeholderText={placeholder}
@@ -443,6 +456,7 @@ const StudentBaseDetails = () => {
                 id={id}
                 onChange={onChange}
               />
+              {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
             </Grid>
           ) : null}
         </Grid>
