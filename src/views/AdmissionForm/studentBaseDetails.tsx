@@ -95,11 +95,13 @@ const StudentBaseDetails = () => {
   const handleChange =
     (prop: keyof CreateStudentAdmissionRequest) =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
-      if (prop === 'program_id') {
-        getDependentData(event.target.value)
-      }
+      const value = event?.target?.value ?? event
+      if (prop === 'program_id') getDependentData(value)
 
-      setApplicationDetails({ ...applicationDetails, [prop]: event?.target?.value ?? event })
+      const error = validateField(prop, value)
+      setErrors(error ? [...errors, error] : errors.filter(({ errorkey }) => errorkey !== prop))
+
+      setApplicationDetails(prev => ({ ...prev, [prop]: value }))
     }
 
   const validateField = (
@@ -412,7 +414,7 @@ const StudentBaseDetails = () => {
           ) : type === InputTypes.SELECT ? (
             <FormControl fullWidth required={mandatoryFields.includes(key)}>
               <InputLabel>{label}</InputLabel>
-              <Select label={label} id={id} value={value} onChange={onChange} error={!!getHadError(key)}>
+              <Select label={label} id={id} value={value ?? ''} onChange={onChange} error={!!getHadError(key)}>
                 {(menuOptions ?? []).map(({ value, label }) => (
                   <MenuItem key={value} value={value}>
                     {label}
@@ -430,7 +432,7 @@ const StudentBaseDetails = () => {
                   aria-labelledby={id}
                   name={id}
                   id={id}
-                  value={value}
+                  value={value ?? ''}
                   onChange={(_, val) =>
                     handleChange(key as keyof CreateStudentAdmissionRequest)({
                       target: { value: val }
