@@ -16,7 +16,6 @@ export type Address = {
   pincode?: string
 }
 
-// address_id=Column(String(36),ForeignKey('address.address_id',ondelete='restrict',onupdate='cascade'))
 export type CreateStudentAdmissionRequest = {
   application_id?: string
   address?: Address
@@ -28,7 +27,7 @@ export type CreateStudentAdmissionRequest = {
   father_name?: string
   father_occupation?: string
   gender?: string
-  medium?: string // new
+  medium?: string
   mother_aadhar?: string
   mother_name?: string
   mother_occupation?: string
@@ -37,8 +36,8 @@ export type CreateStudentAdmissionRequest = {
   previous_marks?: string
   program_id?: string
   religion?: string
-  secondLanguage?: string // new
-  student_email?: string //new
+  second_language?: string
+  student_email?: string
   qualified_exam?: string
   qualified_exam_hallticket_no?: string
   qualified_exam_year_of_pass?: string
@@ -47,13 +46,17 @@ export type CreateStudentAdmissionRequest = {
   student_name?: string
 }
 
+interface CreateApplicationResponse {
+  application_id?: string
+  message?: string
+}
 const admissionServiceApi = api.injectEndpoints({
   endpoints: build => ({
-    createAddonCourse: build.mutation<string, CreateStudentAdmissionRequest>({
+    createUpdateAdmission: build.mutation<CreateApplicationResponse, CreateStudentAdmissionRequest>({
       query: body => {
         return {
           method: HttpRequestMethods.POST,
-          url: urlConstants.admin.add.addonCourse,
+          url: urlConstants.admissions.createAdmission,
           body
         }
       }
@@ -61,4 +64,4 @@ const admissionServiceApi = api.injectEndpoints({
   })
 })
 
-export const { useCreateAddonCourseMutation } = admissionServiceApi
+export const { useCreateUpdateAdmissionMutation } = admissionServiceApi

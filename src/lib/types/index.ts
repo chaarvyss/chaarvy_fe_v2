@@ -1,3 +1,6 @@
+import { SelectChangeEvent } from '@mui/material'
+import React, { ChangeEvent, ReactElement } from 'react'
+
 export type AddOnCourse = {
   addon_course_id: string
   addon_course_name: string
@@ -45,6 +48,28 @@ export type FeesSegment = Segment & {
 }
 
 export type Gender = { gender_id: string; gender_name: string }
+
+export type MenuOptions = {
+  label: string
+  value: string | number
+}
+
+export type InputFields = {
+  type: 'input' | 'select' | 'radio' | 'date'
+  variant?: 'number' | 'string' | 'email'
+  id: string
+  label: string
+  key: string
+  value?: string | number | boolean | Date
+  customInput?: ReactElement
+  placeholder?: string
+  onChange: (e: any) => void
+  isRequired?: boolean
+  caption?: string
+  menuOptions?: MenuOptions[]
+  showYearDropdown?: boolean
+  showMonthDropdown?: boolean
+}
 
 export type Language = { languages_id: string; languages_name: string; status: number }
 export type Occupation = { occupation_id: string; occupation_name: string }
