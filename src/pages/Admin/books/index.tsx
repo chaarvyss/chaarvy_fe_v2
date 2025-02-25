@@ -2,12 +2,12 @@ import React, { useState } from 'react'
 
 import { Box, Card, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@muiElements'
 import { TableHeaders } from 'src/lib/interfaces'
-import { BooksTypesResponse, Fees } from 'src/lib/types'
+import { BooksTypesResponse } from 'src/lib/types'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import { useGetBooksListQuery } from 'src/store/services/listServices'
 
-import CreateOrUpdateBookModal, { BookTypeRequest } from './createBookModal'
+import CreateOrUpdateBookModal from './createBookModal'
 
 const FeesTypes = () => {
   const { data: booksTypes } = useGetBooksListQuery()

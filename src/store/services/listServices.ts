@@ -11,6 +11,7 @@ import {
   Language,
   Occupation,
   Program,
+  ProgramAddonCourseResponse,
   ProgramBooksDetails,
   QualifiedExam,
   Religions,
@@ -26,6 +27,7 @@ import { CacheTag } from './cacheTag'
 const listServicesApi = api.injectEndpoints({
   endpoints: build => ({
     getAddonCoursesList: build.query<AddOnCourse[], boolean>({
+      providesTags: [CacheTag.ListAddonCourse],
       query: onlyActive => {
         return {
           method: HttpRequestMethods.GET,
@@ -78,6 +80,7 @@ const listServicesApi = api.injectEndpoints({
       }
     }),
     getLanguagesList: build.query<Language[], void>({
+      providesTags: [CacheTag.ListLanguages],
       query: () => {
         return {
           method: HttpRequestMethods.GET,
@@ -100,17 +103,6 @@ const listServicesApi = api.injectEndpoints({
           method: HttpRequestMethods.GET,
           url: urlConstants.list.programs,
           params: { active_only }
-        }
-      }
-    }),
-
-    getProgramBooksList: build.query<ProgramBooksDetails, string>({
-      providesTags: [CacheTag.ListProgramBooks],
-      query: program_id => {
-        return {
-          method: HttpRequestMethods.GET,
-          url: urlConstants.list.programBooks,
-          params: { program_id }
         }
       }
     }),
@@ -161,17 +153,16 @@ export const {
   useGetSegmentsListQuery,
   useGetBooksListQuery,
   useGetProgramsListQuery,
-  useLazyGetAddonCoursesListQuery,
-  useLazyGetCommunitiesListQuery,
+  useGetAddonCoursesListQuery,
+  useGetCommunitiesListQuery,
   useLazyGetDistrictsListQuery,
   useLazyGetFeesTypesListQuery,
-  useLazyGetGendersListQuery,
-  useLazyGetLanguagesListQuery,
-  useLazyGetOccupationsListQuery,
-  useLazyGetProgramBooksListQuery,
+  useGetGendersListQuery,
+  useGetLanguagesListQuery,
+  useGetOccupationsListQuery,
   useLazyGetProgramsListQuery,
-  useLazyGetQualifiedExamsListQuery,
-  useLazyGetReligionsListQuery,
+  useGetQualifiedExamsListQuery,
+  useGetReligionsListQuery,
   useLazyGetStateListQuery,
   useLazyGetUsersListQuery
 } = listServicesApi

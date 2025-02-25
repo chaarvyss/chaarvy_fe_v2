@@ -1,14 +1,8 @@
 // ** React Import
 import Box, { BoxProps } from '@mui/material/Box'
-import { purple } from '@mui/material/colors'
-import List from '@mui/material/List'
+import { grey } from '@mui/material/colors'
 import { styled, useTheme } from '@mui/material/styles'
 import { ReactNode, useRef, useState } from 'react'
-
-// ** MUI Import
-
-// ** Third Party Components
-import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // ** Type Import
 import { Settings } from 'src/@core/context/settingsContext'
@@ -68,7 +62,7 @@ const Navigation = (props: Props) => {
 
   return (
     <Drawer {...props}>
-      <Box bgcolor={settings.mode == 'light' ? purple[50] : 'black'}>
+      <Box height='100vh !important' bgcolor={settings.mode == 'light' ? grey[50] : 'black'}>
         <VerticalNavHeader {...props} />
         <StyledBoxForShadow
           ref={shadowRef}

@@ -30,29 +30,22 @@ const CreateOrUpdateFeesTypeModal = ({ selectedFeesType, isOpen, onClose }: Crea
   }
 
   const handleSubmit = () => {
+    let apiResponse
     if (selectedFeesType) {
-      updateFeesType({ fees_type: FeesTypeDetails.fees_type, id: selectedFeesType.fees_type_id })
-        .unwrap()
-        .then(response => {
-          resetState()
-          triggerToast(response, { variant: ToastVariants.SUCCESS })
-          onClose()
-        })
-        .catch(e => {
-          triggerToast(e.data, { variant: ToastVariants.ERROR })
-        })
+      apiResponse = updateFeesType({ fees_type: FeesTypeDetails.fees_type, id: selectedFeesType.fees_type_id })
     } else {
-      CreateFeesType(FeesTypeDetails.fees_type)
-        .unwrap()
-        .then(response => {
-          resetState()
-          triggerToast(response, { variant: ToastVariants.SUCCESS })
-          onClose()
-        })
-        .catch(e => {
-          triggerToast(e.data, { variant: ToastVariants.ERROR })
-        })
+      apiResponse = CreateFeesType(FeesTypeDetails.fees_type)
     }
+    apiResponse
+      .unwrap()
+      .then(response => {
+        resetState()
+        triggerToast(response, { variant: ToastVariants.SUCCESS })
+        onClose()
+      })
+      .catch(e => {
+        triggerToast(e.data, { variant: ToastVariants.ERROR })
+      })
   }
 
   const createFeesTypeFooter = () => {

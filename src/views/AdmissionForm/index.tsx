@@ -6,6 +6,8 @@ import { AccountOutline } from '@mdiElements'
 import { Card, MuiTab } from '@muiElements'
 
 import StudentBaseDetails from './studentBaseDetails'
+import StudentAddress from './address'
+import { GoogleMaps } from 'mdi-material-ui'
 
 const Tab = styled(MuiTab)<TabProps>(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
@@ -29,10 +31,20 @@ const AdmissionForm = () => {
   /*
   Using stepper
     form 1 -> base details and student photo
+    form 2 -> student address
   */
-  const [value, setValue] = useState<string>('account')
 
-  const handleChange = (event: SyntheticEvent, newValue: string) => {
+  type FORMS = 'base_details' | 'address' | 'fees' | 'payment'
+
+  enum FormType {
+    BASE_DETAIL = 'base_details',
+    ADDRESS = 'address',
+    FEES = 'fees',
+    PAYMENT = 'payment'
+  }
+  const [value, setValue] = useState<FORMS>(FormType.BASE_DETAIL)
+
+  const handleChange = (event: SyntheticEvent, newValue: FORMS) => {
     setValue(newValue)
   }
 
@@ -45,7 +57,7 @@ const AdmissionForm = () => {
           sx={{ borderBottom: theme => `1px solid ${theme.palette.divider}` }}
         >
           <Tab
-            value='account'
+            value={FormType.BASE_DETAIL}
             label={
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <AccountOutline />
@@ -53,10 +65,22 @@ const AdmissionForm = () => {
               </Box>
             }
           />
+          <Tab
+            value={FormType.ADDRESS}
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <GoogleMaps />
+                <TabName>Student Address</TabName>
+              </Box>
+            }
+          />
         </TabList>
 
-        <TabPanel sx={{ p: 0 }} value='account'>
+        <TabPanel sx={{ p: 0 }} value={FormType.BASE_DETAIL}>
           <StudentBaseDetails />
+        </TabPanel>
+        <TabPanel sx={{ p: 0 }} value={FormType.ADDRESS}>
+          <StudentAddress />
         </TabPanel>
       </TabContext>
     </Card>

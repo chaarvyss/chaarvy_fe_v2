@@ -26,6 +26,10 @@ const navigation = (): VerticalNavItemsType => {
       path: '/Admin/books'
     },
     {
+      title: 'Addon Courses',
+      path: '/Admin/addonCourse'
+    },
+    {
       title: 'Programs',
       path: '/Admin/programs'
     },

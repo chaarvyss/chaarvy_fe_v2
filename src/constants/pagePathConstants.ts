@@ -1,3 +1,4 @@
 export const PagePath = {
-  LOGIN_PAGE: '/login'
+  LOGIN_PAGE: '/login',
+  CHANGE_PASSWORD: '/changePassword'
 }

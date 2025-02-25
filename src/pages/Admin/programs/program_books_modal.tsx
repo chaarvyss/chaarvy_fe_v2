@@ -24,12 +24,8 @@ import ChaarvyAccordian from 'src/reusable_components/chaarvyAccordian'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import { useCreateProgramBookMutation, useUpdateProgramBookMutation } from 'src/store/services/adminServices'
-import {
-  useGetBooksListQuery,
-  useGetProgramsListQuery,
-  useGetSegmentsListQuery,
-  useLazyGetProgramBooksListQuery
-} from 'src/store/services/listServices'
+import { useGetBooksListQuery, useGetProgramsListQuery, useGetSegmentsListQuery } from 'src/store/services/listServices'
+import { useLazyGetProgramBooksListQuery } from 'src/store/services/programServices'
 
 interface BooksModalProps {
   selectedProgram?: Program
