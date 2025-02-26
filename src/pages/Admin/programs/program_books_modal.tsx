@@ -2,8 +2,14 @@ import {
   Box,
   Button,
   FormControl,
+  FormControlLabel,
+  FormLabel,
+  Grid,
+  IconButton,
   InputLabel,
   MenuItem,
+  Radio,
+  RadioGroup,
   Select,
   SelectChangeEvent,
   Table,
@@ -12,20 +18,23 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography
 } from '@mui/material'
+import { DeleteOutline } from 'mdi-material-ui'
 import React, { useEffect, useState } from 'react'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
-import { Books, Program, ProgramBooksDetails } from 'src/lib/types'
+import { Books, Program } from 'src/lib/types'
 import ChaarvyAccordian from 'src/reusable_components/chaarvyAccordian'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import { useCreateProgramBookMutation, useUpdateProgramBookMutation } from 'src/store/services/adminServices'
 import { useGetBooksListQuery, useGetProgramsListQuery, useGetSegmentsListQuery } from 'src/store/services/listServices'
-import { useLazyGetProgramBooksListQuery } from 'src/store/services/programServices'
+import {
+  useLazyGetProgramBooksListQuery,
+  useLazyGetProgramMediumsListQuery,
+  useLazyGetProgramSecondLanguagesListQuery
+} from 'src/store/services/programServices'
 
 interface BooksModalProps {
   selectedProgram?: Program
@@ -37,7 +46,8 @@ type ProgramBook = {
   program_id: string
   book_id: string
   segment_id: string
-  quantity: number
+  second_language: string
+  medium: string
 }
 
 const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps) => {
@@ -49,7 +59,8 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
   const { data: segmentsList } = useGetSegmentsListQuery()
   const { data: booksList } = useGetBooksListQuery()
   const { data: programsList } = useGetProgramsListQuery(true)
-
+  const [fetchProgramMediums, { data: programMediums }] = useLazyGetProgramMediumsListQuery()
+  const [fetchProgramSecondLanguages, { data: programSecondLanguages }] = useLazyGetProgramSecondLanguagesListQuery()
   const [createProgramBook] = useCreateProgramBookMutation()
   const [updateProgramBook] = useUpdateProgramBookMutation()
 
@@ -57,24 +68,26 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
     program_id: '',
     book_id: '',
     segment_id: '',
-    quantity: 0
+    second_language: '',
+    medium: ''
   })
 
   const [fetchProgramBooksList, { data: booksDetails }] = useLazyGetProgramBooksListQuery()
 
-  const headers: TableHeaders[] = [
-    { label: 's#' },
-    { label: 'Book Name' },
-    { label: 'Quantity' },
-
-    // { label: 'Stock' },
-    { label: 'Actions', width: '100px' }
-  ]
+  const headers: TableHeaders[] = [{ label: 's#' }, { label: 'Book Name' }, { label: 'Actions', width: '100px' }]
   const { triggerToast } = useToast()
 
   useEffect(() => {
-    fetchProgramBooksList(selectedProgram?.program_id ?? '')
+    setBookDetail({ ...bookDetail, program_id: selectedProgram?.program_id ?? '' })
+    fetchProgramSecondLanguages(selectedProgram?.program_id ?? '')
+    fetchProgramMediums(selectedProgram?.program_id ?? '')
   }, [selectedProgram])
+
+  useEffect(() => {
+    if (bookDetail.medium !== '' && bookDetail.second_language !== '') {
+      fetchProgramBooksList(bookDetail)
+    }
+  }, [bookDetail.second_language, bookDetail.medium])
 
   const handleRemoveBookConfirmationModalClose = () => {
     setSelectedBook(undefined)
@@ -109,38 +122,17 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
     )
   }
 
-  const handleKebabOptionClick = (book: Books, option: 'Edit' | 'Remove') => {
+  const handleKebabOptionClick = (book: Books, option: 'Remove') => {
     setSelectedBook(book)
     switch (option) {
-      case 'Edit':
-        setBookDetail({ ...book, program_id: selectedProgram?.program_id ?? '' })
-        setIsBookModalOpen(true)
-        break
       case 'Remove':
         setIsRemoveBookModalOpen(true)
         break
     }
   }
 
-  const getKebabOptions = (eachBook: Books) => {
-    // remove book, edit book name
-    return [
-      {
-        id: eachBook.book_id,
-        label: 'Edit',
-        onOptionClick: () => handleKebabOptionClick(eachBook, 'Edit')
-      }
-
-      // {
-      //   id: eachBook.book_id,
-      //   label: 'Remove Book',
-      //   onOptionClick: () => handleKebabOptionClick(eachBook, 'Remove')
-      // }
-    ]
-  }
-
   const resetState = () => {
-    setBookDetail({ book_id: '', segment_id: '', quantity: 0, program_id: '' })
+    setBookDetail({ ...bookDetail, book_id: '', segment_id: '' })
   }
 
   const handleBookModalClose = () => {
@@ -179,6 +171,9 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
     )
   }
 
+  const program_medium_id = 'program_medium_id'
+  const second_language_id = 'second_language_id'
+
   const renderCreateOrEditBookModal = () => {
     return (
       <ChaarvyModal
@@ -189,56 +184,49 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
         onClose={handleBookModalClose}
         title={`${selectedBook ? 'Edit' : 'Add'} Book`}
       >
-        <Box>
-          <FormControl sx={{ mb: 4 }} fullWidth>
-            <InputLabel id='program'>Program</InputLabel>
-            <Select
-              labelId='program'
-              id='program'
-              disabled={!!selectedProgram}
-              value={selectedProgram?.program_id}
-              label='Program'
-              onChange={handleChange('program_id')}
-            >
-              {programsList?.map(each => <MenuItem value={each.program_id}>{each.program_name}</MenuItem>)}
-            </Select>
-          </FormControl>
-          <FormControl sx={{ mb: 4 }} fullWidth>
-            <InputLabel id='segment'>Segment</InputLabel>
-            <Select
-              labelId='segment'
-              id='segment'
-              disabled={!!selectedBook}
-              value={selectedBook?.segment_id}
-              label='Segment'
-              onChange={handleChange('segment_id')}
-            >
-              {segmentsList?.map(each => <MenuItem value={each.segment_id}>{each.segment_name}</MenuItem>)}
-            </Select>
-          </FormControl>
-          <FormControl sx={{ mb: 4 }} fullWidth>
-            <InputLabel id='book'>Book</InputLabel>
-            <Select
-              labelId='book_id'
-              id='book'
-              disabled={!!selectedBook}
-              value={selectedBook?.book_id}
-              label='Segment'
-              onChange={e => setBookDetail({ ...bookDetail, book_id: e.target.value })}
-            >
-              {booksList?.map(each => <MenuItem value={each.book_id}>{each.book_name}</MenuItem>)}
-            </Select>
-          </FormControl>
-          <TextField
-            onChange={handleChange('quantity')}
-            value={bookDetail.quantity}
-            fullWidth
-            type='number'
-            id='books_quantity'
-            label='Quantity'
-            sx={{ marginBottom: 4 }}
-          />
-        </Box>
+        <>
+          <Box>
+            <FormControl sx={{ mb: 4 }} fullWidth>
+              <InputLabel id='program'>Program</InputLabel>
+              <Select
+                labelId='program'
+                id='program'
+                disabled={!!selectedProgram}
+                value={selectedProgram?.program_id}
+                label='Program'
+                onChange={handleChange('program_id')}
+              >
+                {programsList?.map(each => <MenuItem value={each.program_id}>{each.program_name}</MenuItem>)}
+              </Select>
+            </FormControl>
+            <FormControl sx={{ mb: 4 }} fullWidth>
+              <InputLabel id='segment'>Segment</InputLabel>
+              <Select
+                labelId='segment'
+                id='segment'
+                disabled={!!selectedBook}
+                value={selectedBook?.segment_id}
+                label='Segment'
+                onChange={handleChange('segment_id')}
+              >
+                {segmentsList?.map(each => <MenuItem value={each.segment_id}>{each.segment_name}</MenuItem>)}
+              </Select>
+            </FormControl>
+            <FormControl sx={{ mb: 4 }} fullWidth>
+              <InputLabel id='book'>Book</InputLabel>
+              <Select
+                labelId='book_id'
+                id='book'
+                disabled={!!selectedBook}
+                value={selectedBook?.book_id}
+                label='Segment'
+                onChange={handleChange('book_id')}
+              >
+                {booksList?.map(each => <MenuItem value={each.book_id}>{each.book_name}</MenuItem>)}
+              </Select>
+            </FormControl>
+          </Box>
+        </>
       </ChaarvyModal>
     )
   }
@@ -252,15 +240,54 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
     return ((booksDetails?.segments.length ?? 0) == 0 || booksDetails?.segments.length !== segmentsList?.length) ?? 0
   }
 
+  const isNoBooksAvailable =
+    bookDetail.medium !== '' && bookDetail.second_language !== '' && booksDetails?.segments.length == 0
   return (
     <>
       <ChaarvyModal
         modalSize='col-12 col-md-6'
         isOpen={isOpen}
         onClose={onClose}
+        shouldRestrictCloseOnOuterClick
         title={`${selectedProgram?.program_name} Books`}
       >
         <>
+          <Grid container gap={2}>
+            <Grid item xs={12} lg={5}>
+              <FormControl>
+                <FormLabel id={program_medium_id}>Mediums</FormLabel>
+                <RadioGroup
+                  row
+                  aria-labelledby={program_medium_id}
+                  name={program_medium_id}
+                  id={program_medium_id}
+                  value={bookDetail.medium}
+                  onChange={handleChange('medium')}
+                >
+                  {(programMediums ?? []).map(each => (
+                    <FormControlLabel value={each.language_id} control={<Radio />} label={each.language_name} />
+                  ))}
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} lg={5}>
+              <FormControl>
+                <FormLabel id={second_language_id}>Second Language</FormLabel>
+                <RadioGroup
+                  row
+                  aria-labelledby={second_language_id}
+                  name={second_language_id}
+                  id={second_language_id}
+                  value={bookDetail.second_language}
+                  onChange={handleChange('second_language')}
+                >
+                  {(programSecondLanguages ?? []).map(each => (
+                    <FormControlLabel value={each.language_id} control={<Radio />} label={each.language_name} />
+                  ))}
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+          </Grid>
           {booksDetails?.segments?.map(eachSegment => (
             <ChaarvyAccordian title={eachSegment?.segment_name}>
               {eachSegment?.books.length > 0 ? (
@@ -279,9 +306,10 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
                           <TableRow>
                             <TableCell>{index + 1}</TableCell>
                             <TableCell>{eachBook.book_name}</TableCell>
-                            <TableCell>{eachBook.quantity}</TableCell>
                             <TableCell>
-                              <DropDownMenu dropDownMenuOptions={getKebabOptions(eachBook)} />
+                              <IconButton onClick={() => handleKebabOptionClick(eachBook, 'Remove')}>
+                                <DeleteOutline color='error' />
+                              </IconButton>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -297,6 +325,12 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
               )}
             </ChaarvyAccordian>
           ))}
+
+          {isNoBooksAvailable && (
+            <Typography textAlign='center' padding={3} marginTop={5}>
+              No Books Available for the selected Details. Please Add
+            </Typography>
+          )}
 
           {showAddProgramBookButton() && (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

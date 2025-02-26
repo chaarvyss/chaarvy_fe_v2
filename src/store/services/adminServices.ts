@@ -23,7 +23,8 @@ type CreateProgramBookRequest = {
   program_id: string
   segment_id: string
   book_id: string
-  quantity: number
+  second_language: string
+  medium: string
 }
 
 type updateAddonCourse = {

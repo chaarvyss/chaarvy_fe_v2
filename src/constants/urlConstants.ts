@@ -55,7 +55,9 @@ export const urlConstants = {
     }
   },
   admissions: {
-    createAdmission: `${interRoutePrefix.admisions}/create-update-admission`
+    createAdmission: `${interRoutePrefix.admisions}/create-update-admission`,
+    uploadStudentPhoto: `${interRoutePrefix.admisions}/upload-student-photo`,
+    admissionsList: `${interRoutePrefix.admisions}/admissions-list`
   },
   fees: {
     getprogramFees: `${interRoutePrefix.fees}/program-fee-detail`,

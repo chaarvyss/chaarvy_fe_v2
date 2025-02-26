@@ -39,8 +39,12 @@ const navigation = (): VerticalNavItemsType => {
     },
 
     {
-      title: 'New Admission',
+      title: 'Admission form',
       path: '/StudentManagement/AdmissionForm'
+    },
+    {
+      title: 'Admissions',
+      path: '/StudentManagement/admissions'
     }
   ]
 }

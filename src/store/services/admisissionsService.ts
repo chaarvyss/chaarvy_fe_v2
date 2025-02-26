@@ -3,7 +3,6 @@ import { urlConstants } from 'src/constants/urlConstants'
 import { HttpRequestMethods } from '..'
 
 import api from './api'
-import { CacheTag } from './cacheTag'
 
 export type Address = {
   door_no?: string
@@ -14,6 +13,14 @@ export type Address = {
   district?: string
   state?: string
   pincode?: string
+}
+
+export type AdmissionsListResponse = {
+  application_id: string
+  student_name: string
+  contact_no_1: string
+  program_name: string
+  photo_url: string
 }
 
 export type CreateStudentAdmissionRequest = {
@@ -46,6 +53,11 @@ export type CreateStudentAdmissionRequest = {
   student_name?: string
 }
 
+export type StudentPhotoRequest = {
+  application_id: string
+  photo: File
+}
+
 interface CreateApplicationResponse {
   application_id?: string
   message?: string
@@ -60,8 +72,29 @@ const admissionServiceApi = api.injectEndpoints({
           body
         }
       }
+    }),
+    getAdmissionsList: build.query<AdmissionsListResponse[], void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.admissionsList
+        }
+      }
+    }),
+    uploadStudentPhoto: build.mutation<void, StudentPhotoRequest>({
+      query: body => {
+        const formData = new FormData()
+        formData.append('file', body.photo)
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admissions.uploadStudentPhoto,
+          body: formData,
+          params: { application_id: body.application_id }
+        }
+      }
     })
   })
 })
 
-export const { useCreateUpdateAdmissionMutation } = admissionServiceApi
+export const { useCreateUpdateAdmissionMutation, useUploadStudentPhotoMutation, useGetAdmissionsListQuery } =
+  admissionServiceApi

@@ -7,6 +7,7 @@ import { TableHeaderStatCardProps, UsersListResponse } from 'src/lib/interfaces'
 import DropDownMenu, { filterFalseAndInvalid } from 'src/reusable_components/dropDownMenu'
 import TableTilteHeader, { TableTitleHeaderProps } from 'src/reusable_components/TableTilteHeader'
 import { useLazyGetUsersListQuery } from 'src/store/services/listServices'
+import { statusColors } from 'src/utils/constants'
 import { ChaarvyIcon, ChaarvyIconFontSize, ThemeColorEnum } from 'src/utils/enums'
 import GetChaarvyIcons from 'src/utils/icons'
 import {
@@ -23,11 +24,6 @@ import {
   TableRow,
   Typography
 } from 'src/utils/muiElements'
-
-const statusColors = {
-  active: ThemeColorEnum.Success,
-  inactive: ThemeColorEnum.Warning
-}
 
 const salesData: TableHeaderStatCardProps[] = [
   {

@@ -70,6 +70,11 @@ export type InputFields = {
   showMonthDropdown?: boolean
 }
 
+export type ErrorObject = {
+  errorkey: string
+  error: string
+}
+
 export type Language = { languages_id: string; languages_name: string; status: number }
 export type Occupation = { occupation_id: string; occupation_name: string }
 export type Program = {
@@ -84,6 +89,12 @@ export type ProgramAddonCourseResponse = {
   addon_course_id: string
   addon_coures_fees: number
   addon_course_name: string
+}
+
+export type ProgramBookRequest = {
+  program_id: string
+  medium: string
+  second_language: string
 }
 
 export type ProgramBooksDetails = {

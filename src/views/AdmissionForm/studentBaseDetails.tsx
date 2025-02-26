@@ -11,13 +11,11 @@ import {
   styled,
   Typography
 } from '@mui/material'
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useState, FC } from 'react'
 import DatePicker from 'react-datepicker'
 
 import { Button, FormControl, Grid, InputLabel, TextField } from '@muiElements'
 
-import 'react-datepicker/dist/react-datepicker.css'
-import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import {
   useGetProgramsListQuery,
   useGetQualifiedExamsListQuery,
@@ -26,15 +24,20 @@ import {
   useGetCommunitiesListQuery,
   useGetReligionsListQuery
 } from 'src/store/services/listServices'
-import { CreateStudentAdmissionRequest, useCreateUpdateAdmissionMutation } from 'src/store/services/admisissionsService'
+import {
+  CreateStudentAdmissionRequest,
+  useCreateUpdateAdmissionMutation,
+  useUploadStudentPhotoMutation
+} from 'src/store/services/admisissionsService'
 import {
   useLazyGetProgramMediumsListQuery,
   useLazyGetProgramSecondLanguagesListQuery
 } from 'src/store/services/programServices'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { InputFields } from 'src/lib/types'
+import { ErrorObject, InputFields } from 'src/lib/types'
 import { InputTypes, InputVariants } from 'src/lib/enums'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
+import { useSearchParams } from 'next/navigation'
 
 const ImgStyled = styled('img')(({ theme }) => ({
   width: 120,
@@ -62,15 +65,12 @@ const mandatoryFields = [
   'gender'
 ]
 
-type ErrorObject = {
-  errorkey: string
-  error: string
-}
-
 const StudentBaseDetails = () => {
+  const searchParams = useSearchParams()
   const [errors, setErrors] = useState<Array<ErrorObject>>([])
-  const [admissionId, setAdmissionId] = useState<string>()
-  const [studentImg, setStudentImg] = useState(null)
+  const [admissionId, setAdmissionId] = useState<string | null>(searchParams.get('id'))
+  const [image, setImage] = useState<string | null>(null)
+  const [studentImg, setStudentImg] = useState<File>()
   const [applicationDetails, setApplicationDetails] = useState<CreateStudentAdmissionRequest>()
   const [dob, setDob] = useState<Date>()
 
@@ -86,6 +86,7 @@ const StudentBaseDetails = () => {
   const { data: programsList } = useGetProgramsListQuery(true)
 
   const [createUpdateAdmission] = useCreateUpdateAdmissionMutation()
+  const [uploadStudentPhoto] = useUploadStudentPhotoMutation()
 
   const getDependentData = (program_id: string) => {
     fetchProgramMediums(program_id)
@@ -134,6 +135,8 @@ const StudentBaseDetails = () => {
   const validateForm = (): boolean => {
     const newErrors: ErrorObject[] = []
 
+    if (!studentImg) newErrors.push({ errorkey: 'student_image', error: '* Required' })
+
     mandatoryFields.forEach(field => {
       const key = field as keyof CreateStudentAdmissionRequest
       const error = validateField(key, applicationDetails?.[key])
@@ -149,13 +152,19 @@ const StudentBaseDetails = () => {
       triggerToast('Please correct the errors before submitting.', { variant: ToastVariants.ERROR })
       return
     }
-    if (applicationDetails) {
+    if (applicationDetails && studentImg) {
       if (admissionId) applicationDetails.application_id = admissionId
       createUpdateAdmission(applicationDetails)
         .unwrap()
-        .then(res => {
-          res.application_id && sessionStorage.setItem('admission_id', res.application_id)
-          triggerToast(res.message ?? 'New application created', { variant: ToastVariants.SUCCESS })
+        .then(({ application_id, message }) => {
+          if (application_id) {
+            sessionStorage.setItem('admission_id', application_id)
+            uploadStudentPhoto({
+              application_id: application_id,
+              photo: studentImg
+            })
+          }
+          triggerToast(message ?? 'New application created', { variant: ToastVariants.SUCCESS })
         })
         .catch(res => triggerToast(res.data, { variant: ToastVariants.ERROR }))
     }
@@ -201,7 +210,7 @@ const StudentBaseDetails = () => {
       value: applicationDetails?.qualified_exam_year_of_pass,
       onChange: handleChange('qualified_exam_year_of_pass'),
       menuOptions: getLast10Years().map(each => {
-        return { value: each, label: `${each}` }
+        return { value: `${each}`, label: `${each}` }
       })
     },
     {
@@ -391,6 +400,7 @@ const StudentBaseDetails = () => {
         key,
         caption,
         value,
+        variant,
         menuOptions,
         showYearDropdown,
         showMonthDropdown
@@ -405,6 +415,7 @@ const StudentBaseDetails = () => {
                 error={!!getHadError(key)}
                 label={label}
                 value={value}
+                type={variant}
                 placeholder={placeholder ?? ''}
                 onChange={onChange}
               />
@@ -465,52 +476,69 @@ const StudentBaseDetails = () => {
       )
     )
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      // file.size < 307200 ||
+      if (file.size > 512000) {
+        triggerToast(`Given file size is ${file.size / 1024}kb `, { variant: ToastVariants.ERROR })
+        setErrors([
+          ...errors,
+          { errorkey: 'student_image', error: 'Allowed File size must be between 300 KB and 500 KB.' }
+        ])
+        return
+      } else {
+        setErrors(errors.filter(({ errorkey }) => errorkey !== 'student_image'))
+      }
+      setStudentImg(file)
+      setImage(URL.createObjectURL(file))
+    }
+  }
+
   return (
-    <DatePickerWrapper>
-      <CardContent>
-        <form>
-          <Grid container spacing={7}>
-            <Grid item xs={12} sx={{ marginTop: 4.8, marginBottom: 3 }}>
-              <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'end', justifyContent: 'end' }}>
-                <ImgStyled src={studentImg ?? '/images/avatars/1.png'} alt='add photo' />
-                <Box>
-                  <Button component='label' variant='contained' htmlFor='account-settings-upload-image'>
-                    Upload New Photo
-                    <input
-                      hidden
-                      type='file'
-                      onChange={() => {}}
-                      accept='image/png, image/jpeg'
-                      id='account-settings-upload-image'
-                    />
-                  </Button>
-
-                  <Typography variant='body2' sx={{ marginTop: 5 }}>
-                    Allowed PNG or JPEG. Max size of 800K.
-                  </Typography>
-                </Box>
+    <CardContent>
+      <form>
+        <Grid container spacing={7}>
+          <Grid item xs={12} sx={{ marginTop: 4.8, marginBottom: 3 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'end', justifyContent: 'end' }}>
+              <ImgStyled src={image ?? '/images/avatars/1.png'} alt='add photo' />
+              <Box>
+                <Button component='label' variant='contained' htmlFor='account-settings-upload-image'>
+                  Upload New Photo
+                  <input
+                    hidden
+                    type='file'
+                    onChange={handleImageUpload}
+                    accept='image/png, image/jpeg'
+                    id='account-settings-upload-image'
+                  />
+                </Button>
+                <Typography variant='body2' color={getHadError('student_image') ? 'red' : ''} sx={{ marginTop: 5 }}>
+                  {(getHadError('student_image') ? getHadError('student_image')?.error : null) ??
+                    'Allowed File size must be between 300 KB and 500 KB.'}
+                </Typography>
               </Box>
-            </Grid>
-            {renderInputFields()}
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label='subcaste'
-                id={`${TOP_LEVEL_ID}__sub-caste`}
-                value={applicationDetails?.subcaste}
-                onChange={handleChange('subcaste')}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Button variant='contained' sx={{ marginRight: 3.5 }} onClick={handleSubmit}>
-                Save Changes
-              </Button>
-            </Grid>
+            </Box>
           </Grid>
-        </form>
-      </CardContent>
-    </DatePickerWrapper>
+          {renderInputFields()}
+
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label='subcaste'
+              id={`${TOP_LEVEL_ID}__sub-caste`}
+              value={applicationDetails?.subcaste}
+              onChange={handleChange('subcaste')}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Button variant='contained' sx={{ marginRight: 3.5 }} onClick={handleSubmit}>
+              Save Changes
+            </Button>
+          </Grid>
+        </Grid>
+      </form>
+    </CardContent>
   )
 }
 

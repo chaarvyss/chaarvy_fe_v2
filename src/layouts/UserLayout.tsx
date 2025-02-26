@@ -16,6 +16,7 @@ import VerticalNavItems from 'src/navigation/vertical'
 
 // ** Component Import
 import VerticalAppBarContent from './components/vertical/AppBarContent'
+import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 
 // ** Hook Import
 
@@ -47,7 +48,7 @@ const UserLayout = ({ children }: Props) => {
         />
       )}
     >
-      {children}
+      <DatePickerWrapper>{children}</DatePickerWrapper>
     </VerticalLayout>
   )
 }

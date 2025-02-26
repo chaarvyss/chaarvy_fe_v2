@@ -9,6 +9,7 @@ import { CacheTag } from './cacheTag'
 interface ProgramFeesRequest {
   program_id: string
   segment_id?: string
+  medium: string
 }
 
 interface UpdateProgramFeesRequest {
@@ -21,12 +22,18 @@ export interface CreateProgramFeesRequest {
   fees_type: string
   fees: number
   segment_id: string
+  medium: string
 }
 
 export interface CreateProgramAddonCourseRequest {
   program_id: string
   addon_course_id: string
   fees: number
+}
+
+export interface GetProgramFeesRequest {
+  program_id: string
+  medium: string
 }
 
 const feeServiceApi = api.injectEndpoints({

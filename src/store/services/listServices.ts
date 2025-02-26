@@ -57,7 +57,7 @@ const listServicesApi = api.injectEndpoints({
       query: state_id => {
         return {
           method: HttpRequestMethods.GET,
-          url: urlConstants.list.communities,
+          url: urlConstants.list.districts,
           params: { state_id }
         }
       }
@@ -163,6 +163,6 @@ export const {
   useLazyGetProgramsListQuery,
   useGetQualifiedExamsListQuery,
   useGetReligionsListQuery,
-  useLazyGetStateListQuery,
+  useGetStateListQuery,
   useLazyGetUsersListQuery
 } = listServicesApi
