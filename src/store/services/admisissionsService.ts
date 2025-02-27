@@ -29,7 +29,7 @@ export type CreateStudentAdmissionRequest = {
   community?: string
   contact_no_1?: string
   contact_no_2?: string
-  dob?: Date
+  dob?: string
   father_aadhar?: string
   father_name?: string
   father_occupation?: string
@@ -44,6 +44,7 @@ export type CreateStudentAdmissionRequest = {
   program_id?: string
   religion?: string
   second_language?: string
+  segment?: string
   student_email?: string
   qualified_exam?: string
   qualified_exam_hallticket_no?: string

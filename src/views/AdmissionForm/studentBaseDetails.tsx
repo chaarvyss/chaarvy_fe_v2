@@ -22,7 +22,8 @@ import {
   useGetOccupationsListQuery,
   useGetGendersListQuery,
   useGetCommunitiesListQuery,
-  useGetReligionsListQuery
+  useGetReligionsListQuery,
+  useGetSegmentsListQuery
 } from 'src/store/services/listServices'
 import {
   CreateStudentAdmissionRequest,
@@ -57,6 +58,7 @@ const mandatoryFields = [
   'contact_no_1',
   'medium',
   'program_id',
+  'segment',
   'second_language',
   'student_email',
   'student_aadhar',
@@ -83,6 +85,7 @@ const StudentBaseDetails = () => {
   const { data: communities } = useGetCommunitiesListQuery()
   const { data: religions } = useGetReligionsListQuery()
   const { data: qualifiedExams } = useGetQualifiedExamsListQuery()
+  const { data: segmentsList } = useGetSegmentsListQuery()
   const { data: programsList } = useGetProgramsListQuery(true)
 
   const [createUpdateAdmission] = useCreateUpdateAdmissionMutation()
@@ -152,17 +155,19 @@ const StudentBaseDetails = () => {
       triggerToast('Please correct the errors before submitting.', { variant: ToastVariants.ERROR })
       return
     }
-    if (applicationDetails && studentImg) {
+    if (applicationDetails) {
       if (admissionId) applicationDetails.application_id = admissionId
-      createUpdateAdmission(applicationDetails)
+      createUpdateAdmission({ ...applicationDetails, dob: dob ? new Date(dob).toISOString().split('T')[0] : '' })
         .unwrap()
         .then(({ application_id, message }) => {
           if (application_id) {
             sessionStorage.setItem('admission_id', application_id)
-            uploadStudentPhoto({
-              application_id: application_id,
-              photo: studentImg
-            })
+            if (studentImg) {
+              uploadStudentPhoto({
+                application_id: application_id,
+                photo: studentImg
+              })
+            }
           }
           triggerToast(message ?? 'New application created', { variant: ToastVariants.SUCCESS })
         })
@@ -226,6 +231,17 @@ const StudentBaseDetails = () => {
     },
     {
       type: InputTypes.SELECT,
+      id: `${TOP_LEVEL_ID}__joining-segment`,
+      label: 'Year',
+      key: 'segment',
+      value: applicationDetails?.segment,
+      onChange: handleChange('segment'),
+      menuOptions: (segmentsList ?? []).map(each => {
+        return { value: each.segment_id, label: each.segment_name }
+      })
+    },
+    {
+      type: InputTypes.SELECT,
       id: `${TOP_LEVEL_ID}__medium`,
       label: 'Medium',
       key: 'medium',
@@ -244,6 +260,17 @@ const StudentBaseDetails = () => {
       onChange: handleChange('second_language'),
       menuOptions: (programSecondLanguages ?? []).map(each => {
         return { value: each.language_id, label: each.language_name }
+      })
+    },
+    {
+      type: InputTypes.RADIO,
+      id: `${TOP_LEVEL_ID}__gender`,
+      label: 'Gender',
+      key: 'gender',
+      value: applicationDetails?.gender,
+      onChange: handleChange('gender'),
+      menuOptions: (gendersList ?? []).map(each => {
+        return { value: each.gender_id, label: each.gender_name }
       })
     },
     {
@@ -295,17 +322,7 @@ const StudentBaseDetails = () => {
         return { value: each.occupation_id, label: each.occupation_name }
       })
     },
-    {
-      type: InputTypes.RADIO,
-      id: `${TOP_LEVEL_ID}__gender`,
-      label: 'Gender',
-      key: 'gender',
-      value: applicationDetails?.gender,
-      onChange: handleChange('gender'),
-      menuOptions: (gendersList ?? []).map(each => {
-        return { value: each.gender_id, label: each.gender_name }
-      })
-    },
+
     {
       type: InputTypes.INPUT,
       variant: InputVariants.STRING,
@@ -504,7 +521,7 @@ const StudentBaseDetails = () => {
               <ImgStyled src={image ?? '/images/avatars/1.png'} alt='add photo' />
               <Box>
                 <Button component='label' variant='contained' htmlFor='account-settings-upload-image'>
-                  Upload New Photo
+                  Upload Photo
                   <input
                     hidden
                     type='file'

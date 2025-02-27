@@ -1,10 +1,8 @@
-import { CardContent, Divider, MenuItem, Select, SelectChangeEvent } from '@mui/material'
+import { CardContent, MenuItem, Select, SelectChangeEvent } from '@mui/material'
 import React, { ChangeEvent, useState } from 'react'
 
 import { Button, FormControl, Grid, InputLabel, TextField } from '@muiElements'
 
-import 'react-datepicker/dist/react-datepicker.css'
-import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { Address } from 'src/store/services/admisissionsService'
 import { ErrorObject, InputFields } from 'src/lib/types'
 import { InputTypes, InputVariants } from 'src/lib/enums'
@@ -25,6 +23,7 @@ const mandatoryFields = [
 ]
 
 const StudentAddress = () => {
+  sessionStorage.getItem('admission_id')
   const [errors, setErrors] = useState<Array<ErrorObject>>([])
   const [studentAddress, setStudentAddress] = useState<Address>()
   const { triggerToast } = useToast()

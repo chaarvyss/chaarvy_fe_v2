@@ -7,7 +7,9 @@ import { Card, MuiTab } from '@muiElements'
 
 import StudentBaseDetails from './studentBaseDetails'
 import StudentAddress from './address'
-import { GoogleMaps } from 'mdi-material-ui'
+import { BookOutline, Cash, Cash100, GoogleMaps } from 'mdi-material-ui'
+import AddonCourseDetails from './addonCourseDetails'
+import FeesDetails from './feesDetails'
 
 const Tab = styled(MuiTab)<TabProps>(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
@@ -28,60 +30,54 @@ const TabName = styled('span')(({ theme }) => ({
 }))
 
 const AdmissionForm = () => {
-  /*
-  Using stepper
-    form 1 -> base details and student photo
-    form 2 -> student address
-  */
-
-  type FORMS = 'base_details' | 'address' | 'fees' | 'payment'
-
   enum FormType {
     BASE_DETAIL = 'base_details',
+    ADDON_COURSE = 'add_on_course',
     ADDRESS = 'address',
-    FEES = 'fees',
-    PAYMENT = 'payment'
+    FEES = 'fees'
   }
-  const [value, setValue] = useState<FORMS>(FormType.BASE_DETAIL)
 
-  const handleChange = (event: SyntheticEvent, newValue: FORMS) => {
-    setValue(newValue)
-  }
+  const [value, setValue] = useState<FormType>(FormType.BASE_DETAIL)
+  const handleChange = (_: SyntheticEvent, newValue: FormType) => setValue(newValue)
+
+  const tabs = [
+    {
+      value: FormType.BASE_DETAIL,
+      label: 'Student Details',
+      icon: <AccountOutline />,
+      component: <StudentBaseDetails />
+    },
+    { value: FormType.ADDON_COURSE, label: 'ADDON Courses', icon: <BookOutline />, component: <AddonCourseDetails /> },
+    { value: FormType.ADDRESS, label: 'Student Address', icon: <GoogleMaps />, component: <StudentAddress /> },
+    { value: FormType.FEES, label: 'Fees Details', icon: <Cash />, component: <FeesDetails /> }
+  ]
 
   return (
     <Card>
       <TabContext value={value}>
         <TabList
           onChange={handleChange}
-          aria-label='account-settings tabs'
-          sx={{ borderBottom: theme => `1px solid ${theme.palette.divider}` }}
+          aria-label='admission-form tabs'
+          sx={{ borderBottom: t => `1px solid ${t.palette.divider}` }}
         >
-          <Tab
-            value={FormType.BASE_DETAIL}
-            label={
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <AccountOutline />
-                <TabName>Student Details</TabName>
-              </Box>
-            }
-          />
-          <Tab
-            value={FormType.ADDRESS}
-            label={
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <GoogleMaps />
-                <TabName>Student Address</TabName>
-              </Box>
-            }
-          />
+          {tabs.map(({ value, label, icon }) => (
+            <Tab
+              key={value}
+              value={value}
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  {icon}
+                  <TabName>{label}</TabName>
+                </Box>
+              }
+            />
+          ))}
         </TabList>
-
-        <TabPanel sx={{ p: 0 }} value={FormType.BASE_DETAIL}>
-          <StudentBaseDetails />
-        </TabPanel>
-        <TabPanel sx={{ p: 0 }} value={FormType.ADDRESS}>
-          <StudentAddress />
-        </TabPanel>
+        {tabs.map(({ value, component }) => (
+          <TabPanel key={value} sx={{ p: 0 }} value={value}>
+            {component}
+          </TabPanel>
+        ))}
       </TabContext>
     </Card>
   )
