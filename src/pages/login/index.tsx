@@ -64,8 +64,10 @@ const LoginPage = () => {
   const router = useRouter()
 
   useEffect(() => {
-    if (sessionStorage.getItem(sessionStorageKeys.accessToken)) {
+    if (localStorage.getItem(sessionStorageKeys.accessToken)) {
       router.push('/')
+    } else {
+      setValues({ ...values, clcode: localStorage.getItem(sessionStorageKeys.clientCode) ?? '' })
     }
   }, [])
 
@@ -83,6 +85,7 @@ const LoginPage = () => {
           const res = response as any
           dispatch(setAvailablePermissionsData(response.permission))
           triggerToast('Login Successful', { variant: ToastVariants.SUCCESS })
+          localStorage.setItem(sessionStorageKeys.clientCode, res.data.clcode)
           sessionStorage.setItem(sessionStorageKeys.accessToken, res.data.authToken)
           sessionStorage.setItem(sessionStorageKeys.clientCode, res.data.clcode)
           router.push('/')

@@ -1,13 +1,13 @@
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Box, styled, TabProps } from '@mui/material'
-import React, { SyntheticEvent, useState } from 'react'
+import React, { SyntheticEvent, useEffect, useState } from 'react'
 
 import { AccountOutline } from '@mdiElements'
 import { Card, MuiTab } from '@muiElements'
 
 import StudentBaseDetails from './studentBaseDetails'
 import StudentAddress from './address'
-import { BookOutline, Cash, Cash100, GoogleMaps } from 'mdi-material-ui'
+import { BookOutline, Cash, GoogleMaps } from 'mdi-material-ui'
 import AddonCourseDetails from './addonCourseDetails'
 import FeesDetails from './feesDetails'
 
@@ -29,27 +29,65 @@ const TabName = styled('span')(({ theme }) => ({
   }
 }))
 
-const AdmissionForm = () => {
-  enum FormType {
-    BASE_DETAIL = 'base_details',
-    ADDON_COURSE = 'add_on_course',
-    ADDRESS = 'address',
-    FEES = 'fees'
-  }
+enum FormType {
+  BASE_DETAIL = 'base_details',
+  ADDON_COURSE = 'add_on_course',
+  ADDRESS = 'address',
+  FEES = 'fees'
+}
 
+const AdmissionForm = () => {
   const [value, setValue] = useState<FormType>(FormType.BASE_DETAIL)
   const handleChange = (_: SyntheticEvent, newValue: FormType) => setValue(newValue)
+  const [programId, setProgramId] = useState<string | undefined>()
+  const [application_id, setApplication] = useState<string | undefined>()
+
+  const handleAdmissionCreation = (admission_id: string) => {
+    setApplication(admission_id)
+  }
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const queryParams = new URLSearchParams(window.location.search)
+      setApplication(queryParams.get('id') ?? undefined)
+    }
+  }, [])
+
+  const updateProgramState = (program_id: string) => {
+    setProgramId(program_id ?? undefined)
+  }
 
   const tabs = [
     {
       value: FormType.BASE_DETAIL,
       label: 'Student Details',
       icon: <AccountOutline />,
-      component: <StudentBaseDetails />
+      component: (
+        <StudentBaseDetails
+          application_id={application_id}
+          onAdmissionCreation={handleAdmissionCreation}
+          updateProgramState={updateProgramState}
+        />
+      )
     },
-    { value: FormType.ADDON_COURSE, label: 'ADDON Courses', icon: <BookOutline />, component: <AddonCourseDetails /> },
-    { value: FormType.ADDRESS, label: 'Student Address', icon: <GoogleMaps />, component: <StudentAddress /> },
-    { value: FormType.FEES, label: 'Fees Details', icon: <Cash />, component: <FeesDetails /> }
+    {
+      value: FormType.ADDON_COURSE,
+      label: 'ADDON Courses',
+      icon: <BookOutline />,
+      component: <AddonCourseDetails application_id={application_id} programId={programId} />
+    },
+    {
+      value: FormType.ADDRESS,
+      label: 'Student Address',
+      icon: <GoogleMaps />,
+      component: <StudentAddress application_id={application_id} />
+    },
+    {
+      value: FormType.FEES,
+      label: 'Fees Details',
+      icon: <Cash />,
+      component: <FeesDetails application_id={application_id} />
+    }
   ]
 
   return (

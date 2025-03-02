@@ -1,6 +1,5 @@
 import { Fragment, ReactElement, SyntheticEvent, useState } from 'react'
 
-import { ChaarvyIcon } from 'src/utils/enums'
 import GetChaarvyIcons from 'src/utils/icons'
 import { Box, IconButton, Menu, MenuItem, Typography } from 'src/utils/muiElements'
 
@@ -43,7 +42,9 @@ const DropDownMenu = ({ dropDownMenuOptions }: { dropDownMenuOptions: DropDownMe
 
   return (
     <Fragment>
-      <IconButton onClick={handleDropdownOpen}>{GetChaarvyIcons({ iconName: ChaarvyIcon.DotsVertical })}</IconButton>
+      <IconButton onClick={handleDropdownOpen}>
+        <GetChaarvyIcons iconName='DotsVertical' />
+      </IconButton>
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}

@@ -18,6 +18,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography
 } from '@mui/material'
 import { DeleteOutline } from 'mdi-material-ui'
@@ -48,6 +49,7 @@ type ProgramBook = {
   segment_id: string
   second_language: string
   medium: string
+  quantity: string
 }
 
 const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps) => {
@@ -69,12 +71,18 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
     book_id: '',
     segment_id: '',
     second_language: '',
-    medium: ''
+    medium: '',
+    quantity: ''
   })
 
   const [fetchProgramBooksList, { data: booksDetails }] = useLazyGetProgramBooksListQuery()
 
-  const headers: TableHeaders[] = [{ label: 's#' }, { label: 'Book Name' }, { label: 'Actions', width: '100px' }]
+  const headers: TableHeaders[] = [
+    { label: 's#' },
+    { label: 'Book Name' },
+    { label: 'Quantity' },
+    { label: 'Actions', width: '100px' }
+  ]
   const { triggerToast } = useToast()
 
   useEffect(() => {
@@ -84,10 +92,20 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
   }, [selectedProgram])
 
   useEffect(() => {
-    if (bookDetail.medium !== '' && bookDetail.second_language !== '') {
+    if (programMediums && programSecondLanguages) {
+      setBookDetail({
+        ...bookDetail,
+        medium: programMediums[0]?.language_id,
+        second_language: programSecondLanguages[0]?.language_id
+      })
+    }
+  }, [programMediums, programSecondLanguages])
+
+  useEffect(() => {
+    if (bookDetail.medium && bookDetail.second_language) {
       fetchProgramBooksList(bookDetail)
     }
-  }, [bookDetail.second_language, bookDetail.medium])
+  }, [bookDetail?.second_language, bookDetail?.medium])
 
   const handleRemoveBookConfirmationModalClose = () => {
     setSelectedBook(undefined)
@@ -147,6 +165,9 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
       setBookDetail({ ...bookDetail, [prop]: event.target.value })
     }
 
+  const hadError = (): boolean => {
+    return Object.values(bookDetail).some(each => each === '')
+  }
   const handleSubmit = () => {
     const action = selectedBook ? updateProgramBook : createProgramBook
 
@@ -166,7 +187,11 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
   const BookModalFooter = () => {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <Button onClick={handleSubmit} variant='contained'>{`${selectedBook ? 'Edit' : 'Add'} Book`}</Button>
+        <Button
+          disabled={hadError()}
+          onClick={handleSubmit}
+          variant='contained'
+        >{`${selectedBook ? 'Edit' : 'Add'} Book`}</Button>
       </Box>
     )
   }
@@ -225,6 +250,9 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
                 {booksList?.map(each => <MenuItem value={each.book_id}>{each.book_name}</MenuItem>)}
               </Select>
             </FormControl>
+            <FormControl fullWidth>
+              <TextField required label='Quantity' value={selectedBook?.quantity} onChange={handleChange('quantity')} />
+            </FormControl>
           </Box>
         </>
       </ChaarvyModal>
@@ -264,9 +292,10 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
                   value={bookDetail.medium}
                   onChange={handleChange('medium')}
                 >
-                  {(programMediums ?? []).map(each => (
+                  {programMediums?.map(each => (
                     <FormControlLabel value={each.language_id} control={<Radio />} label={each.language_name} />
                   ))}
+                  {programMediums?.length == 0 && <Typography color='error'>No data Available</Typography>}
                 </RadioGroup>
               </FormControl>
             </Grid>
@@ -281,9 +310,10 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
                   value={bookDetail.second_language}
                   onChange={handleChange('second_language')}
                 >
-                  {(programSecondLanguages ?? []).map(each => (
+                  {programSecondLanguages?.map(each => (
                     <FormControlLabel value={each.language_id} control={<Radio />} label={each.language_name} />
                   ))}
+                  {programSecondLanguages?.length == 0 && <Typography color='error'>No data Available</Typography>}
                 </RadioGroup>
               </FormControl>
             </Grid>
@@ -306,6 +336,7 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
                           <TableRow>
                             <TableCell>{index + 1}</TableCell>
                             <TableCell>{eachBook.book_name}</TableCell>
+                            <TableCell>{eachBook.quantity}</TableCell>
                             <TableCell>
                               <IconButton onClick={() => handleKebabOptionClick(eachBook, 'Remove')}>
                                 <DeleteOutline color='error' />

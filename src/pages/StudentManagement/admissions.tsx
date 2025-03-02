@@ -16,9 +16,10 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { PagePath } from 'src/constants/pagePathConstants'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
-import TableTilteHeader, { TableTitleHeaderProps } from 'src/reusable_components/TableTilteHeader'
+import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import { useGetAdmissionsListQuery } from 'src/store/services/admisissionsService'
 import { statusColors } from 'src/utils/constants'
+import GetChaarvyIcons from 'src/utils/icons'
 
 const Admissions = () => {
   const router = useRouter()
@@ -26,6 +27,17 @@ const Admissions = () => {
 
   const handleCreateAdmissionClick = () => {
     router.push(PagePath.CREATE_ADMISSION)
+  }
+
+  const getKebabOptions = (application_id: string) => {
+    return [
+      {
+        id: 'edit application',
+        label: 'Edit Application',
+        icon: <GetChaarvyIcons iconName='GreasePencil' />,
+        onOptionClick: () => router.push(`${PagePath.CREATE_ADMISSION}?id=${application_id}`)
+      }
+    ]
   }
 
   return (
@@ -73,20 +85,10 @@ const Admissions = () => {
                           '& .MuiChip-label': { fontWeight: 500 }
                         }}
                       />
-                      {/* <Chip
-                        label={user.active === 1 ? 'Active' : 'Inactive'}
-                        color={user.active === 1 ? statusColors.active : statusColors.inactive}
-                        sx={{
-                          height: 24,
-                          fontSize: '0.75rem',
-                          textTransform: 'capitalize',
-                          '& .MuiChip-label': { fontWeight: 500 }
-                        }}
-                      /> */}
                     </TableCell>
 
                     <TableCell width='10px'>
-                      <DropDownMenu dropDownMenuOptions={[]} />
+                      <DropDownMenu dropDownMenuOptions={getKebabOptions(application_id)} />
                     </TableCell>
                   </TableRow>
                 ))}

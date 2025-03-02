@@ -3,6 +3,13 @@ export enum sessionStorageKeys {
   clientCode = 'clcode'
 }
 
+export enum ButtonColors {
+  ERROR = 'error',
+  SUCCESS = 'success',
+  PRIMARY = 'primary',
+  INFO = 'info'
+}
+
 export enum InputTypes {
   INPUT = 'input',
   SELECT = 'select',

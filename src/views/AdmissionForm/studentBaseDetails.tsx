@@ -11,7 +11,7 @@ import {
   styled,
   Typography
 } from '@mui/material'
-import React, { ChangeEvent, useState, FC } from 'react'
+import React, { ChangeEvent, useState, FC, useEffect } from 'react'
 import DatePicker from 'react-datepicker'
 
 import { Button, FormControl, Grid, InputLabel, TextField } from '@muiElements'
@@ -28,6 +28,7 @@ import {
 import {
   CreateStudentAdmissionRequest,
   useCreateUpdateAdmissionMutation,
+  useLazyGetAdmissionDetailQuery,
   useUploadStudentPhotoMutation
 } from 'src/store/services/admisissionsService'
 import {
@@ -38,7 +39,7 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { ErrorObject, InputFields } from 'src/lib/types'
 import { InputTypes, InputVariants } from 'src/lib/enums'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
-import { useSearchParams } from 'next/navigation'
+import { convertDateStringToDate } from 'src/utils/helpers'
 
 const ImgStyled = styled('img')(({ theme }) => ({
   width: 120,
@@ -54,7 +55,14 @@ const getLast10Years = (): number[] => {
   return Array.from({ length: 10 }, (_, i) => currentYear - i)
 }
 
+interface studentBaseDetailsProps {
+  application_id?: string
+  onAdmissionCreation: (application_id: string) => void
+  updateProgramState: (program_id: string) => void
+}
+
 const mandatoryFields = [
+  'admission_number',
   'contact_no_1',
   'medium',
   'program_id',
@@ -67,10 +75,8 @@ const mandatoryFields = [
   'gender'
 ]
 
-const StudentBaseDetails = () => {
-  const searchParams = useSearchParams()
+const StudentBaseDetails = ({ application_id, onAdmissionCreation, updateProgramState }: studentBaseDetailsProps) => {
   const [errors, setErrors] = useState<Array<ErrorObject>>([])
-  const [admissionId, setAdmissionId] = useState<string | null>(searchParams.get('id'))
   const [image, setImage] = useState<string | null>(null)
   const [studentImg, setStudentImg] = useState<File>()
   const [applicationDetails, setApplicationDetails] = useState<CreateStudentAdmissionRequest>()
@@ -90,22 +96,45 @@ const StudentBaseDetails = () => {
 
   const [createUpdateAdmission] = useCreateUpdateAdmissionMutation()
   const [uploadStudentPhoto] = useUploadStudentPhotoMutation()
+  const [fetchApplicationDetail] = useLazyGetAdmissionDetailQuery()
 
   const getDependentData = (program_id: string) => {
+    updateProgramState(program_id)
     fetchProgramMediums(program_id)
     fetchProgramSecondLanguages(program_id)
   }
+
+  useEffect(() => {
+    let apl_id
+    if (typeof window !== 'undefined') {
+      const queryParams = new URLSearchParams(window.location.search)
+      apl_id = queryParams.get('id') ?? application_id
+    }
+    if (apl_id) {
+      fetchApplicationDetail(apl_id).then(({ data: res }) => {
+        if (res?.program_id) {
+          getDependentData(res?.program_id)
+        }
+        setApplicationDetails(res)
+        setDob(convertDateStringToDate(res?.dob))
+        setImage(res?.photo_url ?? null)
+      })
+    }
+  }, [])
 
   const handleChange =
     (prop: keyof CreateStudentAdmissionRequest) =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
       const value = event?.target?.value ?? event
-      if (prop === 'program_id') getDependentData(value)
 
       const error = validateField(prop, value)
       setErrors(error ? [...errors, error] : errors.filter(({ errorkey }) => errorkey !== prop))
 
       setApplicationDetails(prev => ({ ...prev, [prop]: value }))
+
+      if (prop === 'program_id') {
+        getDependentData(value)
+      }
     }
 
   const validateField = (
@@ -138,7 +167,7 @@ const StudentBaseDetails = () => {
   const validateForm = (): boolean => {
     const newErrors: ErrorObject[] = []
 
-    if (!studentImg) newErrors.push({ errorkey: 'student_image', error: '* Required' })
+    if (!studentImg && !image) newErrors.push({ errorkey: 'student_image', error: '* Required' })
 
     mandatoryFields.forEach(field => {
       const key = field as keyof CreateStudentAdmissionRequest
@@ -156,12 +185,12 @@ const StudentBaseDetails = () => {
       return
     }
     if (applicationDetails) {
-      if (admissionId) applicationDetails.application_id = admissionId
+      if (application_id) applicationDetails.application_id = application_id
       createUpdateAdmission({ ...applicationDetails, dob: dob ? new Date(dob).toISOString().split('T')[0] : '' })
         .unwrap()
         .then(({ application_id, message }) => {
           if (application_id) {
-            sessionStorage.setItem('admission_id', application_id)
+            onAdmissionCreation(application_id)
             if (studentImg) {
               uploadStudentPhoto({
                 application_id: application_id,
@@ -176,6 +205,15 @@ const StudentBaseDetails = () => {
   }
 
   const fields: InputFields[] = [
+    {
+      type: InputTypes.INPUT,
+      variant: InputVariants.STRING,
+      id: `${TOP_LEVEL_ID}__admission-number`,
+      label: 'Admission number',
+      key: 'admission_number',
+      value: applicationDetails?.admission_number,
+      onChange: handleChange('admission_number')
+    },
     {
       type: InputTypes.INPUT,
       variant: InputVariants.STRING,
@@ -279,7 +317,7 @@ const StudentBaseDetails = () => {
       label: '',
       key: 'dob',
       value: dob,
-      customInput: <CustomDateElement label='Birth Date' />,
+      customInput: <CustomDateElement label='' />,
       onChange: (date: Date) => setDob(date)
     },
     {
@@ -398,6 +436,15 @@ const StudentBaseDetails = () => {
       menuOptions: (communities ?? []).map(each => {
         return { value: each.community_id, label: each.community_name }
       })
+    },
+    {
+      type: InputTypes.INPUT,
+      variant: InputVariants.STRING,
+      id: `${TOP_LEVEL_ID}__mother-aadhar-number`,
+      key: 'subcaste',
+      label: 'Sub Caste',
+      value: applicationDetails?.subcaste,
+      onChange: handleChange('subcaste')
     }
   ]
 
@@ -425,13 +472,15 @@ const StudentBaseDetails = () => {
         <Grid item xs={12} sm={6} key={id}>
           {type === InputTypes.INPUT ? (
             <>
+              <small>
+                {label} {mandatoryFields.includes(key) ? '*' : ''}
+              </small>
               <TextField
-                required={mandatoryFields.includes(key)}
                 fullWidth
                 id={id}
                 error={!!getHadError(key)}
-                label={label}
                 value={value}
+                defaultValue={value}
                 type={variant}
                 placeholder={placeholder ?? ''}
                 onChange={onChange}
@@ -441,8 +490,8 @@ const StudentBaseDetails = () => {
             </>
           ) : type === InputTypes.SELECT ? (
             <FormControl fullWidth required={mandatoryFields.includes(key)}>
-              <InputLabel>{label}</InputLabel>
-              <Select label={label} id={id} value={value ?? ''} onChange={onChange} error={!!getHadError(key)}>
+              <small>{label}</small>
+              <Select id={id} value={value ?? ''} onChange={onChange} error={!!getHadError(key)}>
                 {(menuOptions ?? []).map(({ value, label }) => (
                   <MenuItem key={value} value={value}>
                     {label}
@@ -476,6 +525,7 @@ const StudentBaseDetails = () => {
             </Grid>
           ) : type === InputTypes.DATE ? (
             <Grid item xs={12}>
+              <small>Date of Birth</small>
               <DatePicker
                 selected={dob}
                 required={mandatoryFields.includes(key)}
@@ -496,7 +546,6 @@ const StudentBaseDetails = () => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      // file.size < 307200 ||
       if (file.size > 512000) {
         triggerToast(`Given file size is ${file.size / 1024}kb `, { variant: ToastVariants.ERROR })
         setErrors([
@@ -539,15 +588,6 @@ const StudentBaseDetails = () => {
           </Grid>
           {renderInputFields()}
 
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label='subcaste'
-              id={`${TOP_LEVEL_ID}__sub-caste`}
-              value={applicationDetails?.subcaste}
-              onChange={handleChange('subcaste')}
-            />
-          </Grid>
           <Grid item xs={12}>
             <Button variant='contained' sx={{ marginRight: 3.5 }} onClick={handleSubmit}>
               Save Changes

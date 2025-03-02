@@ -24,6 +24,7 @@ export type AdmissionsListResponse = {
 }
 
 export type CreateStudentAdmissionRequest = {
+  admission_number?: string
   application_id?: string
   address?: Address
   community?: string
@@ -42,6 +43,7 @@ export type CreateStudentAdmissionRequest = {
   previous_school_or_college_name?: string
   previous_marks?: string
   program_id?: string
+  photo_url?: string
   religion?: string
   second_language?: string
   segment?: string
@@ -54,6 +56,11 @@ export type CreateStudentAdmissionRequest = {
   student_name?: string
 }
 
+export type StudentAddonCourseResponse = {
+  student_addon_program_id: string
+  program_addon_course_id: string
+}
+
 export type StudentPhotoRequest = {
   application_id: string
   photo: File
@@ -62,6 +69,11 @@ export type StudentPhotoRequest = {
 interface CreateApplicationResponse {
   application_id?: string
   message?: string
+}
+
+interface EnrollAddonCourseRequest {
+  application_id: string
+  addon_courses: string[]
 }
 const admissionServiceApi = api.injectEndpoints({
   endpoints: build => ({
@@ -74,11 +86,38 @@ const admissionServiceApi = api.injectEndpoints({
         }
       }
     }),
+    enrollAddonCourse: build.mutation<string, EnrollAddonCourseRequest>({
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admissions.enrollAddonCourse,
+          body
+        }
+      }
+    }),
     getAdmissionsList: build.query<AdmissionsListResponse[], void>({
       query: () => {
         return {
           method: HttpRequestMethods.GET,
           url: urlConstants.admissions.admissionsList
+        }
+      }
+    }),
+    getAdmissionDetail: build.query<CreateStudentAdmissionRequest, string>({
+      query: application_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.admissionDetail,
+          params: { application_id }
+        }
+      }
+    }),
+    getStudentEnrollendAddonCourses: build.query<StudentAddonCourseResponse[], string>({
+      query: application_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.studentEnrolledAddonCourse,
+          params: { application_id }
         }
       }
     }),
@@ -97,5 +136,11 @@ const admissionServiceApi = api.injectEndpoints({
   })
 })
 
-export const { useCreateUpdateAdmissionMutation, useUploadStudentPhotoMutation, useGetAdmissionsListQuery } =
-  admissionServiceApi
+export const {
+  useCreateUpdateAdmissionMutation,
+  useUploadStudentPhotoMutation,
+  useGetAdmissionsListQuery,
+  useLazyGetAdmissionDetailQuery,
+  useLazyGetStudentEnrollendAddonCoursesQuery,
+  useEnrollAddonCourseMutation
+} = admissionServiceApi

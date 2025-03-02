@@ -9,6 +9,10 @@ import { InputTypes, InputVariants } from 'src/lib/enums'
 import { useLazyGetDistrictsListQuery, useGetStateListQuery } from 'src/store/services/listServices'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 
+interface AddressProps {
+  application_id?: string
+}
+
 const TOP_LEVEL_ID = 'student-address'
 
 const mandatoryFields = [
@@ -22,8 +26,7 @@ const mandatoryFields = [
   'pincode'
 ]
 
-const StudentAddress = () => {
-  sessionStorage.getItem('admission_id')
+const StudentAddress = ({ application_id }: AddressProps) => {
   const [errors, setErrors] = useState<Array<ErrorObject>>([])
   const [studentAddress, setStudentAddress] = useState<Address>()
   const { triggerToast } = useToast()

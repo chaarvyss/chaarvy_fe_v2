@@ -1,15 +1,32 @@
 import { Box, Button, Checkbox, FormControlLabel, FormGroup, Typography } from '@mui/material'
 import { Grid } from '@muiElements'
 import React, { ChangeEvent, useEffect, useState } from 'react'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import {
+  useEnrollAddonCourseMutation,
+  useLazyGetStudentEnrollendAddonCoursesQuery
+} from 'src/store/services/admisissionsService'
 import { useLazyGetProgramAddonListQuery } from 'src/store/services/programServices'
 
-const AddonCourseDetails = () => {
-  const [fetchAddonCourse, { data: addonCourses }] = useLazyGetProgramAddonListQuery()
-  sessionStorage.getItem('admission_id')
-  const [selectedAddonCourses, setSelectedAddonCourses] = useState<Array<string>>([])
+interface AddonCourseDetailsProps {
+  application_id?: string
+  programId?: string
+}
 
+const AddonCourseDetails = ({ application_id, programId }: AddonCourseDetailsProps) => {
+  const [fetchAddonCourse, { data: addonCourses }] = useLazyGetProgramAddonListQuery()
+  const [selectedAddonCourses, setSelectedAddonCourses] = useState<Array<string>>([])
+  const [fetchStudentEnrolledAddonCourses] = useLazyGetStudentEnrollendAddonCoursesQuery()
+
+  const [enrollAddonCourse] = useEnrollAddonCourseMutation()
+
+  const { triggerToast } = useToast()
   useEffect(() => {
-    fetchAddonCourse('02421814-f4d1-43b1-8180-b50914b0c357')
+    programId && fetchAddonCourse(programId)
+    application_id &&
+      fetchStudentEnrolledAddonCourses(application_id).then(({ data: res }) =>
+        setSelectedAddonCourses(res?.map(each => each.program_addon_course_id) ?? [])
+      )
   }, [])
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -19,25 +36,38 @@ const AddonCourseDetails = () => {
   }
 
   const handleSubmit = () => {
-    alert('saving student addon courses')
+    if (application_id) {
+      enrollAddonCourse({
+        application_id,
+        addon_courses: selectedAddonCourses
+      })
+        .then(({ data: res }) => {
+          if (res) {
+            triggerToast(res, { variant: ToastVariants.SUCCESS })
+          }
+        })
+        .catch(e => {
+          triggerToast(e.data, { variant: ToastVariants.ERROR })
+        })
+    }
   }
 
   return (
     <Box padding='1rem'>
       <Typography variant='h6' marginBottom='1rem'>
-        Program Second languages
+        Add on Courses
       </Typography>
       <FormGroup>
-        <Grid container spacing={2}>
+        <Grid container spacing={2} justifyContent='center'>
           {addonCourses?.map(each => (
             <Grid item sm={12} md={6}>
               <FormControlLabel
                 key={each.addon_course_id}
                 control={
                   <Checkbox
-                    id={each.addon_course_id}
+                    id={each.program_addon_course_id}
                     onChange={handleChange}
-                    checked={selectedAddonCourses.includes(each.addon_course_id)}
+                    checked={selectedAddonCourses.includes(each.program_addon_course_id)}
                   />
                 }
                 label={each.addon_course_name}
@@ -51,7 +81,7 @@ const AddonCourseDetails = () => {
           Selected Program doesn't offer any ADD-ON Courses.
         </Typography>
       )}
-      <Box>
+      <Box justifyContent='center' display='flex'>
         <Button onClick={handleSubmit}>Save Changes</Button>
       </Box>
     </Box>

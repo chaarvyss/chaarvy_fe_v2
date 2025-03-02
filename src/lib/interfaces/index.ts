@@ -26,7 +26,7 @@ export interface LoginResponse {
 }
 
 export interface TableHeaderStatCardProps {
-  value: string
+  value: string | number
   title: string
   color: ThemeColor
   icon: ReactElement

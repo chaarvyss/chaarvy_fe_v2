@@ -5,6 +5,7 @@ import { Box, Grid, Card, Avatar, CardHeader, Typography, CardContent } from 'sr
 
 export interface TableTitleHeaderProps {
   buttonTitle?: string
+  buttonColor?: 'primary' | 'success' | 'error' | 'info'
   onButtonClick?: () => void
   isButtonDisabled?: boolean
   title: string
@@ -37,7 +38,14 @@ const renderStats = (statData: TableHeaderStatCardProps[]) => {
   ))
 }
 
-const TableTilteHeader = ({ title, stats, buttonTitle, onButtonClick, isButtonDisabled }: TableTitleHeaderProps) => {
+const TableTilteHeader = ({
+  title,
+  stats,
+  buttonTitle,
+  buttonColor,
+  onButtonClick,
+  isButtonDisabled
+}: TableTitleHeaderProps) => {
   return (
     <Card sx={{ mb: 2 }}>
       <CardHeader
@@ -51,7 +59,12 @@ const TableTilteHeader = ({ title, stats, buttonTitle, onButtonClick, isButtonDi
         }}
         action={
           buttonTitle && (
-            <Button variant='contained' disabled={isButtonDisabled} onClick={onButtonClick}>
+            <Button
+              color={buttonColor ?? 'primary'}
+              variant='contained'
+              disabled={isButtonDisabled}
+              onClick={onButtonClick}
+            >
               {buttonTitle}
             </Button>
           )
