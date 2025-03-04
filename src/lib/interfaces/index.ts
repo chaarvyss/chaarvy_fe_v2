@@ -46,3 +46,8 @@ export interface TableHeaders {
   label: string
   width?: string
 }
+
+export interface PaymentModes {
+  payment_mode_id: string
+  payment_mode: string
+}

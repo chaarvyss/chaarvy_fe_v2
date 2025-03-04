@@ -10,6 +10,7 @@ import StudentAddress from './address'
 import { BookOutline, Cash, GoogleMaps } from 'mdi-material-ui'
 import AddonCourseDetails from './addonCourseDetails'
 import FeesDetails from './feesDetails'
+import { useLazyGetAdmissionDetailQuery } from 'src/store/services/admisissionsService'
 
 const Tab = styled(MuiTab)<TabProps>(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
@@ -39,11 +40,13 @@ enum FormType {
 const AdmissionForm = () => {
   const [value, setValue] = useState<FormType>(FormType.BASE_DETAIL)
   const handleChange = (_: SyntheticEvent, newValue: FormType) => setValue(newValue)
-  const [programId, setProgramId] = useState<string | undefined>()
   const [application_id, setApplication] = useState<string | undefined>()
+
+  const [fetchStudentDetails, { data: studentDetail }] = useLazyGetAdmissionDetailQuery()
 
   const handleAdmissionCreation = (admission_id: string) => {
     setApplication(admission_id)
+    fetchStudentDetails(admission_id)
   }
 
   useEffect(() => {
@@ -53,28 +56,22 @@ const AdmissionForm = () => {
     }
   }, [])
 
-  const updateProgramState = (program_id: string) => {
-    setProgramId(program_id ?? undefined)
-  }
+  useEffect(() => {
+    if (application_id) fetchStudentDetails(application_id)
+  }, [application_id])
 
   const tabs = [
     {
       value: FormType.BASE_DETAIL,
       label: 'Student Details',
       icon: <AccountOutline />,
-      component: (
-        <StudentBaseDetails
-          application_id={application_id}
-          onAdmissionCreation={handleAdmissionCreation}
-          updateProgramState={updateProgramState}
-        />
-      )
+      component: <StudentBaseDetails application_id={application_id} onAdmissionCreation={handleAdmissionCreation} />
     },
     {
       value: FormType.ADDON_COURSE,
       label: 'ADDON Courses',
       icon: <BookOutline />,
-      component: <AddonCourseDetails application_id={application_id} programId={programId} />
+      component: <AddonCourseDetails application_id={application_id} programId={studentDetail?.program_id} />
     },
     {
       value: FormType.ADDRESS,
@@ -86,7 +83,7 @@ const AdmissionForm = () => {
       value: FormType.FEES,
       label: 'Fees Details',
       icon: <Cash />,
-      component: <FeesDetails application_id={application_id} />
+      component: <FeesDetails application_id={application_id} segment_id={studentDetail?.segment} />
     }
   ]
 

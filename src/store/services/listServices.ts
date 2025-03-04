@@ -1,5 +1,5 @@
 import { urlConstants } from 'src/constants/urlConstants'
-import { UsersListResponse } from 'src/lib/interfaces'
+import { PaymentModes, UsersListResponse } from 'src/lib/interfaces'
 import {
   AddOnCourse,
   BooksTypesResponse,
@@ -145,6 +145,14 @@ const listServicesApi = api.injectEndpoints({
           url: urlConstants.list.users
         }
       }
+    }),
+    getPaymentModesList: build.query<PaymentModes[], void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.paymentModes
+        }
+      }
     })
   })
 })
@@ -164,5 +172,6 @@ export const {
   useGetQualifiedExamsListQuery,
   useGetReligionsListQuery,
   useGetStateListQuery,
-  useLazyGetUsersListQuery
+  useLazyGetUsersListQuery,
+  useGetPaymentModesListQuery
 } = listServicesApi

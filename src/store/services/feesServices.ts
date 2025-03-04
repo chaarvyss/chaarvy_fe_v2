@@ -69,6 +69,44 @@ export interface StudentProgramFeesDetailsResponse {
   books: BookFeesDetail[]
 }
 
+export interface StudentPayableFeesRequest {
+  application_id: string
+  fees_details?: string
+  segment_id: string
+  payable_fees?: number
+}
+
+export interface PaymentDetailRequest {
+  segment_id?: string
+  application_id?: string
+  amount?: number
+  payment_mode?: string
+  transaction_id?: string
+}
+
+export interface StudentPayableFeesResponse {
+  student_payable_id: string
+  application_id: string
+  fees_details: StudentProgramFeesDetailsResponse
+  segment_id: string
+  payable_fees: number
+}
+
+export interface StudentPendingFeesDetails {
+  segment_id: string
+  segment_name: string
+  payable: number
+  paid: number
+}
+
+export interface StudentPendingFeesDetailsResponse {
+  admission_id: string
+  application_id: string
+  student_name: string
+  program: string
+  fees_details: StudentPendingFeesDetails[]
+}
+
 const feeServiceApi = api.injectEndpoints({
   endpoints: build => ({
     getProgramFeesDetails: build.query<ProgramFeesDetailsResponse, ProgramFeesRequest>({
@@ -109,6 +147,42 @@ const feeServiceApi = api.injectEndpoints({
           params: { application_id }
         }
       }
+    }),
+    createStudentPayableFees: build.mutation<string, StudentPayableFeesRequest>({
+      query: details => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.fees.createStudentPayableFees,
+          body: details
+        }
+      }
+    }),
+    getStudentPayableFeesDetails: build.query<StudentPayableFeesResponse, StudentPayableFeesRequest>({
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.fees.getStudentPayableFees,
+          params
+        }
+      }
+    }),
+    getStudentPendingFeesDetails: build.query<StudentPendingFeesDetailsResponse, string>({
+      query: admission_number => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.fees.getStudentPendingFees,
+          params: { admission_number }
+        }
+      }
+    }),
+    recordPaymentTransaction: build.mutation<string, PaymentDetailRequest>({
+      query: details => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.fees.recordPaymentTransaction,
+          body: details
+        }
+      }
     })
   })
 })
@@ -117,5 +191,9 @@ export const {
   useLazyGetProgramFeesDetailsQuery,
   useUpdateProgramFeesMutation,
   useCreateProgramFeesMutation,
-  useLazyGetStudentAdmissionFeesDetailsQuery
+  useLazyGetStudentAdmissionFeesDetailsQuery,
+  useCreateStudentPayableFeesMutation,
+  useLazyGetStudentPayableFeesDetailsQuery,
+  useLazyGetStudentPendingFeesDetailsQuery,
+  useRecordPaymentTransactionMutation
 } = feeServiceApi

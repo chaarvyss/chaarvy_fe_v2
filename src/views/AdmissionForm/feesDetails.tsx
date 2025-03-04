@@ -15,7 +15,8 @@ import { ButtonColors } from 'src/lib/enums'
 import TableTilteHeader, { TableTitleHeaderProps } from 'src/reusable_components/TableTilteHeader'
 import {
   StudentProgramFeesDetailsResponse,
-  useLazyGetStudentAdmissionFeesDetailsQuery
+  useLazyGetStudentAdmissionFeesDetailsQuery,
+  useLazyGetStudentPayableFeesDetailsQuery
 } from 'src/store/services/feesServices'
 import { ThemeColorEnum } from 'src/utils/enums'
 import GetChaarvyIcons from 'src/utils/icons'
@@ -24,16 +25,29 @@ import { Checkbox, FormControlLabel } from '@mui/material'
 
 interface FeesDetailsProps {
   application_id?: string
+  segment_id?: string
 }
 
-const FeesDetails = ({ application_id }: FeesDetailsProps) => {
+const FeesDetails = ({ application_id, segment_id }: FeesDetailsProps) => {
   const [studentFees, setStudentFees] = useState<StudentProgramFeesDetailsResponse>()
   const [showFeesFinalizeModal, setShowFeesFinalizeModal] = useState(false)
-  const [fetchStudentAdmissionDetails] = useLazyGetStudentAdmissionFeesDetailsQuery()
+  const [fetchStudentAdmissionFeesDetails] = useLazyGetStudentAdmissionFeesDetailsQuery()
+  const [fetchStudentPayableFees, { data: finalizedFees, reset }] = useLazyGetStudentPayableFeesDetailsQuery()
+
+  useEffect(() => {
+    if (application_id && segment_id) fetchStudentPayableFees({ application_id, segment_id })
+  }, [application_id, segment_id])
+
+  useEffect(() => {
+    if (finalizedFees) {
+      setShowFeesFinalizeModal(true)
+      setStudentFees(finalizedFees.fees_details)
+    }
+  }, [finalizedFees])
 
   useEffect(() => {
     application_id &&
-      fetchStudentAdmissionDetails(application_id).then(({ data: res }) => {
+      fetchStudentAdmissionFeesDetails(application_id).then(({ data: res }) => {
         setStudentFees(res)
       })
   }, [])
@@ -100,7 +114,7 @@ const FeesDetails = ({ application_id }: FeesDetailsProps) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value, type, checked } = event.target
     const [item, category] = id.split('--')
-
+    reset()
     setStudentFees(prevFees => {
       if (!prevFees) return prevFees
 
@@ -137,7 +151,9 @@ const FeesDetails = ({ application_id }: FeesDetailsProps) => {
     <>
       <PaymentFinaliseModal
         application_id={application_id}
+        segment_id={segment_id}
         feesDetails={studentFees}
+        finalizedFeesDetails={!!finalizedFees}
         isOpen={showFeesFinalizeModal}
         onClose={handlePaymentFinaliseModalClose}
       />

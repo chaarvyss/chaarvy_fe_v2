@@ -58,7 +58,6 @@ const getLast10Years = (): number[] => {
 interface studentBaseDetailsProps {
   application_id?: string
   onAdmissionCreation: (application_id: string) => void
-  updateProgramState: (program_id: string) => void
 }
 
 const mandatoryFields = [
@@ -75,7 +74,7 @@ const mandatoryFields = [
   'gender'
 ]
 
-const StudentBaseDetails = ({ application_id, onAdmissionCreation, updateProgramState }: studentBaseDetailsProps) => {
+const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBaseDetailsProps) => {
   const [errors, setErrors] = useState<Array<ErrorObject>>([])
   const [image, setImage] = useState<string | null>(null)
   const [studentImg, setStudentImg] = useState<File>()
@@ -99,7 +98,6 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, updateProgram
   const [fetchApplicationDetail] = useLazyGetAdmissionDetailQuery()
 
   const getDependentData = (program_id: string) => {
-    updateProgramState(program_id)
     fetchProgramMediums(program_id)
     fetchProgramSecondLanguages(program_id)
   }

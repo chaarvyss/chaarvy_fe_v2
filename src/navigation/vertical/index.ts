@@ -45,6 +45,10 @@ const navigation = (): VerticalNavItemsType => {
     {
       title: 'Admissions',
       path: '/StudentManagement/admissions'
+    },
+    {
+      title: 'Collect Payment',
+      path: '/StudentManagement/Payments/collectPayment'
     }
   ]
 }

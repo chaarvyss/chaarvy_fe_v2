@@ -1,18 +1,24 @@
 import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@muiElements'
 import React from 'react'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import { StudentProgramFeesDetailsResponse } from 'src/store/services/feesServices'
+import { StudentProgramFeesDetailsResponse, useCreateStudentPayableFeesMutation } from 'src/store/services/feesServices'
 import { GetSumOfNumbers } from 'src/utils/helpers'
 
 interface Props {
   feesDetails?: StudentProgramFeesDetailsResponse
+  finalizedFeesDetails: boolean
   isOpen: boolean
-  onClose: () => void
+  onClose: (isSuccess?: boolean) => void
   application_id?: string
+  segment_id?: string
 }
 
-const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose }: Props) => {
-  const fees = [
+const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose, application_id, segment_id }: Props) => {
+  const [createStudentPayableFees] = useCreateStudentPayableFeesMutation()
+  const { triggerToast } = useToast()
+
+  let fees = [
     {
       particular: 'Program Fees',
       totalFees: GetSumOfNumbers(feesDetails?.prg_fees?.map(each => each.fees) || []),
@@ -30,7 +36,7 @@ const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose }: Props) => {
     }
   ]
 
-  const consolidatedFees = fees.reduce(
+  let consolidatedFees = fees.reduce(
     (acc, { totalFees, discount }) => {
       acc.totalFees += totalFees
       acc.totalDiscount += discount
@@ -39,8 +45,34 @@ const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose }: Props) => {
     { totalFees: 0, totalDiscount: 0 }
   )
 
+  const handleSubmit = () => {
+    if (application_id && segment_id) {
+      createStudentPayableFees({
+        application_id,
+        fees_details: JSON.stringify(feesDetails),
+        payable_fees: consolidatedFees.totalFees - consolidatedFees.totalDiscount,
+        segment_id
+      })
+        .unwrap()
+        .then(res => {
+          triggerToast(res, { variant: ToastVariants.SUCCESS })
+          onClose(true)
+        })
+        .catch(e => {
+          triggerToast(e.data, { variant: ToastVariants.ERROR })
+        })
+    } else {
+      alert('no segment id')
+    }
+  }
+
   return (
-    <ChaarvyModal title='Fees Details Finalization' isOpen={isOpen} onClose={onClose} modalSize='col-12 col-md-8'>
+    <ChaarvyModal
+      title='Fees Details Finalization'
+      isOpen={isOpen}
+      onClose={() => onClose(false)}
+      modalSize='col-12 col-md-8'
+    >
       <TableContainer>
         <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
           <TableHead>
@@ -75,10 +107,12 @@ const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose }: Props) => {
           </TableBody>
         </Table>
         <Box display='flex' justifyContent='space-around' mt={5}>
-          <Button variant='outlined' color='error'>
+          <Button variant='outlined' color='error' onClick={() => onClose(false)}>
             Close
           </Button>
-          <Button variant='contained'>Submit</Button>
+          <Button onClick={handleSubmit} variant='contained'>
+            Submit
+          </Button>
         </Box>
       </TableContainer>
     </ChaarvyModal>

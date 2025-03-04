@@ -57,6 +57,7 @@ export type MenuOptions = {
 export type InputFields = {
   type: 'input' | 'select' | 'radio' | 'date'
   variant?: 'number' | 'string' | 'email'
+  isDisabled?: boolean
   id: string
   label: string
   key: string
