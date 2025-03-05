@@ -1,13 +1,16 @@
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Box, styled, TabProps } from '@mui/material'
-import React, { SyntheticEvent, useState } from 'react'
+import React, { SyntheticEvent, useEffect, useState } from 'react'
 
 import { AccountOutline } from '@mdiElements'
 import { Card, MuiTab } from '@muiElements'
 
 import StudentBaseDetails from './studentBaseDetails'
 import StudentAddress from './address'
-import { GoogleMaps } from 'mdi-material-ui'
+import { BookOutline, Cash, GoogleMaps } from 'mdi-material-ui'
+import AddonCourseDetails from './addonCourseDetails'
+import FeesDetails from './feesDetails'
+import { useLazyGetAdmissionDetailQuery } from 'src/store/services/admisissionsService'
 
 const Tab = styled(MuiTab)<TabProps>(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
@@ -27,61 +30,89 @@ const TabName = styled('span')(({ theme }) => ({
   }
 }))
 
+enum FormType {
+  BASE_DETAIL = 'base_details',
+  ADDON_COURSE = 'add_on_course',
+  ADDRESS = 'address',
+  FEES = 'fees'
+}
+
 const AdmissionForm = () => {
-  /*
-  Using stepper
-    form 1 -> base details and student photo
-    form 2 -> student address
-  */
+  const [value, setValue] = useState<FormType>(FormType.BASE_DETAIL)
+  const handleChange = (_: SyntheticEvent, newValue: FormType) => setValue(newValue)
+  const [application_id, setApplication] = useState<string | undefined>()
 
-  type FORMS = 'base_details' | 'address' | 'fees' | 'payment'
+  const [fetchStudentDetails, { data: studentDetail }] = useLazyGetAdmissionDetailQuery()
 
-  enum FormType {
-    BASE_DETAIL = 'base_details',
-    ADDRESS = 'address',
-    FEES = 'fees',
-    PAYMENT = 'payment'
+  const handleAdmissionCreation = (admission_id: string) => {
+    setApplication(admission_id)
+    fetchStudentDetails(admission_id)
   }
-  const [value, setValue] = useState<FORMS>(FormType.BASE_DETAIL)
 
-  const handleChange = (event: SyntheticEvent, newValue: FORMS) => {
-    setValue(newValue)
-  }
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const queryParams = new URLSearchParams(window.location.search)
+      setApplication(queryParams.get('id') ?? undefined)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (application_id) fetchStudentDetails(application_id)
+  }, [application_id])
+
+  const tabs = [
+    {
+      value: FormType.BASE_DETAIL,
+      label: 'Student Details',
+      icon: <AccountOutline />,
+      component: <StudentBaseDetails application_id={application_id} onAdmissionCreation={handleAdmissionCreation} />
+    },
+    {
+      value: FormType.ADDON_COURSE,
+      label: 'ADDON Courses',
+      icon: <BookOutline />,
+      component: <AddonCourseDetails application_id={application_id} programId={studentDetail?.program_id} />
+    },
+    {
+      value: FormType.ADDRESS,
+      label: 'Student Address',
+      icon: <GoogleMaps />,
+      component: <StudentAddress application_id={application_id} />
+    },
+    {
+      value: FormType.FEES,
+      label: 'Fees Details',
+      icon: <Cash />,
+      component: <FeesDetails application_id={application_id} segment_id={studentDetail?.segment} />
+    }
+  ]
 
   return (
     <Card>
       <TabContext value={value}>
         <TabList
           onChange={handleChange}
-          aria-label='account-settings tabs'
-          sx={{ borderBottom: theme => `1px solid ${theme.palette.divider}` }}
+          aria-label='admission-form tabs'
+          sx={{ borderBottom: t => `1px solid ${t.palette.divider}` }}
         >
-          <Tab
-            value={FormType.BASE_DETAIL}
-            label={
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <AccountOutline />
-                <TabName>Student Details</TabName>
-              </Box>
-            }
-          />
-          <Tab
-            value={FormType.ADDRESS}
-            label={
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <GoogleMaps />
-                <TabName>Student Address</TabName>
-              </Box>
-            }
-          />
+          {tabs.map(({ value, label, icon }) => (
+            <Tab
+              key={value}
+              value={value}
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  {icon}
+                  <TabName>{label}</TabName>
+                </Box>
+              }
+            />
+          ))}
         </TabList>
-
-        <TabPanel sx={{ p: 0 }} value={FormType.BASE_DETAIL}>
-          <StudentBaseDetails />
-        </TabPanel>
-        <TabPanel sx={{ p: 0 }} value={FormType.ADDRESS}>
-          <StudentAddress />
-        </TabPanel>
+        {tabs.map(({ value, component }) => (
+          <TabPanel key={value} sx={{ p: 0 }} value={value}>
+            {component}
+          </TabPanel>
+        ))}
       </TabContext>
     </Card>
   )

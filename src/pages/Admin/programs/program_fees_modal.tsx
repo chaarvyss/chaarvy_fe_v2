@@ -1,4 +1,4 @@
-import { SelectChangeEvent, TextField } from '@mui/material'
+import { FormControlLabel, FormLabel, Grid, Radio, RadioGroup, SelectChangeEvent, TextField } from '@mui/material'
 import { FormControl, Input, InputLabel, MenuItem, Select } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 
@@ -6,7 +6,7 @@ import { Check, Close } from '@mdiElements'
 import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
-import { Fees, Program } from 'src/lib/types'
+import { Fees, Program, ProgramSecondLanguagesResponse } from 'src/lib/types'
 import ChaarvyAccordian from 'src/reusable_components/chaarvyAccordian'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
@@ -21,6 +21,7 @@ import {
   useLazyGetFeesTypesListQuery,
   useLazyGetProgramsListQuery
 } from 'src/store/services/listServices'
+import { useLazyGetProgramMediumsListQuery } from 'src/store/services/programServices'
 
 interface ProgramFeesDetailsProps {
   selectedProgram?: Program
@@ -45,29 +46,45 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
   })
 
   const [createProgramFeeDetails, setCreateProgramFeesDetails] = useState<CreateProgramFeesRequest>({
-    program_id: '',
+    program_id: selectedProgram?.program_id ?? '',
     fees_type: '',
     fees: 0,
-    segment_id: ''
+    segment_id: '',
+    medium: ''
   })
 
   const [fetchProgramFeesDetails, { data: feesDetails }] = useLazyGetProgramFeesDetailsQuery()
   const [fetchProgramsList, { data: programsList }] = useLazyGetProgramsListQuery()
   const [fetchFeesTypesList, { data: feesTypesList }] = useLazyGetFeesTypesListQuery()
   const { data: segmentsList } = useGetSegmentsListQuery()
+  const [fetchProgramMediums, { data: programMediums }] = useLazyGetProgramMediumsListQuery()
 
   const [updateFeeApi] = useUpdateProgramFeesMutation()
   const [createFeesApi] = useCreateProgramFeesMutation()
 
   const onCreateProgramFeeClick = () => {
     setCreateProgramFeesDetails({ ...createProgramFeeDetails, program_id: selectedProgram?.program_id ?? '' })
-    fetchProgramsList(true)
+    fetchProgramsList(false)
     fetchFeesTypesList()
     setIsCreateProgramFeesModalOpen(true)
   }
+
   useEffect(() => {
-    fetchProgramFeesDetails({ program_id: selectedProgram?.program_id || '' })
+    fetchProgramMediums(selectedProgram?.program_id ?? '')
   }, [selectedProgram])
+
+  useEffect(() => {
+    setCreateProgramFeesDetails({ ...createProgramFeeDetails, medium: programMediums?.[0]?.language_id ?? '' })
+  }, [programMediums])
+
+  useEffect(() => {
+    if (createProgramFeeDetails.medium) {
+      fetchProgramFeesDetails({
+        program_id: createProgramFeeDetails.program_id,
+        medium: createProgramFeeDetails.medium
+      })
+    }
+  }, [createProgramFeeDetails.medium])
 
   const headers: TableHeaders[] = [
     { label: 's#' },
@@ -125,10 +142,11 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
 
   const handleAddProgramFeesModalClose = () => {
     setCreateProgramFeesDetails({
-      program_id: '',
+      ...createProgramFeeDetails,
       fees_type: '',
       fees: 0,
-      segment_id: ''
+      segment_id: '',
+      medium: createProgramFeeDetails.medium
     })
     setIsCreateProgramFeesModalOpen(false)
   }
@@ -240,6 +258,8 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
     )
   }
 
+  const program_medium_id = 'program_medium_id'
+
   return (
     <>
       <ChaarvyModal
@@ -247,8 +267,26 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
         onClose={onClose}
         title={`${selectedProgram?.program_name} Fees Details`}
         modalSize='col-12 col-md-6'
+        shouldRestrictCloseOnOuterClick
       >
         <>
+          <Grid item xs={12} lg={5}>
+            <FormControl>
+              <FormLabel id={program_medium_id}>Mediums</FormLabel>
+              <RadioGroup
+                row
+                aria-labelledby={program_medium_id}
+                name={program_medium_id}
+                id={program_medium_id}
+                value={createProgramFeeDetails.medium}
+                onChange={handleCreateProgramFeesDetalilsUpdate('medium')}
+              >
+                {(programMediums ?? []).map(each => (
+                  <FormControlLabel value={each.language_id} control={<Radio />} label={each.language_name} />
+                ))}
+              </RadioGroup>
+            </FormControl>
+          </Grid>
           {(feesDetails?.segments || []).map(eachSegment => (
             <ChaarvyAccordian title={eachSegment.segment_name}>
               {eachSegment?.fees.length > 0 ? (
@@ -315,5 +353,3 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
 }
 
 export default ProgramFeesModal
-
-// TODO: Need to remove add program fees button when fees types are matched with available fees types in fees response list

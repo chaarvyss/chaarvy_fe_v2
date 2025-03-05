@@ -26,7 +26,7 @@ export interface LoginResponse {
 }
 
 export interface TableHeaderStatCardProps {
-  value: string
+  value: string | number
   title: string
   color: ThemeColor
   icon: ReactElement
@@ -45,4 +45,9 @@ export interface UsersListResponse {
 export interface TableHeaders {
   label: string
   width?: string
+}
+
+export interface PaymentModes {
+  payment_mode_id: string
+  payment_mode: string
 }

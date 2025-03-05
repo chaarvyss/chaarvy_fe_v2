@@ -57,6 +57,7 @@ export type MenuOptions = {
 export type InputFields = {
   type: 'input' | 'select' | 'radio' | 'date'
   variant?: 'number' | 'string' | 'email'
+  isDisabled?: boolean
   id: string
   label: string
   key: string
@@ -68,6 +69,11 @@ export type InputFields = {
   menuOptions?: MenuOptions[]
   showYearDropdown?: boolean
   showMonthDropdown?: boolean
+}
+
+export type ErrorObject = {
+  errorkey: string
+  error: string
 }
 
 export type Language = { languages_id: string; languages_name: string; status: number }
@@ -84,6 +90,12 @@ export type ProgramAddonCourseResponse = {
   addon_course_id: string
   addon_coures_fees: number
   addon_course_name: string
+}
+
+export type ProgramBookRequest = {
+  program_id: string
+  medium: string
+  second_language: string
 }
 
 export type ProgramBooksDetails = {

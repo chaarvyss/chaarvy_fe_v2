@@ -1,5 +1,5 @@
 import { urlConstants } from 'src/constants/urlConstants'
-import { UsersListResponse } from 'src/lib/interfaces'
+import { PaymentModes, UsersListResponse } from 'src/lib/interfaces'
 import {
   AddOnCourse,
   BooksTypesResponse,
@@ -57,7 +57,7 @@ const listServicesApi = api.injectEndpoints({
       query: state_id => {
         return {
           method: HttpRequestMethods.GET,
-          url: urlConstants.list.communities,
+          url: urlConstants.list.districts,
           params: { state_id }
         }
       }
@@ -145,6 +145,14 @@ const listServicesApi = api.injectEndpoints({
           url: urlConstants.list.users
         }
       }
+    }),
+    getPaymentModesList: build.query<PaymentModes[], void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.paymentModes
+        }
+      }
     })
   })
 })
@@ -163,6 +171,7 @@ export const {
   useLazyGetProgramsListQuery,
   useGetQualifiedExamsListQuery,
   useGetReligionsListQuery,
-  useLazyGetStateListQuery,
-  useLazyGetUsersListQuery
+  useGetStateListQuery,
+  useLazyGetUsersListQuery,
+  useGetPaymentModesListQuery
 } = listServicesApi

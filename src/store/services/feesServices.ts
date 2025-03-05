@@ -9,6 +9,7 @@ import { CacheTag } from './cacheTag'
 interface ProgramFeesRequest {
   program_id: string
   segment_id?: string
+  medium: string
 }
 
 interface UpdateProgramFeesRequest {
@@ -21,12 +22,89 @@ export interface CreateProgramFeesRequest {
   fees_type: string
   fees: number
   segment_id: string
+  medium: string
 }
 
 export interface CreateProgramAddonCourseRequest {
   program_id: string
   addon_course_id: string
   fees: number
+}
+
+export interface GetProgramFeesRequest {
+  program_id: string
+  medium: string
+}
+
+interface ProgramFeesDetail {
+  program_fees_id: string
+  fees: number
+  fees_type: string
+  fees_type_id: string
+  segment_id: string
+  segment_name: string
+  discount: number
+}
+
+interface AddonCourseFeesDetail {
+  student_addon_program_id: string
+  program_addon_course_id: string
+  addon_coures_fees: number
+  addon_course_name: string
+  discount: number
+}
+
+interface BookFeesDetail {
+  program_book_id: string
+  book_name: string
+  isChecked: boolean
+  price: number
+  quantity: number
+  Total: number
+}
+
+export interface StudentProgramFeesDetailsResponse {
+  prg_fees: ProgramFeesDetail[]
+  addonCourse: AddonCourseFeesDetail[]
+  books: BookFeesDetail[]
+}
+
+export interface StudentPayableFeesRequest {
+  application_id: string
+  fees_details?: string
+  segment_id: string
+  payable_fees?: number
+}
+
+export interface PaymentDetailRequest {
+  segment_id?: string
+  application_id?: string
+  amount?: number
+  payment_mode?: string
+  transaction_id?: string
+}
+
+export interface StudentPayableFeesResponse {
+  student_payable_id: string
+  application_id: string
+  fees_details: StudentProgramFeesDetailsResponse
+  segment_id: string
+  payable_fees: number
+}
+
+export interface StudentPendingFeesDetails {
+  segment_id: string
+  segment_name: string
+  payable: number
+  paid: number
+}
+
+export interface StudentPendingFeesDetailsResponse {
+  admission_id: string
+  application_id: string
+  student_name: string
+  program: string
+  fees_details: StudentPendingFeesDetails[]
 }
 
 const feeServiceApi = api.injectEndpoints({
@@ -60,9 +138,62 @@ const feeServiceApi = api.injectEndpoints({
           body: details
         }
       }
+    }),
+    getStudentAdmissionFeesDetails: build.query<StudentProgramFeesDetailsResponse, string>({
+      query: application_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.fees.getStudentAdmissionFees,
+          params: { application_id }
+        }
+      }
+    }),
+    createStudentPayableFees: build.mutation<string, StudentPayableFeesRequest>({
+      query: details => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.fees.createStudentPayableFees,
+          body: details
+        }
+      }
+    }),
+    getStudentPayableFeesDetails: build.query<StudentPayableFeesResponse, StudentPayableFeesRequest>({
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.fees.getStudentPayableFees,
+          params
+        }
+      }
+    }),
+    getStudentPendingFeesDetails: build.query<StudentPendingFeesDetailsResponse, string>({
+      query: admission_number => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.fees.getStudentPendingFees,
+          params: { admission_number }
+        }
+      }
+    }),
+    recordPaymentTransaction: build.mutation<string, PaymentDetailRequest>({
+      query: details => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.fees.recordPaymentTransaction,
+          body: details
+        }
+      }
     })
   })
 })
 
-export const { useLazyGetProgramFeesDetailsQuery, useUpdateProgramFeesMutation, useCreateProgramFeesMutation } =
-  feeServiceApi
+export const {
+  useLazyGetProgramFeesDetailsQuery,
+  useUpdateProgramFeesMutation,
+  useCreateProgramFeesMutation,
+  useLazyGetStudentAdmissionFeesDetailsQuery,
+  useCreateStudentPayableFeesMutation,
+  useLazyGetStudentPayableFeesDetailsQuery,
+  useLazyGetStudentPendingFeesDetailsQuery,
+  useRecordPaymentTransactionMutation
+} = feeServiceApi

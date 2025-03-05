@@ -7,8 +7,9 @@ import { TableHeaderStatCardProps, UsersListResponse } from 'src/lib/interfaces'
 import DropDownMenu, { filterFalseAndInvalid } from 'src/reusable_components/dropDownMenu'
 import TableTilteHeader, { TableTitleHeaderProps } from 'src/reusable_components/TableTilteHeader'
 import { useLazyGetUsersListQuery } from 'src/store/services/listServices'
-import { ChaarvyIcon, ChaarvyIconFontSize, ThemeColorEnum } from 'src/utils/enums'
-import GetChaarvyIcons from 'src/utils/icons'
+import { statusColors } from 'src/utils/constants'
+import { ChaarvyIconFontSize, ThemeColorEnum } from 'src/utils/enums'
+import GetChaarvyIcons, { IconsEnum } from 'src/utils/icons'
 import {
   Avatar,
   Box,
@@ -24,35 +25,30 @@ import {
   Typography
 } from 'src/utils/muiElements'
 
-const statusColors = {
-  active: ThemeColorEnum.Success,
-  inactive: ThemeColorEnum.Warning
-}
-
 const salesData: TableHeaderStatCardProps[] = [
   {
     value: '245k',
     title: 'Sales',
     color: ThemeColorEnum.Primary,
-    icon: GetChaarvyIcons({ iconName: ChaarvyIcon.TrendingUp, fontSize: ChaarvyIconFontSize.lg })
+    icon: <GetChaarvyIcons iconName='AbTesting' fontSize={ChaarvyIconFontSize.lg} />
   },
   {
     value: '12.5k',
     title: 'Customers',
     color: ThemeColorEnum.Success,
-    icon: GetChaarvyIcons({ iconName: ChaarvyIcon.AbTesting })
+    icon: <GetChaarvyIcons iconName='Abacus' fontSize={ChaarvyIconFontSize.lg} />
   },
   {
     value: '1.54k',
     color: ThemeColorEnum.Warning,
     title: 'Products',
-    icon: GetChaarvyIcons({ iconName: ChaarvyIcon.CellphoneLink })
+    icon: <GetChaarvyIcons iconName='Abacus' fontSize={ChaarvyIconFontSize.lg} />
   },
   {
     value: '$88k',
     color: ThemeColorEnum.Info,
     title: 'Revenue',
-    icon: GetChaarvyIcons({ iconName: ChaarvyIcon.CurrencyUsd })
+    icon: <GetChaarvyIcons iconName='Abacus' fontSize={ChaarvyIconFontSize.lg} />
   }
 ]
 

@@ -28,7 +28,8 @@ export const urlConstants = {
     religions: `${interRoutePrefix.list}/religions`,
     segments: `${interRoutePrefix.list}/segments`,
     states: `${interRoutePrefix.list}/states`,
-    users: `${interRoutePrefix.list}/users`
+    users: `${interRoutePrefix.list}/users`,
+    paymentModes: `${interRoutePrefix.list}/payment-modes`
   },
   admin: {
     add: {
@@ -55,12 +56,22 @@ export const urlConstants = {
     }
   },
   admissions: {
-    createAdmission: `${interRoutePrefix.admisions}/create-update-admission`
+    createAdmission: `${interRoutePrefix.admisions}/create-update-admission`,
+    uploadStudentPhoto: `${interRoutePrefix.admisions}/upload-student-photo`,
+    admissionsList: `${interRoutePrefix.admisions}/admissions-list`,
+    admissionDetail: `${interRoutePrefix.admisions}/admission-details`,
+    studentEnrolledAddonCourse: `${interRoutePrefix.admisions}/student-enrolled-addon-courses`,
+    enrollAddonCourse: `${interRoutePrefix.admisions}/enroll-addon-courses`
   },
   fees: {
     getprogramFees: `${interRoutePrefix.fees}/program-fee-detail`,
     updateprogramFees: `${interRoutePrefix.fees}/update_program_fees`,
-    createProgramFees: `${interRoutePrefix.fees}/add-program-fees`
+    createProgramFees: `${interRoutePrefix.fees}/add-program-fees`,
+    getStudentAdmissionFees: `${interRoutePrefix.fees}/actual-overall-payable-fees`,
+    createStudentPayableFees: `${interRoutePrefix.fees}/add-student-payable-fees`,
+    getStudentPayableFees: `${interRoutePrefix.fees}/student-payable-fees`,
+    getStudentPendingFees: `${interRoutePrefix.fees}/student-pending-payment`,
+    recordPaymentTransaction: `${interRoutePrefix.fees}/record-transaction`
   },
   program: {
     programAddon: `${interRoutePrefix.program}/program-addon-course`,

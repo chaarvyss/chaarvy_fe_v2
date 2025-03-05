@@ -1,5 +1,10 @@
 import { urlConstants } from 'src/constants/urlConstants'
-import { ProgramAddonCourseResponse, ProgramBooksDetails, ProgramSecondLanguagesResponse } from 'src/lib/types'
+import {
+  ProgramAddonCourseResponse,
+  ProgramBookRequest,
+  ProgramBooksDetails,
+  ProgramSecondLanguagesResponse
+} from 'src/lib/types'
 
 import { HttpRequestMethods } from '..'
 
@@ -23,13 +28,13 @@ const programServicesApi = api.injectEndpoints({
         }
       }
     }),
-    getProgramBooksList: build.query<ProgramBooksDetails, string>({
+    getProgramBooksList: build.query<ProgramBooksDetails, ProgramBookRequest>({
       providesTags: [CacheTag.ListProgramBooks],
-      query: program_id => {
+      query: params => {
         return {
           method: HttpRequestMethods.GET,
           url: urlConstants.program.programBooks,
-          params: { program_id }
+          params
         }
       }
     }),
