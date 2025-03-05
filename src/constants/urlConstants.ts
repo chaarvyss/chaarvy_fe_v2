@@ -71,7 +71,8 @@ export const urlConstants = {
     createStudentPayableFees: `${interRoutePrefix.fees}/add-student-payable-fees`,
     getStudentPayableFees: `${interRoutePrefix.fees}/student-payable-fees`,
     getStudentPendingFees: `${interRoutePrefix.fees}/student-pending-payment`,
-    recordPaymentTransaction: `${interRoutePrefix.fees}/record-transaction`
+    recordPaymentTransaction: `${interRoutePrefix.fees}/record-transaction`,
+    paymentRecieptByPaymentId: `${interRoutePrefix.fees}/payment_reciept`
   },
   program: {
     programAddon: `${interRoutePrefix.program}/program-addon-course`,

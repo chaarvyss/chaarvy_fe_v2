@@ -1,3 +1,4 @@
+import { LoadingButton } from '@mui/lab'
 import { Grid, MenuItem, Select, SelectChangeEvent } from '@mui/material'
 import {
   Box,
@@ -17,10 +18,11 @@ import React, { ChangeEvent, useState } from 'react'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { InputTypes, InputVariants } from 'src/lib/enums'
 import { TableHeaders } from 'src/lib/interfaces'
-import { InputFields } from 'src/lib/types'
+import { ErrorObject, InputFields } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import {
   PaymentDetailRequest,
+  useLazyGetPaymentRecieptByPaymentIdQuery,
   useLazyGetStudentPendingFeesDetailsQuery,
   useRecordPaymentTransactionMutation
 } from 'src/store/services/feesServices'
@@ -43,10 +45,18 @@ const CollectPayment = () => {
   const [isCollectPaymentModalOpen, setIsCollectPaymentModalOpen] = useState<boolean>(false)
 
   const { triggerToast } = useToast()
-
+  const [errors, setErrors] = useState<ErrorObject[]>([])
   const [fetchStudentPendingFees, { data: response }] = useLazyGetStudentPendingFeesDetailsQuery()
   const { data: paymentModes } = useGetPaymentModesListQuery()
-  const [recordTransaction] = useRecordPaymentTransactionMutation()
+  const [recordTransaction, { isLoading }] = useRecordPaymentTransactionMutation()
+  const [fetchPaymentReciept] = useLazyGetPaymentRecieptByPaymentIdQuery()
+
+  const [mandatoryFields, setMandatoryFields] = useState<Array<string>>([
+    'segment_id',
+    'application_id',
+    'amount',
+    'payment_mode'
+  ])
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value)
@@ -73,8 +83,13 @@ const CollectPayment = () => {
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
       const value = event?.target?.value ?? event
 
-      if (prop == 'payment_mode' && value == '1') {
-        setPaymentDetails(prev => ({ ...prev, transaction_id: undefined }))
+      if (prop == 'payment_mode') {
+        if (value == '1') {
+          setPaymentDetails(prev => ({ ...prev, transaction_number: undefined }))
+          setMandatoryFields(prevItems => prevItems.filter(item => item !== 'transaction_number'))
+        } else {
+          setMandatoryFields([...mandatoryFields, 'transaction_number'])
+        }
       }
 
       setPaymentDetails(prev => ({ ...prev, [prop]: value }))
@@ -118,13 +133,15 @@ const CollectPayment = () => {
       id: `${TOP_LEVEL_ID}__txn-id`,
       label: 'Transaction Id',
       isDisabled: paymentDetails?.payment_mode == '1',
-      key: 'transaction_id',
-      value: paymentDetails?.transaction_id,
-      onChange: handlePaymentDetailChange('transaction_id')
+      key: 'transaction_number',
+      value: paymentDetails?.transaction_number,
+      onChange: handlePaymentDetailChange('transaction_number')
     }
   ]
 
-  const mandatoryFields = ['segment_id', 'application_id', 'amount', 'payment_mode']
+  const getHadError = (key: string) => {
+    return errors.find(each => each.errorkey === key)
+  }
 
   const renderInputFields = () =>
     fields.map(({ type, id, label, placeholder, isDisabled, onChange, key, caption, value, variant, menuOptions }) => (
@@ -138,6 +155,7 @@ const CollectPayment = () => {
               fullWidth
               id={id}
               value={value ?? ''}
+              error={!!getHadError(key)}
               defaultValue={value}
               type={variant}
               disabled={isDisabled}
@@ -145,9 +163,10 @@ const CollectPayment = () => {
               onChange={onChange}
             />
             {caption && <small>{caption}</small>}
+            {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
           </>
         ) : type === InputTypes.SELECT ? (
-          <FormControl fullWidth>
+          <FormControl fullWidth error={!!getHadError(key)}>
             <small>
               {label} {mandatoryFields.includes(key) ? '*' : ''}
             </small>
@@ -158,10 +177,33 @@ const CollectPayment = () => {
                 </MenuItem>
               ))}
             </Select>
+            {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
           </FormControl>
         ) : null}
       </Grid>
     ))
+
+  const validateField = (key: keyof PaymentDetailRequest, value: any): { errorkey: string; error: string } | null => {
+    if (!value) {
+      return { errorkey: key, error: '* Required' }
+    }
+    return null
+  }
+
+  const validateForm = (): boolean => {
+    const newErrors: ErrorObject[] = []
+
+    mandatoryFields.forEach(field => {
+      const key = field as keyof PaymentDetailRequest
+      const error = validateField(key, paymentDetails?.[key])
+      if (error) newErrors.push(error)
+    })
+
+    setErrors(newErrors)
+
+    console.log(newErrors, 'newErrors')
+    return newErrors.length === 0
+  }
 
   const handleCollectClick = () => {
     setIsCollectPaymentModalOpen(true)
@@ -169,12 +211,45 @@ const CollectPayment = () => {
   }
 
   const handleCollectSubmit = () => {
-    paymentDetails && recordTransaction(paymentDetails)
+    console.log(paymentDetails, 'paymentDetails')
+    if (!validateForm()) {
+      triggerToast('Please correct the errors before submitting.', { variant: ToastVariants.ERROR })
+      return
+    }
+    paymentDetails &&
+      recordTransaction(paymentDetails)
+        .unwrap()
+        .then(data => {
+          triggerToast(data.Message, { variants: ToastVariants.SUCCESS })
+          handleRecieptDownload(data.payment_id)
+          setPaymentDetails(undefined)
+          setIsCollectPaymentModalOpen(false)
+        })
+        .catch(e => triggerToast(e.data, { variants: ToastVariants.ERROR }))
   }
 
   const handleCollectPaymentModalClose = () => {
     setIsCollectPaymentModalOpen(false)
     setPaymentDetails(undefined)
+  }
+
+  const handleRecieptDownload = (payment_id: string) => {
+    fetchPaymentReciept(payment_id)
+      .unwrap()
+      .then(pdfBlob => {
+        if (!pdfBlob) return
+
+        const url = window.URL.createObjectURL(pdfBlob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `payment_receipt-${response?.student_name}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+      })
+      .catch(e => {
+        console.log(e)
+      })
   }
 
   const renderCollectPaymentModal = () => {
@@ -192,9 +267,9 @@ const CollectPayment = () => {
             <Button onClick={handleCollectPaymentModalClose} variant='outlined' color='error'>
               Cancel
             </Button>
-            <Button onClick={handleCollectSubmit} variant='contained' color='success'>
+            <LoadingButton loading={isLoading} onClick={handleCollectSubmit} variant='contained' color='success'>
               Submit
-            </Button>
+            </LoadingButton>
           </Box>
         </Box>
       </ChaarvyModal>
@@ -268,9 +343,9 @@ const CollectPayment = () => {
       )}
       {response && response?.fees_details?.length > 0 && (
         <Box display='flex' justifyContent='center' alignItems='center' padding='1rem'>
-          <Button variant='contained' onClick={handleCollectClick}>
+          <LoadingButton variant='contained' onClick={handleCollectClick}>
             Collect Fees
-          </Button>
+          </LoadingButton>
         </Box>
       )}
       {renderCollectPaymentModal()}
