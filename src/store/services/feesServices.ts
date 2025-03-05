@@ -81,7 +81,7 @@ export interface PaymentDetailRequest {
   application_id?: string
   amount?: number
   payment_mode?: string
-  transaction_id?: string
+  transaction_number?: string
 }
 
 export interface StudentPayableFeesResponse {
@@ -105,6 +105,11 @@ export interface StudentPendingFeesDetailsResponse {
   student_name: string
   program: string
   fees_details: StudentPendingFeesDetails[]
+}
+
+export interface RecordPaymentResponse {
+  Message: string
+  payment_id: string
 }
 
 const feeServiceApi = api.injectEndpoints({
@@ -167,6 +172,7 @@ const feeServiceApi = api.injectEndpoints({
       }
     }),
     getStudentPendingFeesDetails: build.query<StudentPendingFeesDetailsResponse, string>({
+      providesTags: [CacheTag.StudentPayment],
       query: admission_number => {
         return {
           method: HttpRequestMethods.GET,
@@ -175,12 +181,23 @@ const feeServiceApi = api.injectEndpoints({
         }
       }
     }),
-    recordPaymentTransaction: build.mutation<string, PaymentDetailRequest>({
+    recordPaymentTransaction: build.mutation<RecordPaymentResponse, PaymentDetailRequest>({
+      invalidatesTags: [CacheTag.StudentPayment],
       query: details => {
         return {
           method: HttpRequestMethods.POST,
           url: urlConstants.fees.recordPaymentTransaction,
           body: details
+        }
+      }
+    }),
+    getPaymentRecieptByPaymentId: build.query<Blob, string>({
+      query: payment_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.fees.paymentRecieptByPaymentId,
+          responseHandler: response => response.blob(),
+          params: { payment_id }
         }
       }
     })
@@ -195,5 +212,6 @@ export const {
   useCreateStudentPayableFeesMutation,
   useLazyGetStudentPayableFeesDetailsQuery,
   useLazyGetStudentPendingFeesDetailsQuery,
-  useRecordPaymentTransactionMutation
+  useRecordPaymentTransactionMutation,
+  useLazyGetPaymentRecieptByPaymentIdQuery
 } = feeServiceApi
