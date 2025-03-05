@@ -3,9 +3,9 @@ import { ThemeColor } from 'src/@core/layouts/types'
 import { TableHeaderStatCardProps } from 'src/lib/interfaces'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
-import { ChaarvyIcon, ChaarvyIconFontSize, ThemeColorEnum } from 'src/utils/enums'
+import { ChaarvyIconFontSize, ThemeColorEnum } from 'src/utils/enums'
 import GetChaarvyIcons from 'src/utils/icons'
-import { AccountOutline } from 'src/utils/mdiElements'
+
 import {
   Card,
   Chip,
@@ -53,25 +53,25 @@ const salesData: TableHeaderStatCardProps[] = [
     value: '245k',
     title: 'Sales',
     color: ThemeColorEnum.Primary,
-    icon: GetChaarvyIcons({ iconName: ChaarvyIcon.TrendingUp, fontSize: ChaarvyIconFontSize.lg })
+    icon: <GetChaarvyIcons iconName='AbTesting' fontSize={ChaarvyIconFontSize.lg} />
   },
   {
     value: '12.5k',
     title: 'Customers',
     color: ThemeColorEnum.Success,
-    icon: GetChaarvyIcons({ iconName: ChaarvyIcon.AbTesting })
+    icon: <GetChaarvyIcons iconName='AbTesting' fontSize={ChaarvyIconFontSize.lg} />
   },
   {
     value: '1.54k',
     color: ThemeColorEnum.Warning,
     title: 'Products',
-    icon: GetChaarvyIcons({ iconName: ChaarvyIcon.CellphoneLink })
+    icon: <GetChaarvyIcons iconName='AbTesting' fontSize={ChaarvyIconFontSize.lg} />
   },
   {
     value: '$88k',
     color: ThemeColorEnum.Info,
     title: 'Revenue',
-    icon: GetChaarvyIcons({ iconName: ChaarvyIcon.CurrencyUsd })
+    icon: <GetChaarvyIcons iconName='AbTesting' fontSize={ChaarvyIconFontSize.lg} />
   }
 ]
 const Roles = () => {
