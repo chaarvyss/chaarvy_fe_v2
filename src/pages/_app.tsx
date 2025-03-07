@@ -19,6 +19,9 @@ import '../../styles/globals.css'
 import store from 'src/store'
 import { ToastProvider } from 'src/@core/context/toastContext'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import OverlaySpinner from 'src/reusable_components/overlaySpinner'
+import { LoaderProvider } from 'src/@core/context/loaderContext'
+import { SideDrawerProvider } from 'src/@core/context/sideDrawerContext'
 
 type ExtendedAppProps = AppProps & {
   Component: NextPage
@@ -47,28 +50,34 @@ const App = (props: ExtendedAppProps) => {
 
   return (
     <ToastProvider>
-      <Provider store={store}>
-        <CacheProvider value={emotionCache}>
-          <Head>
-            <title>{`${themeConfig.templateName} - Material Design React Admin Template`}</title>
-            <meta
-              name='description'
-              content={`${themeConfig.templateName} – Material Design React Admin Dashboard Template – is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.`}
-            />
-            <meta name='keywords' content='Material Design, MUI, Admin Template, React Admin Template' />
-            <meta name='viewport' content='initial-scale=1, width=device-width' />
-          </Head>
+      <LoaderProvider>
+        <SideDrawerProvider>
+          <Provider store={store}>
+            <CacheProvider value={emotionCache}>
+              <Head>
+                <title>{`${themeConfig.templateName} - Material Design React Admin Template`}</title>
+                <meta
+                  name='description'
+                  content={`${themeConfig.templateName} – Material Design React Admin Dashboard Template – is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.`}
+                />
+                <meta name='keywords' content='Material Design, MUI, Admin Template, React Admin Template' />
+                <meta name='viewport' content='initial-scale=1, width=device-width' />
+              </Head>
 
-          <SettingsProvider>
-            <SettingsConsumer>
-              {({ settings }) => {
-                return <ThemeComponent settings={settings}>{getLayout(<Component {...pageProps} />)}</ThemeComponent>
-              }}
-            </SettingsConsumer>
-            <ToastContainer />
-          </SettingsProvider>
-        </CacheProvider>
-      </Provider>
+              <SettingsProvider>
+                <SettingsConsumer>
+                  {({ settings }) => {
+                    return (
+                      <ThemeComponent settings={settings}>{getLayout(<Component {...pageProps} />)}</ThemeComponent>
+                    )
+                  }}
+                </SettingsConsumer>
+                <ToastContainer />
+              </SettingsProvider>
+            </CacheProvider>
+          </Provider>
+        </SideDrawerProvider>
+      </LoaderProvider>
     </ToastProvider>
   )
 }

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
+import { useLoader } from 'src/@core/context/loaderContext'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
@@ -51,6 +52,7 @@ const LinkStyled = styled('a')(({ theme }) => ({
 
 const LoginPage = () => {
   const dispatch = useDispatch()
+  const { setLoading } = useLoader()
 
   // ** State
   const [values, setValues] = useState<LoginProps>({
@@ -71,9 +73,9 @@ const LoginPage = () => {
     }
   }, [])
 
-  const [login] = useLoginMutation()
+  const [login, { isLoading }] = useLoginMutation()
   const { triggerToast } = useToast()
-
+  setLoading(isLoading)
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const emptyKeys = getEmptyKeysList(values)

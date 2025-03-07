@@ -1,11 +1,12 @@
 import { TextField } from '@mui/material'
 import { ChangeEvent, useEffect, useState } from 'react'
 
-import { Box, Button, Grid, InputLabel } from '@muiElements'
+import { Box, Button, Grid } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Program } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { useCreateProgramMutation, useUpdateProgramMutation } from 'src/store/services/adminServices'
+import { useLoader } from 'src/@core/context/loaderContext'
 
 export interface CreateProgram {
   program_name: string
@@ -18,34 +19,26 @@ interface CreateUpdateProgramProps {
 }
 
 const CreateOrUpdateProgramModal = ({ selectedProgram, isOpen, onClose }: CreateUpdateProgramProps) => {
+  const { setLoading } = useLoader()
   const [programDetails, setProgramDetails] = useState<CreateProgram>({
     program_name: ''
   })
   const { triggerToast } = useToast()
-  const [CreateProgram] = useCreateProgramMutation()
-  const [updateProgram] = useUpdateProgramMutation()
+  const [CreateProgram, { isLoading: creatingProgram }] = useCreateProgramMutation()
+  const [updateProgram, { isLoading: updatingProgram }] = useUpdateProgramMutation()
 
   const handleSubmit = () => {
-    if (selectedProgram) {
-      updateProgram({ program_name: programDetails.program_name, id: selectedProgram.program_id })
-        .unwrap()
-        .then(response => {
-          triggerToast(response, { variant: ToastVariants.SUCCESS })
-          onClose()
-        })
-        .catch(e => {
-          triggerToast(e.data, { variant: ToastVariants.ERROR })
-        })
-    } else {
-      CreateProgram({ program_name: programDetails.program_name })
-        .unwrap()
-        .then(() => {
-          onClose()
-        })
-        .catch(e => {
-          triggerToast(e.data, { variant: ToastVariants.ERROR })
-        })
-    }
+    const action = selectedProgram
+      ? updateProgram({ program_name: programDetails.program_name, id: selectedProgram.program_id })
+      : CreateProgram({ program_name: programDetails.program_name })
+
+    action
+      .unwrap()
+      .then(response => {
+        selectedProgram && triggerToast(response, { variant: ToastVariants.SUCCESS })
+        onClose()
+      })
+      .catch(e => triggerToast(e.data, { variant: ToastVariants.ERROR }))
   }
 
   const createProgramFooter = () => {
@@ -72,6 +65,9 @@ const CreateOrUpdateProgramModal = ({ selectedProgram, isOpen, onClose }: Create
     setProgramDetails({ program_name: '' })
     onClose()
   }
+
+  const showLoader = creatingProgram || updatingProgram
+  setLoading(showLoader)
 
   return (
     <ChaarvyModal
