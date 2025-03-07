@@ -3,6 +3,7 @@ import { urlConstants } from 'src/constants/urlConstants'
 import { HttpRequestMethods } from '..'
 
 import api from './api'
+import { RenderAdmissionsFilters } from 'src/pages/StudentManagement/Admissions/filters'
 
 export type Address = {
   door_no?: string
@@ -17,6 +18,10 @@ export type Address = {
 
 export type AdmissionsListResponse = {
   application_id: string
+  admission_number: string
+  father_name: string
+  dob: string
+  city: string
   student_name: string
   contact_no_1: string
   program_name: string
@@ -95,11 +100,12 @@ const admissionServiceApi = api.injectEndpoints({
         }
       }
     }),
-    getAdmissionsList: build.query<AdmissionsListResponse[], void>({
-      query: () => {
+    getAdmissionsList: build.query<AdmissionsListResponse[], RenderAdmissionsFilters | undefined>({
+      query: params => {
         return {
           method: HttpRequestMethods.GET,
-          url: urlConstants.admissions.admissionsList
+          url: urlConstants.admissions.admissionsList,
+          params
         }
       }
     }),
@@ -139,7 +145,7 @@ const admissionServiceApi = api.injectEndpoints({
 export const {
   useCreateUpdateAdmissionMutation,
   useUploadStudentPhotoMutation,
-  useGetAdmissionsListQuery,
+  useLazyGetAdmissionsListQuery,
   useLazyGetAdmissionDetailQuery,
   useLazyGetStudentEnrollendAddonCoursesQuery,
   useEnrollAddonCourseMutation

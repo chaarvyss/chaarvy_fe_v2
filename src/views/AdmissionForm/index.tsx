@@ -97,6 +97,7 @@ const AdmissionForm = () => {
         >
           {tabs.map(({ value, label, icon }) => (
             <Tab
+              disabled={value !== FormType.BASE_DETAIL && !application_id}
               key={value}
               value={value}
               label={

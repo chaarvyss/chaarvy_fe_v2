@@ -40,6 +40,7 @@ import { ErrorObject, InputFields } from 'src/lib/types'
 import { InputTypes, InputVariants } from 'src/lib/enums'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
 import { convertDateStringToDate } from 'src/utils/helpers'
+import { useLoader } from 'src/@core/context/loaderContext'
 
 const ImgStyled = styled('img')(({ theme }) => ({
   width: 120,
@@ -82,6 +83,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
   const [dob, setDob] = useState<Date>()
 
   const { triggerToast } = useToast()
+  const { setLoading } = useLoader()
 
   const [fetchProgramMediums, { data: programMediums }] = useLazyGetProgramMediumsListQuery()
   const [fetchProgramSecondLanguages, { data: programSecondLanguages }] = useLazyGetProgramSecondLanguagesListQuery()
@@ -95,12 +97,16 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
 
   const [createUpdateAdmission] = useCreateUpdateAdmissionMutation()
   const [uploadStudentPhoto] = useUploadStudentPhotoMutation()
-  const [fetchApplicationDetail] = useLazyGetAdmissionDetailQuery()
+  const [fetchApplicationDetail, { isLoading: isApplicationLoading }] = useLazyGetAdmissionDetailQuery()
 
   const getDependentData = (program_id: string) => {
     fetchProgramMediums(program_id)
     fetchProgramSecondLanguages(program_id)
   }
+
+  const showLoader = isApplicationLoading
+
+  setLoading(showLoader)
 
   useEffect(() => {
     let apl_id

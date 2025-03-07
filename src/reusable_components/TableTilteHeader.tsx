@@ -1,6 +1,7 @@
-import { Button } from '@mui/material'
+import { Button, IconButton, Tooltip } from '@mui/material'
 
 import { TableHeaderStatCardProps } from 'src/lib/interfaces'
+import GetChaarvyIcons from 'src/utils/icons'
 import { Box, Grid, Card, Avatar, CardHeader, Typography, CardContent } from 'src/utils/muiElements'
 
 export interface TableTitleHeaderProps {
@@ -10,6 +11,8 @@ export interface TableTitleHeaderProps {
   isButtonDisabled?: boolean
   title: string
   stats?: TableHeaderStatCardProps[]
+  showFilterIcon?: boolean
+  handleFilterButtonClick?: () => void
 }
 
 const renderStats = (statData: TableHeaderStatCardProps[]) => {
@@ -44,7 +47,9 @@ const TableTilteHeader = ({
   buttonTitle,
   buttonColor,
   onButtonClick,
-  isButtonDisabled
+  isButtonDisabled,
+  showFilterIcon,
+  handleFilterButtonClick
 }: TableTitleHeaderProps) => {
   return (
     <Card sx={{ mb: 2 }}>
@@ -58,16 +63,25 @@ const TableTilteHeader = ({
           }
         }}
         action={
-          buttonTitle && (
-            <Button
-              color={buttonColor ?? 'primary'}
-              variant='contained'
-              disabled={isButtonDisabled}
-              onClick={onButtonClick}
-            >
-              {buttonTitle}
-            </Button>
-          )
+          <>
+            {buttonTitle && (
+              <Button
+                color={buttonColor ?? 'primary'}
+                variant='contained'
+                disabled={isButtonDisabled}
+                onClick={onButtonClick}
+              >
+                {buttonTitle}
+              </Button>
+            )}
+            {showFilterIcon && (
+              <Tooltip title='Filter' placement='top'>
+                <IconButton onClick={handleFilterButtonClick}>
+                  <GetChaarvyIcons iconName='Filter' />
+                </IconButton>
+              </Tooltip>
+            )}
+          </>
         }
       />
       {stats && (

@@ -25,6 +25,7 @@ import { DeleteOutline } from 'mdi-material-ui'
 import React, { useEffect, useState } from 'react'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import { InputVariants } from 'src/lib/enums'
 import { TableHeaders } from 'src/lib/interfaces'
 import { Books, Program } from 'src/lib/types'
 import ChaarvyAccordian from 'src/reusable_components/chaarvyAccordian'
@@ -49,7 +50,7 @@ type ProgramBook = {
   segment_id: string
   second_language: string
   medium: string
-  quantity: string
+  quantity: number
 }
 
 const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps) => {
@@ -72,7 +73,7 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
     segment_id: '',
     second_language: '',
     medium: '',
-    quantity: ''
+    quantity: 0
   })
 
   const [fetchProgramBooksList, { data: booksDetails }] = useLazyGetProgramBooksListQuery()
@@ -166,7 +167,7 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
     }
 
   const hadError = (): boolean => {
-    return Object.values(bookDetail).some(each => each === '')
+    return Object.values(bookDetail).some(each => each === '' || each === 0)
   }
   const handleSubmit = () => {
     const action = selectedBook ? updateProgramBook : createProgramBook
@@ -230,7 +231,7 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
                 labelId='segment'
                 id='segment'
                 disabled={!!selectedBook}
-                value={selectedBook?.segment_id}
+                value={bookDetail?.segment_id}
                 label='Segment'
                 onChange={handleChange('segment_id')}
               >
@@ -243,7 +244,7 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
                 labelId='book_id'
                 id='book'
                 disabled={!!selectedBook}
-                value={selectedBook?.book_id}
+                value={bookDetail?.book_id}
                 label='Segment'
                 onChange={handleChange('book_id')}
               >
@@ -251,7 +252,13 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
               </Select>
             </FormControl>
             <FormControl fullWidth>
-              <TextField required label='Quantity' value={selectedBook?.quantity} onChange={handleChange('quantity')} />
+              <TextField
+                type={InputVariants.NUMBER}
+                required
+                label='Quantity'
+                value={selectedBook?.quantity}
+                onChange={handleChange('quantity')}
+              />
             </FormControl>
           </Box>
         </>
@@ -259,8 +266,8 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
     )
   }
 
-  const handleOnAddBookBtnClick = () => {
-    setBookDetail({ ...bookDetail, program_id: selectedProgram?.program_id ?? '' })
+  const handleOnAddBookBtnClick = (segment_id?: string) => {
+    setBookDetail({ ...bookDetail, program_id: selectedProgram?.program_id ?? '', segment_id: segment_id ?? '' })
     setIsBookModalOpen(true)
   }
 
@@ -347,11 +354,11 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
                       </TableBody>
                     </Table>
                   </TableContainer>
-                  <Button onClick={handleOnAddBookBtnClick}>Add Book</Button>
+                  <Button onClick={() => handleOnAddBookBtnClick(eachSegment?.segment_id)}>Add Book</Button>
                 </>
               ) : (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  <Button onClick={handleOnAddBookBtnClick}>Add Book</Button>
+                  <Button onClick={() => handleOnAddBookBtnClick()}>Add Book</Button>
                 </Box>
               )}
             </ChaarvyAccordian>
@@ -365,7 +372,7 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
 
           {showAddProgramBookButton() && (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <Button onClick={handleOnAddBookBtnClick}>Add Book</Button>
+              <Button onClick={() => handleOnAddBookBtnClick()}>Add Book</Button>
             </Box>
           )}
         </>

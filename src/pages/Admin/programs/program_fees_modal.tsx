@@ -1,4 +1,13 @@
-import { FormControlLabel, FormLabel, Grid, Radio, RadioGroup, SelectChangeEvent, TextField } from '@mui/material'
+import {
+  FormControlLabel,
+  FormLabel,
+  Grid,
+  Radio,
+  RadioGroup,
+  SelectChangeEvent,
+  TextField,
+  Typography
+} from '@mui/material'
 import { FormControl, Input, InputLabel, MenuItem, Select } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 
@@ -62,8 +71,12 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
   const [updateFeeApi] = useUpdateProgramFeesMutation()
   const [createFeesApi] = useCreateProgramFeesMutation()
 
-  const onCreateProgramFeeClick = () => {
-    setCreateProgramFeesDetails({ ...createProgramFeeDetails, program_id: selectedProgram?.program_id ?? '' })
+  const onCreateProgramFeeClick = (segment_id?: string) => {
+    setCreateProgramFeesDetails({
+      ...createProgramFeeDetails,
+      program_id: selectedProgram?.program_id ?? '',
+      segment_id: segment_id ?? ''
+    })
     fetchProgramsList(false)
     fetchFeesTypesList()
     setIsCreateProgramFeesModalOpen(true)
@@ -285,6 +298,11 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
                   <FormControlLabel value={each.language_id} control={<Radio />} label={each.language_name} />
                 ))}
               </RadioGroup>
+              {programMediums?.length == 0 && (
+                <Typography variant='caption' color='error'>
+                  No Data Available
+                </Typography>
+              )}
             </FormControl>
           </Grid>
           {(feesDetails?.segments || []).map(eachSegment => (
@@ -331,18 +349,18 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
                       </TableBody>
                     </Table>
                   </TableContainer>
-                  <Button onClick={onCreateProgramFeeClick}>Add Fees Type</Button>
+                  <Button onClick={() => onCreateProgramFeeClick(eachSegment?.segment_id)}>Add Fees Type</Button>
                 </>
               ) : (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  <Button onClick={onCreateProgramFeeClick}>Add Fees Details</Button>
+                  <Button onClick={() => onCreateProgramFeeClick()}>Add Fees Details</Button>
                 </Box>
               )}
             </ChaarvyAccordian>
           ))}
           {showAddProgramFeesButton() && (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <Button onClick={onCreateProgramFeeClick}>Add Fees Details</Button>
+              <Button onClick={() => onCreateProgramFeeClick()}>Add Fees Details</Button>
             </Box>
           )}
         </>
