@@ -10,6 +10,17 @@ interface ProgramSegment {
   program_segment_id: string
 }
 
+export interface CollegeDetailResponse {
+  id?: string
+  college_name?: string
+  college_code?: string
+  campus_name?: string
+  college_logo?: string
+  college_header?: string
+  college_watermark?: string
+  contact_numbers?: string
+}
+
 const viewServiceApi = api.injectEndpoints({
   endpoints: build => ({
     getProgramSegmentDetails: build.query<ProgramSegment[], string>({
@@ -21,9 +32,17 @@ const viewServiceApi = api.injectEndpoints({
           params: { program_id }
         }
       }
+    }),
+    getCollegeDetails: build.query<CollegeDetailResponse, void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.view.myDetails
+        }
+      }
     })
   }),
   overrideExisting: true
 })
 
-export const { useLazyGetProgramSegmentDetailsQuery } = viewServiceApi
+export const { useLazyGetProgramSegmentDetailsQuery, useLazyGetCollegeDetailsQuery } = viewServiceApi

@@ -6,10 +6,6 @@ import ArrowUp from 'mdi-material-ui/ArrowUp'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-// ** MUI Imports
-
-// ** Icons Imports
-
 // ** Theme Config Import
 import ScrollToTop from 'src/@core/components/scroll-to-top'
 import { LayoutProps } from 'src/@core/layouts/types'

@@ -29,7 +29,8 @@ export const urlConstants = {
     segments: `${interRoutePrefix.list}/segments`,
     states: `${interRoutePrefix.list}/states`,
     users: `${interRoutePrefix.list}/users`,
-    paymentModes: `${interRoutePrefix.list}/payment-modes`
+    paymentModes: `${interRoutePrefix.list}/payment-modes`,
+    studentPaymentsList: `${interRoutePrefix.list}/student-payments`
   },
   admin: {
     add: {
@@ -60,6 +61,8 @@ export const urlConstants = {
     uploadStudentPhoto: `${interRoutePrefix.admisions}/upload-student-photo`,
     admissionsList: `${interRoutePrefix.admisions}/admissions-list`,
     admissionDetail: `${interRoutePrefix.admisions}/admission-details`,
+    studentAddress: `${interRoutePrefix.admisions}/student-address`,
+    createStudentAddress: `${interRoutePrefix.admisions}/create-update-student-address`,
     studentEnrolledAddonCourse: `${interRoutePrefix.admisions}/student-enrolled-addon-courses`,
     enrollAddonCourse: `${interRoutePrefix.admisions}/enroll-addon-courses`
   },
@@ -83,6 +86,7 @@ export const urlConstants = {
     updateProgramMediums: `${interRoutePrefix.program}/update-program-mediums`
   },
   view: {
-    programSegments: `${interRoutePrefix.view}/program-segment`
+    programSegments: `${interRoutePrefix.view}/program-segment`,
+    myDetails: `${interRoutePrefix.view}/my-details`
   }
 }

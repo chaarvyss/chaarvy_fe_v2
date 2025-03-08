@@ -12,18 +12,44 @@ export const ChaarvyIcon = Object.freeze(Object.fromEntries(iconNames.map(name =
 // Step 3: Map Enum values to actual icon components
 const IconsEnum: Record<keyof typeof ChaarvyIcon, React.ComponentType<SvgIconProps>> = MdiIcons
 
-interface GetChaarvyIconsProps {
+type fontSize = '1.25rem' | '1.5rem' | '1.75rem'
+
+export interface GetChaarvyIconsProps {
   iconName: keyof typeof ChaarvyIcon
-  fontSize?: string
+  fontSize?: fontSize
+  color?: string
 }
 
-const GetChaarvyIcons = ({ iconName, fontSize }: GetChaarvyIconsProps) => {
+const GetChaarvyIcons = ({ iconName, fontSize, color }: GetChaarvyIconsProps) => {
   const IconTag = IconsEnum[iconName]
 
-  if (!IconTag) return null // Handle missing icons gracefully
+  if (!IconTag) return null
 
-  return <IconTag sx={{ fontSize: fontSize ?? '1.75rem' }} />
+  const allowedColors = [
+    'inherit',
+    'primary',
+    'secondary',
+    'action',
+    'disabled',
+    'error',
+    'info',
+    'success',
+    'warning'
+  ] as const
+
+  const isDefaultColor = allowedColors.includes(color as any)
+
+  return (
+    <IconTag
+      sx={{
+        fontSize: fontSize ?? '1.75rem',
+        ...(isDefaultColor ? {} : { color })
+      }}
+      color={isDefaultColor ? (color as any) : undefined}
+    />
+  )
 }
 
 export default GetChaarvyIcons
+
 export { IconsEnum }

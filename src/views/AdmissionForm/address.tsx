@@ -1,9 +1,13 @@
 import { CardContent, MenuItem, Select, SelectChangeEvent } from '@mui/material'
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 
-import { Button, FormControl, Grid, InputLabel, TextField } from '@muiElements'
+import { Button, FormControl, Grid, TextField } from '@muiElements'
 
-import { Address } from 'src/store/services/admisissionsService'
+import {
+  Address,
+  useCreateStudentAddressMutation,
+  useGetStudentAddressQuery
+} from 'src/store/services/admisissionsService'
 import { ErrorObject, InputFields } from 'src/lib/types'
 import { InputTypes, InputVariants } from 'src/lib/enums'
 import { useLazyGetDistrictsListQuery, useGetStateListQuery } from 'src/store/services/listServices'
@@ -33,6 +37,17 @@ const StudentAddress = ({ application_id }: AddressProps) => {
   const { data: statesList } = useGetStateListQuery()
   const [fetchDistrictsList, { data: districtsList }] = useLazyGetDistrictsListQuery()
 
+  const [createUpdateAddress] = useCreateStudentAddressMutation()
+
+  const { data: address } = useGetStudentAddressQuery(application_id ?? '')
+
+  useEffect(() => {
+    setStudentAddress(address ?? undefined)
+    if (address?.state) {
+      fetchDistrictsList(address.state)
+    }
+  }, [address])
+
   const validateField = (key: keyof Address, value: any): { errorkey: string; error: string } | null => {
     if (!value) {
       return { errorkey: key, error: '* Required' }
@@ -40,7 +55,7 @@ const StudentAddress = ({ application_id }: AddressProps) => {
 
     switch (key) {
       case 'pincode':
-        return /^[6-9]\d{5}$/.test(value) ? null : { errorkey: key, error: 'Invalid PINCODE number.' }
+        return /^[0-9]\d{5}$/.test(value) ? null : { errorkey: key, error: 'Invalid PINCODE number.' }
       default:
         return null
     }
@@ -157,13 +172,14 @@ const StudentAddress = ({ application_id }: AddressProps) => {
       <Grid item xs={12} sm={6} key={id}>
         {type === InputTypes.INPUT ? (
           <>
+            <small>
+              {label} <span style={{ color: 'red' }}>{mandatoryFields.includes(key) ? '*' : ''}</span>
+            </small>
             <TextField
-              required={mandatoryFields.includes(key)}
               fullWidth
               id={id}
               type={variant}
               error={!!getHadError(key)}
-              label={label}
               value={value}
               placeholder={placeholder ?? ''}
               onChange={onChange}
@@ -173,8 +189,10 @@ const StudentAddress = ({ application_id }: AddressProps) => {
           </>
         ) : type === InputTypes.SELECT ? (
           <FormControl fullWidth required={mandatoryFields.includes(key)}>
-            <InputLabel>{label}</InputLabel>
-            <Select label={label} id={id} value={value ?? ''} onChange={onChange} error={!!getHadError(key)}>
+            <small>
+              {label} <span style={{ color: 'red' }}>{mandatoryFields.includes(key) ? '*' : ''}</span>
+            </small>
+            <Select id={id} value={value ?? ''} onChange={onChange} error={!!getHadError(key)}>
               {(menuOptions ?? []).map(({ value, label }) => (
                 <MenuItem key={value} value={value}>
                   {label}
@@ -192,17 +210,14 @@ const StudentAddress = ({ application_id }: AddressProps) => {
       triggerToast('Please correct the errors before submitting.', { variant: ToastVariants.ERROR })
       return
     }
-    alert('ready to create address')
-    // if (applicationDetails) {
-    //   if (admissionId) applicationDetails.application_id = admissionId
-    //   createUpdateAdmission(applicationDetails)
-    //     .unwrap()
-    //     .then(res => {
-    //       res.application_id && sessionStorage.setItem('admission_id', res.application_id)
-    //       triggerToast(res.message ?? 'New application created', { variant: ToastVariants.SUCCESS })
-    //     })
-    //     .catch(res => triggerToast(res.data, { variant: ToastVariants.ERROR }))
-    // }
+    if (studentAddress) {
+      createUpdateAddress({ ...studentAddress, application_id })
+        .unwrap()
+        .then(res => {
+          triggerToast(res, { variant: ToastVariants.SUCCESS })
+        })
+        .catch(res => triggerToast(res.data, { variant: ToastVariants.ERROR }))
+    }
   }
 
   return (

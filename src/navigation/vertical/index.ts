@@ -7,31 +7,41 @@ const navigation = (): VerticalNavItemsType => {
   return [
     {
       title: 'Dashboard',
-      path: '/'
-      // icon:HomeOutline,
+      path: '/',
+      icon: 'ViewDashboard'
     },
     {
       sectionTitle: 'Admin'
     },
-    {
-      title: 'Users',
-      path: '/Admin/users'
-    },
+    // {
+    //   title: 'Users',
+    //   path: '/Admin/users',
+    //   icon: 'AccountGroup'
+    // },
     {
       title: 'Fees types',
-      path: '/Admin/feesTypes'
+      path: '/Admin/feesTypes',
+      icon: 'FormatListGroup'
     },
     {
       title: 'Books',
-      path: '/Admin/books'
+      path: '/Admin/books',
+      icon: 'Bookshelf'
     },
     {
       title: 'Addon Courses',
-      path: '/Admin/addonCourse'
+      path: '/Admin/addonCourse',
+      icon: 'Offer'
     },
     {
       title: 'Programs',
-      path: '/Admin/programs'
+      path: '/Admin/programs',
+      icon: 'BullseyeArrow'
+    },
+    {
+      title: 'Payments',
+      path: '/Admin/payments',
+      icon: 'AccountCreditCardOutline'
     },
 
     {
@@ -40,15 +50,18 @@ const navigation = (): VerticalNavItemsType => {
 
     {
       title: 'Admission form',
-      path: '/StudentManagement/AdmissionForm'
+      path: '/StudentManagement/AdmissionForm',
+      icon: 'FormSelect'
     },
     {
       title: 'Admissions',
-      path: '/StudentManagement/Admissions'
+      path: '/StudentManagement/Admissions',
+      icon: 'AccountSchoolOutline'
     },
     {
       title: 'Collect Payment',
-      path: '/StudentManagement/Payments/collectPayment'
+      path: '/StudentManagement/Payments/collectPayment',
+      icon: 'BankTransferIn'
     }
   ]
 }

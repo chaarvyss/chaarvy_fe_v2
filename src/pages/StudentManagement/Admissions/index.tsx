@@ -13,7 +13,7 @@ import {
   Typography
 } from '@muiElements'
 import { useRouter } from 'next/router'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLoader } from 'src/@core/context/loaderContext'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import { PagePath } from 'src/constants/pagePathConstants'
@@ -22,17 +22,20 @@ import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import { useLazyGetAdmissionsListQuery } from 'src/store/services/admisissionsService'
 import { statusColors } from 'src/utils/constants'
 import GetChaarvyIcons from 'src/utils/icons'
-import RenderAdmissionFilterOptions, { RenderAdmissionsFilters } from './filters'
+import RenderFilterOptions from '../../../common/filters'
+import { FilterProps } from 'src/lib/interfaces'
+import ChaarvyPagination from 'src/reusable_components/Pagination'
 
 const Admissions = () => {
   const router = useRouter()
   const { openDrawer } = useSideDrawer()
   const { setLoading } = useLoader()
-  const [fetchAdmissions, { data: admissions, isLoading }] = useLazyGetAdmissionsListQuery()
+  const [fetchAdmissions, { data: admissionResponse, isLoading }] = useLazyGetAdmissionsListQuery()
+  const [filterProps, setFilterProps] = useState<FilterProps>({ limit: 20, offset: 0 })
 
   useEffect(() => {
-    fetchAdmissions(undefined)
-  }, [])
+    fetchAdmissions(filterProps)
+  }, [filterProps])
 
   setLoading(isLoading)
   const handleCreateAdmissionClick = () => {
@@ -50,12 +53,12 @@ const Admissions = () => {
     ]
   }
 
-  const handleFilteredAdmissions = (params?: RenderAdmissionsFilters) => {
-    params && fetchAdmissions(params)
+  const handleFilteredAdmissions = (params?: FilterProps) => {
+    params && fetchAdmissions({ ...params, ...filterProps })
   }
 
   const onFilterButtonClick = () => {
-    openDrawer('Filters', <RenderAdmissionFilterOptions onSubmit={handleFilteredAdmissions} />)
+    openDrawer('Filters', <RenderFilterOptions onSubmit={handleFilteredAdmissions} fields={['search', 'program']} />)
   }
 
   return (
@@ -84,7 +87,7 @@ const Admissions = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {(admissions ?? []).map(
+                {(admissionResponse?.admissions ?? []).map(
                   ({
                     photo_url,
                     admission_number,
@@ -134,7 +137,7 @@ const Admissions = () => {
                 )}
               </TableBody>
             </Table>
-            {(admissions ?? []).length == 0 && (
+            {(admissionResponse?.admissions ?? []).length == 0 && (
               <Box justifyContent='center' alignItems='center' paddingBottom='2rem'>
                 <Typography variant='h6' textAlign='center'>
                   No Admissions
@@ -143,6 +146,10 @@ const Admissions = () => {
             )}
           </TableContainer>
         </Card>
+        <ChaarvyPagination
+          total={admissionResponse?.counts?.filtered ?? 0}
+          onChange={data => setFilterProps({ ...filterProps, ...data })}
+        />
       </Paper>
     </>
   )

@@ -32,6 +32,16 @@ export interface TableHeaderStatCardProps {
   icon: ReactElement
 }
 
+export interface FilterProps {
+  searchText?: string
+  limit?: number
+  offset?: number
+  startDate?: string
+  endDate?: string
+  program?: string
+  medium?: string
+}
+
 export interface UsersListResponse {
   active: number
   email: string
@@ -50,4 +60,32 @@ export interface TableHeaders {
 export interface PaymentModes {
   payment_mode_id: string
   payment_mode: string
+}
+
+export interface PaymentsListRequest {
+  limit?: number
+  offset?: number
+  searchText?: string
+  startDate?: string // 2025-03-17
+  endDate?: string
+}
+
+export interface StudentPayment {
+  payment_id: string
+  amount: number
+  transaction_number: string
+  created_date: string
+  reciept_number: string
+  admission_number: string
+  student_name: string
+}
+
+interface StudentPaymentCount {
+  total: number
+  filtered: number
+  amount: number
+}
+export interface PaymentsListResponse {
+  payments: StudentPayment[]
+  counts: StudentPaymentCount
 }

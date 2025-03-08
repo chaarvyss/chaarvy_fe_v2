@@ -1,19 +1,14 @@
-// ** React Import
-
-// ** Next Import
-
-// ** MUI Imports
 import Box, { BoxProps } from '@mui/material/Box'
-import { styled, useTheme } from '@mui/material/styles'
-import Typography, { TypographyProps } from '@mui/material/Typography'
-import Link from 'next/link'
+import { deepOrange } from '@mui/material/colors'
+import { styled } from '@mui/material/styles'
+import Typography from '@mui/material/Typography'
+import { Avatar } from '@muiElements'
 import { ReactNode } from 'react'
 
 // ** Type Import
 import { Settings } from 'src/@core/context/settingsContext'
 
-// ** Configs
-import themeConfig from 'src/configs/themeConfig'
+import { getInitials } from 'src/utils/helpers'
 
 interface Props {
   hidden: boolean
@@ -33,35 +28,40 @@ const MenuHeaderWrapper = styled(Box)<BoxProps>(({ theme }) => ({
   minHeight: theme.mixins.toolbar.minHeight
 }))
 
-const HeaderTitle = styled(Typography)<TypographyProps>(({ theme }) => ({
-  fontWeight: 600,
-  lineHeight: 'normal',
-  textTransform: 'uppercase',
-  color: theme.palette.text.primary,
-  transition: 'opacity .25s ease-in-out, margin .25s ease-in-out'
-}))
-
-const StyledLink = styled('a')({
-  display: 'flex',
-  alignItems: 'center',
-  textDecoration: 'none'
-})
-
 const VerticalNavHeader = (props: Props) => {
   // ** Props
-  const { verticalNavMenuBranding: userVerticalNavMenuBranding } = props
-
-  // ** Hooks
-  const theme = useTheme()
+  const { verticalNavMenuBranding: userVerticalNavMenuBranding, settings } = props
 
   return (
-    <MenuHeaderWrapper className='nav-header' sx={{ pl: 6 }}>
+    <MenuHeaderWrapper className='nav-header' sx={{ pl: 0 }}>
       {userVerticalNavMenuBranding ? (
         userVerticalNavMenuBranding(props)
       ) : (
-        <Typography variant='h6' sx={{ ml: 3 }}>
-          {themeConfig.templateName}
-        </Typography>
+        <Box display='flex' justifyContent='center' alignItems='start'>
+          <Box margin='1rem 0rem' marginLeft='.5rem'>
+            <Avatar src={settings.college_logo} sx={{ bgcolor: deepOrange[500] }} alt={settings.college_name}>
+              {getInitials(settings.college_name)}
+            </Avatar>
+          </Box>
+          <Box display='flex' flexDirection='column' justifyContent='start' margin='1rem 0rem'>
+            <Typography
+              variant='h6'
+              sx={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                width: 200,
+                ml: 3
+              }}
+              noWrap
+            >
+              {settings.college_name}
+            </Typography>
+            <Typography variant='body1' sx={{ ml: 3 }}>
+              {settings.campus_name}
+            </Typography>
+          </Box>
+        </Box>
       )}
     </MenuHeaderWrapper>
   )

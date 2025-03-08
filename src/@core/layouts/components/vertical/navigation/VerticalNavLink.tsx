@@ -8,6 +8,7 @@ import { useRouter } from 'next/router'
 import { Settings } from 'src/@core/context/settingsContext'
 import { NavLink } from 'src/@core/layouts/types'
 import { handleURLQueries } from 'src/@core/layouts/utils'
+import GetChaarvyIcons, { GetChaarvyIconsProps } from 'src/utils/icons'
 
 interface Props {
   item: NavLink
@@ -48,9 +49,17 @@ const VerticalNavLink = ({ item, settings }: Props) => {
       <Box onClick={() => router.push(item.path === undefined ? '/' : `${item.path}`)}>
         <Box
           bgcolor={getItemBgColor()}
+          display='flex'
+          gap='1rem'
+          width='100vw'
+          borderRadius='1rem'
+          boxShadow={isNavLinkActive() ? `0px 0px 0.3rem .3rem ${purple[100]}` : ''}
           padding='0.6rem'
           style={{ borderTopRightRadius: '1rem', borderBottomRightRadius: '1rem', cursor: 'pointer' }}
         >
+          {item.icon && (
+            <GetChaarvyIcons color={getItemColor()} iconName={item.icon as GetChaarvyIconsProps['iconName']} />
+          )}
           <Typography color={getItemColor()}>{item.title}</Typography>
         </Box>
       </Box>

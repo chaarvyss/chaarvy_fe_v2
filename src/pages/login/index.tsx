@@ -32,6 +32,8 @@ import {
 // ** Demo Imports
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
 
+import { useSettings } from 'src/@core/hooks/useSettings'
+
 interface State {
   clcode: string
   username: string
@@ -62,7 +64,7 @@ const LoginPage = () => {
   })
 
   const [errors, setErrors] = useState<Array<string>>([])
-
+  const { settings, saveSettings } = useSettings()
   const router = useRouter()
 
   useEffect(() => {
@@ -88,6 +90,7 @@ const LoginPage = () => {
           dispatch(setAvailablePermissionsData(response.permission))
           triggerToast('Login Successful', { variant: ToastVariants.SUCCESS })
           localStorage.setItem(sessionStorageKeys.clientCode, res.data.clcode)
+          saveSettings({ ...settings, current_username: res.data.name })
           sessionStorage.setItem(sessionStorageKeys.accessToken, res.data.authToken)
           sessionStorage.setItem(sessionStorageKeys.clientCode, res.data.clcode)
           router.push('/')

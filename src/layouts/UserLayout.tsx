@@ -4,7 +4,7 @@ import Box from '@mui/material/Box'
 // ** MUI Imports
 import { Theme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import { CSSProperties, ReactNode, useState } from 'react'
+import { CSSProperties, ReactNode, useEffect, useState } from 'react'
 
 // ** Layout Imports
 // !Do not remove this Layout import
@@ -20,6 +20,7 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { ClipLoader } from 'react-spinners'
 import OverlaySpinner from 'src/reusable_components/overlaySpinner'
 import SideDrawer from 'src/reusable_components/sideDrawer'
+import { useLazyGetCollegeDetailsQuery } from 'src/store/services/viewServices'
 
 // ** Hook Import
 
@@ -31,6 +32,21 @@ const UserLayout = ({ children }: Props) => {
   // ** Hooks
   const { settings, saveSettings } = useSettings()
   const hidden = useMediaQuery((theme: Theme) => theme.breakpoints.down('lg'))
+  const [fetchCollegeDetails] = useLazyGetCollegeDetailsQuery()
+
+  useEffect(() => {
+    fetchCollegeDetails()
+      .unwrap()
+      .then(collegeDetails => {
+        saveSettings({
+          ...settings,
+          college_name: collegeDetails.college_name ?? '',
+          campus_name: collegeDetails.campus_name ?? '',
+          college_code: collegeDetails.college_code ?? '',
+          college_logo: collegeDetails.college_logo ?? undefined
+        })
+      })
+  }, [])
 
   return (
     <>

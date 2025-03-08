@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 
 import { Settings } from 'src/@core/context/settingsContext'
+import { GetChaarvyIconsProps } from 'src/utils/icons'
 
 export type ContentWidth = 'full' | 'boxed'
 
@@ -15,7 +16,7 @@ export type NavLink = {
   badgeContent?: string
   externalLink?: boolean
   openInNewTab?: boolean
-  icon?: string | string[] | ReactNode
+  icon?: GetChaarvyIconsProps['iconName']
   badgeColor?: 'default' | 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info'
 }
 

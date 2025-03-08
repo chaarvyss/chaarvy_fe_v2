@@ -1,5 +1,5 @@
 // ** Types Import
-import { Typography } from '@muiElements'
+import { Box, Typography } from '@muiElements'
 import { Settings } from 'src/@core/context/settingsContext'
 import { NavLink, NavSectionTitle, VerticalNavItemsType } from 'src/@core/layouts/types'
 
@@ -31,7 +31,11 @@ const VerticalNavItems = (props: Props) => {
   const RenderMenuItems = verticalNavItems?.map((item: NavLink | NavSectionTitle, index: number) => {
     const TagName: any = resolveNavItemComponent(item)
 
-    return <TagName {...props} key={index} item={item} />
+    return (
+      <Box borderRadius='1rem'>
+        <TagName {...props} key={index} item={item} />
+      </Box>
+    )
   })
 
   return <>{RenderMenuItems}</>
