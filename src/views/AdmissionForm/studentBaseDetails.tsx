@@ -11,10 +11,10 @@ import {
   styled,
   Typography
 } from '@mui/material'
-import React, { ChangeEvent, useState, FC, useEffect } from 'react'
+import React, { ChangeEvent, useState, useEffect } from 'react'
 import DatePicker from 'react-datepicker'
-
-import { Button, FormControl, Grid, InputLabel, TextField } from '@muiElements'
+import 'react-datepicker/dist/react-datepicker.css'
+import { Button, FormControl, Grid, TextField } from '@muiElements'
 
 import {
   useGetProgramsListQuery,
@@ -37,10 +37,12 @@ import {
 } from 'src/store/services/programServices'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { ErrorObject, InputFields } from 'src/lib/types'
-import { InputTypes, InputVariants } from 'src/lib/enums'
+import { DateFormats, InputTypes, InputVariants } from 'src/lib/enums'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
 import { convertDateStringToDate } from 'src/utils/helpers'
 import { useLoader } from 'src/@core/context/loaderContext'
+import { dateToString } from 'src/lib/helpers'
+import { useImageViewer } from 'src/@core/context/imageViewerContext'
 
 const ImgStyled = styled('img')(({ theme }) => ({
   width: 120,
@@ -84,6 +86,14 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
 
   const { triggerToast } = useToast()
   const { setLoading } = useLoader()
+
+  const { setShowImage } = useImageViewer()
+
+  const handleImageViewClick = (url: string) => {
+    if (setShowImage) {
+      setShowImage(url)
+    }
+  }
 
   const [fetchProgramMediums, { data: programMediums }] = useLazyGetProgramMediumsListQuery()
   const [fetchProgramSecondLanguages, { data: programSecondLanguages }] = useLazyGetProgramSecondLanguagesListQuery()
@@ -190,7 +200,10 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
     }
     if (applicationDetails) {
       if (application_id) applicationDetails.application_id = application_id
-      createUpdateAdmission({ ...applicationDetails, dob: dob ? new Date(dob).toISOString().split('T')[0] : '' })
+      createUpdateAdmission({
+        ...applicationDetails,
+        dob: dateToString(dob, DateFormats.YearMonthDate) ?? ''
+      })
         .unwrap()
         .then(({ application_id, message }) => {
           if (application_id) {
@@ -457,95 +470,78 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
   }
 
   const renderInputFields = () =>
-    fields.map(
-      ({
-        type,
-        id,
-        customInput,
-        label,
-        placeholder,
-        onChange,
-        key,
-        caption,
-        value,
-        variant,
-        menuOptions,
-        showYearDropdown,
-        showMonthDropdown
-      }) => (
-        <Grid item xs={12} sm={6} key={id}>
-          {type === InputTypes.INPUT ? (
-            <>
-              <small>
-                {label} {mandatoryFields.includes(key) ? '*' : ''}
-              </small>
-              <TextField
-                fullWidth
+    fields.map(({ type, id, customInput, label, placeholder, onChange, key, caption, value, variant, menuOptions }) => (
+      <Grid item xs={12} sm={6} key={id}>
+        {type === InputTypes.INPUT ? (
+          <>
+            <small>
+              {label} {mandatoryFields.includes(key) ? '*' : ''}
+            </small>
+            <TextField
+              fullWidth
+              id={id}
+              error={!!getHadError(key)}
+              value={value}
+              defaultValue={value}
+              type={variant}
+              placeholder={placeholder ?? ''}
+              onChange={onChange}
+            />
+            {caption && <small>{caption}</small>}
+            {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+          </>
+        ) : type === InputTypes.SELECT ? (
+          <FormControl fullWidth required={mandatoryFields.includes(key)}>
+            <small>{label}</small>
+            <Select id={id} value={value ?? ''} onChange={onChange} error={!!getHadError(key)}>
+              {(menuOptions ?? []).map(({ value, label }) => (
+                <MenuItem key={value} value={value}>
+                  {label}
+                </MenuItem>
+              ))}
+            </Select>
+            {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+          </FormControl>
+        ) : type === InputTypes.RADIO ? (
+          <Grid item xs={12}>
+            <FormControl required error={!!getHadError(key)}>
+              <FormLabel id={id}>{label}</FormLabel>
+              <RadioGroup
+                row
+                aria-labelledby={id}
+                name={id}
                 id={id}
-                error={!!getHadError(key)}
-                value={value}
-                defaultValue={value}
-                type={variant}
-                placeholder={placeholder ?? ''}
-                onChange={onChange}
-              />
-              {caption && <small>{caption}</small>}
-              {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-            </>
-          ) : type === InputTypes.SELECT ? (
-            <FormControl fullWidth required={mandatoryFields.includes(key)}>
-              <small>{label}</small>
-              <Select id={id} value={value ?? ''} onChange={onChange} error={!!getHadError(key)}>
-                {(menuOptions ?? []).map(({ value, label }) => (
-                  <MenuItem key={value} value={value}>
-                    {label}
-                  </MenuItem>
+                value={value ?? ''}
+                onChange={(_, val) =>
+                  handleChange(key as keyof CreateStudentAdmissionRequest)({
+                    target: { value: val }
+                  } as ChangeEvent<HTMLInputElement>)
+                }
+              >
+                {(menuOptions ?? []).map(each => (
+                  <FormControlLabel value={each.value} control={<Radio />} label={each.label} />
                 ))}
-              </Select>
+              </RadioGroup>
               {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
             </FormControl>
-          ) : type === InputTypes.RADIO ? (
-            <Grid item xs={12}>
-              <FormControl required error={!!getHadError(key)}>
-                <FormLabel id={id}>{label}</FormLabel>
-                <RadioGroup
-                  row
-                  aria-labelledby={id}
-                  name={id}
-                  id={id}
-                  value={value ?? ''}
-                  onChange={(_, val) =>
-                    handleChange(key as keyof CreateStudentAdmissionRequest)({
-                      target: { value: val }
-                    } as ChangeEvent<HTMLInputElement>)
-                  }
-                >
-                  {(menuOptions ?? []).map(each => (
-                    <FormControlLabel value={each.value} control={<Radio />} label={each.label} />
-                  ))}
-                </RadioGroup>
-                {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-              </FormControl>
-            </Grid>
-          ) : type === InputTypes.DATE ? (
-            <Grid item xs={12}>
+          </Grid>
+        ) : type === InputTypes.DATE ? (
+          <Grid item xs={12}>
+            <Box display='flex' flexDirection='column'>
               <small>Date of Birth</small>
               <DatePicker
                 selected={dob}
                 required={mandatoryFields.includes(key)}
-                showYearDropdown={showYearDropdown}
-                showMonthDropdown={showMonthDropdown}
-                placeholderText={placeholder}
                 customInput={customInput}
                 id={id}
                 onChange={onChange}
               />
               {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-            </Grid>
-          ) : null}
-        </Grid>
-      )
-    )
+            </Box>
+          </Grid>
+        ) : null}
+      </Grid>
+    ))
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -571,7 +567,12 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
         <Grid container spacing={7}>
           <Grid item xs={12} sx={{ marginTop: 4.8, marginBottom: 3 }}>
             <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'end', justifyContent: 'end' }}>
-              <ImgStyled src={image ?? '/images/avatars/1.png'} alt='add photo' />
+              <ImgStyled
+                onClick={() => handleImageViewClick(image ?? '')}
+                src={image ?? '/images/avatars/1.png'}
+                alt='add photo'
+                style={{ cursor: 'pointer' }}
+              />
               <Box>
                 <Button component='label' variant='contained' htmlFor='account-settings-upload-image'>
                   Upload Photo

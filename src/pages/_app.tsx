@@ -19,9 +19,11 @@ import '../../styles/globals.css'
 import store from 'src/store'
 import { ToastProvider } from 'src/@core/context/toastContext'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import OverlaySpinner from 'src/reusable_components/overlaySpinner'
 import { LoaderProvider } from 'src/@core/context/loaderContext'
 import { SideDrawerProvider } from 'src/@core/context/sideDrawerContext'
+
+import 'react-datepicker/dist/react-datepicker.css'
+import { ImageViewerProvider } from 'src/@core/context/imageViewerContext'
 
 type ExtendedAppProps = AppProps & {
   Component: NextPage
@@ -44,39 +46,41 @@ if (themeConfig.routingLoader) {
 
 const App = (props: ExtendedAppProps) => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
+  const getLayout = Component.getLayout ?? (page => <UserLayout>{page}</UserLayout>)
 
   // Variables
-  const getLayout = Component.getLayout ?? (page => <UserLayout>{page}</UserLayout>)
 
   return (
     <ToastProvider>
       <LoaderProvider>
-        <SideDrawerProvider>
-          <Provider store={store}>
-            <CacheProvider value={emotionCache}>
-              <Head>
-                <title>{`${themeConfig.templateName} - Material Design React Admin Template`}</title>
-                <meta
-                  name='description'
-                  content={`${themeConfig.templateName} – Material Design React Admin Dashboard Template – is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.`}
-                />
-                <meta name='keywords' content='Material Design, MUI, Admin Template, React Admin Template' />
-                <meta name='viewport' content='initial-scale=1, width=device-width' />
-              </Head>
+        <ImageViewerProvider>
+          <SideDrawerProvider>
+            <Provider store={store}>
+              <CacheProvider value={emotionCache}>
+                <Head>
+                  <title>{`${themeConfig.templateName} - Material Design React Admin Template`}</title>
+                  <meta
+                    name='description'
+                    content={`${themeConfig.templateName} – Material Design React Admin Dashboard Template – is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.`}
+                  />
+                  <meta name='keywords' content='Material Design, MUI, Admin Template, React Admin Template' />
+                  <meta name='viewport' content='initial-scale=1, width=device-width' />
+                </Head>
 
-              <SettingsProvider>
-                <SettingsConsumer>
-                  {({ settings }) => {
-                    return (
-                      <ThemeComponent settings={settings}>{getLayout(<Component {...pageProps} />)}</ThemeComponent>
-                    )
-                  }}
-                </SettingsConsumer>
-                <ToastContainer />
-              </SettingsProvider>
-            </CacheProvider>
-          </Provider>
-        </SideDrawerProvider>
+                <SettingsProvider>
+                  <SettingsConsumer>
+                    {({ settings }) => {
+                      return (
+                        <ThemeComponent settings={settings}>{getLayout(<Component {...pageProps} />)}</ThemeComponent>
+                      )
+                    }}
+                  </SettingsConsumer>
+                  <ToastContainer />
+                </SettingsProvider>
+              </CacheProvider>
+            </Provider>
+          </SideDrawerProvider>
+        </ImageViewerProvider>
       </LoaderProvider>
     </ToastProvider>
   )

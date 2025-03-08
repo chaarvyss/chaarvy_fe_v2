@@ -34,8 +34,25 @@ const FeesDetails = ({ application_id, segment_id }: FeesDetailsProps) => {
   const [fetchStudentAdmissionFeesDetails] = useLazyGetStudentAdmissionFeesDetailsQuery()
   const [fetchStudentPayableFees, { data: finalizedFees, reset }] = useLazyGetStudentPayableFeesDetailsQuery()
 
+  const getActualPayableFees = () => {
+    application_id &&
+      fetchStudentAdmissionFeesDetails(application_id).then(({ data: res }) => {
+        setStudentFees(res)
+      })
+  }
+
   useEffect(() => {
-    if (application_id && segment_id) fetchStudentPayableFees({ application_id, segment_id })
+    if (application_id) {
+      if (segment_id) {
+        fetchStudentPayableFees({ application_id, segment_id }).then(res => {
+          if (res.data == null) {
+            getActualPayableFees()
+          }
+        })
+      } else {
+        getActualPayableFees()
+      }
+    }
   }, [application_id, segment_id])
 
   useEffect(() => {
@@ -44,13 +61,6 @@ const FeesDetails = ({ application_id, segment_id }: FeesDetailsProps) => {
       setStudentFees(finalizedFees.fees_details)
     }
   }, [finalizedFees])
-
-  useEffect(() => {
-    application_id &&
-      fetchStudentAdmissionFeesDetails(application_id).then(({ data: res }) => {
-        setStudentFees(res)
-      })
-  }, [])
 
   const TotalFees = () => {
     const sum = (arr?: number[]) => arr?.reduce((acc, val) => acc + val, 0) || 0

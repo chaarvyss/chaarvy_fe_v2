@@ -14,6 +14,11 @@ export type Settings = {
   mode: PaletteMode
   themeColor: ThemeColor
   contentWidth: ContentWidth
+  college_name: string
+  college_code: string
+  campus_name: string
+  current_username?: string
+  college_logo?: string
 }
 
 export type SettingsContextValue = {
@@ -24,7 +29,10 @@ export type SettingsContextValue = {
 const initialSettings: Settings = {
   themeColor: 'primary',
   mode: themeConfig.mode,
-  contentWidth: themeConfig.contentWidth
+  contentWidth: themeConfig.contentWidth,
+  college_code: '',
+  college_name: '',
+  campus_name: ''
 }
 
 // ** Create Context

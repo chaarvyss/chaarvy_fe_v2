@@ -3,9 +3,11 @@ import { urlConstants } from 'src/constants/urlConstants'
 import { HttpRequestMethods } from '..'
 
 import api from './api'
-import { RenderAdmissionsFilters } from 'src/pages/StudentManagement/Admissions/filters'
+import { FilterProps } from 'src/lib/interfaces'
+import { CacheTag } from './cacheTag'
 
 export type Address = {
+  application_id?: string
   door_no?: string
   house_apartment_name?: string // new
   street?: string
@@ -16,7 +18,7 @@ export type Address = {
   pincode?: string
 }
 
-export type AdmissionsListResponse = {
+export type Admissions = {
   application_id: string
   admission_number: string
   father_name: string
@@ -26,6 +28,16 @@ export type AdmissionsListResponse = {
   contact_no_1: string
   program_name: string
   photo_url: string
+}
+
+export type AdmissionCounts = {
+  total: number
+  filtered: number
+}
+
+export type AdmissionsListResponse = {
+  admissions: Admissions[]
+  counts: AdmissionCounts
 }
 
 export type CreateStudentAdmissionRequest = {
@@ -100,7 +112,7 @@ const admissionServiceApi = api.injectEndpoints({
         }
       }
     }),
-    getAdmissionsList: build.query<AdmissionsListResponse[], RenderAdmissionsFilters | undefined>({
+    getAdmissionsList: build.query<AdmissionsListResponse, FilterProps | undefined>({
       query: params => {
         return {
           method: HttpRequestMethods.GET,
@@ -118,6 +130,29 @@ const admissionServiceApi = api.injectEndpoints({
         }
       }
     }),
+
+    getStudentAddress: build.query<Address, string>({
+      providesTags: [CacheTag.StudentAddress],
+      query: application_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.studentAddress,
+          params: { application_id }
+        }
+      }
+    }),
+
+    createStudentAddress: build.mutation<string, Address>({
+      invalidatesTags: [CacheTag.StudentAddress],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admissions.createStudentAddress,
+          body
+        }
+      }
+    }),
+
     getStudentEnrollendAddonCourses: build.query<StudentAddonCourseResponse[], string>({
       query: application_id => {
         return {
@@ -148,5 +183,7 @@ export const {
   useLazyGetAdmissionsListQuery,
   useLazyGetAdmissionDetailQuery,
   useLazyGetStudentEnrollendAddonCoursesQuery,
-  useEnrollAddonCourseMutation
+  useEnrollAddonCourseMutation,
+  useGetStudentAddressQuery,
+  useCreateStudentAddressMutation
 } = admissionServiceApi

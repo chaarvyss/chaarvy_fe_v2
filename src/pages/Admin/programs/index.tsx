@@ -105,7 +105,6 @@ const Programs = () => {
   }
 
   const getKebabOptions = (eachProgram: Program) => {
-    // TODO: edit program, books, fees, addon
     return [
       {
         id: eachProgram.program_id,
@@ -222,13 +221,7 @@ export default Programs
 /*  TODO:
 programs:
   ** Need to update all features with permission management
-  Need to integrate apis
-  Need to add validation and error messages while creating and updating Program information.
   need to add an option for adding segments ie, year, semester ...
-  need to show program details which contain the info of 
-    -eligibility criteria
-    -program duriation
-    -segments available
 
 fees details:
   ** Need to update all features with permission management

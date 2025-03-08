@@ -20,7 +20,7 @@ interface ChaarvyModalProps {
   footer?: ReactChild
   isOpen: boolean
   modalSize?: string
-  onClose: () => void
+  onClose?: () => void
   shouldWarnOnClose?: boolean
   shouldRestrictCloseOnOuterClick?: boolean
   title?: string
@@ -49,20 +49,22 @@ const ChaarvyModal = ({
             <Box sx={{ padding: 2 }}>
               <Typography variant='body1'>Are you sure want to close this modal?</Typography>
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
-              <Button variant='outlined' color='error' onClick={() => setIsWarnOnCloseOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                variant='contained'
-                onClick={() => {
-                  setIsWarnOnCloseOpen(false)
-                  onClose()
-                }}
-              >
-                Confirm
-              </Button>
-            </Box>
+            {onClose && (
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
+                <Button variant='outlined' color='error' onClick={() => setIsWarnOnCloseOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  variant='contained'
+                  onClick={() => {
+                    setIsWarnOnCloseOpen(false)
+                    onClose()
+                  }}
+                >
+                  Confirm
+                </Button>
+              </Box>
+            )}
           </Card>
         </Grid>
       </Modal>
@@ -73,7 +75,7 @@ const ChaarvyModal = ({
     if (shouldWarnOnClose) {
       setIsWarnOnCloseOpen(true)
     } else {
-      onClose()
+      onClose?.()
     }
   }
 
@@ -83,7 +85,8 @@ const ChaarvyModal = ({
 
   return (
     <>
-      <Modal open={isOpen} {...(!!shouldRestrictCloseOnOuterClick ? {} : { onClose: handleModalClose })}>
+      {/* <Modal open={isOpen} {...(!!shouldRestrictCloseOnOuterClick ? {} : { onClose: handleModalClose?.() })}> */}
+      <Modal open={isOpen} onClose={shouldRestrictCloseOnOuterClick ? undefined : handleModalClose}>
         <Card className={getModalSize()} sx={style}>
           <Box
             sx={{
@@ -96,7 +99,7 @@ const ChaarvyModal = ({
             }}
           >
             <Typography variant='h5'>{title}</Typography>
-            <Close onClick={handleModalClose} sx={{ cursor: 'pointer' }} />
+            {onClose && <Close onClick={handleModalClose} sx={{ cursor: 'pointer' }} />}
           </Box>
           <CardContent sx={{ p: 3 }}>{children}</CardContent>
           {footer && (

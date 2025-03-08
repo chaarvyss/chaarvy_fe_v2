@@ -1,5 +1,4 @@
-import { SelectChangeEvent } from '@mui/material'
-import React, { ChangeEvent, ReactElement } from 'react'
+import { ReactElement } from 'react'
 
 export type AddOnCourse = {
   addon_course_id: string
@@ -16,6 +15,7 @@ export type BooksTypesResponse = {
 
 export type Community = { community_id: string; community_name: string }
 
+export type DateFormatTypes = 'yyyy-MM-dd'
 export type District = { district_id: string; district_name: string }
 
 export type Fees = {

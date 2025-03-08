@@ -21,3 +21,12 @@ export const convertDateStringToDate = (dateStr?: string) => {
   const [day, month, year] = dateStr.split('-').map(Number)
   return new Date(year, month - 1, day)
 }
+
+export const getInitials = (name: string, length: number = 2): string => {
+  const initials = name
+    .split(' ')
+    .map(word => word[0]?.toUpperCase() || '')
+    .join('')
+
+  return initials.slice(0, length)
+}

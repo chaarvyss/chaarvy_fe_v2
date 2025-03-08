@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react'
 
 import { Box, Card, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@muiElements'
 import { TableHeaders } from 'src/lib/interfaces'
-import { Fees, FeesTypesResponse } from 'src/lib/types'
+import { FeesTypesResponse } from 'src/lib/types'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import { useLazyGetFeesTypesListQuery } from 'src/store/services/listServices'
 
 import CreateOrUpdateFeesTypeModal from './createFeesModal'
+
+const TOP_LEVEL_ID = 'fees-type-list'
 
 const FeesTypes = () => {
   const [fetchFeesTypes, { data: getFeesTypes }] = useLazyGetFeesTypesListQuery()
@@ -58,13 +60,15 @@ const FeesTypes = () => {
               <TableHead>
                 <TableRow>
                   {headers.map(each => (
-                    <TableCell style={each.width ? { width: each.width } : {}}>{each.label}</TableCell>
+                    <TableCell key={`${TOP_LEVEL_ID}__${each.label}`} style={each.width ? { width: each.width } : {}}>
+                      {each.label}
+                    </TableCell>
                   ))}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {(getFeesTypes ?? []).map((eachFeesType: FeesTypesResponse, index) => (
-                  <TableRow>
+                  <TableRow key={eachFeesType.fees_type_id}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{eachFeesType?.fees_type}</TableCell>
 
