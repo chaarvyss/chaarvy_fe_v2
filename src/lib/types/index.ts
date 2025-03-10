@@ -11,6 +11,7 @@ export type BooksTypesResponse = {
   book_name: string
   pages: number
   price: number
+  available_quantity: number
 }
 
 export type Community = { community_id: string; community_name: string }

@@ -1,4 +1,5 @@
 export enum CacheTag {
+  CollegeProfile = 'collegeProfile',
   ListAddonCourse = 'listAddonCourse',
   ListBooks = 'listBooks',
   ListFeesTypes = 'listFeesTypes',

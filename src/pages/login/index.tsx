@@ -93,7 +93,7 @@ const LoginPage = () => {
           saveSettings({ ...settings, current_username: res.data.name })
           sessionStorage.setItem(sessionStorageKeys.accessToken, res.data.authToken)
           sessionStorage.setItem(sessionStorageKeys.clientCode, res.data.clcode)
-          router.push('/')
+          router.push('/dashboard')
         })
         .catch(e => {
           triggerToast(e?.data, { variant: ToastVariants.ERROR })
@@ -119,7 +119,7 @@ const LoginPage = () => {
     <Box className='content-center'>
       <Card sx={{ zIndex: 1 }}>
         <CardContent sx={{ padding: theme => `${theme.spacing(12, 9, 7)} !important` }}>
-          <Box sx={{ mb: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Box sx={{ mb: 8, display: 'flex',cursor:'pointer', alignItems: 'center', justifyContent: 'center' }} onClick={()=>router.push('/')}>
             <svg
               width={35}
               height={29}
@@ -185,7 +185,6 @@ const LoginPage = () => {
                 ml: 3,
                 lineHeight: 1,
                 fontWeight: 600,
-                textTransform: 'uppercase',
                 fontSize: '1.5rem !important'
               }}
             >
@@ -194,7 +193,7 @@ const LoginPage = () => {
           </Box>
           <Box sx={{ mb: 6 }}>
             <Typography variant='h5' sx={{ fontWeight: 600, marginBottom: 1.5 }}>
-              Welcome to {themeConfig.templateName}! 👋🏻
+              Welcome to {themeConfig.templateName}!
             </Typography>
             <Typography variant='body2'>Please sign-in to your account and start the adventure</Typography>
           </Box>
@@ -240,9 +239,9 @@ const LoginPage = () => {
               />
             </FormControl>
             <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'end' }}>
-              <Link passHref href='/'>
+              {/* <Link passHref href='/'>
                 <LinkStyled onClick={() => (window.location.href = '/reset-password')}>Forgot Password?</LinkStyled>
-              </Link>
+              </Link> */}
             </Box>
             <Button fullWidth size='large' variant='contained' sx={{ marginBottom: 7 }} type='submit'>
               Login

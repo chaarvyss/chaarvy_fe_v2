@@ -34,6 +34,7 @@ const viewServiceApi = api.injectEndpoints({
       }
     }),
     getCollegeDetails: build.query<CollegeDetailResponse, void>({
+      providesTags: [CacheTag.CollegeProfile],
       query: () => {
         return {
           method: HttpRequestMethods.GET,
@@ -45,4 +46,5 @@ const viewServiceApi = api.injectEndpoints({
   overrideExisting: true
 })
 
-export const { useLazyGetProgramSegmentDetailsQuery, useLazyGetCollegeDetailsQuery } = viewServiceApi
+export const { useLazyGetProgramSegmentDetailsQuery, useGetCollegeDetailsQuery, useLazyGetCollegeDetailsQuery } =
+  viewServiceApi

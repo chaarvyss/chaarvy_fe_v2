@@ -47,6 +47,7 @@ const FeesTypes = () => {
     { label: 'Book Name' },
     { label: 'Pages' },
     { label: 'Price' },
+    { label: 'Available Quantity' },
     { label: 'Action', width: '100px' }
   ]
 
@@ -71,6 +72,7 @@ const FeesTypes = () => {
                     <TableCell>{eachBook?.book_name}</TableCell>
                     <TableCell>{eachBook?.pages}</TableCell>
                     <TableCell>{eachBook?.price}</TableCell>
+                    <TableCell>{eachBook?.available_quantity}</TableCell>
 
                     <TableCell>
                       <DropDownMenu dropDownMenuOptions={getKebabOptions(eachBook)} />

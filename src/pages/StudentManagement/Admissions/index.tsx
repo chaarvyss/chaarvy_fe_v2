@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Box,
   Card,
   Chip,
@@ -25,6 +24,7 @@ import GetChaarvyIcons from 'src/utils/icons'
 import RenderFilterOptions from '../../../common/filters'
 import { FilterProps } from 'src/lib/interfaces'
 import ChaarvyPagination from 'src/reusable_components/Pagination'
+import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
 
 const Admissions = () => {
   const router = useRouter()
@@ -81,7 +81,6 @@ const Admissions = () => {
                   <TableCell>Date of Birth</TableCell>
                   <TableCell>Program</TableCell>
                   <TableCell>Status</TableCell>
-                  <TableCell>City</TableCell>
                   <TableCell>Phone</TableCell>
                   <TableCell></TableCell>
                 </TableRow>
@@ -93,7 +92,6 @@ const Admissions = () => {
                     admission_number,
                     dob,
                     father_name,
-                    city,
                     program_name,
                     application_id,
                     contact_no_1,
@@ -102,7 +100,7 @@ const Admissions = () => {
                     <TableRow hover key={application_id}>
                       <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
                         <Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '1rem' }}>
-                          <Avatar src={photo_url} />
+                          <ChaarvyAvatar src={photo_url} />
                           <Box sx={{ flexDirection: 'column' }}>
                             <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>
                               {student_name}
@@ -127,7 +125,6 @@ const Admissions = () => {
                           }}
                         />
                       </TableCell>
-                      <TableCell>{city}</TableCell>
                       <TableCell>{contact_no_1}</TableCell>
                       <TableCell width='10px'>
                         <DropDownMenu dropDownMenuOptions={getKebabOptions(application_id)} />

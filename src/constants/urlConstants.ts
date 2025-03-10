@@ -53,7 +53,9 @@ export const urlConstants = {
       programAddon: `${interRoutePrefix.admin}/update-program-addon-course`,
       programBook: `${interRoutePrefix.admin}/update-program-book`,
       programStatus: `${interRoutePrefix.admin}/update-program-status`,
-      programSegment: `${interRoutePrefix.admin}/update-program-segment`
+      programSegment: `${interRoutePrefix.admin}/update-program-segment`,
+      collegeProfile: `${interRoutePrefix.admin}/update-mydetails`,
+      collgeLogo: `${interRoutePrefix.admin}/update-college-logo`
     }
   },
   admissions: {
