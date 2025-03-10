@@ -18,6 +18,8 @@ import { useRouter } from 'next/router'
 import { useState, SyntheticEvent, Fragment } from 'react'
 
 import { PagePath } from 'src/constants/pagePathConstants'
+import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
+import GetChaarvyIcons from 'src/utils/icons'
 
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
@@ -72,7 +74,7 @@ const UserDropdown = () => {
         badgeContent={<BadgeContentSpan />}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Avatar
+        <ChaarvyAvatar
           alt='John Doe'
           onClick={handleDropdownOpen}
           sx={{ width: 40, height: 40 }}
@@ -87,12 +89,12 @@ const UserDropdown = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <MenuItem sx={{ py: 2 }} onClick={() => handleDropdownClose(PagePath.CHANGE_PASSWORD)}>
-          <LogoutVariant sx={{ marginRight: 2, fontSize: '1.375rem', color: 'text.secondary' }} />
+        <MenuItem sx={{ p: 2, gap: 3 }} onClick={() => handleDropdownClose(PagePath.CHANGE_PASSWORD)}>
+          <GetChaarvyIcons iconName='KeyChange' />
           Change Password
         </MenuItem>
-        <MenuItem sx={{ py: 2 }} onClick={() => handleDropdownClose(PagePath.LOGIN_PAGE)}>
-          <LogoutVariant sx={{ marginRight: 2, fontSize: '1.375rem', color: 'text.secondary' }} />
+        <MenuItem sx={{ p: 2, gap: 3 }} onClick={() => handleDropdownClose(PagePath.LOGIN_PAGE)}>
+          <GetChaarvyIcons iconName='Logout' />
           Logout
         </MenuItem>
       </Menu>

@@ -15,6 +15,7 @@ import {
   Typography
 } from '@muiElements'
 import React, { ChangeEvent, useState } from 'react'
+import { useLoader } from 'src/@core/context/loaderContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { InputTypes, InputVariants } from 'src/lib/enums'
 import { TableHeaders } from 'src/lib/interfaces'
@@ -44,12 +45,15 @@ const CollectPayment = () => {
   const [searchText, setSearchText] = useState<string>()
   const [isCollectPaymentModalOpen, setIsCollectPaymentModalOpen] = useState<boolean>(false)
 
+  const { setLoading } = useLoader()
+
   const { triggerToast } = useToast()
   const [errors, setErrors] = useState<ErrorObject[]>([])
-  const [fetchStudentPendingFees, { data: response }] = useLazyGetStudentPendingFeesDetailsQuery()
+  const [fetchStudentPendingFees, { data: response, isLoading: fetchingRecords }] =
+    useLazyGetStudentPendingFeesDetailsQuery()
   const { data: paymentModes } = useGetPaymentModesListQuery()
   const [recordTransaction, { isLoading }] = useRecordPaymentTransactionMutation()
-  const [fetchPaymentReciept] = useLazyGetPaymentRecieptByPaymentIdQuery()
+  const [fetchPaymentReciept, { isLoading: fetchingReciept }] = useLazyGetPaymentRecieptByPaymentIdQuery()
 
   const [mandatoryFields, setMandatoryFields] = useState<Array<string>>([
     'segment_id',
@@ -211,7 +215,6 @@ const CollectPayment = () => {
   }
 
   const handleCollectSubmit = () => {
-    console.log(paymentDetails, 'paymentDetails')
     if (!validateForm()) {
       triggerToast('Please correct the errors before submitting.', { variant: ToastVariants.ERROR })
       return
@@ -275,6 +278,10 @@ const CollectPayment = () => {
       </ChaarvyModal>
     )
   }
+
+  const showLoader = fetchingReciept || fetchingRecords
+
+  setLoading(showLoader)
 
   return (
     <Card sx={{ p: 5 }}>

@@ -17,7 +17,7 @@ type ThemeConfig = {
 
 const themeConfig: ThemeConfig = {
   // ** Layout Configs
-  templateName: 'Chaarvy Solutions' /* App Name */,
+  templateName: 'Chaarvy - AcadPro' /* App Name */,
   mode: 'light' /* light | dark */,
   contentWidth: 'boxed' /* full | boxed */,
 

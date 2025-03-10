@@ -1,6 +1,6 @@
-import { FormControl, MenuItem, Pagination, Select } from '@mui/material'
+import { FormControl, MenuItem, Pagination, Select, SelectChangeEvent } from '@mui/material'
 import { Box } from '@muiElements'
-import React, { useEffect, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import { FilterProps } from 'src/lib/interfaces'
 
 interface PaginationProps {
@@ -22,17 +22,17 @@ const ChaarvyPagination = ({ total, onChange }: PaginationProps) => {
     total = 1
   }
 
+  const handlePageSizeChange = (e: SelectChangeEvent<number>) => {
+    setPageNumber(1)
+    setItemsPerPage(Number(e.target.value))
+  }
+
   return (
     <Box padding={5} display='flex' justifyContent='space-between' alignItems='center'>
       <FormControl>
         <small>Items per page</small>
-        <Select
-          size='small'
-          id='pagination-select'
-          value={itemsPerPage}
-          onChange={e => setItemsPerPage(Number(e.target.value))}
-        >
-          {[5, 10, 20, 50, 100].map(each => (
+        <Select size='small' id='pagination-select' value={itemsPerPage} onChange={handlePageSizeChange}>
+          {[2, 5, 10, 20, 50, 100].map(each => (
             <MenuItem value={each}>{`${each}`}</MenuItem>
           ))}
         </Select>

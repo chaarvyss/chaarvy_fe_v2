@@ -1,5 +1,3 @@
-// import HomeOutline from 'mdi-material-ui/HomeOutline'
-
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
 
@@ -7,8 +5,13 @@ const navigation = (): VerticalNavItemsType => {
   return [
     {
       title: 'Dashboard',
-      path: '/',
+      path: '/dashBoard',
       icon: 'ViewDashboard'
+    },
+    {
+      title: 'College Profile',
+      path: '/collegeProfile',
+      icon: 'FaceManProfile'
     },
     {
       sectionTitle: 'Admin'

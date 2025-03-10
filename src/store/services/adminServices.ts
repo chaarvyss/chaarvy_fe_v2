@@ -36,6 +36,12 @@ type UpdateBook = CreateBook & {
   book_id: string
 }
 
+type CreateCollegeProfileRequest = {
+  college_name?: string
+  campus_name?: string
+  contact_numbers?: string
+}
+
 type UpdateProgramRequest = {
   id?: string
   program_name: string
@@ -188,6 +194,16 @@ const adminServiceApi = api.injectEndpoints({
         }
       }
     }),
+    updateCollegeProfile: build.mutation<string, CreateCollegeProfileRequest>({
+      invalidatesTags: [CacheTag.CollegeProfile],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.update.collegeProfile,
+          body
+        }
+      }
+    }),
     updateProgram: build.mutation<string, UpdateProgramRequest>({
       invalidatesTags: [CacheTag.ListPrograms],
       query: params => {
@@ -227,6 +243,18 @@ const adminServiceApi = api.injectEndpoints({
           params: { id }
         }
       }
+    }),
+    uploadCollegeLogo: build.mutation<string, File>({
+      query: college_logo => {
+        const formData = new FormData()
+        formData.append('college_logo', college_logo)
+
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.update.collgeLogo,
+          body: formData
+        }
+      }
     })
   })
 })
@@ -242,11 +270,13 @@ export const {
   useUpdateAddonCourseMutation,
   useUpdateAddonCourseStatusMutation,
   useUpdateBookMutation,
+  useUpdateCollegeProfileMutation,
   useUpdateFeesTypeMutation,
   useUpdateLangugageMutation,
   useUpdateProgramMutation,
   useUpdateProgramAddonMutation,
   useUpdateProgramBookMutation,
   useCreateProgramSegmentMutation,
-  useUpdateProgramStatusMutation
+  useUpdateProgramStatusMutation,
+  useUploadCollegeLogoMutation
 } = adminServiceApi
