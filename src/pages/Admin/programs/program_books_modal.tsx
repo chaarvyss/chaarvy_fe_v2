@@ -1,3 +1,4 @@
+import { LoadingButton } from '@mui/lab'
 import {
   Box,
   Button,
@@ -23,6 +24,7 @@ import {
 } from '@mui/material'
 import { DeleteOutline } from 'mdi-material-ui'
 import React, { useEffect, useState } from 'react'
+import { useLoader } from 'src/@core/context/loaderContext'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { InputVariants } from 'src/lib/enums'
@@ -30,7 +32,11 @@ import { TableHeaders } from 'src/lib/interfaces'
 import { Books, Program } from 'src/lib/types'
 import ChaarvyAccordian from 'src/reusable_components/chaarvyAccordian'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import { useCreateProgramBookMutation, useUpdateProgramBookMutation } from 'src/store/services/adminServices'
+import {
+  useCreateProgramBookMutation,
+  useDeleteProgramBookMutation,
+  useUpdateProgramBookMutation
+} from 'src/store/services/adminServices'
 import { useGetBooksListQuery, useGetProgramsListQuery, useGetSegmentsListQuery } from 'src/store/services/listServices'
 import {
   useLazyGetProgramBooksListQuery,
@@ -56,16 +62,29 @@ type ProgramBook = {
 const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps) => {
   const [isBookModalOpen, setIsBookModalOpen] = useState<boolean>(false)
   const [selectedBook, setSelectedBook] = useState<Books>()
-
   const [isRemoveBookModalOpen, setIsRemoveBookModalOpen] = useState<boolean>(false)
 
-  const { data: segmentsList } = useGetSegmentsListQuery()
-  const { data: booksList } = useGetBooksListQuery()
-  const { data: programsList } = useGetProgramsListQuery(true)
-  const [fetchProgramMediums, { data: programMediums }] = useLazyGetProgramMediumsListQuery()
-  const [fetchProgramSecondLanguages, { data: programSecondLanguages }] = useLazyGetProgramSecondLanguagesListQuery()
-  const [createProgramBook] = useCreateProgramBookMutation()
-  const [updateProgramBook] = useUpdateProgramBookMutation()
+  const { data: segmentsList, isFetching: isSegmentsFetching } = useGetSegmentsListQuery()
+  const { data: booksList, isFetching: isBooksFetching } = useGetBooksListQuery()
+  const { data: programsList, isFetching: isProgramsFetching } = useGetProgramsListQuery(true)
+  const [fetchProgramMediums, { data: programMediums, isFetching: isProgramMediumsFetching }] =
+    useLazyGetProgramMediumsListQuery()
+  const [fetchProgramSecondLanguages, { data: programSecondLanguages, isFetching: isProgramSecondLanguagesFetching }] =
+    useLazyGetProgramSecondLanguagesListQuery()
+  const [createProgramBook, { isLoading: isCreateProgramBook }] = useCreateProgramBookMutation()
+  const [updateProgramBook, { isLoading: isUpdateProgramBook }] = useUpdateProgramBookMutation()
+  const [deleteProgramBook, { isLoading: isDeleteProgramBook }] = useDeleteProgramBookMutation()
+
+  const isLoading =
+    isSegmentsFetching ||
+    isBooksFetching ||
+    isProgramsFetching ||
+    isProgramMediumsFetching ||
+    isProgramSecondLanguagesFetching
+
+  const { setLoading } = useLoader()
+
+  setLoading(isLoading)
 
   const [bookDetail, setBookDetail] = useState<ProgramBook>({
     program_id: '',
@@ -114,7 +133,15 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
   }
 
   const handleRemoveBook = () => {
-    alert(selectedBook?.book_id) // TODO: Need to add API Call and test functionality
+    if (!selectedBook) return
+    deleteProgramBook(selectedBook?.program_book_id)
+      .unwrap()
+      .then(res => {
+        triggerToast(res, { variant: ToastVariants.SUCCESS })
+      })
+      .catch(e => {
+        triggerToast(e.data, { variant: ToastVariants.ERROR })
+      })
     handleRemoveBookConfirmationModalClose()
   }
 
@@ -126,9 +153,9 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
             <Button color='error' variant='outlined' onClick={handleRemoveBookConfirmationModalClose}>
               Decline
             </Button>
-            <Button variant='contained' onClick={handleRemoveBook}>
+            <LoadingButton loading={isDeleteProgramBook} variant='contained' onClick={handleRemoveBook}>
               Confirm
-            </Button>
+            </LoadingButton>
           </Box>
         }
         shouldRestrictCloseOnOuterClick
@@ -188,11 +215,12 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
   const BookModalFooter = () => {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <Button
+        <LoadingButton
+          loading={isCreateProgramBook || isUpdateProgramBook}
           disabled={hadError()}
           onClick={handleSubmit}
           variant='contained'
-        >{`${selectedBook ? 'Edit' : 'Add'} Book`}</Button>
+        >{`${selectedBook ? 'Edit' : 'Add'} Book`}</LoadingButton>
       </Box>
     )
   }

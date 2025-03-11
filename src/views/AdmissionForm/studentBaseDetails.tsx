@@ -1,6 +1,7 @@
 import {
   Box,
   CardContent,
+  CircularProgress,
   FormControlLabel,
   FormLabel,
   MenuItem,
@@ -43,6 +44,7 @@ import { convertDateStringToDate } from 'src/utils/helpers'
 import { useLoader } from 'src/@core/context/loaderContext'
 import { dateToString } from 'src/lib/helpers'
 import { useImageViewer } from 'src/@core/context/imageViewerContext'
+import { LoadingButton } from '@mui/lab'
 
 const ImgStyled = styled('img')(({ theme }) => ({
   width: 120,
@@ -95,8 +97,10 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
     }
   }
 
-  const [fetchProgramMediums, { data: programMediums }] = useLazyGetProgramMediumsListQuery()
-  const [fetchProgramSecondLanguages, { data: programSecondLanguages }] = useLazyGetProgramSecondLanguagesListQuery()
+  const [fetchProgramMediums, { data: programMediums, isFetching: isProgramMediumsLoading }] =
+    useLazyGetProgramMediumsListQuery()
+  const [fetchProgramSecondLanguages, { data: programSecondLanguages, isFetching: isSecondLanguageLoading }] =
+    useLazyGetProgramSecondLanguagesListQuery()
   const { data: occupationsList } = useGetOccupationsListQuery()
   const { data: gendersList } = useGetGendersListQuery()
   const { data: communities } = useGetCommunitiesListQuery()
@@ -105,8 +109,8 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
   const { data: segmentsList } = useGetSegmentsListQuery()
   const { data: programsList } = useGetProgramsListQuery(true)
 
-  const [createUpdateAdmission] = useCreateUpdateAdmissionMutation()
-  const [uploadStudentPhoto] = useUploadStudentPhotoMutation()
+  const [createUpdateAdmission, { isLoading: IsupdatingAdmission }] = useCreateUpdateAdmissionMutation()
+  const [uploadStudentPhoto, { isLoading: isUploadingPhoto }] = useUploadStudentPhotoMutation()
   const [fetchApplicationDetail, { isLoading: isApplicationLoading }] = useLazyGetAdmissionDetailQuery()
 
   const getDependentData = (program_id: string) => {
@@ -300,6 +304,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
       id: `${TOP_LEVEL_ID}__medium`,
       label: 'Medium',
       key: 'medium',
+      isLoading: isProgramMediumsLoading,
       value: applicationDetails?.medium,
       onChange: handleChange('medium'),
       menuOptions: (programMediums ?? []).map(each => {
@@ -311,6 +316,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
       id: `${TOP_LEVEL_ID}__second-language`,
       label: 'Second Language',
       key: 'second_language',
+      isLoading: isSecondLanguageLoading,
       value: applicationDetails?.second_language,
       onChange: handleChange('second_language'),
       menuOptions: (programSecondLanguages ?? []).map(each => {
@@ -470,78 +476,99 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
   }
 
   const renderInputFields = () =>
-    fields.map(({ type, id, customInput, label, placeholder, onChange, key, caption, value, variant, menuOptions }) => (
-      <Grid item xs={12} sm={6} key={id}>
-        {type === InputTypes.INPUT ? (
-          <>
-            <small>
-              {label} {mandatoryFields.includes(key) ? '*' : ''}
-            </small>
-            <TextField
-              fullWidth
-              id={id}
-              error={!!getHadError(key)}
-              value={value}
-              defaultValue={value}
-              type={variant}
-              placeholder={placeholder ?? ''}
-              onChange={onChange}
-            />
-            {caption && <small>{caption}</small>}
-            {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-          </>
-        ) : type === InputTypes.SELECT ? (
-          <FormControl fullWidth required={mandatoryFields.includes(key)}>
-            <small>{label}</small>
-            <Select id={id} value={value ?? ''} onChange={onChange} error={!!getHadError(key)}>
-              {(menuOptions ?? []).map(({ value, label }) => (
-                <MenuItem key={value} value={value}>
-                  {label}
-                </MenuItem>
-              ))}
-            </Select>
-            {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-          </FormControl>
-        ) : type === InputTypes.RADIO ? (
-          <Grid item xs={12}>
-            <FormControl required error={!!getHadError(key)}>
-              <FormLabel id={id}>{label}</FormLabel>
-              <RadioGroup
-                row
-                aria-labelledby={id}
-                name={id}
+    fields.map(
+      ({
+        type,
+        id,
+        customInput,
+        label,
+        placeholder,
+        onChange,
+        key,
+        caption,
+        value,
+        variant,
+        menuOptions,
+        isLoading
+      }) => (
+        <Grid item xs={12} sm={6} key={id}>
+          {type === InputTypes.INPUT ? (
+            <>
+              <small>
+                {label} {mandatoryFields.includes(key) ? '*' : ''}
+              </small>
+              <TextField
+                fullWidth
                 id={id}
-                value={value ?? ''}
-                onChange={(_, val) =>
-                  handleChange(key as keyof CreateStudentAdmissionRequest)({
-                    target: { value: val }
-                  } as ChangeEvent<HTMLInputElement>)
-                }
-              >
-                {(menuOptions ?? []).map(each => (
-                  <FormControlLabel value={each.value} control={<Radio />} label={each.label} />
-                ))}
-              </RadioGroup>
-              {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-            </FormControl>
-          </Grid>
-        ) : type === InputTypes.DATE ? (
-          <Grid item xs={12}>
-            <Box display='flex' flexDirection='column'>
-              <small>Date of Birth</small>
-              <DatePicker
-                selected={dob}
-                required={mandatoryFields.includes(key)}
-                customInput={customInput}
-                id={id}
+                error={!!getHadError(key)}
+                value={value}
+                defaultValue={value}
+                type={variant}
+                placeholder={placeholder ?? ''}
                 onChange={onChange}
               />
+              {caption && <small>{caption}</small>}
               {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-            </Box>
-          </Grid>
-        ) : null}
-      </Grid>
-    ))
+            </>
+          ) : type === InputTypes.SELECT ? (
+            <FormControl fullWidth required={mandatoryFields.includes(key)}>
+              <small>{label}</small>
+              <Select id={id} value={value ?? ''} onChange={onChange} error={!!getHadError(key)}>
+                {isLoading ? (
+                  <MenuItem disabled>
+                    <CircularProgress size={24} />
+                  </MenuItem>
+                ) : (
+                  (menuOptions ?? []).map(({ value, label }) => (
+                    <MenuItem key={value} value={value}>
+                      {label}
+                    </MenuItem>
+                  ))
+                )}
+              </Select>
+              {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+            </FormControl>
+          ) : type === InputTypes.RADIO ? (
+            <Grid item xs={12}>
+              <FormControl required error={!!getHadError(key)}>
+                <FormLabel id={id}>{label}</FormLabel>
+                <RadioGroup
+                  row
+                  aria-labelledby={id}
+                  name={id}
+                  id={id}
+                  value={value ?? ''}
+                  onChange={(_, val) =>
+                    handleChange(key as keyof CreateStudentAdmissionRequest)({
+                      target: { value: val }
+                    } as ChangeEvent<HTMLInputElement>)
+                  }
+                >
+                  {(menuOptions ?? []).map(each => (
+                    <FormControlLabel value={each.value} control={<Radio />} label={each.label} />
+                  ))}
+                </RadioGroup>
+                {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+              </FormControl>
+            </Grid>
+          ) : type === InputTypes.DATE ? (
+            <Grid item xs={12}>
+              <Box display='flex' flexDirection='column'>
+                <small>Date of Birth</small>
+                <DatePicker
+                  selected={dob}
+                  required={mandatoryFields.includes(key)}
+                  customInput={customInput}
+                  id={id}
+                  onChange={onChange}
+                />
+                {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+              </Box>
+            </Grid>
+          ) : null}
+        </Grid>
+      )
+    )
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -594,9 +621,14 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
           {renderInputFields()}
 
           <Grid item xs={12}>
-            <Button variant='contained' sx={{ marginRight: 3.5 }} onClick={handleSubmit}>
+            <LoadingButton
+              loading={IsupdatingAdmission || isUploadingPhoto}
+              variant='contained'
+              sx={{ marginRight: 3.5 }}
+              onClick={handleSubmit}
+            >
               Save Changes
-            </Button>
+            </LoadingButton>
           </Grid>
         </Grid>
       </form>

@@ -30,7 +30,7 @@ const RenderFilterOptions = ({ onSubmit, fields }: RenderFilterProps) => {
 
   const handleSubmit = event => {
     event?.preventDefault()
-    let finalFilters = { ...filters }
+    let finalFilters = { ...filters, offset: 0 }
 
     let date: Date
     if (startDate) {

@@ -6,6 +6,7 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { BooksTypesResponse } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { useCreateBookMutation, useUpdateBookMutation } from 'src/store/services/adminServices'
+import { LoadingButton } from '@mui/lab'
 
 export interface BookTypeRequest {
   book_name: string
@@ -28,8 +29,8 @@ const CreateOrUpdateBookModal = ({ selectedBook, isOpen, onClose }: CreateUpdate
     available_quantity: 0
   })
   const { triggerToast } = useToast()
-  const [createBook] = useCreateBookMutation()
-  const [updateBook] = useUpdateBookMutation()
+  const [createBook, { isLoading: isCreatingBook }] = useCreateBookMutation()
+  const [updateBook, { isLoading: isUpdatingBook }] = useUpdateBookMutation()
 
   const resetState = () => {
     setBookType({ book_name: '', pages: 0, price: 0, available_quantity: 0 })
@@ -65,9 +66,14 @@ const CreateOrUpdateBookModal = ({ selectedBook, isOpen, onClose }: CreateUpdate
   const createBookFooter = () => {
     return (
       <Box display='flex' justifyContent='center'>
-        <Button disabled={shouldDisableSubmitButton} onClick={handleSubmit} variant='contained'>
+        <LoadingButton
+          loading={isCreatingBook || isUpdatingBook}
+          disabled={shouldDisableSubmitButton}
+          onClick={handleSubmit}
+          variant='contained'
+        >
           {selectedBook?.book_id ? 'Edit' : 'Create'}
-        </Button>
+        </LoadingButton>
       </Box>
     )
   }

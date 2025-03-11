@@ -6,6 +6,7 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { FeesTypesResponse } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { useCreateFeesTypeMutation, useUpdateFeesTypeMutation } from 'src/store/services/adminServices'
+import { LoadingButton } from '@mui/lab'
 
 export interface CreateFeesType {
   fees_type: string
@@ -22,8 +23,8 @@ const CreateOrUpdateFeesTypeModal = ({ selectedFeesType, isOpen, onClose }: Crea
     fees_type: ''
   })
   const { triggerToast } = useToast()
-  const [CreateFeesType] = useCreateFeesTypeMutation()
-  const [updateFeesType] = useUpdateFeesTypeMutation()
+  const [CreateFeesType, { isLoading: isCreatingFeesType }] = useCreateFeesTypeMutation()
+  const [updateFeesType, { isLoading: isUpdatingFeesType }] = useUpdateFeesTypeMutation()
 
   const resetState = () => {
     setFeesTypeDetails({ fees_type: '' })
@@ -51,9 +52,9 @@ const CreateOrUpdateFeesTypeModal = ({ selectedFeesType, isOpen, onClose }: Crea
   const createFeesTypeFooter = () => {
     return (
       <Box display='flex' justifyContent='center'>
-        <Button onClick={handleSubmit} variant='contained'>
+        <LoadingButton loading={isCreatingFeesType || isUpdatingFeesType} onClick={handleSubmit} variant='contained'>
           {selectedFeesType ? 'Edit' : 'Create'}
-        </Button>
+        </LoadingButton>
       </Box>
     )
   }

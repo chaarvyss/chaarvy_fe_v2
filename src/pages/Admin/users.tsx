@@ -1,15 +1,20 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { useLoader } from 'src/@core/context/loaderContext'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Permissions } from 'src/constants/permissions'
 import { isPermitted } from 'src/lib/helpers'
-import { TableHeaderStatCardProps, UsersListResponse } from 'src/lib/interfaces'
-import DropDownMenu, { filterFalseAndInvalid } from 'src/reusable_components/dropDownMenu'
+import { FilterProps, TableHeaderStatCardProps, User } from 'src/lib/interfaces'
+import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
+import DropDownMenu from 'src/reusable_components/dropDownMenu'
+import ChaarvyPagination from 'src/reusable_components/Pagination'
+import SideDrawer from 'src/reusable_components/sideDrawer'
 import TableTilteHeader, { TableTitleHeaderProps } from 'src/reusable_components/TableTilteHeader'
+import { useUpdateUserStatusMutation } from 'src/store/services/adminServices'
 import { useLazyGetUsersListQuery } from 'src/store/services/listServices'
 import { statusColors } from 'src/utils/constants'
 import { ChaarvyIconFontSize, ThemeColorEnum } from 'src/utils/enums'
-import GetChaarvyIcons, { IconsEnum } from 'src/utils/icons'
+import GetChaarvyIcons from 'src/utils/icons'
 import {
   Avatar,
   Box,
@@ -25,68 +30,36 @@ import {
   Typography
 } from 'src/utils/muiElements'
 
-const salesData: TableHeaderStatCardProps[] = [
-  {
-    value: '245k',
-    title: 'Sales',
-    color: ThemeColorEnum.Primary,
-    icon: <GetChaarvyIcons iconName='AbTesting' fontSize={ChaarvyIconFontSize.lg} />
-  },
-  {
-    value: '12.5k',
-    title: 'Customers',
-    color: ThemeColorEnum.Success,
-    icon: <GetChaarvyIcons iconName='Abacus' fontSize={ChaarvyIconFontSize.lg} />
-  },
-  {
-    value: '1.54k',
-    color: ThemeColorEnum.Warning,
-    title: 'Products',
-    icon: <GetChaarvyIcons iconName='Abacus' fontSize={ChaarvyIconFontSize.lg} />
-  },
-  {
-    value: '$88k',
-    color: ThemeColorEnum.Info,
-    title: 'Revenue',
-    icon: <GetChaarvyIcons iconName='Abacus' fontSize={ChaarvyIconFontSize.lg} />
-  }
-]
-
 const Users = () => {
   const { triggerToast } = useToast()
-  const [fetchUsersList, { data: usersList }] = useLazyGetUsersListQuery()
+  const [fetchUsersList, { data: usersList, isLoading: isFetchingUsers }] = useLazyGetUsersListQuery()
+  const [updateUserStatus, { isLoading: isStatusUpdating }] = useUpdateUserStatusMutation()
+  const { setLoading } = useLoader()
+
+  const [filters, setFilters] = useState<FilterProps>()
+
+  const usersData: TableHeaderStatCardProps[] = [
+    {
+      value: usersList?.counts?.total ?? 0,
+      title: 'Total Users',
+      color: ThemeColorEnum.Primary,
+      icon: <GetChaarvyIcons iconName='Group' fontSize={ChaarvyIconFontSize.lg} />
+    },
+    {
+      value: usersList?.counts?.filtered ?? 0,
+      title: 'Filtered Users',
+      color: ThemeColorEnum.Success,
+      icon: <GetChaarvyIcons iconName='Abacus' fontSize={ChaarvyIconFontSize.lg} />
+    }
+  ]
 
   useEffect(() => {
-    fetchUsersList()
+    fetchUsersList(filters)
       .unwrap()
       .catch(e => {
-        triggerToast(e.data.detail, { variant: ToastVariants.ERROR })
+        triggerToast(e.data, { variant: ToastVariants.ERROR })
       })
-  }, [])
-
-  const users: UsersListResponse[] = usersList || []
-
-  const handleUpdateUserClick = (user_id: string) => {
-    alert('updating user')
-  }
-
-  const handleUpdateUserPermissionsClick = (user_id: string) => {
-    alert('updating user permissions')
-  }
-
-  const getDropDownOptions = (user: UsersListResponse) =>
-    filterFalseAndInvalid([
-      isPermitted(Permissions.UPDATE_USER) && {
-        id: user.user_id,
-        label: 'Update details',
-        onOptionClick: () => handleUpdateUserClick(user.user_id)
-      },
-      isPermitted(Permissions.UPDATE_USER_PERMISSIONS) && {
-        id: user.user_id,
-        label: 'Update Permissions',
-        onOptionClick: () => handleUpdateUserPermissionsClick(user.user_id)
-      }
-    ])
+  }, [filters])
 
   const handleCreateUserClick = () => {
     alert('creating user')
@@ -95,16 +68,18 @@ const Users = () => {
   const getUserTableHeader = () => {
     const props: TableTitleHeaderProps = {
       title: 'Users',
-      stats: salesData,
-      onButtonClick: handleCreateUserClick
-    }
-
-    if (isPermitted(Permissions.CREATE_USER)) {
-      props['buttonTitle'] = 'Create User'
+      stats: usersData,
+      onButtonClick: handleCreateUserClick,
+      showFilterIcon: true,
+      buttonTitle: 'Create User'
     }
 
     return props
   }
+
+  const isLoading = isStatusUpdating || isFetchingUsers
+
+  setLoading(isLoading)
 
   return (
     <>
@@ -112,18 +87,18 @@ const Users = () => {
       <Paper>
         <Card>
           <TableContainer>
-            <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
+            <Table aria-label='table in dashboard'>
               <TableHead>
                 <TableRow>
                   <TableCell>Name</TableCell>
-                  <TableCell>Email</TableCell>
                   <TableCell>Role</TableCell>
+                  <TableCell>Email</TableCell>
                   <TableCell>Status</TableCell>
-                  <TableCell></TableCell>
+                  <TableCell width='10px'>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {users.map(user => (
+                {(usersList?.users ?? []).map(user => (
                   <TableRow
                     hover
                     key={user.user_id || `${user.name}-${user.email}`}
@@ -131,19 +106,20 @@ const Users = () => {
                   >
                     <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
                       <Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '1rem' }}>
-                        <Avatar />
+                        <ChaarvyAvatar src={user.profile_pic} alt={user.name} />
                         <Box sx={{ flexDirection: 'column' }}>
                           <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>{user.name}</Typography>
-                          <Typography variant='caption'>{user.role}</Typography>
+                          <Typography variant='caption'>{user.mobile}</Typography>
                         </Box>
                       </Box>
                     </TableCell>
+                    <TableCell>{user.role_name}</TableCell>
                     <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.role}</TableCell>
                     <TableCell>
                       <Chip
-                        label={user.active === 1 ? 'Active' : 'Inactive'}
-                        color={user.active === 1 ? statusColors.active : statusColors.inactive}
+                        onClick={() => updateUserStatus(user.user_id)}
+                        label={user.status === 1 ? 'Active' : 'Inactive'}
+                        color={user.status === 1 ? statusColors.active : statusColors.inactive}
                         sx={{
                           height: 24,
                           fontSize: '0.75rem',
@@ -154,13 +130,13 @@ const Users = () => {
                     </TableCell>
 
                     <TableCell width='10px'>
-                      <DropDownMenu dropDownMenuOptions={getDropDownOptions(user)} />
+                      <GetChaarvyIcons iconName='Pencil' />
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-            {users.length == 0 && (
+            {(usersList?.users ?? []).length == 0 && (
               <Box justifyContent='center' alignItems='center' paddingBottom='2rem'>
                 <Typography variant='h6' textAlign='center'>
                   No Users Available
@@ -168,6 +144,10 @@ const Users = () => {
               </Box>
             )}
           </TableContainer>
+          <ChaarvyPagination
+            total={usersList?.counts?.filtered ?? 0}
+            onChange={props => setFilters({ ...filters, ...props })}
+          />
         </Card>
       </Paper>
     </>

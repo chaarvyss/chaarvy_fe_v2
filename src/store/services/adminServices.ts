@@ -255,6 +255,26 @@ const adminServiceApi = api.injectEndpoints({
           body: formData
         }
       }
+    }),
+    updateUserStatus: build.mutation<string, string>({
+      invalidatesTags: [CacheTag.ListUsers],
+      query: id => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.update.userStatus,
+          params: { id }
+        }
+      }
+    }),
+    deleteProgramBook: build.mutation<string, string>({
+      invalidatesTags: [CacheTag.ListProgramBooks],
+      query: id => {
+        return {
+          method: HttpRequestMethods.DELETE,
+          url: urlConstants.admin.delete.programBook,
+          params: { id }
+        }
+      }
     })
   })
 })
@@ -278,5 +298,7 @@ export const {
   useUpdateProgramBookMutation,
   useCreateProgramSegmentMutation,
   useUpdateProgramStatusMutation,
-  useUploadCollegeLogoMutation
+  useUploadCollegeLogoMutation,
+  useUpdateUserStatusMutation,
+  useDeleteProgramBookMutation
 } = adminServiceApi

@@ -22,6 +22,7 @@ import { ThemeColorEnum } from 'src/utils/enums'
 import GetChaarvyIcons from 'src/utils/icons'
 import PaymentFinaliseModal from './paymentFinaliseModal'
 import { Checkbox, FormControlLabel } from '@mui/material'
+import { useLoader } from 'src/@core/context/loaderContext'
 
 interface FeesDetailsProps {
   application_id?: string
@@ -29,10 +30,18 @@ interface FeesDetailsProps {
 }
 
 const FeesDetails = ({ application_id, segment_id }: FeesDetailsProps) => {
+  const { setLoading } = useLoader()
+
   const [studentFees, setStudentFees] = useState<StudentProgramFeesDetailsResponse>()
   const [showFeesFinalizeModal, setShowFeesFinalizeModal] = useState(false)
-  const [fetchStudentAdmissionFeesDetails] = useLazyGetStudentAdmissionFeesDetailsQuery()
-  const [fetchStudentPayableFees, { data: finalizedFees, reset }] = useLazyGetStudentPayableFeesDetailsQuery()
+  const [fetchStudentAdmissionFeesDetails, { isFetching: isFetchingStudentFeesDetails }] =
+    useLazyGetStudentAdmissionFeesDetailsQuery()
+  const [fetchStudentPayableFees, { data: finalizedFees, reset, isFetching: isFetchingStudentPayableFees }] =
+    useLazyGetStudentPayableFeesDetailsQuery()
+
+  const loading = isFetchingStudentFeesDetails || isFetchingStudentPayableFees
+
+  setLoading(loading)
 
   const getActualPayableFees = () => {
     application_id &&

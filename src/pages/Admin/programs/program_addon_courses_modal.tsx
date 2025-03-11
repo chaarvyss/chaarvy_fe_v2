@@ -7,9 +7,7 @@ import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, Ta
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
 import { ProgramAddonCourseResponse, Program, AddOnCourse } from 'src/lib/types'
-import ChaarvyAccordian from 'src/reusable_components/chaarvyAccordian'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import DropDownMenu from 'src/reusable_components/dropDownMenu'
 
 import { useGetAddonCoursesListQuery, useLazyGetProgramsListQuery } from 'src/store/services/listServices'
 import { CreateProgramAddonCourseRequest } from 'src/store/services/feesServices'

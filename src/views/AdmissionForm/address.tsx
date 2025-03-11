@@ -1,4 +1,4 @@
-import { CardContent, MenuItem, Select, SelectChangeEvent } from '@mui/material'
+import { CardContent, CircularProgress, MenuItem, Select, SelectChangeEvent } from '@mui/material'
 import React, { ChangeEvent, useEffect, useState } from 'react'
 
 import { Button, FormControl, Grid, TextField } from '@muiElements'
@@ -12,6 +12,8 @@ import { ErrorObject, InputFields } from 'src/lib/types'
 import { InputTypes, InputVariants } from 'src/lib/enums'
 import { useLazyGetDistrictsListQuery, useGetStateListQuery } from 'src/store/services/listServices'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import { useLoader } from 'src/@core/context/loaderContext'
+import { LoadingButton } from '@mui/lab'
 
 interface AddressProps {
   application_id?: string
@@ -34,12 +36,16 @@ const StudentAddress = ({ application_id }: AddressProps) => {
   const [errors, setErrors] = useState<Array<ErrorObject>>([])
   const [studentAddress, setStudentAddress] = useState<Address>()
   const { triggerToast } = useToast()
+  const { setLoading } = useLoader()
+
   const { data: statesList } = useGetStateListQuery()
-  const [fetchDistrictsList, { data: districtsList }] = useLazyGetDistrictsListQuery()
+  const [fetchDistrictsList, { data: districtsList, isFetching: isDistrictsLoading }] = useLazyGetDistrictsListQuery()
 
-  const [createUpdateAddress] = useCreateStudentAddressMutation()
+  const [createUpdateAddress, { isLoading: isUpdatingAddress }] = useCreateStudentAddressMutation()
 
-  const { data: address } = useGetStudentAddressQuery(application_id ?? '')
+  const { data: address, isFetching: isFetchingAddress } = useGetStudentAddressQuery(application_id ?? '')
+
+  setLoading(isFetchingAddress)
 
   useEffect(() => {
     setStudentAddress(address ?? undefined)
@@ -146,6 +152,7 @@ const StudentAddress = ({ application_id }: AddressProps) => {
       id: `${TOP_LEVEL_ID}__district`,
       label: 'District',
       key: 'district',
+      isLoading: isDistrictsLoading,
       value: studentAddress?.district,
       onChange: handleAddressChange('district'),
       menuOptions: (districtsList ?? []).map(each => {
@@ -168,7 +175,7 @@ const StudentAddress = ({ application_id }: AddressProps) => {
   }
 
   const renderInputFields = () =>
-    fields.map(({ type, id, label, placeholder, onChange, key, caption, value, variant, menuOptions }) => (
+    fields.map(({ type, id, label, placeholder, onChange, key, caption, isLoading, value, variant, menuOptions }) => (
       <Grid item xs={12} sm={6} key={id}>
         {type === InputTypes.INPUT ? (
           <>
@@ -193,11 +200,17 @@ const StudentAddress = ({ application_id }: AddressProps) => {
               {label} <span style={{ color: 'red' }}>{mandatoryFields.includes(key) ? '*' : ''}</span>
             </small>
             <Select id={id} value={value ?? ''} onChange={onChange} error={!!getHadError(key)}>
-              {(menuOptions ?? []).map(({ value, label }) => (
-                <MenuItem key={value} value={value}>
-                  {label}
+              {isLoading ? (
+                <MenuItem disabled>
+                  <CircularProgress size={24} />
                 </MenuItem>
-              ))}
+              ) : (
+                (menuOptions ?? []).map(({ value, label }) => (
+                  <MenuItem key={value} value={value}>
+                    {label}
+                  </MenuItem>
+                ))
+              )}
             </Select>
             {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
           </FormControl>
@@ -220,14 +233,22 @@ const StudentAddress = ({ application_id }: AddressProps) => {
     }
   }
 
+  const disableSubmitButton = mandatoryFields.some(each => !studentAddress?.[each])
+
   return (
     <CardContent>
       <Grid container spacing={7}>
         {renderInputFields()}
         <Grid item xs={12}>
-          <Button variant='contained' sx={{ marginRight: 3.5 }} onClick={handleSubmit}>
+          <LoadingButton
+            loading={isUpdatingAddress}
+            disabled={disableSubmitButton || errors.length > 0}
+            variant='contained'
+            sx={{ marginRight: 3.5 }}
+            onClick={handleSubmit}
+          >
             Save Changes
-          </Button>
+          </LoadingButton>
         </Grid>
       </Grid>
     </CardContent>

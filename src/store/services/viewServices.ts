@@ -21,6 +21,24 @@ export interface CollegeDetailResponse {
   contact_numbers?: string
 }
 
+export interface PaymentDetailResponse {
+  admission_number: string
+  amount: string
+  college_name: string
+  payment_mode: string
+  receipt_number: string
+  payment_datetime: string
+  student_name: string
+  father_name: string
+  campus_name: string
+  group: string
+  medium: string
+  gender: string
+  transaction_id: string
+  section: string
+  student_type: string
+}
+
 const viewServiceApi = api.injectEndpoints({
   endpoints: build => ({
     getProgramSegmentDetails: build.query<ProgramSegment[], string>({
@@ -41,10 +59,23 @@ const viewServiceApi = api.injectEndpoints({
           url: urlConstants.view.myDetails
         }
       }
+    }),
+    getPaymentDetail: build.query<PaymentDetailResponse, string>({
+      query: payment_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.view.paymentDetail,
+          params: { payment_id }
+        }
+      }
     })
   }),
   overrideExisting: true
 })
 
-export const { useLazyGetProgramSegmentDetailsQuery, useGetCollegeDetailsQuery, useLazyGetCollegeDetailsQuery } =
-  viewServiceApi
+export const {
+  useLazyGetProgramSegmentDetailsQuery,
+  useGetCollegeDetailsQuery,
+  useLazyGetCollegeDetailsQuery,
+  useLazyGetPaymentDetailQuery
+} = viewServiceApi
