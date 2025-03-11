@@ -42,14 +42,23 @@ export interface FilterProps {
   medium?: string
 }
 
-export interface UsersListResponse {
-  active: number
-  email: string
-  mobile: string
-  name: string
-  role: string
+export interface User {
   user_id: string
   username: string
+  name: string
+  email: string
+  mobile: string
+  profile_pic: string
+  status: number
+  role_name: string
+}
+
+export interface UsersListResponse {
+  users: User[]
+  counts: {
+    total: number
+    filtered: number
+  }
 }
 
 export interface TableHeaders {
@@ -68,6 +77,14 @@ export interface PaymentsListRequest {
   searchText?: string
   startDate?: string // 2025-03-17
   endDate?: string
+}
+
+export interface UsersListRequest {
+  limit?: number
+  offset?: number
+  searchText?: string
+  role?: string
+  status?: number
 }
 
 export interface StudentPayment {

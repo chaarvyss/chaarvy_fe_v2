@@ -8,12 +8,16 @@ import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import { useGetBooksListQuery } from 'src/store/services/listServices'
 
 import CreateOrUpdateBookModal from './createBookModal'
+import { useLoader } from 'src/@core/context/loaderContext'
 
 const FeesTypes = () => {
-  const { data: booksTypes } = useGetBooksListQuery()
+  const { data: booksTypes, isLoading } = useGetBooksListQuery()
   const [isBookModalOpen, setIsFeesTypeModalOpen] = useState<boolean>(false)
   const [selectedBook, setSelectedBook] = useState<BooksTypesResponse>()
 
+  const { setLoading } = useLoader()
+
+  setLoading(isLoading)
   const handleOnModalClose = () => {
     setSelectedBook(undefined)
     setIsFeesTypeModalOpen(false)

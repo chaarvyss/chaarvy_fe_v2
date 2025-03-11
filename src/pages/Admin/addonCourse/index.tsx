@@ -29,19 +29,25 @@ import {
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Check, Close, Pencil } from 'mdi-material-ui'
+import { useLoader } from 'src/@core/context/loaderContext'
+import { LoadingButton } from '@mui/lab'
 
 const FeesTypes = () => {
-  const { data: addonCourses } = useGetAddonCoursesListQuery(false)
+  const { data: addonCourses, isLoading } = useGetAddonCoursesListQuery(false)
   const [isAddonCourseModalOpen, setIsAddonCourseModalOpen] = useState<boolean>(false)
   const [selectedAddonCourse, setSelectedAddonCourse] = useState<AddOnCourse>()
 
   const [addonCourseName, setAddonCourseName] = useState<string>()
 
-  const [updateAddonCourseStatus] = useUpdateAddonCourseStatusMutation()
-  const [createAddonCourse] = useCreateAddonCourseMutation()
-  const [updateAddonCourse] = useUpdateAddonCourseMutation()
+  const [updateAddonCourseStatus, { isLoading: isCourseStatusUpdating }] = useUpdateAddonCourseStatusMutation()
+  const [createAddonCourse, { isLoading: isCourseCreating }] = useCreateAddonCourseMutation()
+  const [updateAddonCourse, { isLoading: isCourseUpdating }] = useUpdateAddonCourseMutation()
 
   const { triggerToast } = useToast()
+
+  const { setLoading } = useLoader()
+
+  setLoading(isLoading || isCourseStatusUpdating)
 
   const handleOnModalClose = () => {
     setSelectedAddonCourse(undefined)
@@ -79,9 +85,9 @@ const FeesTypes = () => {
   const createProgramFooter = () => {
     return (
       <Box display='flex' justifyContent='center'>
-        <Button onClick={handleSubmit} variant='contained'>
+        <LoadingButton loading={isCourseCreating || isCourseUpdating} onClick={handleSubmit} variant='contained'>
           Create Addon Course
-        </Button>
+        </LoadingButton>
       </Box>
     )
   }

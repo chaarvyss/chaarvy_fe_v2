@@ -1,6 +1,8 @@
+import { LoadingButton } from '@mui/lab'
 import { Box, Button, Checkbox, FormControlLabel, FormGroup, Typography } from '@mui/material'
 import { Grid } from '@muiElements'
 import React, { ChangeEvent, useEffect, useState } from 'react'
+import { useLoader } from 'src/@core/context/loaderContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import {
   useEnrollAddonCourseMutation,
@@ -14,13 +16,14 @@ interface AddonCourseDetailsProps {
 }
 
 const AddonCourseDetails = ({ application_id, programId }: AddonCourseDetailsProps) => {
-  const [fetchAddonCourse, { data: addonCourses }] = useLazyGetProgramAddonListQuery()
+  const [fetchAddonCourse, { data: addonCourses, isFetching: isLoadingCourses }] = useLazyGetProgramAddonListQuery()
   const [selectedAddonCourses, setSelectedAddonCourses] = useState<Array<string>>([])
   const [fetchStudentEnrolledAddonCourses] = useLazyGetStudentEnrollendAddonCoursesQuery()
-
-  const [enrollAddonCourse] = useEnrollAddonCourseMutation()
-
+  const [enrollAddonCourse, { isLoading: isEnrollingCourse }] = useEnrollAddonCourseMutation()
   const { triggerToast } = useToast()
+
+  const { setLoading } = useLoader()
+
   useEffect(() => {
     programId && fetchAddonCourse(programId)
     application_id &&
@@ -52,6 +55,9 @@ const AddonCourseDetails = ({ application_id, programId }: AddonCourseDetailsPro
     }
   }
 
+  const isLoading = isLoadingCourses
+  setLoading(isLoading)
+
   return (
     <Box padding='1rem'>
       <Typography variant='h6' marginBottom='1rem'>
@@ -82,7 +88,9 @@ const AddonCourseDetails = ({ application_id, programId }: AddonCourseDetailsPro
         </Typography>
       )}
       <Box justifyContent='center' display='flex'>
-        <Button onClick={handleSubmit}>Save Changes</Button>
+        <LoadingButton loading={isEnrollingCourse} onClick={handleSubmit}>
+          Save Changes
+        </LoadingButton>
       </Box>
     </Box>
   )

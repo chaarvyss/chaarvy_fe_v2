@@ -1,4 +1,5 @@
-import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@muiElements'
+import { LoadingButton } from '@mui/lab'
+import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@muiElements'
 import React from 'react'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
@@ -15,7 +16,7 @@ interface Props {
 }
 
 const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose, application_id, segment_id }: Props) => {
-  const [createStudentPayableFees] = useCreateStudentPayableFeesMutation()
+  const [createStudentPayableFees, { isLoading }] = useCreateStudentPayableFeesMutation()
   const { triggerToast } = useToast()
 
   let fees = [
@@ -110,9 +111,9 @@ const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose, application_id, se
           <Button variant='outlined' color='error' onClick={() => onClose(false)}>
             Close
           </Button>
-          <Button onClick={handleSubmit} variant='contained'>
+          <LoadingButton loading={isLoading} onClick={handleSubmit} variant='contained'>
             Submit
-          </Button>
+          </LoadingButton>
         </Box>
       </TableContainer>
     </ChaarvyModal>

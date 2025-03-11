@@ -1,6 +1,6 @@
 import { FormControl, MenuItem, Pagination, Select, SelectChangeEvent } from '@mui/material'
 import { Box } from '@muiElements'
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FilterProps } from 'src/lib/interfaces'
 
 interface PaginationProps {

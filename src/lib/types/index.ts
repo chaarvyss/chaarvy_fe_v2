@@ -70,6 +70,7 @@ export type InputFields = {
   menuOptions?: MenuOptions[]
   showYearDropdown?: boolean
   showMonthDropdown?: boolean
+  isLoading?: boolean
 }
 
 export type ErrorObject = {

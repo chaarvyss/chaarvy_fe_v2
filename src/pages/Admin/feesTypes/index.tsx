@@ -8,14 +8,18 @@ import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import { useLazyGetFeesTypesListQuery } from 'src/store/services/listServices'
 
 import CreateOrUpdateFeesTypeModal from './createFeesModal'
+import { useLoader } from 'src/@core/context/loaderContext'
 
 const TOP_LEVEL_ID = 'fees-type-list'
 
 const FeesTypes = () => {
-  const [fetchFeesTypes, { data: getFeesTypes }] = useLazyGetFeesTypesListQuery()
+  const [fetchFeesTypes, { data: getFeesTypes, isLoading }] = useLazyGetFeesTypesListQuery()
   const [isFeesTypeModalOpen, setIsFeesTypeModalOpen] = useState<boolean>(false)
   const [selectedFeesType, setSelectedFeesType] = useState<FeesTypesResponse>()
 
+  const { setLoading } = useLoader()
+
+  setLoading(isLoading)
   useEffect(() => {
     fetchFeesTypes()
   }, [])

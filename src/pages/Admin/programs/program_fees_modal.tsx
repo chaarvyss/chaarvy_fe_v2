@@ -15,7 +15,7 @@ import { Check, Close } from '@mdiElements'
 import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
-import { Fees, Program, ProgramSecondLanguagesResponse } from 'src/lib/types'
+import { Fees, Program } from 'src/lib/types'
 import ChaarvyAccordian from 'src/reusable_components/chaarvyAccordian'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
@@ -31,6 +31,8 @@ import {
   useLazyGetProgramsListQuery
 } from 'src/store/services/listServices'
 import { useLazyGetProgramMediumsListQuery } from 'src/store/services/programServices'
+import { useLoader } from 'src/@core/context/loaderContext'
+import { LoadingButton } from '@mui/lab'
 
 interface ProgramFeesDetailsProps {
   selectedProgram?: Program
@@ -62,14 +64,26 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
     medium: ''
   })
 
-  const [fetchProgramFeesDetails, { data: feesDetails }] = useLazyGetProgramFeesDetailsQuery()
-  const [fetchProgramsList, { data: programsList }] = useLazyGetProgramsListQuery()
-  const [fetchFeesTypesList, { data: feesTypesList }] = useLazyGetFeesTypesListQuery()
-  const { data: segmentsList } = useGetSegmentsListQuery()
-  const [fetchProgramMediums, { data: programMediums }] = useLazyGetProgramMediumsListQuery()
+  const [fetchProgramFeesDetails, { data: feesDetails, isFetching: isFeesDetailsFetching }] =
+    useLazyGetProgramFeesDetailsQuery()
+  const [fetchProgramsList, { data: programsList, isFetching: isProgramsListFetching }] = useLazyGetProgramsListQuery()
+  const [fetchFeesTypesList, { data: feesTypesList, isFetching: isFeesTypesFetching }] = useLazyGetFeesTypesListQuery()
+  const { data: segmentsList, isFetching: isSegmentsListFetching } = useGetSegmentsListQuery()
+  const [fetchProgramMediums, { data: programMediums, isFetching: isProgramMediumFetching }] =
+    useLazyGetProgramMediumsListQuery()
 
-  const [updateFeeApi] = useUpdateProgramFeesMutation()
-  const [createFeesApi] = useCreateProgramFeesMutation()
+  const [updateFeeApi, { isLoading: isUpdatingFees }] = useUpdateProgramFeesMutation()
+  const [createFeesApi, { isLoading: isCreatingFees }] = useCreateProgramFeesMutation()
+
+  const { setLoading } = useLoader()
+  const isLoading =
+    isSegmentsListFetching ||
+    isFeesDetailsFetching ||
+    isProgramsListFetching ||
+    isFeesTypesFetching ||
+    isProgramMediumFetching
+
+  setLoading(isLoading)
 
   const onCreateProgramFeeClick = (segment_id?: string) => {
     setCreateProgramFeesDetails({
@@ -250,13 +264,14 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
             <Button onClick={handleAddProgramFeesModalClose} variant='outlined' color='error'>
               Cancel
             </Button>
-            <Button
+            <LoadingButton
+              loading={isUpdatingFees || isCreatingFees}
               variant='contained'
               disabled={isCreateProgramFeesButtonDisabled()}
               onClick={confirmCreateProgramFees}
             >
               Create
-            </Button>
+            </LoadingButton>
           </Box>
         </Box>
       </ChaarvyModal>

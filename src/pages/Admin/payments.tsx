@@ -1,8 +1,9 @@
 import {
+  Button,
   Card,
+  Grid,
   IconButton,
   Paper,
-  SelectChangeEvent,
   Table,
   TableBody,
   TableCell,
@@ -12,16 +13,19 @@ import {
   Tooltip,
   Typography
 } from '@mui/material'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLoader } from 'src/@core/context/loaderContext'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import RenderFilterOptions from 'src/common/filters'
 import { FilterProps, StudentPayment, TableHeaderStatCardProps } from 'src/lib/interfaces'
+import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import ChaarvyPagination from 'src/reusable_components/Pagination'
 import TableTilteHeader, { TableTitleHeaderProps } from 'src/reusable_components/TableTilteHeader'
 import { useLazyGetPaymentRecieptByPaymentIdQuery } from 'src/store/services/feesServices'
 import { useLazyGetPaymentsListQuery } from 'src/store/services/listServices'
+import { useLazyGetPaymentDetailQuery } from 'src/store/services/viewServices'
 import { ChaarvyIconFontSize, ThemeColorEnum } from 'src/utils/enums'
 import GetChaarvyIcons from 'src/utils/icons'
 import { Box } from 'src/utils/muiElements'
@@ -29,14 +33,23 @@ import { Box } from 'src/utils/muiElements'
 const Payments = () => {
   const { triggerToast } = useToast()
   const { openDrawer } = useSideDrawer()
+  const { setLoading } = useLoader()
 
-  const [fetchPaymentsList, { data: PaymentsList }] = useLazyGetPaymentsListQuery()
-  const [fetchPaymentReciept] = useLazyGetPaymentRecieptByPaymentIdQuery()
+  const [fetchPaymentsList, { data: PaymentsList, isFetching: isFetchingPayments }] = useLazyGetPaymentsListQuery()
+  const [fetchPaymentReciept, { isFetching: isFetchingPaymentReciept }] = useLazyGetPaymentRecieptByPaymentIdQuery()
+
+  const [fetchPaymentDetail, { data: paymentDetailResponse, reset, isFetching: isFetchingPaymentDetail }] =
+    useLazyGetPaymentDetailQuery()
+
+  const [selectedPayment, setSelectedPayment] = useState<StudentPayment>()
+
   const [filterProps, setFilterProps] = useState<FilterProps>({ limit: 20, offset: 0 })
 
   const onSubmit = (params?: FilterProps) => {
     fetchPaymentsList(params)
   }
+
+  setLoading(isFetchingPaymentDetail || isFetchingPayments || isFetchingPaymentReciept)
 
   const handleRecieptDownload = (payment: StudentPayment) => {
     fetchPaymentReciept(payment.payment_id)
@@ -60,6 +73,12 @@ const Payments = () => {
   const onFilterButtonClick = () => {
     openDrawer('Filters', <RenderFilterOptions onSubmit={onSubmit} fields={['search', 'dateRange']} />)
   }
+
+  useEffect(() => {
+    if (selectedPayment) {
+      fetchPaymentDetail(selectedPayment.payment_id)
+    }
+  }, [selectedPayment?.payment_id])
 
   useEffect(() => {
     fetchPaymentsList(filterProps)
@@ -102,8 +121,79 @@ const Payments = () => {
     return props
   }
 
+  const handleModalClose = () => {
+    setSelectedPayment(undefined)
+    reset()
+  }
+
+  const PaymentDetail = () => {
+    const {
+      admission_number,
+      amount,
+      college_name,
+      payment_mode,
+      receipt_number,
+      payment_datetime,
+      student_name,
+      father_name,
+      campus_name,
+      group,
+      medium,
+      transaction_id
+    } = paymentDetailResponse ?? {}
+
+    const items = [
+      { label: 'Admission Number', value: admission_number },
+      { label: 'Reciept Number', value: receipt_number },
+      { label: 'Student Name', value: student_name },
+      { label: 'Father Name', value: father_name },
+      { label: 'College Name', value: college_name },
+      { label: 'Campus Name', value: campus_name },
+      { label: 'Group', value: group },
+      { label: 'Medium', value: medium },
+      { label: 'Payment Mode', value: payment_mode },
+      { label: 'Payment Date', value: payment_datetime },
+      { label: 'Transaction Number', value: transaction_id },
+      { label: 'Amount', value: amount }
+    ]
+
+    if (selectedPayment == undefined) return
+
+    return (
+      <ChaarvyModal
+        modalSize='col-12 col-md-10 col-xl-8'
+        isOpen={true}
+        onClose={handleModalClose}
+        title='Payment Details'
+      >
+        <>
+          <Grid container spacing={7}>
+            {items.map(each => {
+              return (
+                <>
+                  <Grid item xs={6} md={3}>
+                    <Typography>{each.label}</Typography>
+                  </Grid>
+                  <Grid item xs={6} md={3}>
+                    <Typography flexWrap='wrap'>: {each.value}</Typography>
+                  </Grid>
+                </>
+              )
+            })}
+          </Grid>
+          <Box display='flex' justifyContent='center' alignItems='center' marginTop='1rem' padding='1rem'>
+            <Button onClick={() => handleRecieptDownload(selectedPayment)} variant='contained'>
+              Print Reciept
+            </Button>
+          </Box>
+        </>
+      </ChaarvyModal>
+    )
+  }
+
   return (
     <>
+      <PaymentDetail />
       {TableTilteHeader(getUserTableHeader())}
       <Paper>
         <Card>
@@ -117,7 +207,7 @@ const Payments = () => {
                   <TableCell>Transaction Number</TableCell>
                   <TableCell>Amount</TableCell>
                   <TableCell>Payment Date</TableCell>
-                  <TableCell></TableCell>
+                  <TableCell>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -136,6 +226,11 @@ const Payments = () => {
                     <TableCell>{payment.amount}</TableCell>
                     <TableCell>{payment.created_date}</TableCell>
                     <TableCell>
+                      <Tooltip title='Fees Details' placement='top'>
+                        <IconButton onClick={() => setSelectedPayment(payment)}>
+                          <GetChaarvyIcons iconName='Eye' fontSize='1.25rem' />
+                        </IconButton>
+                      </Tooltip>
                       <Tooltip title='Fees Reciept' placement='top'>
                         <IconButton onClick={() => handleRecieptDownload(payment)}>
                           <GetChaarvyIcons iconName='Download' fontSize='1.25rem' />

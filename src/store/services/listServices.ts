@@ -1,5 +1,11 @@
 import { urlConstants } from 'src/constants/urlConstants'
-import { PaymentModes, PaymentsListRequest, PaymentsListResponse, UsersListResponse } from 'src/lib/interfaces'
+import {
+  PaymentModes,
+  PaymentsListRequest,
+  PaymentsListResponse,
+  UsersListRequest,
+  UsersListResponse
+} from 'src/lib/interfaces'
 import {
   AddOnCourse,
   BooksTypesResponse,
@@ -138,11 +144,13 @@ const listServicesApi = api.injectEndpoints({
         }
       }
     }),
-    getUsersList: build.query<UsersListResponse[], void>({
-      query: () => {
+    getUsersList: build.query<UsersListResponse, UsersListRequest | undefined>({
+      providesTags: [CacheTag.ListUsers],
+      query: params => {
         return {
           method: HttpRequestMethods.GET,
-          url: urlConstants.list.users
+          url: urlConstants.list.users,
+          params
         }
       }
     }),

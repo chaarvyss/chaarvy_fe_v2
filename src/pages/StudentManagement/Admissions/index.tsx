@@ -54,12 +54,27 @@ const Admissions = () => {
   }
 
   const handleFilteredAdmissions = (params?: FilterProps) => {
-    params && fetchAdmissions({ ...params, ...filterProps })
+    params && fetchAdmissions({ ...filterProps, ...params })
   }
 
   const onFilterButtonClick = () => {
     openDrawer('Filters', <RenderFilterOptions onSubmit={handleFilteredAdmissions} fields={['search', 'program']} />)
   }
+
+  const admission_stats = [
+    {
+      value: admissionResponse?.counts?.total ?? 0,
+      title: 'Total Admissions',
+      color: 'success' as const,
+      icon: <GetChaarvyIcons iconName='AccountBoxMultipleOutline' />
+    },
+    {
+      value: admissionResponse?.counts?.filtered ?? 0,
+      title: 'Filtered Admissions',
+      color: 'info' as const,
+      icon: <GetChaarvyIcons iconName='FilterCheckOutline' />
+    }
+  ]
 
   return (
     <>
@@ -68,6 +83,7 @@ const Admissions = () => {
         buttonTitle: 'New Admission',
         onButtonClick: handleCreateAdmissionClick,
         showFilterIcon: true,
+        stats: admission_stats,
         handleFilterButtonClick: onFilterButtonClick
       })}
       <Paper>
@@ -100,7 +116,7 @@ const Admissions = () => {
                     <TableRow hover key={application_id}>
                       <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
                         <Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '1rem' }}>
-                          <ChaarvyAvatar src={photo_url} />
+                          <ChaarvyAvatar src={photo_url} alt={student_name} />
                           <Box sx={{ flexDirection: 'column' }}>
                             <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>
                               {student_name}

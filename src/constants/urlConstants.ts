@@ -55,7 +55,11 @@ export const urlConstants = {
       programStatus: `${interRoutePrefix.admin}/update-program-status`,
       programSegment: `${interRoutePrefix.admin}/update-program-segment`,
       collegeProfile: `${interRoutePrefix.admin}/update-mydetails`,
-      collgeLogo: `${interRoutePrefix.admin}/update-college-logo`
+      collgeLogo: `${interRoutePrefix.admin}/update-college-logo`,
+      userStatus: `${interRoutePrefix.admin}/update-user-status`
+    },
+    delete: {
+      programBook: `${interRoutePrefix.admin}/delete-program-book`
     }
   },
   admissions: {
@@ -89,6 +93,7 @@ export const urlConstants = {
   },
   view: {
     programSegments: `${interRoutePrefix.view}/program-segment`,
-    myDetails: `${interRoutePrefix.view}/my-details`
+    myDetails: `${interRoutePrefix.view}/my-details`,
+    paymentDetail: `${interRoutePrefix.view}/payment-details`
   }
 }
