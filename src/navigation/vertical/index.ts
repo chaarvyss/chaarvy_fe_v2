@@ -5,7 +5,7 @@ const navigation = (): VerticalNavItemsType => {
   return [
     {
       title: 'Dashboard',
-      path: '/dashBoard',
+      path: '/dashboard',
       icon: 'ViewDashboard'
     },
     {
@@ -16,11 +16,11 @@ const navigation = (): VerticalNavItemsType => {
     {
       sectionTitle: 'Admin'
     },
-    {
-      title: 'Users',
-      path: '/Admin/users',
-      icon: 'AccountGroup'
-    },
+    // {
+    //   title: 'Users',
+    //   path: '/Admin/users',
+    //   icon: 'AccountGroup'
+    // },
     {
       title: 'Fees types',
       path: '/Admin/feesTypes',

@@ -1,12 +1,14 @@
 import React, { ChangeEvent, useEffect, useState } from 'react'
 import { Box, Grid, TextField } from '@muiElements'
 import { CollegeDetailResponse, useGetCollegeDetailsQuery } from 'src/store/services/viewServices'
-import { Button, Paper, SelectChangeEvent, Typography } from '@mui/material'
+import { Button, IconButton, Paper, SelectChangeEvent, Typography } from '@mui/material'
 import { InputVariants } from 'src/lib/enums'
 import StyledImage from 'src/reusable_components/styledImage'
 import { useUpdateCollegeProfileMutation, useUploadCollegeLogoMutation } from 'src/store/services/adminServices'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { useSettings } from 'src/@core/hooks/useSettings'
+import GetChaarvyIcons from 'src/utils/icons'
+import StudentAddress from 'src/views/AdmissionForm/address'
 
 const ViewProfile = () => {
   const { data: details } = useGetCollegeDetailsQuery()
@@ -74,50 +76,76 @@ const ViewProfile = () => {
     }
   }
 
+  const BaseDetailsTab = () => (
+    <Grid container spacing={7}>
+      {['college_code', 'college_name', 'campus_name', 'contact_numbers'].map(field => (
+        <Grid item xs={12} md={6} key={field}>
+          <Box display='flex' flexDirection='column'>
+            <small>{field.replace('_', ' ').toUpperCase()}</small>
+            <TextField
+              onChange={handleChange(field as keyof CollegeDetailResponse)}
+              value={newDetails?.[field as keyof CollegeDetailResponse]}
+              disabled={field === 'college_code'}
+              type={field === 'contact_numbers' ? InputVariants.NUMBER : 'text'}
+            />
+          </Box>
+        </Grid>
+      ))}
+      {newDetails !== details && (
+        <Grid item>
+          <Button onClick={handleSubmit}>Update Profile</Button>
+        </Grid>
+      )}
+    </Grid>
+  )
+
   return (
     <Paper sx={{ p: 5 }}>
       <Typography variant='h4' marginBottom='1rem' textAlign='center'>
         College Profile
       </Typography>
-      <Box className='d-flex flex-column flex-md-row'>
-        <Grid container spacing={7}>
-          {['college_code', 'college_name', 'campus_name', 'contact_numbers'].map(field => (
-            <Grid item xs={12} key={field}>
-              <Box display='flex' flexDirection='column'>
-                <small>{field.replace('_', ' ').toUpperCase()}</small>
-                <TextField
-                  onChange={handleChange(field as keyof CollegeDetailResponse)}
-                  value={newDetails?.[field as keyof CollegeDetailResponse]}
-                  disabled={field === 'college_code'}
-                  type={field === 'contact_numbers' ? InputVariants.NUMBER : 'text'}
-                />
-              </Box>
+      <Box className='d-flex flex-column flex-md-row justify-content-center align-items-start' gap={4}>
+        <Box
+          className='border col-12 col-md-4 d-flex flex-column justify-content-center align-items-center rounded'
+          gap={4}
+          padding={4}
+        >
+          <Box className='position-relative'>
+            <StyledImage variant='rounded' src={collegeLogoUrl ?? '/images/avatars/1.png'} alt='add photo' />
+            <IconButton
+              component='label'
+              color='info'
+              htmlFor='upload-image'
+              className='position-absolute bg-info'
+              sx={{ bottom: '0px', right: '20px' }}
+            >
+              <GetChaarvyIcons iconName='PencilOutline' color='white' />
+              <input hidden type='file' onChange={handleImageUpload} accept='image/png, image/jpeg' id='upload-image' />
+            </IconButton>
+            {collegeLogo && (
+              <IconButton
+                sx={{ bottom: '0px', right: '-30px' }}
+                className='position-absolute bg-success'
+                onClick={handleUploadCollegeLogo}
+              >
+                <GetChaarvyIcons iconName='ContentSave' color='white' />
+              </IconButton>
+            )}
+          </Box>
+          {[
+            { v: 'college_code', l: 'College Code' },
+            { v: 'college_name', l: 'College Name' },
+            { v: 'campus_name', l: 'Campus Name' },
+            { v: 'contact_numbers', l: 'Contact Number' }
+          ].map(field => (
+            <Grid item xs={12} className='n' key={field.l}>
+              <Typography>
+                {field.l} : {newDetails?.[field.v as keyof CollegeDetailResponse] ?? '-'}
+              </Typography>
             </Grid>
           ))}
-          {newDetails !== details && (
-            <Grid item>
-              <Button onClick={handleSubmit}>Update Profile</Button>
-            </Grid>
-          )}
-        </Grid>
-        <Grid container spacing={7}>
-          <Grid item xs={12}>
-            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-              <StyledImage src={collegeLogoUrl ?? '/images/avatars/1.png'} alt='add photo' />
-              <Button component='label' variant='contained' htmlFor='upload-image'>
-                {`${collegeLogoUrl ? 'Update' : 'Upload'} College logo`}
-                <input
-                  hidden
-                  type='file'
-                  onChange={handleImageUpload}
-                  accept='image/png, image/jpeg'
-                  id='upload-image'
-                />
-              </Button>
-              {collegeLogo && <Button onClick={handleUploadCollegeLogo}>Save Logo</Button>}
-            </Box>
-          </Grid>
-        </Grid>
+        </Box>
+        {BaseDetailsTab()}
       </Box>
     </Paper>
   )

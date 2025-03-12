@@ -17,10 +17,11 @@ const ImageViewer = ({ imageUrl }: { imageUrl: string }) => {
             <div style={{ marginBottom: '10px' }}>
               <Box
                 gap={1}
+                className='bg-info rounded'
                 style={{
                   position: 'absolute',
-                  right: '100px',
-                  top: '50px',
+                  right: '5%',
+                  top: '3vh',
                   display: 'flex'
                 }}
               >
