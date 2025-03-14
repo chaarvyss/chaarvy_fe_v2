@@ -49,7 +49,6 @@ const FeesTypes = () => {
   const headers: TableHeaders[] = [
     { label: 'S#' },
     { label: 'Book Name' },
-    { label: 'Pages' },
     { label: 'Price' },
     { label: 'Available Quantity' },
     { label: 'Action', width: '100px' }
@@ -74,7 +73,6 @@ const FeesTypes = () => {
                   <TableRow>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{eachBook?.book_name}</TableCell>
-                    <TableCell>{eachBook?.pages}</TableCell>
                     <TableCell>{eachBook?.price}</TableCell>
                     <TableCell>{eachBook?.available_quantity}</TableCell>
 

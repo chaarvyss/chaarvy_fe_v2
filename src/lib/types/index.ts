@@ -9,7 +9,6 @@ export type AddOnCourse = {
 export type BooksTypesResponse = {
   book_id: string
   book_name: string
-  pages: number
   price: number
   available_quantity: number
 }
@@ -29,6 +28,11 @@ export type Fees = {
 export type FeesTypesResponse = {
   fees_type: string
   fees_type_id: string
+}
+
+export type RolesListResponse = {
+  role_id: string
+  role_name: string
 }
 
 export type Books = {

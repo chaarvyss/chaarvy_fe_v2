@@ -1,4 +1,5 @@
 export enum CacheTag {
+  Address = 'address',
   CollegeProfile = 'collegeProfile',
   ListAddonCourse = 'listAddonCourse',
   ListBooks = 'listBooks',
@@ -13,5 +14,6 @@ export enum CacheTag {
   ListUsers = 'listUsers',
   ProgramFees = 'programFees',
   StudentPayment = 'studentPayment',
-  StudentAddress = 'studentAddress'
+  StudentAddress = 'studentAddress',
+  User = 'user'
 }

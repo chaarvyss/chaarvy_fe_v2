@@ -21,6 +21,7 @@ import {
   ProgramBooksDetails,
   QualifiedExam,
   Religions,
+  RolesListResponse,
   Segment,
   State
 } from 'src/lib/types'
@@ -74,6 +75,14 @@ const listServicesApi = api.injectEndpoints({
         return {
           method: HttpRequestMethods.GET,
           url: urlConstants.list.feesTypes
+        }
+      }
+    }),
+    getRolesList: build.query<RolesListResponse[], void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.roles
         }
       }
     }),
@@ -191,5 +200,6 @@ export const {
   useGetStateListQuery,
   useLazyGetUsersListQuery,
   useGetPaymentModesListQuery,
-  useLazyGetPaymentsListQuery
+  useLazyGetPaymentsListQuery,
+  useGetRolesListQuery
 } = listServicesApi

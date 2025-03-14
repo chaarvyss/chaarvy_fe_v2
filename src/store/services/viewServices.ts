@@ -1,9 +1,11 @@
 import { urlConstants } from 'src/constants/urlConstants'
 
 import { HttpRequestMethods } from '..'
+import { Address } from './admisissionsService'
 
 import api from './api'
 import { CacheTag } from './cacheTag'
+import { User } from 'src/lib/interfaces'
 
 interface ProgramSegment {
   segment_name: string
@@ -19,6 +21,21 @@ export interface CollegeDetailResponse {
   college_header?: string
   college_watermark?: string
   contact_numbers?: string
+  address_id?: string
+}
+
+export interface UserProfile {
+  user_id?: string
+  address_id?: string
+  status?: number
+  name?: string
+  username?: string
+  mobile?: string
+  email?: string
+  Role?: string
+  role_name?: string
+  created_on?: string
+  profile_pic?: string
 }
 
 export interface PaymentDetailResponse {
@@ -52,7 +69,7 @@ const viewServiceApi = api.injectEndpoints({
       }
     }),
     getCollegeDetails: build.query<CollegeDetailResponse, void>({
-      providesTags: [CacheTag.CollegeProfile],
+      providesTags: [CacheTag.CollegeProfile, CacheTag.Address],
       query: () => {
         return {
           method: HttpRequestMethods.GET,
@@ -68,8 +85,29 @@ const viewServiceApi = api.injectEndpoints({
           params: { payment_id }
         }
       }
+    }),
+    getAddress: build.query<Address, string>({
+      providesTags: [CacheTag.Address],
+      query: address_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.view.address,
+          params: { address_id }
+        }
+      }
+    }),
+    getUserProfile: build.query<UserProfile, string>({
+      providesTags: [CacheTag.User, CacheTag.Address],
+      query: user_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.view.userProfile,
+          params: { user_id }
+        }
+      }
     })
   }),
+
   overrideExisting: true
 })
 
@@ -77,5 +115,7 @@ export const {
   useLazyGetProgramSegmentDetailsQuery,
   useGetCollegeDetailsQuery,
   useLazyGetCollegeDetailsQuery,
-  useLazyGetPaymentDetailQuery
+  useLazyGetPaymentDetailQuery,
+  useGetAddressQuery,
+  useGetUserProfileQuery
 } = viewServiceApi

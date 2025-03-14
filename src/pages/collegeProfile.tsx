@@ -1,22 +1,31 @@
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, SyntheticEvent, useEffect, useState } from 'react'
 import { Box, Grid, TextField } from '@muiElements'
 import { CollegeDetailResponse, useGetCollegeDetailsQuery } from 'src/store/services/viewServices'
-import { Button, IconButton, Paper, SelectChangeEvent, Typography } from '@mui/material'
+import { Button, IconButton, Paper, SelectChangeEvent, Tab, Typography } from '@mui/material'
 import { InputVariants } from 'src/lib/enums'
 import StyledImage from 'src/reusable_components/styledImage'
 import { useUpdateCollegeProfileMutation, useUploadCollegeLogoMutation } from 'src/store/services/adminServices'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { useSettings } from 'src/@core/hooks/useSettings'
 import GetChaarvyIcons from 'src/utils/icons'
-import StudentAddress from 'src/views/AdmissionForm/address'
+import AddressForm, { AddressType } from 'src/common/addressForm'
+import { TabContext, TabList, TabPanel } from '@mui/lab'
+import { TabName } from 'src/reusable_components/styledComponents/TabName'
 
-const ViewProfile = () => {
+enum FormType {
+  BASE_DETAIL = 'base_detail',
+  ADDRESS = 'address'
+}
+
+const ViewCollegeProfile = () => {
   const { data: details } = useGetCollegeDetailsQuery()
   const [newDetails, setNewDetails] = useState<CollegeDetailResponse>()
   const [collegeLogo, setCollegeLogo] = useState<File>()
   const [collegeLogoUrl, setCollegeLogoUrl] = useState<string>()
 
   const { settings, saveSettings } = useSettings()
+
+  const [value, setValue] = useState<FormType>(FormType.BASE_DETAIL)
 
   const [UpdateCollegeProfileDetails] = useUpdateCollegeProfileMutation()
   const [uploadCollegeLogo] = useUploadCollegeLogoMutation()
@@ -99,9 +108,26 @@ const ViewProfile = () => {
     </Grid>
   )
 
+  const handleTabChange = (_: SyntheticEvent, newValue: FormType) => setValue(newValue)
+
+  const tabs = [
+    {
+      value: FormType.BASE_DETAIL,
+      label: 'College Details',
+      icon: <GetChaarvyIcons iconName='AccountDetails' />,
+      component: BaseDetailsTab()
+    },
+    {
+      value: FormType.ADDRESS,
+      label: 'Address',
+      icon: <GetChaarvyIcons iconName='MapMarkerOutline' />,
+      component: <AddressForm user_type={AddressType.COLLEGE} address_id={details?.address_id} />
+    }
+  ]
+
   return (
     <Paper sx={{ p: 5 }}>
-      <Typography variant='h4' marginBottom='1rem' textAlign='center'>
+      <Typography variant='h5' marginBottom='1rem' textAlign='left'>
         College Profile
       </Typography>
       <Box className='d-flex flex-column flex-md-row justify-content-center align-items-start' gap={4}>
@@ -145,10 +171,38 @@ const ViewProfile = () => {
             </Grid>
           ))}
         </Box>
-        {BaseDetailsTab()}
+        <Box>
+          <TabContext value={value}>
+            <TabList
+              onChange={handleTabChange}
+              aria-label='admission-form tabs'
+              sx={{ borderBottom: t => `1px solid ${t.palette.divider}` }}
+            >
+              {tabs.map(({ value, label, icon }) => (
+                <Tab
+                  key={value}
+                  value={value}
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      {icon}
+                      <TabName>{label}</TabName>
+                    </Box>
+                  }
+                />
+              ))}
+            </TabList>
+            <Box margin='1rem 0rem'>
+              {tabs.map(({ value, component }) => (
+                <TabPanel key={value} sx={{ p: 0 }} value={value}>
+                  {component}
+                </TabPanel>
+              ))}
+            </Box>
+          </TabContext>
+        </Box>
       </Box>
     </Paper>
   )
 }
 
-export default ViewProfile
+export default ViewCollegeProfile

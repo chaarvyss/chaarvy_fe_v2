@@ -1,5 +1,5 @@
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
-import { Box, Button, IconButton } from '@mui/material'
+import { Box, IconButton } from '@mui/material'
 import { useImageViewer } from 'src/@core/context/imageViewerContext'
 import GetChaarvyIcons from 'src/utils/icons'
 
