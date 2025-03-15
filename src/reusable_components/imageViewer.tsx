@@ -1,5 +1,5 @@
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
-import { Box, Button, IconButton } from '@mui/material'
+import { Box, IconButton } from '@mui/material'
 import { useImageViewer } from 'src/@core/context/imageViewerContext'
 import GetChaarvyIcons from 'src/utils/icons'
 
@@ -17,10 +17,11 @@ const ImageViewer = ({ imageUrl }: { imageUrl: string }) => {
             <div style={{ marginBottom: '10px' }}>
               <Box
                 gap={1}
+                className='bg-info rounded'
                 style={{
                   position: 'absolute',
-                  right: '100px',
-                  top: '50px',
+                  right: '5%',
+                  top: '3vh',
                   display: 'flex'
                 }}
               >

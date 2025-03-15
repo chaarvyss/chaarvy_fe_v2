@@ -50,7 +50,7 @@ const ChaarvyModal = ({
               <Typography variant='body1'>Are you sure want to close this modal?</Typography>
             </Box>
             {onClose && (
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
+              <Box gap={4} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
                 <Button variant='outlined' color='error' onClick={() => setIsWarnOnCloseOpen(false)}>
                   Cancel
                 </Button>

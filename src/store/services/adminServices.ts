@@ -4,6 +4,8 @@ import { HttpRequestMethods } from '..'
 
 import api from './api'
 import { CacheTag } from './cacheTag'
+import { Address } from './admisissionsService'
+import { UserProfile } from './viewServices'
 
 type CreateBook = {
   book_name: string
@@ -60,6 +62,17 @@ type ProgramSegmentRequest = {
   id?: string
   program_id: string
   segment_id: string
+}
+
+interface CreateAddressRequest {
+  address: Address
+  user_id?: string
+  user_type: string
+}
+
+interface CreateUserRequest {
+  user_id?: string
+  user: UserProfile
 }
 
 const adminServiceApi = api.injectEndpoints({
@@ -275,6 +288,29 @@ const adminServiceApi = api.injectEndpoints({
           params: { id }
         }
       }
+    }),
+
+    createUpdateAddress: build.mutation<string, CreateAddressRequest>({
+      invalidatesTags: [CacheTag.Address],
+      query: ({ user_id, user_type, address }) => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.add.createUpdateAddress,
+          params: { user_id, user_type },
+          body: address
+        }
+      }
+    }),
+    createUpdateUser: build.mutation<string, CreateUserRequest>({
+      invalidatesTags: [CacheTag.User],
+      query: ({ user_id, user }) => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.createUpdateUser,
+          params: { user_id },
+          body: user
+        }
+      }
     })
   })
 })
@@ -300,5 +336,7 @@ export const {
   useUpdateProgramStatusMutation,
   useUploadCollegeLogoMutation,
   useUpdateUserStatusMutation,
-  useDeleteProgramBookMutation
+  useDeleteProgramBookMutation,
+  useCreateUpdateAddressMutation,
+  useCreateUpdateUserMutation
 } = adminServiceApi

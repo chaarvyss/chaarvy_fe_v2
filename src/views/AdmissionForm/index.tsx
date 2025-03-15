@@ -11,6 +11,7 @@ import { BookOutline, Cash, GoogleMaps } from 'mdi-material-ui'
 import AddonCourseDetails from './addonCourseDetails'
 import FeesDetails from './feesDetails'
 import { useLazyGetAdmissionDetailQuery } from 'src/store/services/admisissionsService'
+import { TabName } from 'src/reusable_components/styledComponents/TabName'
 
 const Tab = styled(MuiTab)<TabProps>(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
@@ -18,15 +19,6 @@ const Tab = styled(MuiTab)<TabProps>(({ theme }) => ({
   },
   [theme.breakpoints.down('sm')]: {
     minWidth: 67
-  }
-}))
-
-const TabName = styled('span')(({ theme }) => ({
-  lineHeight: 1.71,
-  fontSize: '0.875rem',
-  marginLeft: theme.spacing(2.4),
-  [theme.breakpoints.down('md')]: {
-    display: 'none'
   }
 }))
 

@@ -8,6 +8,7 @@ import { CacheTag } from './cacheTag'
 
 export type Address = {
   application_id?: string
+  address_id?: string
   door_no?: string
   house_apartment_name?: string // new
   street?: string

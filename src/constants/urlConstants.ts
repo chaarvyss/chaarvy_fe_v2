@@ -30,9 +30,11 @@ export const urlConstants = {
     states: `${interRoutePrefix.list}/states`,
     users: `${interRoutePrefix.list}/users`,
     paymentModes: `${interRoutePrefix.list}/payment-modes`,
+    roles: `${interRoutePrefix.list}/roles`,
     studentPaymentsList: `${interRoutePrefix.list}/student-payments`
   },
   admin: {
+    createUpdateUser: `${interRoutePrefix.admin}/create-update-user`,
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
       book: `${interRoutePrefix.admin}/add-book`,
@@ -41,7 +43,8 @@ export const urlConstants = {
       program: `${interRoutePrefix.admin}/add-program`,
       programAddon: `${interRoutePrefix.admin}/add-program-addon-course`,
       programBook: `${interRoutePrefix.admin}/add-program-book`,
-      programSegment: `${interRoutePrefix.admin}/add-program-segment`
+      programSegment: `${interRoutePrefix.admin}/add-program-segment`,
+      createUpdateAddress: `${interRoutePrefix.admin}/create-update-address`
     },
     update: {
       addonCourse: `${interRoutePrefix.admin}/update-addon-course`,
@@ -94,6 +97,8 @@ export const urlConstants = {
   view: {
     programSegments: `${interRoutePrefix.view}/program-segment`,
     myDetails: `${interRoutePrefix.view}/my-details`,
-    paymentDetail: `${interRoutePrefix.view}/payment-details`
+    paymentDetail: `${interRoutePrefix.view}/payment-details`,
+    address: `${interRoutePrefix.view}/address`,
+    userProfile: `${interRoutePrefix.view}/user_base_details`
   }
 }

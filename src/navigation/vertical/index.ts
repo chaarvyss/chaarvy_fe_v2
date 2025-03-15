@@ -5,7 +5,7 @@ const navigation = (): VerticalNavItemsType => {
   return [
     {
       title: 'Dashboard',
-      path: '/dashBoard',
+      path: '/dashboard',
       icon: 'ViewDashboard'
     },
     {
@@ -27,7 +27,7 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'FormatListGroup'
     },
     {
-      title: 'Books',
+      title: 'Books & Stationary',
       path: '/Admin/books',
       icon: 'Bookshelf'
     },
