@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Grid, MenuItem, Select, SelectChangeEvent } from '@mui/material'
+import { Grid, IconButton, MenuItem, Select, SelectChangeEvent, Tooltip } from '@mui/material'
 import {
   Box,
   Button,
@@ -14,7 +14,7 @@ import {
   TextField,
   Typography
 } from '@muiElements'
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import { useLoader } from 'src/@core/context/loaderContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { InputTypes, InputVariants } from 'src/lib/enums'
@@ -23,6 +23,7 @@ import { ErrorObject, InputFields } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import {
   PaymentDetailRequest,
+  StudentPendingFeesDetails,
   useLazyGetPaymentRecieptByPaymentIdQuery,
   useLazyGetStudentPendingFeesDetailsQuery,
   useRecordPaymentTransactionMutation
@@ -37,7 +38,9 @@ const headers: TableHeaders[] = [
   { label: 'Segment Name' },
   { label: 'Payable fees' },
   { label: 'Paid Fees' },
-  { label: 'Due' }
+  { label: 'Due Date' },
+  { label: 'Due' },
+  { label: 'Actions', width: '10px' }
 ]
 
 const CollectPayment = () => {
@@ -76,6 +79,19 @@ const CollectPayment = () => {
         })
   }
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const queryParams = new URLSearchParams(window.location.search)
+      if (queryParams && queryParams.get('id') && queryParams.get('id') !== null) {
+        fetchStudentPendingFees(queryParams.get('id') ?? '')
+          .unwrap()
+          .catch(e => {
+            triggerToast(e.data, { variants: ToastVariants.ERROR })
+          })
+      }
+    }
+  }, [])
+
   const uniqueSegments = Array.from(
     new Map(
       response?.fees_details.map(({ segment_id, segment_name }) => [segment_id, { segment_id, segment_name }])
@@ -106,10 +122,21 @@ const CollectPayment = () => {
       label: 'Segment',
       key: 'segment_id',
       value: paymentDetails?.segment_id,
+      isDisabled: !!paymentDetails?.payment_id as boolean,
       onChange: handlePaymentDetailChange('segment_id'),
       menuOptions: (uniqueSegments ?? []).map(each => {
         return { value: each.segment_id, label: each.segment_name }
       })
+    },
+    {
+      type: InputTypes.INPUT,
+      variant: InputVariants.NUMBER,
+      id: `${TOP_LEVEL_ID}__amount`,
+      label: 'Amount',
+      isDisabled: !!paymentDetails?.payment_id as boolean,
+      key: 'amount',
+      value: paymentDetails?.amount,
+      onChange: handlePaymentDetailChange('amount')
     },
     {
       type: InputTypes.SELECT,
@@ -121,15 +148,6 @@ const CollectPayment = () => {
       menuOptions: (paymentModes ?? []).map(each => {
         return { value: each.payment_mode_id, label: each.payment_mode }
       })
-    },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.NUMBER,
-      id: `${TOP_LEVEL_ID}__amount`,
-      label: 'Amount',
-      key: 'amount',
-      value: paymentDetails?.amount,
-      onChange: handlePaymentDetailChange('amount')
     },
     {
       type: InputTypes.INPUT,
@@ -174,7 +192,7 @@ const CollectPayment = () => {
             <small>
               {label} {mandatoryFields.includes(key) ? '*' : ''}
             </small>
-            <Select id={id} value={value ?? ''} onChange={onChange}>
+            <Select id={id} value={value ?? ''} onChange={onChange} disabled={isDisabled}>
               {(menuOptions ?? []).map(({ value, label }) => (
                 <MenuItem key={value} value={value}>
                   {label}
@@ -209,9 +227,15 @@ const CollectPayment = () => {
     return newErrors.length === 0
   }
 
-  const handleCollectClick = () => {
+  const handleCollectClick = (feesDetail: StudentPendingFeesDetails) => {
+    const preData = { segment_id: feesDetail.segment_id }
+    if (feesDetail.payment_id) {
+      preData['payment_id'] = feesDetail.payment_id
+      preData['amount'] = feesDetail.payable
+    }
+
     setIsCollectPaymentModalOpen(true)
-    setPaymentDetails(prev => ({ ...prev, application_id: response?.application_id }))
+    setPaymentDetails(prev => ({ ...prev, application_id: response?.application_id, ...preData }))
   }
 
   const handleCollectSubmit = () => {
@@ -234,6 +258,7 @@ const CollectPayment = () => {
   const handleCollectPaymentModalClose = () => {
     setIsCollectPaymentModalOpen(false)
     setPaymentDetails(undefined)
+    setErrors([])
   }
 
   const handleRecieptDownload = (payment_id: string) => {
@@ -282,6 +307,13 @@ const CollectPayment = () => {
   const showLoader = fetchingReciept || fetchingRecords
 
   setLoading(showLoader)
+
+  const getDueDate = (feesDetail: StudentPendingFeesDetails) => {
+    if ([null, 3].includes(feesDetail.payment_aggrement)) {
+      return 'Flexible Payment'
+    }
+    return feesDetail.due_date
+  }
 
   return (
     <Card sx={{ p: 5 }}>
@@ -336,7 +368,15 @@ const CollectPayment = () => {
                   <TableCell>{eachFees.segment_name}</TableCell>
                   <TableCell>{eachFees.payable}</TableCell>
                   <TableCell>{eachFees.paid}</TableCell>
+                  <TableCell>{getDueDate(eachFees)}</TableCell>
                   <TableCell>{eachFees.payable - eachFees.paid}</TableCell>
+                  <TableCell>
+                    <Tooltip title='Collect Payment' placement='top'>
+                      <IconButton onClick={() => handleCollectClick(eachFees)}>
+                        <GetChaarvyIcons iconName='BankTransferIn' />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -347,13 +387,6 @@ const CollectPayment = () => {
             </Box>
           )}
         </TableContainer>
-      )}
-      {response && response?.fees_details?.length > 0 && (
-        <Box display='flex' justifyContent='center' alignItems='center' padding='1rem'>
-          <LoadingButton variant='contained' onClick={handleCollectClick}>
-            Collect Fees
-          </LoadingButton>
-        </Box>
       )}
       {renderCollectPaymentModal()}
     </Card>

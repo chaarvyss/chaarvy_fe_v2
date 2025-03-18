@@ -7,7 +7,7 @@ const ImageViewer = ({ imageUrl }: { imageUrl: string }) => {
   const { setShowImage } = useImageViewer()
   return (
     <div
-      style={{ zIndex: 1050, position: 'relative' }}
+      style={{ zIndex: 9999, position: 'relative' }}
       className='position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-50'
     >
       <TransformWrapper>

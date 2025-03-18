@@ -70,13 +70,17 @@ export interface StudentProgramFeesDetailsResponse {
 }
 
 export interface StudentPayableFeesRequest {
-  application_id: string
+  application_id?: string
   fees_details?: string
-  segment_id: string
+  segment_id?: string
   payable_fees?: number
+  paymentAggrement?: string
+  no_of_terms?: number
+  term_details?: string
 }
 
 export interface PaymentDetailRequest {
+  payment_id?: string
   segment_id?: string
   application_id?: string
   amount?: number
@@ -97,6 +101,10 @@ export interface StudentPendingFeesDetails {
   segment_name: string
   payable: number
   paid: number
+  payment_id: string
+  status: number
+  due_date: string
+  payment_aggrement: number
 }
 
 export interface StudentPendingFeesDetailsResponse {

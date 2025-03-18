@@ -12,7 +12,8 @@ const interRoutePrefix = {
 export const urlConstants = {
   auth: {
     login: `${interRoutePrefix.auth}/login`,
-    changePassword: `${interRoutePrefix.auth}/change-password`
+    changePassword: `${interRoutePrefix.auth}/change-password`,
+    updateProfilePic: `${interRoutePrefix.auth}/upload-profile-pic`
   },
   list: {
     addOnCourse: `${interRoutePrefix.list}/addon_courses`,
@@ -30,6 +31,7 @@ export const urlConstants = {
     states: `${interRoutePrefix.list}/states`,
     users: `${interRoutePrefix.list}/users`,
     paymentModes: `${interRoutePrefix.list}/payment-modes`,
+    paymentAggrements: `${interRoutePrefix.list}/payment-aggrements`,
     roles: `${interRoutePrefix.list}/roles`,
     studentPaymentsList: `${interRoutePrefix.list}/student-payments`
   },

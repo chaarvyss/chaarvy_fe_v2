@@ -66,6 +66,11 @@ export interface TableHeaders {
   width?: string
 }
 
+export interface PaymentAggrement {
+  payment_aggrement_id: string
+  payment_aggrement_name: string
+  description: string
+}
 export interface PaymentModes {
   payment_mode_id: string
   payment_mode: string
@@ -95,6 +100,7 @@ export interface StudentPayment {
   reciept_number: string
   admission_number: string
   student_name: string
+  status: number
 }
 
 interface StudentPaymentCount {

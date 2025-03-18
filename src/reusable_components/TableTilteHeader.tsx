@@ -1,4 +1,5 @@
 import { Button, IconButton, Tooltip } from '@mui/material'
+import { ReactElement } from 'react'
 
 import { TableHeaderStatCardProps } from 'src/lib/interfaces'
 import GetChaarvyIcons from 'src/utils/icons'
@@ -12,6 +13,7 @@ export interface TableTitleHeaderProps {
   title: string
   stats?: TableHeaderStatCardProps[]
   showFilterIcon?: boolean
+  icon?: ReactElement
   handleFilterButtonClick?: () => void
 }
 
@@ -49,6 +51,7 @@ const TableTilteHeader = ({
   onButtonClick,
   isButtonDisabled,
   showFilterIcon,
+  icon,
   handleFilterButtonClick
 }: TableTitleHeaderProps) => {
   return (
@@ -63,16 +66,27 @@ const TableTilteHeader = ({
           }
         }}
         action={
-          <>
+          <Box display='flex'>
             {buttonTitle && (
-              <Button
-                color={buttonColor ?? 'primary'}
-                variant='contained'
-                disabled={isButtonDisabled}
-                onClick={onButtonClick}
-              >
-                {buttonTitle}
-              </Button>
+              <>
+                <Button
+                  className={icon ? 'd-none d-md-block' : ''}
+                  color={buttonColor ?? 'primary'}
+                  variant='contained'
+                  disabled={isButtonDisabled}
+                  onClick={onButtonClick}
+                >
+                  <Box display='flex' gap={2}>
+                    {icon}
+                    <Typography color='white'>{buttonTitle}</Typography>
+                  </Box>
+                </Button>
+                <Tooltip title={buttonTitle} placement='top'>
+                  <IconButton disabled={isButtonDisabled} onClick={onButtonClick} className={icon ? 'd-md-none' : ''}>
+                    {icon}
+                  </IconButton>
+                </Tooltip>
+              </>
             )}
             {showFilterIcon && (
               <Tooltip title='Filter' placement='top'>
@@ -81,7 +95,7 @@ const TableTilteHeader = ({
                 </IconButton>
               </Tooltip>
             )}
-          </>
+          </Box>
         }
       />
       {stats && (

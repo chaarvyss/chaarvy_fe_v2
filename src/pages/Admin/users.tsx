@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLoader } from 'src/@core/context/loaderContext'
+import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { FilterProps, TableHeaderStatCardProps, User } from 'src/lib/interfaces'
@@ -24,6 +25,7 @@ import {
   TableRow,
   Typography
 } from 'src/utils/muiElements'
+import CreateUser from 'src/views/Users/createUsers'
 import ViewUserProfile from 'src/views/Users/userProfile'
 
 const Users = () => {
@@ -33,6 +35,8 @@ const Users = () => {
   const { setLoading } = useLoader()
 
   const [selectedUser, setSelectedUser] = useState<User>()
+
+  const { openDrawer } = useSideDrawer()
 
   const [filters, setFilters] = useState<FilterProps>()
 
@@ -60,7 +64,7 @@ const Users = () => {
   }, [filters])
 
   const handleCreateUserClick = () => {
-    alert('creating user')
+    openDrawer('New User', <CreateUser />)
   }
 
   const getUserTableHeader = () => {
@@ -69,6 +73,7 @@ const Users = () => {
       stats: usersData,
       onButtonClick: handleCreateUserClick,
       showFilterIcon: true,
+      icon: <GetChaarvyIcons iconName='AccountPlusOutline' />,
       buttonTitle: 'Create User'
     }
 
@@ -108,8 +113,10 @@ const Users = () => {
                     onClick={() => setSelectedUser(user)}
                   >
                     <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
-                      <Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '1rem' }} onClick={(event)=>event.stopPropagation()}>
-                        <ChaarvyAvatar src={user.profile_pic} alt={user.name} />
+                      <Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '1rem' }}>
+                        <Box onClick={event => event.stopPropagation()}>
+                          <ChaarvyAvatar src={user.profile_pic} alt={user.name} />
+                        </Box>
                         <Box sx={{ flexDirection: 'column' }}>
                           <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>{user.name}</Typography>
                           <Typography variant='caption'>{user.mobile}</Typography>

@@ -54,7 +54,7 @@ const Admissions = () => {
   }
 
   const handleFilteredAdmissions = (params?: FilterProps) => {
-    params && fetchAdmissions({ ...filterProps, ...params })
+    fetchAdmissions({ ...filterProps, ...params })
   }
 
   const onFilterButtonClick = () => {

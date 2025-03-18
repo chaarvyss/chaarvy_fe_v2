@@ -7,6 +7,7 @@ import { FilterProps } from 'src/lib/interfaces'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
 import { useGetProgramsListQuery } from 'src/store/services/listServices'
 import { dateToString } from 'src/lib/helpers'
+import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 
 type FieldTypes = 'search' | 'program' | 'medium' | 'startDate' | 'endDate' | 'dateRange'
 
@@ -21,6 +22,8 @@ const RenderFilterOptions = ({ onSubmit, fields }: RenderFilterProps) => {
 
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
+
+  const { closeDrawer } = useSideDrawer()
 
   const handleChange =
     (prop: keyof FilterProps) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
@@ -48,6 +51,7 @@ const RenderFilterOptions = ({ onSubmit, fields }: RenderFilterProps) => {
   const handleReset = () => {
     setFilters(undefined)
     onSubmit(undefined)
+    closeDrawer()
   }
 
   return (
@@ -60,7 +64,7 @@ const RenderFilterOptions = ({ onSubmit, fields }: RenderFilterProps) => {
         }
       }}
     >
-      <Grid container gap={4}>
+      <Grid container gap={4} display='flex' flexDirection='column'>
         {fields.includes('search') && (
           <Grid item>
             <TextField
