@@ -1,6 +1,6 @@
 import React, { ChangeEvent, SyntheticEvent, useEffect, useState } from 'react'
 import { Box, Grid, TextField } from '@muiElements'
-import { useGetCollegeDetailsQuery, useGetUserProfileQuery, UserProfile } from 'src/store/services/viewServices'
+import { useGetUserProfileQuery, UserProfile } from 'src/store/services/viewServices'
 import {
   Button,
   CircularProgress,
@@ -16,7 +16,6 @@ import {
 import { InputVariants } from 'src/lib/enums'
 import StyledImage from 'src/reusable_components/styledImage'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { useSettings } from 'src/@core/hooks/useSettings'
 import GetChaarvyIcons from 'src/utils/icons'
 import AddressForm, { AddressType } from 'src/common/addressForm'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
@@ -24,6 +23,7 @@ import { TabName } from 'src/reusable_components/styledComponents/TabName'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { useCreateUpdateUserMutation } from 'src/store/services/adminServices'
 import { useGetRolesListQuery } from 'src/store/services/listServices'
+import { useUploadProfilePicMutation } from 'src/store/services/authServices'
 
 enum FormType {
   BASE_DETAIL = 'base_detail',
@@ -65,7 +65,7 @@ const ViewUserProfile = (props: UserProfileProps) => {
 
   const { data: rolesData, isLoading: isRolesListLoading } = useGetRolesListQuery()
 
-  // const [uploadCollegeLogo] = useUploadCollegeLogoMutation()
+  const [uploadProfilePic] = useUploadProfilePicMutation()
 
   const { triggerToast } = useToast()
 
@@ -82,23 +82,24 @@ const ViewUserProfile = (props: UserProfileProps) => {
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    // if (file) {
-    //   setCollegeLogo(file)
-    //   setCollegeLogoUrl(URL.createObjectURL(file))
-    // }
+    if (file) {
+      setProfilePic(file)
+      setProfilePicUrl(URL.createObjectURL(file))
+    }
   }
 
   const handleUploadProfilePic = () => {
-    // if (profilePic) {
-    // uploadProfilePic(profilePic)
-    //   .unwrap()
-    //   .then(res => {
-    //     setProfilePic(undefined)
-    //     triggerToast(res, { variants: ToastVariants.SUCCESS })
-    //   })
-    //   .catch(e => {
-    //     triggerToast(e.data, { variant: ToastVariants.ERROR })
-    //   })
+    if (profilePic) {
+      uploadProfilePic({ photo: profilePic, user_id })
+        .unwrap()
+        .then(res => {
+          setProfilePic(undefined)
+          triggerToast(res, { variants: ToastVariants.SUCCESS })
+        })
+        .catch(e => {
+          triggerToast(e.data, { variant: ToastVariants.ERROR })
+        })
+    }
   }
 
   const handleSubmit = () => {
@@ -213,7 +214,7 @@ const ViewUserProfile = (props: UserProfileProps) => {
               <GetChaarvyIcons iconName='PencilOutline' color='white' />
               <input hidden type='file' onChange={handleImageUpload} accept='image/png, image/jpeg' id='upload-image' />
             </IconButton>
-            {/* {profilePic && (
+            {profilePic && (
               <IconButton
                 sx={{ bottom: '0px', right: '-30px' }}
                 className='position-absolute bg-success'
@@ -221,7 +222,7 @@ const ViewUserProfile = (props: UserProfileProps) => {
               >
                 <GetChaarvyIcons iconName='ContentSave' color='white' />
               </IconButton>
-            )} */}
+            )}
           </Box>
           {mainKeys.map(field => (
             <Grid item xs={12} className='n' key={field.l}>

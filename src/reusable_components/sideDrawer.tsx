@@ -5,11 +5,11 @@ import { Typography } from '@mui/material'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 
 const SideDrawer = () => {
-  const { isOpen, title, children, closeDrawer } = useSideDrawer()
+  const { isOpen, title, children, closeDrawer, className } = useSideDrawer()
 
   return (
     <Drawer open={isOpen} anchor='right' onClose={closeDrawer}>
-      <Box sx={{ width: 250, padding: '1rem' }}>
+      <Box sx={{ width: '20vw', minWidth: '300px', padding: '1rem' }}>
         <Typography variant='h4' textAlign='center'>
           {title}
         </Typography>

@@ -4,7 +4,8 @@ interface SideDrawerContextProps {
   isOpen: boolean
   title: string
   children: ReactNode
-  openDrawer: (title: string, children?: ReactNode) => void
+  className?: string
+  openDrawer: (title: string, children?: ReactNode, className?: string) => void
   closeDrawer: () => void
   setChildren: (content: ReactNode) => void
 }
@@ -15,10 +16,12 @@ export const SideDrawerProvider = ({ children }: { children: React.ReactNode }) 
   const [isOpen, setIsOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [drawerChildren, setDrawerChildren] = useState<ReactNode>(null)
+  const [className, setClassName] = useState<string>()
 
-  const openDrawer = (drawerTitle: string, content?: ReactNode) => {
+  const openDrawer = (drawerTitle: string, content?: ReactNode, className?: string) => {
     setTitle(drawerTitle)
     if (content) setDrawerChildren(content)
+    if (className) setClassName(className)
     setIsOpen(true)
   }
 
@@ -26,11 +29,20 @@ export const SideDrawerProvider = ({ children }: { children: React.ReactNode }) 
     setIsOpen(false)
     setTitle('')
     setDrawerChildren(null)
+    setClassName(undefined)
   }
 
   return (
     <SideDrawerContext.Provider
-      value={{ isOpen, title, children: drawerChildren, openDrawer, closeDrawer, setChildren: setDrawerChildren }}
+      value={{
+        isOpen,
+        title,
+        children: drawerChildren,
+        openDrawer,
+        className,
+        closeDrawer,
+        setChildren: setDrawerChildren
+      }}
     >
       {children}
     </SideDrawerContext.Provider>

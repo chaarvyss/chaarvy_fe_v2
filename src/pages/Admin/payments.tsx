@@ -13,7 +13,9 @@ import {
   Tooltip,
   Typography
 } from '@mui/material'
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { href } from 'react-router-dom'
 import { useLoader } from 'src/@core/context/loaderContext'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 
@@ -34,6 +36,8 @@ const Payments = () => {
   const { triggerToast } = useToast()
   const { openDrawer } = useSideDrawer()
   const { setLoading } = useLoader()
+
+  const router = useRouter()
 
   const [fetchPaymentsList, { data: PaymentsList, isFetching: isFetchingPayments }] = useLazyGetPaymentsListQuery()
   const [fetchPaymentReciept, { isFetching: isFetchingPaymentReciept }] = useLazyGetPaymentRecieptByPaymentIdQuery()
@@ -84,7 +88,7 @@ const Payments = () => {
     fetchPaymentsList(filterProps)
       .unwrap()
       .catch(e => {
-        triggerToast(e.data.detail, { variant: ToastVariants.ERROR })
+        triggerToast(e.data, { variant: ToastVariants.ERROR })
       })
   }, [filterProps])
 
@@ -204,6 +208,7 @@ const Payments = () => {
                   <TableCell>S#</TableCell>
                   <TableCell>Admission number</TableCell>
                   <TableCell>Student Name</TableCell>
+                  <TableCell>Status</TableCell>
                   <TableCell>Transaction Number</TableCell>
                   <TableCell>Amount</TableCell>
                   <TableCell>Payment Date</TableCell>
@@ -222,21 +227,36 @@ const Payments = () => {
                     </TableCell>
                     <TableCell>{payment.admission_number}</TableCell>
                     <TableCell>{payment.student_name}</TableCell>
+                    <TableCell>{payment.status}</TableCell>
                     <TableCell>{payment.transaction_number}</TableCell>
                     <TableCell>{payment.amount}</TableCell>
                     <TableCell>{payment.created_date}</TableCell>
-                    <TableCell>
-                      <Tooltip title='Fees Details' placement='top'>
-                        <IconButton onClick={() => setSelectedPayment(payment)}>
-                          <GetChaarvyIcons iconName='Eye' fontSize='1.25rem' />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title='Fees Reciept' placement='top'>
-                        <IconButton onClick={() => handleRecieptDownload(payment)}>
-                          <GetChaarvyIcons iconName='Download' fontSize='1.25rem' />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
+                    {payment.status == 1 ? (
+                      <TableCell>
+                        <Tooltip title='Fees Details' placement='top'>
+                          <IconButton onClick={() => setSelectedPayment(payment)}>
+                            <GetChaarvyIcons iconName='Eye' fontSize='1.25rem' />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title='Fees Reciept' placement='top'>
+                          <IconButton onClick={() => handleRecieptDownload(payment)}>
+                            <GetChaarvyIcons iconName='Download' fontSize='1.25rem' />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    ) : (
+                      <TableCell>
+                        <Tooltip title='Collect Payment' placement='top'>
+                          <IconButton
+                            onClick={() =>
+                              router.push(`/StudentManagement/Payments/collectPayment/?id=${payment.admission_number}`)
+                            }
+                          >
+                            <GetChaarvyIcons iconName='BankTransferIn' fontSize='1.75rem' />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>

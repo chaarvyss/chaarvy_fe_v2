@@ -1,5 +1,6 @@
 import { urlConstants } from 'src/constants/urlConstants'
 import {
+  PaymentAggrement,
   PaymentModes,
   PaymentsListRequest,
   PaymentsListResponse,
@@ -154,12 +155,20 @@ const listServicesApi = api.injectEndpoints({
       }
     }),
     getUsersList: build.query<UsersListResponse, UsersListRequest | undefined>({
-      providesTags: [CacheTag.ListUsers],
+      providesTags: [CacheTag.ListUsers, CacheTag.User],
       query: params => {
         return {
           method: HttpRequestMethods.GET,
           url: urlConstants.list.users,
           params
+        }
+      }
+    }),
+    getPaymentAggrements: build.query<PaymentAggrement[], void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.paymentAggrements
         }
       }
     }),
@@ -201,5 +210,6 @@ export const {
   useLazyGetUsersListQuery,
   useGetPaymentModesListQuery,
   useLazyGetPaymentsListQuery,
-  useGetRolesListQuery
+  useGetRolesListQuery,
+  useGetPaymentAggrementsQuery
 } = listServicesApi

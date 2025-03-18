@@ -4,6 +4,12 @@ import { ChangePasswordProps, LoginProps, LoginResponse } from 'src/lib/interfac
 import { httpHeaders, HttpRequestMethods } from '..'
 
 import api from './api'
+import { CacheTag } from './cacheTag'
+
+export type ProfilePicUploadRequest = {
+  user_id: string
+  photo: File
+}
 
 const authServiceApi = api.injectEndpoints({
   endpoints: build => ({
@@ -25,8 +31,21 @@ const authServiceApi = api.injectEndpoints({
           url: urlConstants.auth.changePassword
         }
       }
+    }),
+    uploadProfilePic: build.mutation<string, ProfilePicUploadRequest>({
+      invalidatesTags: [CacheTag.User],
+      query: ({ user_id, photo }) => {
+        const formData = new FormData()
+        formData.append('file', photo)
+        return {
+          body: formData,
+          method: HttpRequestMethods.POST,
+          url: urlConstants.auth.updateProfilePic,
+          params: { user_id }
+        }
+      }
     })
   })
 })
 
-export const { useLoginMutation, useChangePasswordMutation } = authServiceApi
+export const { useLoginMutation, useChangePasswordMutation, useUploadProfilePicMutation } = authServiceApi
