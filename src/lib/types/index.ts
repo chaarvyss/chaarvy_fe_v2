@@ -124,6 +124,11 @@ export type ProgramSecondLanguagesResponse = {
   language_name: string
 }
 
+export type ProgramSectionResponse = {
+  section_id: string
+  section_name: string
+}
+
 export type QualifiedExam = { qualified_exam_id: string; qualified_exam_name: string }
 export type Segment = {
   segment_name: string

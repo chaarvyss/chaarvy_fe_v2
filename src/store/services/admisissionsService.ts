@@ -63,6 +63,7 @@ export type CreateStudentAdmissionRequest = {
   program_id?: string
   photo_url?: string
   religion?: string
+  section?: string
   second_language?: string
   segment?: string
   student_email?: string

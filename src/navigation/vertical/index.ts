@@ -27,6 +27,11 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'FormatListGroup'
     },
     {
+      title: 'Sections',
+      path: '/Admin/sections',
+      icon: 'ArrangeBringToFront'
+    },
+    {
       title: 'Books & Stationary',
       path: '/Admin/books',
       icon: 'Bookshelf'

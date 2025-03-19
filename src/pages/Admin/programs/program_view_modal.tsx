@@ -13,7 +13,7 @@ import {
   TableRow,
   Typography
 } from '@mui/material'
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
@@ -21,10 +21,10 @@ import { Program } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { useCreateProgramSegmentMutation } from 'src/store/services/adminServices'
 import { useGetSegmentsListQuery } from 'src/store/services/listServices'
-import { useLazyGetProgramSecondLanguagesListQuery } from 'src/store/services/programServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
 import ProgramSecondLanguage from './program_second_language'
 import ProgramMediums from './program_mediums'
+import ProgramSection from './program_sections'
 
 interface ProgramView {
   selectedProgram?: Program
@@ -141,10 +141,10 @@ const ProgramViewModal = ({ selectedProgram, isOpen, onClose }: ProgramView) => 
             </>
           )}
           {showAddSegmentButton() && <Button onClick={() => setIsEditModalOpen(true)}>Add program segment</Button>}
-
           <Box gap='24px'>
-            <ProgramSecondLanguage program_id={selectedProgram?.program_id as string} />
+            <ProgramSection program_id={selectedProgram?.program_id as string} />
             <ProgramMediums program_id={selectedProgram?.program_id as string} />
+            <ProgramSecondLanguage program_id={selectedProgram?.program_id as string} />
           </Box>
         </>
       </ChaarvyModal>

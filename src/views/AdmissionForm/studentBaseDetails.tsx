@@ -34,7 +34,8 @@ import {
 } from 'src/store/services/admisissionsService'
 import {
   useLazyGetProgramMediumsListQuery,
-  useLazyGetProgramSecondLanguagesListQuery
+  useLazyGetProgramSecondLanguagesListQuery,
+  useLazyGetProgramSectionListQuery
 } from 'src/store/services/programServices'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { ErrorObject, InputFields } from 'src/lib/types'
@@ -76,6 +77,7 @@ const mandatoryFields = [
   'student_aadhar',
   'student_name',
   'dob',
+  'section',
   'gender'
 ]
 
@@ -101,6 +103,9 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
     useLazyGetProgramMediumsListQuery()
   const [fetchProgramSecondLanguages, { data: programSecondLanguages, isFetching: isSecondLanguageLoading }] =
     useLazyGetProgramSecondLanguagesListQuery()
+
+  const [fetchProgramSectionsData, { data: programSections, isFetching: isSectionsLoading }] =
+    useLazyGetProgramSectionListQuery()
   const { data: occupationsList } = useGetOccupationsListQuery()
   const { data: gendersList } = useGetGendersListQuery()
   const { data: communities } = useGetCommunitiesListQuery()
@@ -116,6 +121,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
   const getDependentData = (program_id: string) => {
     fetchProgramMediums(program_id)
     fetchProgramSecondLanguages(program_id)
+    fetchProgramSectionsData(program_id)
   }
 
   const showLoader = isApplicationLoading
@@ -297,6 +303,17 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
       onChange: handleChange('segment'),
       menuOptions: (segmentsList ?? []).map(each => {
         return { value: each.segment_id, label: each.segment_name }
+      })
+    },
+    {
+      type: InputTypes.SELECT,
+      id: `${TOP_LEVEL_ID}__section`,
+      label: 'Section',
+      key: 'segment',
+      value: applicationDetails?.section,
+      onChange: handleChange('section'),
+      menuOptions: (programSections ?? []).map(each => {
+        return { value: each.section_id, label: each.section_name }
       })
     },
     {

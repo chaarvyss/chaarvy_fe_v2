@@ -33,10 +33,12 @@ export const urlConstants = {
     paymentModes: `${interRoutePrefix.list}/payment-modes`,
     paymentAggrements: `${interRoutePrefix.list}/payment-aggrements`,
     roles: `${interRoutePrefix.list}/roles`,
-    studentPaymentsList: `${interRoutePrefix.list}/student-payments`
+    studentPaymentsList: `${interRoutePrefix.list}/student-payments`,
+    sectionsList: `${interRoutePrefix.list}/sections`
   },
   admin: {
     createUpdateUser: `${interRoutePrefix.admin}/create-update-user`,
+    createUpdateSection: `${interRoutePrefix.admin}/add-update-section`,
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
       book: `${interRoutePrefix.admin}/add-book`,
@@ -93,8 +95,10 @@ export const urlConstants = {
     programBooks: `${interRoutePrefix.program}/program-book-detail`,
     getProgramSecondLanguages: `${interRoutePrefix.program}/program-second-language`,
     getProgramMediums: `${interRoutePrefix.program}/program-mediums`,
+    getProgramSections: `${interRoutePrefix.program}/program-sections`,
     updateProgramSecondLanguages: `${interRoutePrefix.program}/update-program-second-language`,
-    updateProgramMediums: `${interRoutePrefix.program}/update-program-mediums`
+    updateProgramMediums: `${interRoutePrefix.program}/update-program-mediums`,
+    updateProgramSections: `${interRoutePrefix.program}/update-program-sections`
   },
   view: {
     programSegments: `${interRoutePrefix.view}/program-segment`,

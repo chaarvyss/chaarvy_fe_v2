@@ -112,3 +112,8 @@ export interface PaymentsListResponse {
   payments: StudentPayment[]
   counts: StudentPaymentCount
 }
+
+export interface Section {
+  section_id: string
+  section_name: string
+}

@@ -10,7 +10,6 @@ import { LoadingButton } from '@mui/lab'
 
 export interface BookTypeRequest {
   book_name: string
-  pages: number
   price: number
   available_quantity: number
 }
@@ -24,7 +23,6 @@ interface CreateUpdateBookProps {
 const CreateOrUpdateBookModal = ({ selectedBook, isOpen, onClose }: CreateUpdateBookProps) => {
   const [bookType, setBookType] = useState<BookTypeRequest>({
     book_name: '',
-    pages: 0,
     price: 0,
     available_quantity: 0
   })
@@ -33,7 +31,7 @@ const CreateOrUpdateBookModal = ({ selectedBook, isOpen, onClose }: CreateUpdate
   const [updateBook, { isLoading: isUpdatingBook }] = useUpdateBookMutation()
 
   const resetState = () => {
-    setBookType({ book_name: '', pages: 0, price: 0, available_quantity: 0 })
+    setBookType({ book_name: '', price: 0, available_quantity: 0 })
   }
 
   const handleSubmit = () => {
@@ -79,8 +77,8 @@ const CreateOrUpdateBookModal = ({ selectedBook, isOpen, onClose }: CreateUpdate
   }
 
   useEffect(() => {
-    const { book_name, pages, price, available_quantity } = (selectedBook as BooksTypesResponse) ?? {}
-    setBookType({ book_name, pages, price, available_quantity })
+    const { book_name, price, available_quantity } = (selectedBook as BooksTypesResponse) ?? {}
+    setBookType({ book_name, price, available_quantity })
   }, [selectedBook])
 
   const handleChange = (prop: keyof BookTypeRequest) => (event: ChangeEvent<HTMLInputElement>) => {
@@ -109,17 +107,6 @@ const CreateOrUpdateBookModal = ({ selectedBook, isOpen, onClose }: CreateUpdate
             fullWidth
             id='book_name'
             label='Book Name'
-            sx={{ marginBottom: 4 }}
-          />
-        </Grid>
-        <Grid sm={12} md={8} lg={6} gap={2}>
-          <TextField
-            onChange={handleChange('pages')}
-            value={bookType.pages}
-            fullWidth
-            id='pages'
-            type='number'
-            label='Pages'
             sx={{ marginBottom: 4 }}
           />
         </Grid>

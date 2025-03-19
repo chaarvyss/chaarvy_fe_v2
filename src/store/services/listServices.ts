@@ -4,6 +4,7 @@ import {
   PaymentModes,
   PaymentsListRequest,
   PaymentsListResponse,
+  Section,
   UsersListRequest,
   UsersListResponse
 } from 'src/lib/interfaces'
@@ -188,6 +189,15 @@ const listServicesApi = api.injectEndpoints({
           params
         }
       }
+    }),
+    getSectionsList: build.query<Section[], void>({
+      providesTags: [CacheTag.Section],
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.sectionsList
+        }
+      }
     })
   })
 })
@@ -211,5 +221,6 @@ export const {
   useGetPaymentModesListQuery,
   useLazyGetPaymentsListQuery,
   useGetRolesListQuery,
-  useGetPaymentAggrementsQuery
+  useGetPaymentAggrementsQuery,
+  useGetSectionsListQuery
 } = listServicesApi

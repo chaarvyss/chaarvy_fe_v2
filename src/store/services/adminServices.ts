@@ -6,10 +6,10 @@ import api from './api'
 import { CacheTag } from './cacheTag'
 import { Address } from './admisissionsService'
 import { UserProfile } from './viewServices'
+import { Section } from 'src/lib/interfaces'
 
 type CreateBook = {
   book_name: string
-  pages: number
   price: number
 }
 
@@ -289,7 +289,6 @@ const adminServiceApi = api.injectEndpoints({
         }
       }
     }),
-
     createUpdateAddress: build.mutation<string, CreateAddressRequest>({
       invalidatesTags: [CacheTag.Address],
       query: ({ user_id, user_type, address }) => {
@@ -309,6 +308,16 @@ const adminServiceApi = api.injectEndpoints({
           url: urlConstants.admin.createUpdateUser,
           params: { user_id },
           body: user
+        }
+      }
+    }),
+    createUpdateSection: build.mutation<string, Section>({
+      invalidatesTags: [CacheTag.Section],
+      query: section => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.createUpdateSection,
+          body: section
         }
       }
     })
@@ -338,5 +347,6 @@ export const {
   useUpdateUserStatusMutation,
   useDeleteProgramBookMutation,
   useCreateUpdateAddressMutation,
-  useCreateUpdateUserMutation
+  useCreateUpdateUserMutation,
+  useCreateUpdateSectionMutation
 } = adminServiceApi
