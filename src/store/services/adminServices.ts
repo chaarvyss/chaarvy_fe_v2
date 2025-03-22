@@ -6,7 +6,7 @@ import api from './api'
 import { CacheTag } from './cacheTag'
 import { Address } from './admisissionsService'
 import { UserProfile } from './viewServices'
-import { Section } from 'src/lib/interfaces'
+import { Section, UserPermissionRequest } from 'src/lib/interfaces'
 
 type CreateBook = {
   book_name: string
@@ -154,6 +154,16 @@ const adminServiceApi = api.injectEndpoints({
           method: HttpRequestMethods.POST,
           url: urlConstants.admin.add.feesType,
           params: { fees_type }
+        }
+      }
+    }),
+    getUserPermissions: build.query<string[], string>({
+      providesTags: [CacheTag.UserPermissions],
+      query: user_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admin.get.userPermissions,
+          params: { user_id }
         }
       }
     }),
@@ -320,6 +330,16 @@ const adminServiceApi = api.injectEndpoints({
           body: section
         }
       }
+    }),
+    updateUserPermissions: build.mutation<string, UserPermissionRequest>({
+      invalidatesTags: [CacheTag.UserPermissions],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.update.updateUserPermissions,
+          body
+        }
+      }
     })
   })
 })
@@ -348,5 +368,7 @@ export const {
   useDeleteProgramBookMutation,
   useCreateUpdateAddressMutation,
   useCreateUpdateUserMutation,
-  useCreateUpdateSectionMutation
+  useCreateUpdateSectionMutation,
+  useUpdateUserPermissionsMutation,
+  useGetUserPermissionsQuery
 } = adminServiceApi

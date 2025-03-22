@@ -73,6 +73,7 @@ export type CreateStudentAdmissionRequest = {
   subcaste?: string
   student_aadhar?: string
   student_name?: string
+  application_fees_status?: string
 }
 
 export type StudentAddonCourseResponse = {

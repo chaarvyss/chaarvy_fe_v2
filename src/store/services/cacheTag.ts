@@ -17,5 +17,6 @@ export enum CacheTag {
   StudentPayment = 'studentPayment',
   StudentAddress = 'studentAddress',
   User = 'user',
+  UserPermissions = 'userPermissions',
   Section = 'section'
 }

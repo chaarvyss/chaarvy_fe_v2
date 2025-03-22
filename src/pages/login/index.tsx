@@ -87,13 +87,14 @@ const LoginPage = () => {
         .unwrap()
         .then(response => {
           const res = response as any
-          dispatch(setAvailablePermissionsData(response.permission))
+          dispatch(setAvailablePermissionsData(res.data.permission))
           triggerToast('Login Successful', { variant: ToastVariants.SUCCESS })
           localStorage.setItem(sessionStorageKeys.clientCode, res.data.clcode)
           saveSettings({ ...settings, current_username: res.data.name })
           sessionStorage.setItem(sessionStorageKeys.accessToken, res.data.authToken)
           sessionStorage.setItem(sessionStorageKeys.clientCode, res.data.clcode)
           router.push('/dashboard')
+          sessionStorage.setItem('role', res.data.role)
         })
         .catch(e => {
           triggerToast(e?.data, { variant: ToastVariants.ERROR })
@@ -119,7 +120,10 @@ const LoginPage = () => {
     <Box className='content-center'>
       <Card sx={{ zIndex: 1 }}>
         <CardContent sx={{ padding: theme => `${theme.spacing(12, 9, 7)} !important` }}>
-          <Box sx={{ mb: 8, display: 'flex',cursor:'pointer', alignItems: 'center', justifyContent: 'center' }} onClick={()=>router.push('/')}>
+          <Box
+            sx={{ mb: 8, display: 'flex', cursor: 'pointer', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => router.push('/')}
+          >
             <svg
               width={35}
               height={29}

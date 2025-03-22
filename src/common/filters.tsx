@@ -1,15 +1,16 @@
 import { Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Box } from '@mui/material'
 import { Grid, TextField } from '@muiElements'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import { DateFormats, InputVariants } from 'src/lib/enums'
 import { FilterProps } from 'src/lib/interfaces'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
-import { useGetProgramsListQuery } from 'src/store/services/listServices'
+import { useGetProgramsListQuery, useGetSectionsListQuery } from 'src/store/services/listServices'
 import { dateToString } from 'src/lib/helpers'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
+import { useLazyGetProgramSectionListQuery } from 'src/store/services/programServices'
 
-type FieldTypes = 'search' | 'program' | 'medium' | 'startDate' | 'endDate' | 'dateRange'
+type FieldTypes = 'search' | 'program' | 'medium' | 'startDate' | 'endDate' | 'dateRange' | 'sections'
 
 interface RenderFilterProps {
   onSubmit: (data?: FilterProps) => void
@@ -19,6 +20,7 @@ interface RenderFilterProps {
 const RenderFilterOptions = ({ onSubmit, fields }: RenderFilterProps) => {
   const [filters, setFilters] = useState<FilterProps>()
   const { data: programsList } = useGetProgramsListQuery(true)
+  const { data: sections } = useGetSectionsListQuery()
 
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
@@ -47,7 +49,6 @@ const RenderFilterOptions = ({ onSubmit, fields }: RenderFilterProps) => {
     }
     onSubmit(finalFilters)
   }
-
   const handleReset = () => {
     setFilters(undefined)
     onSubmit(undefined)
@@ -82,6 +83,16 @@ const RenderFilterOptions = ({ onSubmit, fields }: RenderFilterProps) => {
             <Select label='Program' value={filters?.program ?? ''} onChange={handleChange('program')}>
               {(programsList ?? []).map(({ program_id, program_name }) => (
                 <MenuItem value={program_id}>{program_name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+        {fields.includes('sections') && (
+          <FormControl fullWidth>
+            <InputLabel>Section</InputLabel>
+            <Select label='Section' value={filters?.section ?? ''} onChange={handleChange('section')}>
+              {(sections ?? []).map(({ section_id, section_name }) => (
+                <MenuItem value={section_id}>{section_name}</MenuItem>
               ))}
             </Select>
           </FormControl>

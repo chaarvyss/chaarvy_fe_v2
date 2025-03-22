@@ -14,9 +14,11 @@ import { useLazyGetDistrictsListQuery, useGetStateListQuery } from 'src/store/se
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { useLoader } from 'src/@core/context/loaderContext'
 import { LoadingButton } from '@mui/lab'
+import { AdmissionFormType } from '.'
 
 interface AddressProps {
   application_id?: string
+  handleNext: (step: AdmissionFormType) => void
 }
 
 const TOP_LEVEL_ID = 'student-address'
@@ -32,7 +34,7 @@ const mandatoryFields = [
   'pincode'
 ]
 
-const StudentAddress = ({ application_id }: AddressProps) => {
+const StudentAddress = ({ application_id, handleNext }: AddressProps) => {
   const [errors, setErrors] = useState<Array<ErrorObject>>([])
   const [studentAddress, setStudentAddress] = useState<Address>()
   const { triggerToast } = useToast()
@@ -227,6 +229,7 @@ const StudentAddress = ({ application_id }: AddressProps) => {
       createUpdateAddress({ ...studentAddress, application_id })
         .unwrap()
         .then(res => {
+          handleNext(AdmissionFormType.FEES)
           triggerToast(res, { variant: ToastVariants.SUCCESS })
         })
         .catch(res => triggerToast(res.data, { variant: ToastVariants.ERROR }))

@@ -9,7 +9,6 @@ import {
   RadioGroup,
   Select,
   SelectChangeEvent,
-  styled,
   Typography
 } from '@mui/material'
 import React, { ChangeEvent, useState, useEffect } from 'react'
@@ -46,13 +45,13 @@ import { useLoader } from 'src/@core/context/loaderContext'
 import { dateToString } from 'src/lib/helpers'
 import { useImageViewer } from 'src/@core/context/imageViewerContext'
 import { LoadingButton } from '@mui/lab'
-
-const ImgStyled = styled('img')(({ theme }) => ({
-  width: 120,
-  height: 120,
-  marginRight: theme.spacing(6.25),
-  borderRadius: theme.shape.borderRadius
-}))
+import { ImgStyled } from 'src/reusable_components/styledComponents/styledImgTag'
+import { useRouter } from 'next/router'
+import { AdmissionFormType } from '.'
+import {
+  useLazyGetApplicationFeesPaymentQuery,
+  useLazyUpdateApplicationPaymentQuery
+} from 'src/store/services/feesServices'
 
 const TOP_LEVEL_ID = 'student-application-form'
 
@@ -64,6 +63,7 @@ const getLast10Years = (): number[] => {
 interface studentBaseDetailsProps {
   application_id?: string
   onAdmissionCreation: (application_id: string) => void
+  handleNext: (step: AdmissionFormType) => void
 }
 
 const mandatoryFields = [
@@ -81,7 +81,7 @@ const mandatoryFields = [
   'gender'
 ]
 
-const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBaseDetailsProps) => {
+const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }: studentBaseDetailsProps) => {
   const [errors, setErrors] = useState<Array<ErrorObject>>([])
   const [image, setImage] = useState<string | null>(null)
   const [studentImg, setStudentImg] = useState<File>()
@@ -90,6 +90,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
 
   const { triggerToast } = useToast()
   const { setLoading } = useLoader()
+  const router = useRouter()
 
   const { setShowImage } = useImageViewer()
 
@@ -106,6 +107,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
 
   const [fetchProgramSectionsData, { data: programSections, isFetching: isSectionsLoading }] =
     useLazyGetProgramSectionListQuery()
+
   const { data: occupationsList } = useGetOccupationsListQuery()
   const { data: gendersList } = useGetGendersListQuery()
   const { data: communities } = useGetCommunitiesListQuery()
@@ -117,6 +119,9 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
   const [createUpdateAdmission, { isLoading: IsupdatingAdmission }] = useCreateUpdateAdmissionMutation()
   const [uploadStudentPhoto, { isLoading: isUploadingPhoto }] = useUploadStudentPhotoMutation()
   const [fetchApplicationDetail, { isLoading: isApplicationLoading }] = useLazyGetAdmissionDetailQuery()
+  const [createPayment, { isLoading }] = useLazyGetApplicationFeesPaymentQuery()
+
+  const [updateApplicationPayment] = useLazyUpdateApplicationPaymentQuery()
 
   const getDependentData = (program_id: string) => {
     fetchProgramMediums(program_id)
@@ -130,9 +135,15 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
 
   useEffect(() => {
     let apl_id
+    let razorpay_payment_link_status
+    let segment_id
+    let transaction_id
     if (typeof window !== 'undefined') {
       const queryParams = new URLSearchParams(window.location.search)
       apl_id = queryParams.get('id') ?? application_id
+      razorpay_payment_link_status = queryParams.get('razorpay_payment_link_status')
+      segment_id = queryParams.get('segment_id')
+      transaction_id = queryParams.get('razorpay_payment_id')
     }
     if (apl_id) {
       fetchApplicationDetail(apl_id).then(({ data: res }) => {
@@ -143,6 +154,14 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
         setDob(convertDateStringToDate(res?.dob))
         setImage(res?.photo_url ?? null)
       })
+    }
+
+    if (razorpay_payment_link_status == 'paid') {
+      updateApplicationPayment({ application_id: apl_id, segment_id, transaction_id })
+        .unwrap()
+        .then(() => {
+          handleNext(AdmissionFormType.ADDON_COURSE)
+        })
     }
   }, [])
 
@@ -203,6 +222,16 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
     return newErrors.length === 0
   }
 
+  const handleCreatePayment = async (application_id, segment_id, email) => {
+    try {
+      const response = await createPayment({ application_id, segment_id, email }).unwrap()
+      router.push(response.short_url)
+    } catch (error) {
+      console.error('Error creating payment:', error)
+      alert('Failed to create payment link.')
+    }
+  }
+
   const handleSubmit = () => {
     if (!validateForm()) {
       triggerToast('Please correct the errors before submitting.', { variant: ToastVariants.ERROR })
@@ -217,6 +246,11 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
         .unwrap()
         .then(({ application_id, message }) => {
           if (application_id) {
+            if (applicationDetails.application_fees_status != '1') {
+              handleCreatePayment(application_id, applicationDetails.segment, applicationDetails.student_email)
+            } else {
+              handleNext(AdmissionFormType.ADDON_COURSE)
+            }
             onAdmissionCreation(application_id)
             if (studentImg) {
               uploadStudentPhoto({
@@ -309,7 +343,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
       type: InputTypes.SELECT,
       id: `${TOP_LEVEL_ID}__section`,
       label: 'Section',
-      key: 'segment',
+      key: 'section',
       value: applicationDetails?.section,
       onChange: handleChange('section'),
       menuOptions: (programSections ?? []).map(each => {
@@ -610,7 +644,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation }: studentBase
       <form>
         <Grid container spacing={7}>
           <Grid item xs={12} sx={{ marginTop: 4.8, marginBottom: 3 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'end', justifyContent: 'end' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'end', justifyContent: 'end', gap: 3 }}>
               <ImgStyled
                 onClick={() => handleImageViewClick(image ?? '')}
                 src={image ?? '/images/avatars/1.png'}

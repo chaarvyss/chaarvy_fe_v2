@@ -16,7 +16,7 @@ import themeConfig from 'src/configs/themeConfig'
 import UserLayout from 'src/layouts/UserLayout'
 import 'react-perfect-scrollbar/dist/css/styles.css'
 import '../../styles/globals.css'
-import store from 'src/store'
+import store, { persistor } from 'src/store'
 import { ToastProvider } from 'src/@core/context/toastContext'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { LoaderProvider } from 'src/@core/context/loaderContext'
@@ -24,6 +24,7 @@ import { SideDrawerProvider } from 'src/@core/context/sideDrawerContext'
 
 import 'react-datepicker/dist/react-datepicker.css'
 import { ImageViewerProvider } from 'src/@core/context/imageViewerContext'
+import { PersistGate } from 'redux-persist/integration/react'
 
 type ExtendedAppProps = AppProps & {
   Component: NextPage
@@ -56,25 +57,27 @@ const App = (props: ExtendedAppProps) => {
         <ImageViewerProvider>
           <SideDrawerProvider>
             <Provider store={store}>
-              <CacheProvider value={emotionCache}>
-                <Head>
-                  <title>{`${themeConfig.templateName}`}</title>
-                  <meta name='description' content={`${themeConfig.templateName}`} />
-                  <meta name='keywords' content='Education, ERP, inter, school, Acadamics,Management,Chaarvy' />
-                  <meta name='viewport' content='initial-scale=1, width=device-width' />
-                </Head>
+              <PersistGate loading={null} persistor={persistor}>
+                <CacheProvider value={emotionCache}>
+                  <Head>
+                    <title>{`${themeConfig.templateName}`}</title>
+                    <meta name='description' content={`${themeConfig.templateName}`} />
+                    <meta name='keywords' content='Education, ERP, inter, school, Acadamics,Management,Chaarvy' />
+                    <meta name='viewport' content='initial-scale=1, width=device-width' />
+                  </Head>
 
-                <SettingsProvider>
-                  <SettingsConsumer>
-                    {({ settings }) => {
-                      return (
-                        <ThemeComponent settings={settings}>{getLayout(<Component {...pageProps} />)}</ThemeComponent>
-                      )
-                    }}
-                  </SettingsConsumer>
-                  <ToastContainer />
-                </SettingsProvider>
-              </CacheProvider>
+                  <SettingsProvider>
+                    <SettingsConsumer>
+                      {({ settings }) => {
+                        return (
+                          <ThemeComponent settings={settings}>{getLayout(<Component {...pageProps} />)}</ThemeComponent>
+                        )
+                      }}
+                    </SettingsConsumer>
+                    <ToastContainer />
+                  </SettingsProvider>
+                </CacheProvider>
+              </PersistGate>
             </Provider>
           </SideDrawerProvider>
         </ImageViewerProvider>

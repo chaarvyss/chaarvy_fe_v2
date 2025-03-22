@@ -1,77 +1,85 @@
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
+import { Permissions } from 'src/constants/permissions'
+
+import store from 'src/store'
 
 const navigation = (): VerticalNavItemsType => {
-  return [
+  const allowedPermissions = store.getState().permission.data
+
+  let navItems: VerticalNavItemsType = []
+
+  const hadPermission = (key: string) => {
+    return (allowedPermissions ?? []).includes(key)
+  }
+
+  const items = [
+    { key: Permissions.NAV.DASHBOARD, title: 'Dashboard', path: '/dashboard', icon: 'ViewDashboard' as const },
     {
-      title: 'Dashboard',
-      path: '/dashboard',
-      icon: 'ViewDashboard'
-    },
-    {
+      key: Permissions.NAV.COLLEGE_PROFILE,
       title: 'College Profile',
       path: '/collegeProfile',
-      icon: 'FaceManProfile'
+      icon: 'FaceManProfile' as const
     },
     {
-      sectionTitle: 'Admin'
-    },
-    {
+      key: Permissions.NAV.USERS,
       title: 'Users',
       path: '/Admin/users',
-      icon: 'AccountGroup'
+      icon: 'AccountGroup' as const
     },
     {
+      key: Permissions.NAV.FEES_TYPES,
       title: 'Fees types',
       path: '/Admin/feesTypes',
-      icon: 'FormatListGroup'
+      icon: 'FormatListGroup' as const
     },
+    { key: Permissions.NAV.SECTIONS, title: 'Sections', path: '/Admin/sections', icon: 'ArrangeBringToFront' as const },
+    { key: Permissions.NAV.BOOKS, title: 'Books & Stationary', path: '/Admin/books', icon: 'Bookshelf' as const },
+    { key: Permissions.NAV.ADDON, title: 'Addon Courses', path: '/Admin/addonCourse', icon: 'Offer' as const },
+    { key: Permissions.NAV.PROGRAMS, title: 'Programs', path: '/Admin/programs', icon: 'BullseyeArrow' as const },
     {
-      title: 'Sections',
-      path: '/Admin/sections',
-      icon: 'ArrangeBringToFront'
-    },
-    {
-      title: 'Books & Stationary',
-      path: '/Admin/books',
-      icon: 'Bookshelf'
-    },
-    {
-      title: 'Addon Courses',
-      path: '/Admin/addonCourse',
-      icon: 'Offer'
-    },
-    {
-      title: 'Programs',
-      path: '/Admin/programs',
-      icon: 'BullseyeArrow'
-    },
-    {
+      key: Permissions.NAV.PAYMENTS,
       title: 'Payments',
       path: '/Admin/payments',
-      icon: 'AccountCreditCardOutline'
+      icon: 'AccountCreditCardOutline' as const
     },
 
     {
-      sectionTitle: 'Admissions'
-    },
-
-    {
+      key: Permissions.NAV.ADMISSION_FORM,
       title: 'Admission form',
       path: '/StudentManagement/AdmissionForm',
-      icon: 'FormSelect'
+      icon: 'FormSelect' as const
     },
     {
+      key: Permissions.NAV.ADMISSIONS,
       title: 'Admissions',
       path: '/StudentManagement/Admissions',
-      icon: 'AccountSchoolOutline'
+      icon: 'AccountSchoolOutline' as const
     },
     {
+      key: Permissions.NAV.COLLECT_PAYMENT,
       title: 'Collect Payment',
       path: '/StudentManagement/Payments/collectPayment',
-      icon: 'BankTransferIn'
+      icon: 'BankTransferIn' as const
+    },
+    {
+      key: Permissions.NAV.PAYMENTS,
+      title: 'Payments',
+      path: '/Admin/payments',
+      icon: 'AccountCreditCardOutline' as const
+    },
+
+    {
+      key: Permissions.NAV.ATTENDENCE_REGISTER,
+      title: 'Attendence Register',
+      path: '/Faculty/attendence',
+      icon: 'AccountCheck' as const
     }
   ]
+
+  navItems.push(...items.filter(item => hadPermission(item.key)))
+
+  return navItems
 }
 
 export default navigation

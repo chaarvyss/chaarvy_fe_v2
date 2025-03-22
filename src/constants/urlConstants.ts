@@ -50,6 +50,9 @@ export const urlConstants = {
       programSegment: `${interRoutePrefix.admin}/add-program-segment`,
       createUpdateAddress: `${interRoutePrefix.admin}/create-update-address`
     },
+    get: {
+      userPermissions: `${interRoutePrefix.admin}/user-permissions`
+    },
     update: {
       addonCourse: `${interRoutePrefix.admin}/update-addon-course`,
       addonCourseStatus: `${interRoutePrefix.admin}/update-addon-course-status`,
@@ -63,7 +66,8 @@ export const urlConstants = {
       programSegment: `${interRoutePrefix.admin}/update-program-segment`,
       collegeProfile: `${interRoutePrefix.admin}/update-mydetails`,
       collgeLogo: `${interRoutePrefix.admin}/update-college-logo`,
-      userStatus: `${interRoutePrefix.admin}/update-user-status`
+      userStatus: `${interRoutePrefix.admin}/update-user-status`,
+      updateUserPermissions: `${interRoutePrefix.admin}/update-user-permission`
     },
     delete: {
       programBook: `${interRoutePrefix.admin}/delete-program-book`
@@ -88,7 +92,9 @@ export const urlConstants = {
     getStudentPayableFees: `${interRoutePrefix.fees}/student-payable-fees`,
     getStudentPendingFees: `${interRoutePrefix.fees}/student-pending-payment`,
     recordPaymentTransaction: `${interRoutePrefix.fees}/record-transaction`,
-    paymentRecieptByPaymentId: `${interRoutePrefix.fees}/payment_reciept`
+    paymentRecieptByPaymentId: `${interRoutePrefix.fees}/payment_reciept`,
+    getApplicationFeesPaymentLink: `${interRoutePrefix.fees}/get-payment-link`,
+    updateApplicationFeesPayment: `${interRoutePrefix.fees}/update-application-payment`
   },
   program: {
     programAddon: `${interRoutePrefix.program}/program-addon-course`,

@@ -4,6 +4,7 @@ import React, { ChangeEvent, useEffect, useState } from 'react'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { useGetSectionsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSectionListQuery, useUpdateProgramSectionMutation } from 'src/store/services/programServices'
+import { areSetsEqual } from 'src/utils/helpers'
 
 const ProgramSection = ({ program_id }: { program_id: string }) => {
   const [fetchProgramSection, { data: ProgramSection }] = useLazyGetProgramSectionListQuery()
@@ -35,14 +36,6 @@ const ProgramSection = ({ program_id }: { program_id: string }) => {
 
       return new Set(newIds)
     })
-  }
-
-  const areSetsEqual = (set1: Set<string>, set2: Set<string>) => {
-    if (set1.size !== set2.size) return false
-    for (let item of set1) {
-      if (!set2.has(item)) return false
-    }
-    return true
   }
 
   const handleSubmit = () => {
