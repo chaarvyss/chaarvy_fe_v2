@@ -24,6 +24,7 @@ import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { useCreateUpdateUserMutation } from 'src/store/services/adminServices'
 import { useGetRolesListQuery } from 'src/store/services/listServices'
 import { useUploadProfilePicMutation } from 'src/store/services/authServices'
+import UserPermissions from './userPermissions'
 
 enum FormType {
   BASE_DETAIL = 'base_detail',
@@ -175,17 +176,7 @@ const ViewUserProfile = (props: UserProfileProps) => {
       value: FormType.PERMISSIONS,
       label: 'Permissions',
       icon: <GetChaarvyIcons iconName='AccountLockOutline' />,
-      component: (
-        <Box className='col-12'>
-          <Grid container spacing={7}>
-            <Grid item xs={12} md={6}>
-              <Box display='flex' flexDirection='column'>
-                <Typography>Comming Soon</Typography>
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
-      )
+      component: <UserPermissions user_id={user_id} />
     }
   ]
 

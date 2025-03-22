@@ -3,7 +3,8 @@ import {
   ProgramAddonCourseResponse,
   ProgramBookRequest,
   ProgramBooksDetails,
-  ProgramSecondLanguagesResponse
+  ProgramSecondLanguagesResponse,
+  ProgramSectionResponse
 } from 'src/lib/types'
 
 import { HttpRequestMethods } from '..'
@@ -14,6 +15,11 @@ import { CacheTag } from './cacheTag'
 type ProgramSecondLanguageRequest = {
   program_id: string
   languages: Array<string>
+}
+
+type ProgramSectionRequest = {
+  program_id: string
+  sections: Array<string>
 }
 
 const programServicesApi = api.injectEndpoints({
@@ -60,7 +66,6 @@ const programServicesApi = api.injectEndpoints({
     }),
 
     getProgramMediumsList: build.query<ProgramSecondLanguagesResponse[], string>({
-      providesTags: [CacheTag.ListProgramMediums],
       query: program_id => {
         return {
           method: HttpRequestMethods.GET,
@@ -70,11 +75,29 @@ const programServicesApi = api.injectEndpoints({
       }
     }),
     updateProgramMediums: build.mutation<string, ProgramSecondLanguageRequest>({
-      invalidatesTags: [CacheTag.ListProgramMediums],
       query: body => {
         return {
           method: HttpRequestMethods.POST,
           url: urlConstants.program.updateProgramMediums,
+          body: { ...body }
+        }
+      }
+    }),
+    getProgramSectionList: build.query<ProgramSectionResponse[], string>({
+      query: program_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.program.getProgramSections,
+          params: { program_id }
+        }
+      }
+    }),
+    updateProgramSection: build.mutation<string, ProgramSectionRequest>({
+      invalidatesTags: [CacheTag.ListProgramMediums],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.program.updateProgramSections,
           body: { ...body }
         }
       }
@@ -88,5 +111,7 @@ export const {
   useLazyGetProgramSecondLanguagesListQuery,
   useUpdateProgramSecondLanguagesListMutation,
   useLazyGetProgramMediumsListQuery,
-  useUpdateProgramMediumsMutation
+  useUpdateProgramMediumsMutation,
+  useLazyGetProgramSectionListQuery,
+  useUpdateProgramSectionMutation
 } = programServicesApi

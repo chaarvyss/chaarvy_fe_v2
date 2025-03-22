@@ -40,6 +40,7 @@ export interface FilterProps {
   endDate?: string
   program?: string
   medium?: string
+  section?: string
 }
 
 export interface User {
@@ -111,4 +112,14 @@ interface StudentPaymentCount {
 export interface PaymentsListResponse {
   payments: StudentPayment[]
   counts: StudentPaymentCount
+}
+
+export interface Section {
+  section_id: string
+  section_name: string
+}
+
+export interface UserPermissionRequest {
+  user_id: string
+  available_permissions: string[]
 }

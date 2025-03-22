@@ -22,7 +22,7 @@ const Tab = styled(MuiTab)<TabProps>(({ theme }) => ({
   }
 }))
 
-enum FormType {
+export enum AdmissionFormType {
   BASE_DETAIL = 'base_details',
   ADDON_COURSE = 'add_on_course',
   ADDRESS = 'address',
@@ -30,8 +30,8 @@ enum FormType {
 }
 
 const AdmissionForm = () => {
-  const [value, setValue] = useState<FormType>(FormType.BASE_DETAIL)
-  const handleChange = (_: SyntheticEvent, newValue: FormType) => setValue(newValue)
+  const [value, setValue] = useState<AdmissionFormType>(AdmissionFormType.BASE_DETAIL)
+  const handleChange = (_: SyntheticEvent, newValue: AdmissionFormType) => setValue(newValue)
   const [application_id, setApplication] = useState<string | undefined>()
 
   const [fetchStudentDetails, { data: studentDetail }] = useLazyGetAdmissionDetailQuery()
@@ -45,8 +45,16 @@ const AdmissionForm = () => {
     if (typeof window !== 'undefined') {
       const queryParams = new URLSearchParams(window.location.search)
       setApplication(queryParams.get('id') ?? undefined)
+
+      if (queryParams.get('step') == '2') {
+        handleNext(AdmissionFormType.ADDON_COURSE)
+      }
     }
   }, [])
+
+  const handleNext = (step: AdmissionFormType) => {
+    setValue(step)
+  }
 
   useEffect(() => {
     if (application_id) fetchStudentDetails(application_id)
@@ -54,25 +62,37 @@ const AdmissionForm = () => {
 
   const tabs = [
     {
-      value: FormType.BASE_DETAIL,
+      value: AdmissionFormType.BASE_DETAIL,
       label: 'Student Details',
       icon: <AccountOutline />,
-      component: <StudentBaseDetails application_id={application_id} onAdmissionCreation={handleAdmissionCreation} />
+      component: (
+        <StudentBaseDetails
+          application_id={application_id}
+          onAdmissionCreation={handleAdmissionCreation}
+          handleNext={handleNext}
+        />
+      )
     },
     {
-      value: FormType.ADDON_COURSE,
+      value: AdmissionFormType.ADDON_COURSE,
       label: 'ADDON Courses',
       icon: <BookOutline />,
-      component: <AddonCourseDetails application_id={application_id} programId={studentDetail?.program_id} />
+      component: (
+        <AddonCourseDetails
+          application_id={application_id}
+          programId={studentDetail?.program_id}
+          handleNext={handleNext}
+        />
+      )
     },
     {
-      value: FormType.ADDRESS,
+      value: AdmissionFormType.ADDRESS,
       label: 'Student Address',
       icon: <GoogleMaps />,
-      component: <StudentAddress application_id={application_id} />
+      component: <StudentAddress application_id={application_id} handleNext={handleNext} />
     },
     {
-      value: FormType.FEES,
+      value: AdmissionFormType.FEES,
       label: 'Fees Details',
       icon: <Cash />,
       component: <FeesDetails application_id={application_id} segment_id={studentDetail?.segment} />
@@ -89,7 +109,7 @@ const AdmissionForm = () => {
         >
           {tabs.map(({ value, label, icon }) => (
             <Tab
-              disabled={value !== FormType.BASE_DETAIL && !application_id}
+              disabled={value !== AdmissionFormType.BASE_DETAIL && !application_id}
               key={value}
               value={value}
               label={

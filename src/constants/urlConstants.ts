@@ -33,10 +33,12 @@ export const urlConstants = {
     paymentModes: `${interRoutePrefix.list}/payment-modes`,
     paymentAggrements: `${interRoutePrefix.list}/payment-aggrements`,
     roles: `${interRoutePrefix.list}/roles`,
-    studentPaymentsList: `${interRoutePrefix.list}/student-payments`
+    studentPaymentsList: `${interRoutePrefix.list}/student-payments`,
+    sectionsList: `${interRoutePrefix.list}/sections`
   },
   admin: {
     createUpdateUser: `${interRoutePrefix.admin}/create-update-user`,
+    createUpdateSection: `${interRoutePrefix.admin}/add-update-section`,
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
       book: `${interRoutePrefix.admin}/add-book`,
@@ -47,6 +49,9 @@ export const urlConstants = {
       programBook: `${interRoutePrefix.admin}/add-program-book`,
       programSegment: `${interRoutePrefix.admin}/add-program-segment`,
       createUpdateAddress: `${interRoutePrefix.admin}/create-update-address`
+    },
+    get: {
+      userPermissions: `${interRoutePrefix.admin}/user-permissions`
     },
     update: {
       addonCourse: `${interRoutePrefix.admin}/update-addon-course`,
@@ -61,7 +66,8 @@ export const urlConstants = {
       programSegment: `${interRoutePrefix.admin}/update-program-segment`,
       collegeProfile: `${interRoutePrefix.admin}/update-mydetails`,
       collgeLogo: `${interRoutePrefix.admin}/update-college-logo`,
-      userStatus: `${interRoutePrefix.admin}/update-user-status`
+      userStatus: `${interRoutePrefix.admin}/update-user-status`,
+      updateUserPermissions: `${interRoutePrefix.admin}/update-user-permission`
     },
     delete: {
       programBook: `${interRoutePrefix.admin}/delete-program-book`
@@ -86,15 +92,19 @@ export const urlConstants = {
     getStudentPayableFees: `${interRoutePrefix.fees}/student-payable-fees`,
     getStudentPendingFees: `${interRoutePrefix.fees}/student-pending-payment`,
     recordPaymentTransaction: `${interRoutePrefix.fees}/record-transaction`,
-    paymentRecieptByPaymentId: `${interRoutePrefix.fees}/payment_reciept`
+    paymentRecieptByPaymentId: `${interRoutePrefix.fees}/payment_reciept`,
+    getApplicationFeesPaymentLink: `${interRoutePrefix.fees}/get-payment-link`,
+    updateApplicationFeesPayment: `${interRoutePrefix.fees}/update-application-payment`
   },
   program: {
     programAddon: `${interRoutePrefix.program}/program-addon-course`,
     programBooks: `${interRoutePrefix.program}/program-book-detail`,
     getProgramSecondLanguages: `${interRoutePrefix.program}/program-second-language`,
     getProgramMediums: `${interRoutePrefix.program}/program-mediums`,
+    getProgramSections: `${interRoutePrefix.program}/program-sections`,
     updateProgramSecondLanguages: `${interRoutePrefix.program}/update-program-second-language`,
-    updateProgramMediums: `${interRoutePrefix.program}/update-program-mediums`
+    updateProgramMediums: `${interRoutePrefix.program}/update-program-mediums`,
+    updateProgramSections: `${interRoutePrefix.program}/update-program-sections`
   },
   view: {
     programSegments: `${interRoutePrefix.view}/program-segment`,

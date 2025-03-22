@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { CircularProgress, Grid, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material'
+import { CircularProgress, Grid, MenuItem, Select, SelectChangeEvent, Tooltip, Typography } from '@mui/material'
 import {
   Box,
   Button,
@@ -11,9 +11,12 @@ import {
   TableHead,
   TableRow
 } from '@muiElements'
+import { FormatListChecks } from 'mdi-material-ui'
 import React, { ChangeEvent, useState } from 'react'
+import DatePicker from 'react-datepicker'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
+import CustomDateElement from 'src/reusable_components/dateInputElement'
 import {
   StudentPayableFeesRequest,
   StudentProgramFeesDetailsResponse,
@@ -31,9 +34,16 @@ interface Props {
   segment_id?: string
 }
 
+interface TermsDetail {
+  payable_fees: number
+  due_date: Date
+}
+
 const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose, application_id, segment_id }: Props) => {
   const [createStudentPayableFees, { isLoading }] = useCreateStudentPayableFeesMutation()
   const { triggerToast } = useToast()
+
+  const [terms, setTerms] = useState<TermsDetail[]>([])
 
   const { data: paymentAggrements } = useGetPaymentAggrementsQuery()
 
@@ -73,11 +83,14 @@ const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose, application_id, se
         fees_details: JSON.stringify(feesDetails),
         payable_fees: consolidatedFees.totalFees - consolidatedFees.totalDiscount,
         segment_id,
-        ...paymentAggrement
+        ...paymentAggrement,
+        term_details: paymentAggrement?.paymentAggrement == '2' ? JSON.stringify(terms) : undefined
       })
         .unwrap()
         .then(res => {
           triggerToast(res, { variant: ToastVariants.SUCCESS })
+          setPaymentAggrement(undefined)
+          setTerms([])
           onClose(true)
         })
         .catch(e => {
@@ -88,26 +101,46 @@ const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose, application_id, se
     }
   }
 
+  const shouldDisableSubmitButton = () => {
+    return !paymentAggrement || (paymentAggrement.paymentAggrement === '2' && terms.length === 0)
+  }
+
+  const bulidDefaultTerms = (value: number) => {
+    setPaymentAggrement(prev => ({ ...prev, no_of_terms: value }))
+    const date = new Date()
+    const monthsToAddPerTerm = Math.floor(12 / value)
+
+    setTerms(
+      [...Array(value)].map((_, index) => ({
+        payable_fees: (consolidatedFees.totalFees - consolidatedFees.totalDiscount) / value,
+        due_date: new Date(date.getFullYear(), date.getMonth() + index * monthsToAddPerTerm, 10)
+      }))
+    )
+  }
+
   const handlePaymentAggrementChange =
     (prop: keyof StudentPayableFeesRequest) =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
       setPaymentAggrement({ ...paymentAggrement, [prop]: event.target.value })
+      setTerms([])
     }
 
-  const getPaymentAggrementDescription = () => {
-    if (paymentAggrements && paymentAggrement?.paymentAggrement) {
-      return paymentAggrements.find(each => each.payment_aggrement_id === paymentAggrement?.paymentAggrement)
-        ?.description
-    } else {
-      return 'Please Select A payment aggrement option to proceed.'
-    }
+  const handleDateChange = (date: Date | null, index?: number) => {
+    if (date === null || index === undefined) return
+    setTerms(terms.map((each, cindex) => (cindex === index ? { ...each, due_date: date } : each)))
+  }
+
+  const handleModalClose = () => {
+    setPaymentAggrement(undefined)
+    setTerms([])
+    onClose(false)
   }
 
   return (
     <ChaarvyModal
       title='Fees Details Finalization'
       isOpen={isOpen}
-      onClose={() => onClose(false)}
+      onClose={handleModalClose}
       modalSize='col-12 col-md-8'
     >
       <>
@@ -148,36 +181,84 @@ const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose, application_id, se
         <Box className='col-12 p-3'>
           <Grid container spacing={7}>
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <small>Payment Aggrement</small>
-                <Select onChange={handlePaymentAggrementChange('paymentAggrement')}>
-                  {isLoading ? (
-                    <MenuItem disabled>
-                      <CircularProgress size={24} />
-                    </MenuItem>
-                  ) : (
-                    (paymentAggrements ?? []).map(({ payment_aggrement_id, payment_aggrement_name }) => (
-                      <MenuItem key={payment_aggrement_id} value={payment_aggrement_id}>
-                        {payment_aggrement_name}
+              <Box display='flex' justifyContent='center' alignItems='center'>
+                <FormControl fullWidth>
+                  <small>Payment Aggrement</small>
+                  <Select onChange={handlePaymentAggrementChange('paymentAggrement')}>
+                    {isLoading ? (
+                      <MenuItem disabled>
+                        <CircularProgress size={24} />
                       </MenuItem>
-                    ))
-                  )}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box>
-                <Typography>{getPaymentAggrementDescription()}</Typography>
+                    ) : (
+                      (paymentAggrements ?? []).map(({ payment_aggrement_id, payment_aggrement_name }) => (
+                        <MenuItem key={payment_aggrement_id} value={payment_aggrement_id}>
+                          {payment_aggrement_name}
+                        </MenuItem>
+                      ))
+                    )}
+                  </Select>
+                </FormControl>
               </Box>
             </Grid>
+
+            {paymentAggrement?.paymentAggrement == '2' && (
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <small>Number of term installments</small>
+                  <Select onChange={e => bulidDefaultTerms(e.target.value as number)}>
+                    {[...Array(12).keys()].map(each => (
+                      <MenuItem key={each} value={each + 1}>
+                        {each + 1}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
           </Grid>
         </Box>
 
+        {terms.length > 0 && (
+          <TableContainer>
+            <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
+              <TableHead>
+                <TableRow>
+                  <TableCell></TableCell>
+                  <TableCell>Amount</TableCell>
+                  <TableCell>Due Date</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {terms.map((each, index) => (
+                  <TableRow hover sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>{each.payable_fees}</TableCell>
+                    <TableCell>
+                      <Box display='flex' flexDirection='column'>
+                        <DatePicker
+                          selected={each.due_date}
+                          customInput={<CustomDateElement label='' />}
+                          onChange={(date: Date | null) => handleDateChange(date, index)}
+                        />
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+
         <Box display='flex' justifyContent='space-around' mt={5}>
-          <Button variant='outlined' color='error' onClick={() => onClose(false)}>
+          <Button variant='outlined' color='error' onClick={handleModalClose}>
             Close
           </Button>
-          <LoadingButton loading={isLoading} onClick={handleSubmit} variant='contained'>
+          <LoadingButton
+            disabled={shouldDisableSubmitButton()}
+            loading={isLoading}
+            onClick={handleSubmit}
+            variant='contained'
+          >
             Submit
           </LoadingButton>
         </Box>

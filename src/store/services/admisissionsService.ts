@@ -63,6 +63,7 @@ export type CreateStudentAdmissionRequest = {
   program_id?: string
   photo_url?: string
   religion?: string
+  section?: string
   second_language?: string
   segment?: string
   student_email?: string
@@ -72,6 +73,7 @@ export type CreateStudentAdmissionRequest = {
   subcaste?: string
   student_aadhar?: string
   student_name?: string
+  application_fees_status?: string
 }
 
 export type StudentAddonCourseResponse = {

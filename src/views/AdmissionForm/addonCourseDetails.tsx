@@ -9,13 +9,15 @@ import {
   useLazyGetStudentEnrollendAddonCoursesQuery
 } from 'src/store/services/admisissionsService'
 import { useLazyGetProgramAddonListQuery } from 'src/store/services/programServices'
+import { AdmissionFormType } from '.'
 
 interface AddonCourseDetailsProps {
   application_id?: string
   programId?: string
+  handleNext: (step: AdmissionFormType) => void
 }
 
-const AddonCourseDetails = ({ application_id, programId }: AddonCourseDetailsProps) => {
+const AddonCourseDetails = ({ application_id, programId, handleNext }: AddonCourseDetailsProps) => {
   const [fetchAddonCourse, { data: addonCourses, isFetching: isLoadingCourses }] = useLazyGetProgramAddonListQuery()
   const [selectedAddonCourses, setSelectedAddonCourses] = useState<Array<string>>([])
   const [fetchStudentEnrolledAddonCourses] = useLazyGetStudentEnrollendAddonCoursesQuery()
@@ -46,6 +48,7 @@ const AddonCourseDetails = ({ application_id, programId }: AddonCourseDetailsPro
       })
         .then(({ data: res }) => {
           if (res) {
+            handleNext(AdmissionFormType.ADDRESS)
             triggerToast(res, { variant: ToastVariants.SUCCESS })
           }
         })

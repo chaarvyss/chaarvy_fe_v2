@@ -120,6 +120,18 @@ export interface RecordPaymentResponse {
   payment_id: string
 }
 
+export interface ApplicationPaymentRequest {
+  application_id: string
+  segment_id: string
+  email: string
+}
+
+export interface UpdateApplicationPaymentRequest {
+  application_id: string
+  segment_id: string
+  transaction_id: string
+}
+
 const feeServiceApi = api.injectEndpoints({
   endpoints: build => ({
     getProgramFeesDetails: build.query<ProgramFeesDetailsResponse, ProgramFeesRequest>({
@@ -208,6 +220,16 @@ const feeServiceApi = api.injectEndpoints({
           params: { payment_id }
         }
       }
+    }),
+    getApplicationFeesPayment: build.query<any, ApplicationPaymentRequest>({
+      query: params => ({
+        url: urlConstants.fees.getApplicationFeesPaymentLink,
+        params
+      })
+    }),
+
+    updateApplicationPayment: build.query<any, UpdateApplicationPaymentRequest>({
+      query: params => ({ url: urlConstants.fees.updateApplicationFeesPayment, params })
     })
   })
 })
@@ -221,5 +243,7 @@ export const {
   useLazyGetStudentPayableFeesDetailsQuery,
   useLazyGetStudentPendingFeesDetailsQuery,
   useRecordPaymentTransactionMutation,
-  useLazyGetPaymentRecieptByPaymentIdQuery
+  useLazyGetPaymentRecieptByPaymentIdQuery,
+  useLazyUpdateApplicationPaymentQuery,
+  useLazyGetApplicationFeesPaymentQuery
 } = feeServiceApi
