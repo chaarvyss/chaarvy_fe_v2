@@ -36,6 +36,7 @@ export interface FilterProps {
   searchText?: string
   limit?: number
   offset?: number
+  status_?: string
   startDate?: string
   endDate?: string
   program?: string
@@ -50,7 +51,7 @@ export interface User {
   email: string
   mobile: string
   profile_pic: string
-  status: number
+  status: string
   role_name: string
 }
 
@@ -115,8 +116,8 @@ export interface PaymentsListResponse {
 }
 
 export interface Section {
-  section_id: string
-  section_name: string
+  section_id?: string
+  section_name?: string
 }
 
 export interface UserPermissionRequest {

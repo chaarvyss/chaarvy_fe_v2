@@ -37,12 +37,6 @@ const navigation = (): VerticalNavItemsType => {
     { key: Permissions.NAV.BOOKS, title: 'Books & Stationary', path: '/Admin/books', icon: 'Bookshelf' as const },
     { key: Permissions.NAV.ADDON, title: 'Addon Courses', path: '/Admin/addonCourse', icon: 'Offer' as const },
     { key: Permissions.NAV.PROGRAMS, title: 'Programs', path: '/Admin/programs', icon: 'BullseyeArrow' as const },
-    {
-      key: Permissions.NAV.PAYMENTS,
-      title: 'Payments',
-      path: '/Admin/payments',
-      icon: 'AccountCreditCardOutline' as const
-    },
 
     {
       key: Permissions.NAV.ADMISSION_FORM,

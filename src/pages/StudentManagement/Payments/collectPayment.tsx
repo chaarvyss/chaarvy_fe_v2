@@ -29,6 +29,7 @@ import {
   useRecordPaymentTransactionMutation
 } from 'src/store/services/feesServices'
 import { useGetPaymentModesListQuery } from 'src/store/services/listServices'
+import { printDocument } from 'src/utils/helpers'
 import GetChaarvyIcons from 'src/utils/icons'
 
 const TOP_LEVEL_ID = 'collect-payment'
@@ -268,12 +269,7 @@ const CollectPayment = () => {
         if (!pdfBlob) return
 
         const url = window.URL.createObjectURL(pdfBlob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `payment_receipt-${response?.student_name}.pdf`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
+        printDocument(url)
       })
       .catch(e => {
         console.log(e)

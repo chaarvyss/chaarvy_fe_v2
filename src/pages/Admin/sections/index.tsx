@@ -84,11 +84,8 @@ const Sections = () => {
 
   const handleChange =
     (prop: keyof Section) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
-      const value = event?.target?.value ?? event
-      setSelectedSection(prev => ({
-        section_id: prev?.section_id ?? '',
-        section_name: prev?.section_name ?? ''
-      }))
+      const value = event?.target?.value
+      setSelectedSection(prev => ({ ...prev, [prop]: value }))
     }
 
   const SectionModal = () => (
