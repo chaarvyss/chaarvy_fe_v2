@@ -38,3 +38,24 @@ export const areSetsEqual = (set1: Set<string>, set2: Set<string>) => {
   }
   return true
 }
+
+export const printDocument = (url: string) => {
+  const newTab = window.open(url, '_blank')
+  if (newTab) {
+    newTab.onload = () => {
+      newTab.focus()
+      newTab.print()
+    }
+  } else {
+    alert('Popup blocked! Allow popups for this site.')
+  }
+}
+
+export const downloadDocument = (url: string, file_name: string) => {
+  const a = document.createElement('a')
+  a.href = url
+  a.download = file_name
+  document.body.appendChild(a)
+  a.click()
+  window.URL.revokeObjectURL(url)
+}

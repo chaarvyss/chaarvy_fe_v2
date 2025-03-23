@@ -8,16 +8,20 @@ import CustomDateElement from 'src/reusable_components/dateInputElement'
 import { useGetProgramsListQuery, useGetSectionsListQuery } from 'src/store/services/listServices'
 import { dateToString } from 'src/lib/helpers'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
-import { useLazyGetProgramSectionListQuery } from 'src/store/services/programServices'
 
-type FieldTypes = 'search' | 'program' | 'medium' | 'startDate' | 'endDate' | 'dateRange' | 'sections'
+type FieldTypes = 'search' | 'program' | 'medium' | 'startDate' | 'endDate' | 'dateRange' | 'sections' | 'status'
 
+interface StatusOption {
+  label: string
+  value: string
+}
 interface RenderFilterProps {
   onSubmit: (data?: FilterProps) => void
   fields: Array<FieldTypes>
+  statusOptions?: StatusOption[]
 }
 
-const RenderFilterOptions = ({ onSubmit, fields }: RenderFilterProps) => {
+const RenderFilterOptions = ({ onSubmit, fields, statusOptions }: RenderFilterProps) => {
   const [filters, setFilters] = useState<FilterProps>()
   const { data: programsList } = useGetProgramsListQuery(true)
   const { data: sections } = useGetSectionsListQuery()
@@ -93,6 +97,16 @@ const RenderFilterOptions = ({ onSubmit, fields }: RenderFilterProps) => {
             <Select label='Section' value={filters?.section ?? ''} onChange={handleChange('section')}>
               {(sections ?? []).map(({ section_id, section_name }) => (
                 <MenuItem value={section_id}>{section_name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+        {fields.includes('status') && (
+          <FormControl fullWidth>
+            <InputLabel>Status</InputLabel>
+            <Select label='Status' value={filters?.status_ ?? ''} onChange={handleChange('status_')}>
+              {(statusOptions ?? []).map(({ label, value }) => (
+                <MenuItem value={value}>{label}</MenuItem>
               ))}
             </Select>
           </FormControl>

@@ -29,6 +29,7 @@ import { useLazyGetPaymentRecieptByPaymentIdQuery } from 'src/store/services/fee
 import { useLazyGetPaymentsListQuery } from 'src/store/services/listServices'
 import { useLazyGetPaymentDetailQuery } from 'src/store/services/viewServices'
 import { ChaarvyIconFontSize, ThemeColorEnum } from 'src/utils/enums'
+import { printDocument } from 'src/utils/helpers'
 import GetChaarvyIcons from 'src/utils/icons'
 import { Box } from 'src/utils/muiElements'
 
@@ -47,7 +48,7 @@ const Payments = () => {
 
   const [selectedPayment, setSelectedPayment] = useState<StudentPayment>()
 
-  const [filterProps, setFilterProps] = useState<FilterProps>({ limit: 20, offset: 0 })
+  const [filterProps, setFilterProps] = useState<FilterProps>({ limit: 20, offset: 0, status_: '1' })
 
   const onSubmit = (params?: FilterProps) => {
     fetchPaymentsList(params)
@@ -60,22 +61,34 @@ const Payments = () => {
       .unwrap()
       .then(pdfBlob => {
         if (!pdfBlob) return
-
         const url = window.URL.createObjectURL(pdfBlob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `${payment.student_name}-fees-acknowledgement.pdf`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
+        printDocument(url)
       })
       .catch(e => {
         console.log(e)
       })
   }
 
+  const statusOptions = [
+    {
+      label: 'Paid',
+      value: '1'
+    },
+    {
+      label: 'Unpaid',
+      value: '0'
+    }
+  ]
+
   const onFilterButtonClick = () => {
-    openDrawer('Filters', <RenderFilterOptions onSubmit={onSubmit} fields={['search', 'dateRange']} />)
+    openDrawer(
+      'Filters',
+      <RenderFilterOptions
+        onSubmit={onSubmit}
+        fields={['search', 'dateRange', 'status']}
+        statusOptions={statusOptions}
+      />
+    )
   }
 
   useEffect(() => {
