@@ -131,8 +131,8 @@ const Users = () => {
                           event.stopPropagation()
                           updateUserStatus(user.user_id)
                         }}
-                        label={user.status === 1 ? 'Active' : 'Inactive'}
-                        color={user.status === 1 ? statusColors.active : statusColors.inactive}
+                        label={user.status == '1' ? 'Active' : 'Inactive'}
+                        color={user.status == '1' ? statusColors.active : statusColors.inactive}
                         sx={{
                           height: 24,
                           fontSize: '0.75rem',
