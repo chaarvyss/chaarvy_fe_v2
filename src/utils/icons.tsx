@@ -12,7 +12,7 @@ export const ChaarvyIcon = Object.freeze(Object.fromEntries(iconNames.map(name =
 // Step 3: Map Enum values to actual icon components
 const IconsEnum: Record<keyof typeof ChaarvyIcon, React.ComponentType<SvgIconProps>> = MdiIcons
 
-type fontSize = '1.25rem' | '1.5rem' | '1.75rem'
+type fontSize = '1.25rem' | '1.5rem' | '1.75rem' | '2rem' | '2.25rem' | '2.5rem'
 
 export interface GetChaarvyIconsProps {
   iconName: keyof typeof ChaarvyIcon

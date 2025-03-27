@@ -6,7 +6,8 @@ const interRoutePrefix = {
   fees: `${interPrefix}/fees`,
   list: `${interPrefix}/list`,
   program: `${interPrefix}/program`,
-  view: `${interPrefix}/view`
+  view: `${interPrefix}/view`,
+  dashboard: `${interPrefix}/dash_board`
 }
 
 export const urlConstants = {
@@ -82,6 +83,10 @@ export const urlConstants = {
     createStudentAddress: `${interRoutePrefix.admisions}/create-update-student-address`,
     studentEnrolledAddonCourse: `${interRoutePrefix.admisions}/student-enrolled-addon-courses`,
     enrollAddonCourse: `${interRoutePrefix.admisions}/enroll-addon-courses`
+  },
+
+  dashboard: {
+    lowStationaryStockDetails: `${interRoutePrefix.dashboard}/stationary-stock`
   },
   fees: {
     getprogramFees: `${interRoutePrefix.fees}/program-fee-detail`,
