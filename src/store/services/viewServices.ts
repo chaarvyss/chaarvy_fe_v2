@@ -5,7 +5,6 @@ import { Address } from './admisissionsService'
 
 import api from './api'
 import { CacheTag } from './cacheTag'
-import { User } from 'src/lib/interfaces'
 
 interface ProgramSegment {
   segment_name: string
@@ -22,6 +21,8 @@ export interface CollegeDetailResponse {
   college_watermark?: string
   contact_numbers?: string
   address_id?: string
+  jananabhumi_number?: string
+  UDISE_number?: string
 }
 
 export interface UserProfile {
@@ -36,8 +37,12 @@ export interface UserProfile {
   role_name?: string
   created_on?: string
   profile_pic?: string
+  calender_id?: string
 }
 
+export interface UserCalenderResponse {
+  calender_id?: string
+}
 export interface PaymentDetailResponse {
   admission_number: string
   amount: string
@@ -105,6 +110,15 @@ const viewServiceApi = api.injectEndpoints({
           params: { user_id }
         }
       }
+    }),
+    getUserCalender: build.query<UserCalenderResponse, void>({
+      providesTags: [CacheTag.User, CacheTag.Address],
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.view.userCalender
+        }
+      }
     })
   }),
 
@@ -117,5 +131,6 @@ export const {
   useLazyGetCollegeDetailsQuery,
   useLazyGetPaymentDetailQuery,
   useGetAddressQuery,
-  useGetUserProfileQuery
+  useGetUserProfileQuery,
+  useLazyGetUserCalenderQuery
 } = viewServiceApi

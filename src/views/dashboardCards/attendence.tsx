@@ -19,11 +19,11 @@ const Attendence = () => {
         type: 'bar' as const,
         height: 220,
         stacked: true,
-        stackType: '100%' as const
+        stackType: 'normal' as const
       },
       plotOptions: {
         bar: {
-          horizontal: true // ✅ Horizontal bar for better readability
+          horizontal: false // ✅ Horizontal bar for better readability
         }
       },
       stroke: {

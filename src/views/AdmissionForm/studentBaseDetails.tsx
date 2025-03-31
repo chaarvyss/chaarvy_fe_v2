@@ -18,11 +18,7 @@ import { Button, FormControl, Grid, TextField } from '@muiElements'
 
 import {
   useGetProgramsListQuery,
-  useGetQualifiedExamsListQuery,
-  useGetOccupationsListQuery,
   useGetGendersListQuery,
-  useGetCommunitiesListQuery,
-  useGetReligionsListQuery,
   useGetSegmentsListQuery
 } from 'src/store/services/listServices'
 import {
@@ -52,13 +48,9 @@ import {
   useLazyGetApplicationFeesPaymentQuery,
   useLazyUpdateApplicationPaymentQuery
 } from 'src/store/services/feesServices'
+import ApplicationFeesModal from './application_fees_modal'
 
 const TOP_LEVEL_ID = 'student-application-form'
-
-const getLast10Years = (): number[] => {
-  const currentYear = new Date().getFullYear()
-  return Array.from({ length: 10 }, (_, i) => currentYear - i)
-}
 
 interface studentBaseDetailsProps {
   application_id?: string
@@ -87,6 +79,8 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
   const [studentImg, setStudentImg] = useState<File>()
   const [applicationDetails, setApplicationDetails] = useState<CreateStudentAdmissionRequest>()
   const [dob, setDob] = useState<Date>()
+  const [isNew, setIsNew] = useState<boolean>(true)
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false)
 
   const { triggerToast } = useToast()
   const { setLoading } = useLoader()
@@ -108,11 +102,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
   const [fetchProgramSectionsData, { data: programSections, isFetching: isSectionsLoading }] =
     useLazyGetProgramSectionListQuery()
 
-  const { data: occupationsList } = useGetOccupationsListQuery()
   const { data: gendersList } = useGetGendersListQuery()
-  const { data: communities } = useGetCommunitiesListQuery()
-  const { data: religions } = useGetReligionsListQuery()
-  const { data: qualifiedExams } = useGetQualifiedExamsListQuery()
   const { data: segmentsList } = useGetSegmentsListQuery()
   const { data: programsList } = useGetProgramsListQuery(true)
 
@@ -146,6 +136,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
       transaction_id = queryParams.get('razorpay_payment_id')
     }
     if (apl_id) {
+      setIsNew(false)
       fetchApplicationDetail(apl_id).then(({ data: res }) => {
         if (res?.program_id) {
           getDependentData(res?.program_id)
@@ -153,6 +144,9 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
         setApplicationDetails(res)
         setDob(convertDateStringToDate(res?.dob))
         setImage(res?.photo_url ?? null)
+        if (res?.application_fees_status == null) {
+          setIsPaymentModalOpen(true)
+        }
       })
     }
 
@@ -160,7 +154,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
       updateApplicationPayment({ application_id: apl_id, segment_id, transaction_id })
         .unwrap()
         .then(() => {
-          handleNext(AdmissionFormType.ADDON_COURSE)
+          handleNext(AdmissionFormType.STUDENT_DETAIL)
         })
     }
   }, [])
@@ -237,19 +231,21 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
       triggerToast('Please correct the errors before submitting.', { variant: ToastVariants.ERROR })
       return
     }
+
+    let finalData = { ...applicationDetails }
     if (applicationDetails) {
-      if (application_id) applicationDetails.application_id = application_id
+      if (application_id) finalData.application_id = application_id
       createUpdateAdmission({
-        ...applicationDetails,
+        ...finalData,
         dob: dateToString(dob, DateFormats.YearMonthDate) ?? ''
       })
         .unwrap()
         .then(({ application_id, message }) => {
           if (application_id) {
             if (applicationDetails.application_fees_status != '1') {
-              handleCreatePayment(application_id, applicationDetails.segment, applicationDetails.student_email)
+              setIsPaymentModalOpen(true)
             } else {
-              handleNext(AdmissionFormType.ADDON_COURSE)
+              handleNext(AdmissionFormType.STUDENT_DETAIL)
             }
             onAdmissionCreation(application_id)
             if (studentImg) {
@@ -285,37 +281,6 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
       placeholder: 'Student Name',
       onChange: handleChange('student_name'),
       caption: 'As per SSC Records'
-    },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__qualified-exam`,
-      label: 'Qualified Exam',
-      key: 'qualified_exam',
-      value: applicationDetails?.qualified_exam,
-      onChange: handleChange('qualified_exam'),
-      menuOptions: (qualifiedExams ?? []).map(each => {
-        return { value: each.qualified_exam_id, label: each.qualified_exam_name }
-      })
-    },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.STRING,
-      key: 'qualified_exam_hallticket_no',
-      id: `${TOP_LEVEL_ID}__qualified_exam_hallticket_no`,
-      label: 'Hall ticket number',
-      value: applicationDetails?.qualified_exam_hallticket_no,
-      onChange: handleChange('qualified_exam_hallticket_no')
-    },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__qualified_exam_year_of_pass`,
-      label: 'Year of pass',
-      key: 'qualified_exam_year_of_pass',
-      value: applicationDetails?.qualified_exam_year_of_pass,
-      onChange: handleChange('qualified_exam_year_of_pass'),
-      menuOptions: getLast10Years().map(each => {
-        return { value: `${each}`, label: `${each}` }
-      })
     },
     {
       type: InputTypes.SELECT,
@@ -397,47 +362,6 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
     {
       type: InputTypes.INPUT,
       variant: InputVariants.STRING,
-      id: `${TOP_LEVEL_ID}__father-name`,
-      key: 'father_name',
-      label: 'Father Name',
-      value: applicationDetails?.father_name,
-      onChange: handleChange('father_name')
-    },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__father-occupation`,
-      label: 'Father Occupation',
-      key: 'father_occupation',
-      value: applicationDetails?.father_occupation,
-      onChange: handleChange('father_occupation'),
-      menuOptions: (occupationsList ?? []).map(each => {
-        return { value: each.occupation_id, label: each.occupation_name }
-      })
-    },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.STRING,
-      id: `${TOP_LEVEL_ID}__mother-name`,
-      key: 'mother_name',
-      label: 'Mother Name',
-      value: applicationDetails?.mother_name,
-      onChange: handleChange('mother_name')
-    },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__mother-occupation`,
-      label: 'Mother Occupation',
-      key: 'mother_occupation',
-      value: applicationDetails?.mother_occupation,
-      onChange: handleChange('mother_occupation'),
-      menuOptions: (occupationsList ?? []).map(each => {
-        return { value: each.occupation_id, label: each.occupation_name }
-      })
-    },
-
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.STRING,
       id: `${TOP_LEVEL_ID}__student_email`,
       key: 'student_email',
       label: 'Student Email',
@@ -453,15 +377,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
       value: applicationDetails?.contact_no_1,
       onChange: handleChange('contact_no_1')
     },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.NUMBER,
-      id: `${TOP_LEVEL_ID}__alt-phone`,
-      key: 'contact_no_2',
-      label: 'Alternative number',
-      value: applicationDetails?.contact_no_2,
-      onChange: handleChange('contact_no_2')
-    },
+
     {
       type: InputTypes.INPUT,
       variant: InputVariants.NUMBER,
@@ -470,55 +386,6 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
       label: 'Student Aadhar',
       value: applicationDetails?.student_aadhar,
       onChange: handleChange('student_aadhar')
-    },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.NUMBER,
-      id: `${TOP_LEVEL_ID}__father-aadhar-number`,
-      key: 'father_aadhar',
-      label: 'Father Aadhar',
-      value: applicationDetails?.father_aadhar,
-      onChange: handleChange('father_aadhar')
-    },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.NUMBER,
-      id: `${TOP_LEVEL_ID}__mother-aadhar-number`,
-      key: 'mother_aadhar',
-      label: 'Mother Aadhar',
-      value: applicationDetails?.mother_aadhar,
-      onChange: handleChange('mother_aadhar')
-    },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__religion`,
-      label: 'Religion',
-      key: 'religion',
-      value: applicationDetails?.religion,
-      onChange: handleChange('religion'),
-      menuOptions: (religions ?? []).map(each => {
-        return { value: each.religion_id, label: each.religion_name }
-      })
-    },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__caste`,
-      label: 'Caste / Community',
-      key: 'community',
-      value: applicationDetails?.community,
-      onChange: handleChange('community'),
-      menuOptions: (communities ?? []).map(each => {
-        return { value: each.community_id, label: each.community_name }
-      })
-    },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.STRING,
-      id: `${TOP_LEVEL_ID}__mother-aadhar-number`,
-      key: 'subcaste',
-      label: 'Sub Caste',
-      value: applicationDetails?.subcaste,
-      onChange: handleChange('subcaste')
     }
   ]
 
@@ -639,8 +506,19 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
     }
   }
 
+  const handleCollectButtonClick = () => {
+    if (applicationDetails) {
+      handleCreatePayment(application_id, applicationDetails.segment, applicationDetails.student_email)
+    }
+  }
+
   return (
     <CardContent>
+      <ApplicationFeesModal
+        isOpen={isPaymentModalOpen}
+        isLoading={isLoading}
+        onCollectClick={handleCollectButtonClick}
+      />
       <form>
         <Grid container spacing={7}>
           <Grid item xs={12} sx={{ marginTop: 4.8, marginBottom: 3 }}>
@@ -670,7 +548,11 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
             </Box>
           </Grid>
           {renderInputFields()}
-
+          {isNew && (
+            <Box marginTop={4} marginLeft={8}>
+              <Typography variant='h6'>Processing Fees: 495.00/-</Typography>
+            </Box>
+          )}
           <Grid item xs={12}>
             <LoadingButton
               loading={IsupdatingAdmission || isUploadingPhoto}
@@ -678,7 +560,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
               sx={{ marginRight: 3.5 }}
               onClick={handleSubmit}
             >
-              Save Changes
+              {isNew ? 'Enroll' : 'Save'} and Continue
             </LoadingButton>
           </Grid>
         </Grid>

@@ -12,6 +12,7 @@ import AddonCourseDetails from './addonCourseDetails'
 import FeesDetails from './feesDetails'
 import { useLazyGetAdmissionDetailQuery } from 'src/store/services/admisissionsService'
 import { TabName } from 'src/reusable_components/styledComponents/TabName'
+import StudentDetails from './studentDetails'
 
 const Tab = styled(MuiTab)<TabProps>(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
@@ -24,6 +25,7 @@ const Tab = styled(MuiTab)<TabProps>(({ theme }) => ({
 
 export enum AdmissionFormType {
   BASE_DETAIL = 'base_details',
+  STUDENT_DETAIL = 'student_details',
   ADDON_COURSE = 'add_on_course',
   ADDRESS = 'address',
   FEES = 'fees'
@@ -63,10 +65,22 @@ const AdmissionForm = () => {
   const tabs = [
     {
       value: AdmissionFormType.BASE_DETAIL,
-      label: 'Student Details',
+      label: 'Student Base Details',
       icon: <AccountOutline />,
       component: (
         <StudentBaseDetails
+          application_id={application_id}
+          onAdmissionCreation={handleAdmissionCreation}
+          handleNext={handleNext}
+        />
+      )
+    },
+    {
+      value: AdmissionFormType.STUDENT_DETAIL,
+      label: 'Student Details',
+      icon: <AccountOutline />,
+      component: (
+        <StudentDetails
           application_id={application_id}
           onAdmissionCreation={handleAdmissionCreation}
           handleNext={handleNext}

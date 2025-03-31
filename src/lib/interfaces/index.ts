@@ -42,6 +42,7 @@ export interface FilterProps {
   program?: string
   medium?: string
   section?: string
+  role?: string
 }
 
 export interface User {

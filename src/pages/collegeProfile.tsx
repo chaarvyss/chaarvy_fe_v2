@@ -87,19 +87,21 @@ const ViewCollegeProfile = () => {
 
   const BaseDetailsTab = () => (
     <Grid container spacing={7}>
-      {['college_code', 'college_name', 'campus_name', 'contact_numbers'].map(field => (
-        <Grid item xs={12} md={6} key={field}>
-          <Box display='flex' flexDirection='column'>
-            <small>{field.replace('_', ' ').toUpperCase()}</small>
-            <TextField
-              onChange={handleChange(field as keyof CollegeDetailResponse)}
-              value={newDetails?.[field as keyof CollegeDetailResponse]}
-              disabled={field === 'college_code'}
-              type={field === 'contact_numbers' ? InputVariants.NUMBER : 'text'}
-            />
-          </Box>
-        </Grid>
-      ))}
+      {['college_code', 'college_name', 'campus_name', 'contact_numbers', 'UDISE_number', 'jananabhumi_number'].map(
+        field => (
+          <Grid item xs={12} md={6} key={field}>
+            <Box display='flex' flexDirection='column'>
+              <small>{field.replace('_', ' ').toUpperCase()}</small>
+              <TextField
+                onChange={handleChange(field as keyof CollegeDetailResponse)}
+                value={newDetails?.[field as keyof CollegeDetailResponse]}
+                disabled={field === 'college_code'}
+                type={field === 'contact_numbers' ? InputVariants.NUMBER : 'text'}
+              />
+            </Box>
+          </Grid>
+        )
+      )}
       {newDetails !== details && (
         <Grid item>
           <Button onClick={handleSubmit}>Update Profile</Button>
