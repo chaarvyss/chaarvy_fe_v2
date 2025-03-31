@@ -1,3 +1,8 @@
+type Event = {
+  start: string
+  end: string
+}
+
 export const GetSumOfNumbers = (arr?: number[]) => arr?.reduce((acc, val) => acc + val, 0) || 0
 
 const isValidDate = dateStr => {
@@ -58,4 +63,27 @@ export const downloadDocument = (url: string, file_name: string) => {
   document.body.appendChild(a)
   a.click()
   window.URL.revokeObjectURL(url)
+}
+
+export const formatEventDate = (event: Event): string => {
+  const { start, end } = event
+
+  if (start.includes('T') && end.includes('T')) {
+    const startDate = new Date(start)
+    const endDate = new Date(end)
+
+    const date = startDate.toISOString().split('T')[0] // Extracts only the date part
+    const startTime = startDate.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+    const endTime = endDate.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+
+    return `${date} | ${startTime} - ${endTime}`
+  } else {
+    return `${start} - Full day`
+  }
 }

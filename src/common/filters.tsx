@@ -5,11 +5,20 @@ import DatePicker from 'react-datepicker'
 import { DateFormats, InputVariants } from 'src/lib/enums'
 import { FilterProps } from 'src/lib/interfaces'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
-import { useGetProgramsListQuery, useGetSectionsListQuery } from 'src/store/services/listServices'
+import { useGetProgramsListQuery, useGetRolesListQuery, useGetSectionsListQuery } from 'src/store/services/listServices'
 import { dateToString } from 'src/lib/helpers'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 
-type FieldTypes = 'search' | 'program' | 'medium' | 'startDate' | 'endDate' | 'dateRange' | 'sections' | 'status'
+type FieldTypes =
+  | 'search'
+  | 'program'
+  | 'medium'
+  | 'startDate'
+  | 'endDate'
+  | 'dateRange'
+  | 'sections'
+  | 'status'
+  | 'role'
 
 interface StatusOption {
   label: string
@@ -25,6 +34,7 @@ const RenderFilterOptions = ({ onSubmit, fields, statusOptions }: RenderFilterPr
   const [filters, setFilters] = useState<FilterProps>()
   const { data: programsList } = useGetProgramsListQuery(true)
   const { data: sections } = useGetSectionsListQuery()
+  const { data: roles } = useGetRolesListQuery()
 
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
@@ -107,6 +117,16 @@ const RenderFilterOptions = ({ onSubmit, fields, statusOptions }: RenderFilterPr
             <Select label='Status' value={filters?.status_ ?? ''} onChange={handleChange('status_')}>
               {(statusOptions ?? []).map(({ label, value }) => (
                 <MenuItem value={value}>{label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+        {fields.includes('role') && (
+          <FormControl fullWidth>
+            <InputLabel>Role</InputLabel>
+            <Select label='role' value={filters?.role ?? ''} onChange={handleChange('role')}>
+              {(roles ?? []).map(({ role_name, role_id }) => (
+                <MenuItem value={role_id}>{role_name}</MenuItem>
               ))}
             </Select>
           </FormControl>

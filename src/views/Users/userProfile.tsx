@@ -55,7 +55,6 @@ interface UserProfileProps {
 
 const ViewUserProfile = (props: UserProfileProps) => {
   const { user_id, onClose } = props
-
   const { data: details } = useGetUserProfileQuery(user_id)
   const [newDetails, setNewDetails] = useState<UserProfile>()
   const [value, setValue] = useState<FormType>(FormType.BASE_DETAIL)

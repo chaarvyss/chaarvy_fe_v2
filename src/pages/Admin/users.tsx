@@ -3,6 +3,7 @@ import { useLoader } from 'src/@core/context/loaderContext'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import RenderFilterOptions from 'src/common/filters'
 import { FilterProps, TableHeaderStatCardProps, User } from 'src/lib/interfaces'
 import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
 import ChaarvyPagination from 'src/reusable_components/Pagination'
@@ -38,7 +39,7 @@ const Users = () => {
 
   const { openDrawer } = useSideDrawer()
 
-  const [filters, setFilters] = useState<FilterProps>()
+  const [filters, setFilters] = useState<FilterProps>({ limit: 20, offset: 0, status_: '1' })
 
   const usersData: TableHeaderStatCardProps[] = [
     {
@@ -67,6 +68,28 @@ const Users = () => {
     openDrawer('New User', <CreateUser />)
   }
 
+  const onSubmit = (params?: FilterProps) => {
+    fetchUsersList({ ...filters, ...params })
+  }
+
+  const statusOptions = [
+    {
+      label: 'Active',
+      value: '1'
+    },
+    {
+      label: 'Inactive',
+      value: '0'
+    }
+  ]
+
+  const onFilterButtonClick = () => {
+    openDrawer(
+      'Filters',
+      <RenderFilterOptions onSubmit={onSubmit} fields={['search', 'status', 'role']} statusOptions={statusOptions} />
+    )
+  }
+
   const getUserTableHeader = () => {
     const props: TableTitleHeaderProps = {
       title: 'Users',
@@ -74,7 +97,8 @@ const Users = () => {
       onButtonClick: handleCreateUserClick,
       showFilterIcon: true,
       icon: <GetChaarvyIcons iconName='AccountPlusOutline' />,
-      buttonTitle: 'Create User'
+      buttonTitle: 'Create User',
+      handleFilterButtonClick: onFilterButtonClick
     }
 
     return props

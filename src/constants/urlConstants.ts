@@ -3,6 +3,7 @@ const interRoutePrefix = {
   admin: `${interPrefix}/admin`,
   admisions: `${interPrefix}/admissions`,
   auth: `${interPrefix}/auth`,
+  calender: `${interPrefix}/google-calender`,
   fees: `${interPrefix}/fees`,
   list: `${interPrefix}/list`,
   program: `${interPrefix}/program`,
@@ -15,6 +16,11 @@ export const urlConstants = {
     login: `${interRoutePrefix.auth}/login`,
     changePassword: `${interRoutePrefix.auth}/change-password`,
     updateProfilePic: `${interRoutePrefix.auth}/upload-profile-pic`
+  },
+  calender: {
+    integrate: `${interRoutePrefix.calender}/login`,
+    integrateCallback: `${interRoutePrefix.calender}/callback`,
+    eventsList: `${interRoutePrefix.calender}/list-events`
   },
   list: {
     addOnCourse: `${interRoutePrefix.list}/addon_courses`,
@@ -86,7 +92,10 @@ export const urlConstants = {
   },
 
   dashboard: {
-    lowStationaryStockDetails: `${interRoutePrefix.dashboard}/stationary-stock`
+    studentsCount: `${interRoutePrefix.dashboard}/students_count`,
+    lowStationaryStockDetails: `${interRoutePrefix.dashboard}/stationary-stock`,
+    studentEnrollmentCountDetails: `${interRoutePrefix.dashboard}/student_enrollments`,
+    paymentCountDetails: `${interRoutePrefix.dashboard}/payment_count`
   },
   fees: {
     getprogramFees: `${interRoutePrefix.fees}/program-fee-detail`,
@@ -116,6 +125,7 @@ export const urlConstants = {
     myDetails: `${interRoutePrefix.view}/my-details`,
     paymentDetail: `${interRoutePrefix.view}/payment-details`,
     address: `${interRoutePrefix.view}/address`,
-    userProfile: `${interRoutePrefix.view}/user_base_details`
+    userProfile: `${interRoutePrefix.view}/user_base_details`,
+    userCalender: `${interRoutePrefix.view}/user_calender`
   }
 }
