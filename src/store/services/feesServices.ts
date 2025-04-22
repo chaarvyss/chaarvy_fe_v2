@@ -124,6 +124,7 @@ export interface ApplicationPaymentRequest {
   application_id: string
   segment_id: string
   email: string
+  source: 'web' | 'app'
 }
 
 export interface UpdateApplicationPaymentRequest {

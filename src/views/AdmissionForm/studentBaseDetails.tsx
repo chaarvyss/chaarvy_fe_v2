@@ -24,6 +24,7 @@ import {
 import {
   CreateStudentAdmissionRequest,
   useCreateUpdateAdmissionMutation,
+  useGetProcessingFeesQuery,
   useLazyGetAdmissionDetailQuery,
   useUploadStudentPhotoMutation
 } from 'src/store/services/admisissionsService'
@@ -118,6 +119,8 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
     fetchProgramSecondLanguages(program_id)
     fetchProgramSectionsData(program_id)
   }
+
+  const { data: processingFees } = useGetProcessingFeesQuery()
 
   const showLoader = isApplicationLoading
 
@@ -216,9 +219,9 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
     return newErrors.length === 0
   }
 
-  const handleCreatePayment = async (application_id, segment_id, email) => {
+  const handleCreatePayment = async (application_id, segment_id, email, source: 'web' | 'app') => {
     try {
-      const response = await createPayment({ application_id, segment_id, email }).unwrap()
+      const response = await createPayment({ application_id, segment_id, email, source }).unwrap()
       router.push(response.short_url)
     } catch (error) {
       console.error('Error creating payment:', error)
@@ -508,7 +511,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
 
   const handleCollectButtonClick = () => {
     if (applicationDetails) {
-      handleCreatePayment(application_id, applicationDetails.segment, applicationDetails.student_email)
+      handleCreatePayment(application_id, applicationDetails.segment, applicationDetails.student_email, 'app')
     }
   }
 
@@ -518,6 +521,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
         isOpen={isPaymentModalOpen}
         isLoading={isLoading}
         onCollectClick={handleCollectButtonClick}
+        processingFees={processingFees ?? 0}
       />
       <form>
         <Grid container spacing={7}>
@@ -550,7 +554,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
           {renderInputFields()}
           {isNew && (
             <Box marginTop={4} marginLeft={8}>
-              <Typography variant='h6'>Processing Fees: 495.00/-</Typography>
+              <Typography variant='h6'>Processing Fees: {processingFees ?? 0}.00/-</Typography>
             </Box>
           )}
           <Grid item xs={12}>

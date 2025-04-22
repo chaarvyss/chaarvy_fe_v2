@@ -134,6 +134,15 @@ const admissionServiceApi = api.injectEndpoints({
       }
     }),
 
+    getProcessingFees: build.query<number, void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.getProcessingFees
+        }
+      }
+    }),
+
     getStudentAddress: build.query<Address, string>({
       providesTags: [CacheTag.StudentAddress],
       query: application_id => {
@@ -188,5 +197,6 @@ export const {
   useLazyGetStudentEnrollendAddonCoursesQuery,
   useEnrollAddonCourseMutation,
   useGetStudentAddressQuery,
-  useCreateStudentAddressMutation
+  useCreateStudentAddressMutation,
+  useGetProcessingFeesQuery
 } = admissionServiceApi

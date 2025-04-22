@@ -7,14 +7,17 @@ interface ApplicationFeesModalProps {
   isOpen: boolean
   isLoading: boolean
   onCollectClick: () => void
+  processingFees: number
 }
 
 const ApplicationFeesModal = (data: ApplicationFeesModalProps) => {
-  const { isOpen, isLoading, onCollectClick } = data
+  const { isOpen, isLoading, onCollectClick, processingFees } = data
   return (
     <ChaarvyModal isOpen={isOpen} title='Application Processing Fees' shouldRestrictCloseOnOuterClick>
       <Box padding={2} gap={3}>
-        <Typography variant='body1'>Application Processing Fees of Rupees 495.00/- will be collected.</Typography>
+        <Typography variant='body1'>
+          Application Processing Fees of Rupees {processingFees}.00/- will be collected.
+        </Typography>
         {isLoading && (
           <Typography marginTop={3} variant='body1'>
             Page will redirect in a moment. Please wait...
