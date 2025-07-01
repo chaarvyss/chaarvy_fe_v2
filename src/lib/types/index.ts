@@ -60,7 +60,7 @@ export type MenuOptions = {
 }
 
 export type InputFields = {
-  type: 'input' | 'select' | 'radio' | 'date'
+  type: 'input' | 'select' | 'radio' | 'date' | 'button'
   variant?: 'number' | 'string' | 'email'
   isDisabled?: boolean
   id: string
@@ -133,6 +133,13 @@ export type QualifiedExam = { qualified_exam_id: string; qualified_exam_name: st
 export type Segment = {
   segment_name: string
   segment_id: string
+}
+
+export type Students = {
+  student_name: string
+  admission_number: string
+  application_id: string
+  photo_url?: string
 }
 
 export type Religions = { religion_id: string; religion_name: string }

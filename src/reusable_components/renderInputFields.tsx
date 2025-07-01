@@ -1,6 +1,5 @@
-import { CircularProgress, MenuItem, Select } from '@mui/material'
+import { Box, Button, CircularProgress, MenuItem, Select } from '@mui/material'
 import { FormControl, Grid, TextField } from '@muiElements'
-import { useState } from 'react'
 import { InputTypes } from 'src/lib/enums'
 import { ErrorObject, InputFields } from 'src/lib/types'
 
@@ -16,12 +15,13 @@ const RenderInputFields = ({ fields, mandatoryFields, errors }: RenderInputField
   }
 
   return (
-    <Grid container spacing={7}>
+    <Grid container spacing={3}>
       {fields.map(
         ({
           type,
           id,
           customInput,
+          isDisabled,
           label,
           placeholder,
           onChange,
@@ -41,6 +41,7 @@ const RenderInputFields = ({ fields, mandatoryFields, errors }: RenderInputField
                 <TextField
                   fullWidth
                   id={id}
+                  size='small'
                   error={!!getHadError(key)}
                   value={value}
                   defaultValue={value}
@@ -54,7 +55,7 @@ const RenderInputFields = ({ fields, mandatoryFields, errors }: RenderInputField
             ) : type === InputTypes.SELECT ? (
               <FormControl fullWidth required={mandatoryFields.includes(key)}>
                 <small>{label}</small>
-                <Select id={id} value={value ?? ''} onChange={onChange} error={!!getHadError(key)}>
+                <Select id={id} value={value ?? ''} size='small' onChange={onChange} error={!!getHadError(key)}>
                   {isLoading ? (
                     <MenuItem disabled>
                       <CircularProgress size={24} />
@@ -68,6 +69,15 @@ const RenderInputFields = ({ fields, mandatoryFields, errors }: RenderInputField
                   )}
                 </Select>
                 {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+              </FormControl>
+            ) : type === InputTypes.BUTTON ? (
+              <FormControl fullWidth>
+                <small color='#fff'>.</small>
+                <Box display='flex' alignItems='end'>
+                  <Button color='success' disabled={isDisabled} variant='contained' onClick={onChange}>
+                    {label}
+                  </Button>
+                </Box>
               </FormControl>
             ) : null}
           </Grid>

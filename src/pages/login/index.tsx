@@ -33,6 +33,8 @@ import {
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
 
 import { useSettings } from 'src/@core/hooks/useSettings'
+import { MASTER_TYPE } from 'src/constants/constants'
+import { PagePath } from 'src/constants/pagePathConstants'
 
 interface State {
   clcode: string
@@ -87,14 +89,20 @@ const LoginPage = () => {
         .unwrap()
         .then(response => {
           const res = response as any
-          dispatch(setAvailablePermissionsData(res.data.permission))
+          const { clcode, name, authToken, role, permission } = res.data
+
+          dispatch(setAvailablePermissionsData(permission))
           triggerToast('Login Successful', { variant: ToastVariants.SUCCESS })
-          localStorage.setItem(sessionStorageKeys.clientCode, res.data.clcode)
-          saveSettings({ ...settings, current_username: res.data.name })
-          sessionStorage.setItem(sessionStorageKeys.accessToken, res.data.authToken)
-          sessionStorage.setItem(sessionStorageKeys.clientCode, res.data.clcode)
-          router.push('/dashboard')
-          sessionStorage.setItem('role', res.data.role)
+          localStorage.setItem(sessionStorageKeys.clientCode, clcode)
+          saveSettings({ ...settings, current_username: name })
+          sessionStorage.setItem(sessionStorageKeys.accessToken, authToken)
+          sessionStorage.setItem(sessionStorageKeys.clientCode, clcode)
+          sessionStorage.setItem('role', role)
+          if (clcode == MASTER_TYPE) {
+            router.push(PagePath.MASTER_DASHBOARD)
+          } else {
+            router.push(PagePath.DASHBOARD)
+          }
         })
         .catch(e => {
           triggerToast(e?.data, { variant: ToastVariants.ERROR })

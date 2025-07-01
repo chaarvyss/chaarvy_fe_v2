@@ -1,5 +1,11 @@
 export const PagePath = {
-  LOGIN_PAGE: '/login',
+  DASHBOARD: '/dashboard',
   CHANGE_PASSWORD: '/changePassword',
-  CREATE_ADMISSION: '/StudentManagement/AdmissionForm'
+  CREATE_ADMISSION: '/StudentManagement/AdmissionForm',
+  LOGIN_PAGE: '/login',
+  MASTER_DASHBOARD: '/Master/dashboard'
+}
+
+export const MasterPagePath = {
+  CLIENTS_LIST: '/Master/clients'
 }

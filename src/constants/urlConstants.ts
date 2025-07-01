@@ -35,6 +35,7 @@ export const urlConstants = {
     qualifiedExams: `${interRoutePrefix.list}/qualified-exams`,
     religions: `${interRoutePrefix.list}/religions`,
     segments: `${interRoutePrefix.list}/segments`,
+    students: `${interRoutePrefix.list}/students-list`,
     states: `${interRoutePrefix.list}/states`,
     users: `${interRoutePrefix.list}/users`,
     paymentModes: `${interRoutePrefix.list}/payment-modes`,

@@ -1,10 +1,12 @@
 import { urlConstants } from 'src/constants/urlConstants'
 import {
+  FilterProps,
   PaymentAggrement,
   PaymentModes,
   PaymentsListRequest,
   PaymentsListResponse,
   Section,
+  StudentsListRequest,
   UsersListRequest,
   UsersListResponse
 } from 'src/lib/interfaces'
@@ -25,7 +27,8 @@ import {
   Religions,
   RolesListResponse,
   Segment,
-  State
+  State,
+  Students
 } from 'src/lib/types'
 
 import { HttpRequestMethods } from '..'
@@ -147,6 +150,15 @@ const listServicesApi = api.injectEndpoints({
         }
       }
     }),
+    getStudentsList: build.query<Students[], FilterProps>({
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.students,
+          params
+        }
+      }
+    }),
     getStateList: build.query<State[], void>({
       query: () => {
         return {
@@ -222,5 +234,6 @@ export const {
   useLazyGetPaymentsListQuery,
   useGetRolesListQuery,
   useGetPaymentAggrementsQuery,
-  useGetSectionsListQuery
+  useGetSectionsListQuery,
+  useLazyGetStudentsListQuery
 } = listServicesApi

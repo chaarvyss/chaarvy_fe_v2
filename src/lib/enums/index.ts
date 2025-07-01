@@ -19,7 +19,8 @@ export enum InputTypes {
   INPUT = 'input',
   SELECT = 'select',
   RADIO = 'radio',
-  DATE = 'date'
+  DATE = 'date',
+  BUTTON = 'button'
 }
 
 export enum InputVariants {

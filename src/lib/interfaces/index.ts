@@ -95,6 +95,12 @@ export interface UsersListRequest {
   status?: number
 }
 
+export interface StudentsListRequest {
+  program_id: string
+  medium_id: string
+  section_id: string
+}
+
 export interface StudentPayment {
   payment_id: string
   amount: number

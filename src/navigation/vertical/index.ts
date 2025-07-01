@@ -1,5 +1,6 @@
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
+import { MasterPagePath, PagePath } from 'src/constants/pagePathConstants'
 import { Permissions } from 'src/constants/permissions'
 
 import store from 'src/store'
@@ -13,8 +14,8 @@ const navigation = (): VerticalNavItemsType => {
     return (allowedPermissions ?? []).includes(key)
   }
 
-  const items = [
-    { key: Permissions.NAV.DASHBOARD, title: 'Dashboard', path: '/dashboard', icon: 'ViewDashboard' as const },
+  const client_navs = [
+    { key: Permissions.NAV.DASHBOARD, title: 'Dashboard', path: PagePath.DASHBOARD, icon: 'ViewDashboard' as const },
     {
       key: Permissions.NAV.COLLEGE_PROFILE,
       title: 'College Profile',
@@ -71,6 +72,22 @@ const navigation = (): VerticalNavItemsType => {
     }
   ]
 
+  const master_navs = [
+    {
+      key: Permissions.MASTER.NAV.DASHBOARD,
+      title: 'Dashboard',
+      path: PagePath.MASTER_DASHBOARD,
+      icon: 'ViewDashboard' as const
+    },
+    {
+      key: Permissions.MASTER.CLIENTS.VIEW_LIST,
+      title: 'Clients',
+      path: MasterPagePath.CLIENTS_LIST,
+      icon: 'FormatListGroup' as const
+    }
+  ]
+
+  const items = [...master_navs, ...client_navs]
   navItems.push(...items.filter(item => hadPermission(item.key)))
 
   return navItems

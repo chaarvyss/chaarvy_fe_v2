@@ -1,4 +1,13 @@
 export const Permissions = {
+  MASTER: {
+    NAV: {
+      DASHBOARD: 'a07d2d6e-8431-4527-9857-c7d155715002'
+    },
+    CLIENTS: {
+      VIEW_LIST: '49e4596b-0888-4a9d-931f-d03352c56536'
+    }
+  },
+
   ROLE: {
     CREATE_ROLE: '6660878a-d015-11ef-af72-842afd127d37',
     UPDATE_ROLE: '6660ac0d-d015-11ef-af72-842afd127d37',
