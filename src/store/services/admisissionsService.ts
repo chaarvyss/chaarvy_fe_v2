@@ -198,5 +198,5 @@ export const {
   useEnrollAddonCourseMutation,
   useGetStudentAddressQuery,
   useCreateStudentAddressMutation,
-  useGetProcessingFeesQuery
+  useLazyGetProcessingFeesQuery
 } = admissionServiceApi

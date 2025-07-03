@@ -113,6 +113,12 @@ const AdmissionForm = () => {
     }
   ]
 
+  const shouldDisableTab = ({ value }: { value: AdmissionFormType }): boolean => {
+    if (!application_id) return value !== AdmissionFormType.BASE_DETAIL
+    if (studentDetail?.application_fees_status == '1') return false
+    return true
+  }
+
   return (
     <Card>
       <TabContext value={value}>
@@ -123,7 +129,7 @@ const AdmissionForm = () => {
         >
           {tabs.map(({ value, label, icon }) => (
             <Tab
-              disabled={value !== AdmissionFormType.BASE_DETAIL && !application_id}
+              disabled={shouldDisableTab({ value })}
               key={value}
               value={value}
               label={

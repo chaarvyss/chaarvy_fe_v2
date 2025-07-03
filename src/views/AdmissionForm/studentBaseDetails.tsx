@@ -24,7 +24,7 @@ import {
 import {
   CreateStudentAdmissionRequest,
   useCreateUpdateAdmissionMutation,
-  useGetProcessingFeesQuery,
+  useLazyGetProcessingFeesQuery,
   useLazyGetAdmissionDetailQuery,
   useUploadStudentPhotoMutation
 } from 'src/store/services/admisissionsService'
@@ -120,7 +120,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
     fetchProgramSectionsData(program_id)
   }
 
-  const { data: processingFees } = useGetProcessingFeesQuery()
+  const [fetchProcessingFees, { data: processingFees }] = useLazyGetProcessingFeesQuery()
 
   const showLoader = isApplicationLoading
 
@@ -148,7 +148,11 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
         setDob(convertDateStringToDate(res?.dob))
         setImage(res?.photo_url ?? null)
         if (res?.application_fees_status == null) {
-          setIsPaymentModalOpen(true)
+          fetchProcessingFees()
+            .unwrap()
+            .then(() => {
+              setIsPaymentModalOpen(true)
+            })
         }
       })
     }
@@ -157,6 +161,8 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
       updateApplicationPayment({ application_id: apl_id, segment_id, transaction_id })
         .unwrap()
         .then(() => {
+          const url = window.location.origin + window.location.pathname
+          window.history.replaceState({}, document.title, url)
           handleNext(AdmissionFormType.STUDENT_DETAIL)
         })
     }
@@ -246,7 +252,11 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
         .then(({ application_id, message }) => {
           if (application_id) {
             if (applicationDetails.application_fees_status != '1') {
-              setIsPaymentModalOpen(true)
+              fetchProcessingFees()
+                .unwrap()
+                .then(() => {
+                  setIsPaymentModalOpen(true)
+                })
             } else {
               handleNext(AdmissionFormType.STUDENT_DETAIL)
             }
