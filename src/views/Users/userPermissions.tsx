@@ -1,8 +1,10 @@
 import { Button, Checkbox, FormControlLabel, FormGroup, Grid } from '@mui/material'
 import { Box, Typography } from '@muiElements'
 import React, { ChangeEvent, useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Permissions } from 'src/constants/permissions'
+import { setAvailablePermissionsData } from 'src/store/permissionSlice'
 import { useGetUserPermissionsQuery, useUpdateUserPermissionsMutation } from 'src/store/services/adminServices'
 
 interface UserPermissionsProps {
@@ -13,6 +15,7 @@ const UserPermissions = ({ user_id }: UserPermissionsProps) => {
   const [allowedPermissions, setAllowedPermissions] = useState<Set<string>>(new Set())
 
   const { data: current_available_permissions } = useGetUserPermissionsQuery(user_id)
+  const dispatch = useDispatch()
 
   useEffect(() => {
     if (current_available_permissions) {
@@ -32,12 +35,14 @@ const UserPermissions = ({ user_id }: UserPermissionsProps) => {
   }
 
   const handleSubmit = () => {
+    const available_permissions = Array.from(allowedPermissions).filter(e => e !== undefined)
     updatePermissions({
       user_id,
-      available_permissions: Array.from(allowedPermissions).filter(e => e !== undefined)
+      available_permissions
     })
       .unwrap()
       .then(response => {
+        dispatch(setAvailablePermissionsData(available_permissions))
         triggerToast(response, { variant: ToastVariants.SUCCESS })
       })
       .catch(e => {
