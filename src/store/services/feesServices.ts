@@ -86,6 +86,7 @@ export interface PaymentDetailRequest {
   amount?: number
   payment_mode?: string
   transaction_number?: string
+  payment_date?: Date
 }
 
 export interface StudentPayableFeesResponse {

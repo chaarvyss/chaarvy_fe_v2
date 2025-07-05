@@ -36,6 +36,7 @@ export const Permissions = {
     ADMISSION_FORM: 'd7d07152-b7e8-4409-ba6e-c44221ebcfef',
     ADMISSIONS: '07c5ab7a-2570-4d67-b76c-025eccb663fa',
     COLLECT_PAYMENT: '8d15d23d-dad8-47b9-b6aa-14cb1204c292',
-    ATTENDENCE_REGISTER: 'cf2eefaa-5053-4ba2-84cc-ce033ae34851'
+    ATTENDENCE_REGISTER: 'cf2eefaa-5053-4ba2-84cc-ce033ae34851',
+    ROLES: '84d30bbf-e4fb-4888-b6f0-0568bf9df1b0'
   }
 }

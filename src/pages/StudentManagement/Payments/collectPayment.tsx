@@ -32,6 +32,10 @@ import { useGetPaymentModesListQuery } from 'src/store/services/listServices'
 import { printDocument } from 'src/utils/helpers'
 import GetChaarvyIcons from 'src/utils/icons'
 
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import CustomDateElement from 'src/reusable_components/dateInputElement'
+
 const TOP_LEVEL_ID = 'collect-payment'
 
 const headers: TableHeaders[] = [
@@ -49,6 +53,7 @@ const CollectPayment = () => {
   const [searchText, setSearchText] = useState<string>()
   const [isCollectPaymentModalOpen, setIsCollectPaymentModalOpen] = useState<boolean>(false)
 
+  const [paymentDate, setPaymentDate] = useState<Date>()
   const { setLoading } = useLoader()
 
   const { triggerToast } = useToast()
@@ -63,7 +68,8 @@ const CollectPayment = () => {
     'segment_id',
     'application_id',
     'amount',
-    'payment_mode'
+    'payment_mode',
+    'payment_date'
   ])
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -98,6 +104,10 @@ const CollectPayment = () => {
       response?.fees_details.map(({ segment_id, segment_name }) => [segment_id, { segment_id, segment_name }])
     ).values()
   )
+
+  const getHadError = (key: string) => {
+    return errors.find(each => each.errorkey === key)
+  }
 
   const handlePaymentDetailChange =
     (prop: keyof PaymentDetailRequest) =>
@@ -151,6 +161,15 @@ const CollectPayment = () => {
       })
     },
     {
+      type: InputTypes.DATE,
+      id: `${TOP_LEVEL_ID}__paid-date`,
+      label: 'Paid on',
+      key: 'payment_date',
+      value: paymentDate,
+      customInput: <CustomDateElement error={!!getHadError('payment_date')} label='' />,
+      onChange: (date: Date) => setPaymentDate(date)
+    },
+    {
       type: InputTypes.INPUT,
       variant: InputVariants.STRING,
       id: `${TOP_LEVEL_ID}__txn-id`,
@@ -162,49 +181,74 @@ const CollectPayment = () => {
     }
   ]
 
-  const getHadError = (key: string) => {
-    return errors.find(each => each.errorkey === key)
-  }
-
   const renderInputFields = () =>
-    fields.map(({ type, id, label, placeholder, isDisabled, onChange, key, caption, value, variant, menuOptions }) => (
-      <Grid item xs={12} sm={6} key={id} gap={3}>
-        {type === InputTypes.INPUT ? (
-          <>
-            <small>
-              {label} {mandatoryFields.includes(key) ? '*' : ''}
-            </small>
-            <TextField
-              fullWidth
-              id={id}
-              value={value ?? ''}
-              error={!!getHadError(key)}
-              defaultValue={value}
-              type={variant}
-              disabled={isDisabled}
-              placeholder={placeholder ?? ''}
-              onChange={onChange}
-            />
-            {caption && <small>{caption}</small>}
-            {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-          </>
-        ) : type === InputTypes.SELECT ? (
-          <FormControl fullWidth error={!!getHadError(key)}>
-            <small>
-              {label} {mandatoryFields.includes(key) ? '*' : ''}
-            </small>
-            <Select id={id} value={value ?? ''} onChange={onChange} disabled={isDisabled}>
-              {(menuOptions ?? []).map(({ value, label }) => (
-                <MenuItem key={value} value={value}>
-                  {label}
-                </MenuItem>
-              ))}
-            </Select>
-            {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-          </FormControl>
-        ) : null}
-      </Grid>
-    ))
+    fields.map(
+      ({
+        type,
+        id,
+        label,
+        placeholder,
+        customInput,
+        isDisabled,
+        onChange,
+        key,
+        caption,
+        value,
+        variant,
+        menuOptions
+      }) => (
+        <Grid item xs={12} sm={6} key={id} gap={3}>
+          {type === InputTypes.INPUT ? (
+            <>
+              <small>
+                {label} {mandatoryFields.includes(key) ? '*' : ''}
+              </small>
+              <TextField
+                fullWidth
+                id={id}
+                value={value ?? ''}
+                error={!!getHadError(key)}
+                defaultValue={value}
+                type={variant}
+                disabled={isDisabled}
+                placeholder={placeholder ?? ''}
+                onChange={onChange}
+              />
+              {caption && <small>{caption}</small>}
+              {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+            </>
+          ) : type === InputTypes.SELECT ? (
+            <FormControl fullWidth error={!!getHadError(key)}>
+              <small>
+                {label} {mandatoryFields.includes(key) ? '*' : ''}
+              </small>
+              <Select id={id} value={value ?? ''} onChange={onChange} disabled={isDisabled}>
+                {(menuOptions ?? []).map(({ value, label }) => (
+                  <MenuItem key={value} value={value}>
+                    {label}
+                  </MenuItem>
+                ))}
+              </Select>
+              {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+            </FormControl>
+          ) : type === InputTypes.DATE ? (
+            <Grid item xs={12}>
+              <Box display='flex' flexDirection='column'>
+                <small>Payment Date*</small>
+                <DatePicker
+                  selected={paymentDate}
+                  required={mandatoryFields.includes(key)}
+                  customInput={customInput}
+                  id={id}
+                  onChange={onChange}
+                />
+                {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+              </Box>
+            </Grid>
+          ) : null}
+        </Grid>
+      )
+    )
 
   const validateField = (key: keyof PaymentDetailRequest, value: any): { errorkey: string; error: string } | null => {
     if (!value) {
@@ -218,8 +262,12 @@ const CollectPayment = () => {
 
     mandatoryFields.forEach(field => {
       const key = field as keyof PaymentDetailRequest
-      const error = validateField(key, paymentDetails?.[key])
-      if (error) newErrors.push(error)
+      if (key == 'payment_date') {
+        if (paymentDate == null) newErrors.push({ errorkey: 'payment_date', error: 'Required' })
+      } else {
+        const error = validateField(key, paymentDetails?.[key])
+        if (error) newErrors.push(error)
+      }
     })
 
     setErrors(newErrors)
@@ -245,12 +293,13 @@ const CollectPayment = () => {
       return
     }
     paymentDetails &&
-      recordTransaction(paymentDetails)
+      recordTransaction({ ...paymentDetails, payment_date: paymentDate })
         .unwrap()
         .then(data => {
           triggerToast(data.Message, { variants: ToastVariants.SUCCESS })
           handleRecieptDownload(data.payment_id)
           setPaymentDetails(undefined)
+          setPaymentDate(undefined)
           setIsCollectPaymentModalOpen(false)
         })
         .catch(e => triggerToast(e.data, { variants: ToastVariants.ERROR }))
@@ -259,6 +308,7 @@ const CollectPayment = () => {
   const handleCollectPaymentModalClose = () => {
     setIsCollectPaymentModalOpen(false)
     setPaymentDetails(undefined)
+    setPaymentDate(undefined)
     setErrors([])
   }
 

@@ -1,6 +1,9 @@
 // ** Types Imports
+import { Icon } from '@mui/material'
+import { useState } from 'react'
 import { ThemeColor } from 'src/@core/layouts/types'
 import { TableHeaderStatCardProps } from 'src/lib/interfaces'
+import { FeesTypesResponse } from 'src/lib/types'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import { ChaarvyIconFontSize, ThemeColorEnum } from 'src/utils/enums'
@@ -33,15 +36,7 @@ interface StatusObj {
   }
 }
 
-const rows: RowType[] = [
-  {
-    status: 1,
-    name: 'Sally Quinn',
-    role: '$19586.23',
-    email: 'eebsworth2m@sbwire.com',
-    designation: 'Human Resources Assistant'
-  }
-]
+const rows: RowType[] = []
 
 const statusObj: StatusObj = {
   1: { color: ThemeColorEnum.Success },
@@ -60,21 +55,20 @@ const salesData: TableHeaderStatCardProps[] = [
     title: 'Customers',
     color: ThemeColorEnum.Success,
     icon: <GetChaarvyIcons iconName='AbTesting' fontSize={ChaarvyIconFontSize.lg} />
-  },
-  {
-    value: '1.54k',
-    color: ThemeColorEnum.Warning,
-    title: 'Products',
-    icon: <GetChaarvyIcons iconName='AbTesting' fontSize={ChaarvyIconFontSize.lg} />
-  },
-  {
-    value: '$88k',
-    color: ThemeColorEnum.Info,
-    title: 'Revenue',
-    icon: <GetChaarvyIcons iconName='AbTesting' fontSize={ChaarvyIconFontSize.lg} />
   }
 ]
 const Roles = () => {
+  const [selectedRole, setSelectedRole] = useState<string>()
+
+  const getKebabOptions = (role_id: string) => {
+    return [
+      {
+        id: role_id,
+        label: 'Edit',
+        onOptionClick: () => setSelectedRole(role_id)
+      }
+    ]
+  }
   return (
     <>
       {TableTilteHeader({
@@ -89,11 +83,12 @@ const Roles = () => {
             <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
               <TableHead>
                 <TableRow>
-                  <TableCell>Role name</TableCell>
-                  <TableCell>Description</TableCell>
+                  <TableCell>#</TableCell>
+                  <TableCell>Role</TableCell>
                   <TableCell>Status</TableCell>
-                  <TableCell>Created by</TableCell>
-                  <TableCell></TableCell>
+                  <TableCell>
+                    <GetChaarvyIcons iconName='Pencil' fontSize='1.25rem' />
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

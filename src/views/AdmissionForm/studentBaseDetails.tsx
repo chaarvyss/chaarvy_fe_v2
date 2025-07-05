@@ -127,6 +127,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
   setLoading(showLoader)
 
   useEffect(() => {
+    fetchProcessingFees()
     let apl_id
     let razorpay_payment_link_status
     let segment_id
@@ -148,11 +149,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
         setDob(convertDateStringToDate(res?.dob))
         setImage(res?.photo_url ?? null)
         if (res?.application_fees_status == null) {
-          fetchProcessingFees()
-            .unwrap()
-            .then(() => {
-              setIsPaymentModalOpen(true)
-            })
+          setIsPaymentModalOpen(true)
         }
       })
     }
@@ -252,11 +249,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
         .then(({ application_id, message }) => {
           if (application_id) {
             if (applicationDetails.application_fees_status != '1') {
-              fetchProcessingFees()
-                .unwrap()
-                .then(() => {
-                  setIsPaymentModalOpen(true)
-                })
+              setIsPaymentModalOpen(true)
             } else {
               handleNext(AdmissionFormType.STUDENT_DETAIL)
             }

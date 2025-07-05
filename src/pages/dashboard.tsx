@@ -38,12 +38,12 @@ const Dashboard: React.FC = () => {
 
   const defaultLayout = [
     // { i: 'greetingCard', x: 0, y: 0, w: 8, h: 2 },
-    { i: 'Students', x: 0, y: 0, w: 3, h: 3 },
-    { i: 'Attendence', x: 3, y: 0, w: 3, h: 3 },
-    { i: 'Calender', x: 6, y: 0, w: 6, h: 4 },
-    { i: 'Payments', x: 0, y: 3, w: 6, h: 2 },
-    { i: 'Stationary_stock', x: 6, y: 6, w: 6, h: 4 },
-    { i: 'Student_enrollments', x: 6, y: 6, w: 6, h: 4 }
+    { i: 'Students', x: 0, y: 0, w: 3, h: 3, shouldHide: true },
+    { i: 'Attendence', x: 3, y: 0, w: 3, h: 3, shouldHide: true },
+    { i: 'Calender', x: 6, y: 0, w: 6, h: 4, shouldHide: false },
+    { i: 'Payments', x: 0, y: 3, w: 6, h: 2, shouldHide: true },
+    { i: 'Stationary_stock', x: 6, y: 6, w: 6, h: 4, shouldHide: true },
+    { i: 'Student_enrollments', x: 6, y: 6, w: 6, h: 4, shouldHide: true }
   ]
 
   const [layout, setLayout] = useState<Array<any>>([])
@@ -87,16 +87,20 @@ const Dashboard: React.FC = () => {
         draggableHandle='.drag-handle'
         onLayoutChange={newLayout => handleLayoutChange(newLayout)}
       >
-        {layout.map(item => (
-          <div key={item.i}>
-            <Paper elevation={3} className='p-3'>
-              <Typography variant='h6' className='drag-handle'>
-                {item.i.replace('_', ' ')}
-              </Typography>
-              {components[item.i]}
-            </Paper>
-          </div>
-        ))}
+        {layout.map(item => {
+          if (item.shouldHide) return null
+
+          return (
+            <div key={item.i}>
+              <Paper elevation={3} className='p-3'>
+                <Typography variant='h6' className='drag-handle'>
+                  {item.i.replace(/_/g, ' ')}
+                </Typography>
+                {components[item.i]}
+              </Paper>
+            </div>
+          )
+        })}
       </GridLayout>
     </div>
   )
