@@ -41,12 +41,14 @@ export const urlConstants = {
     paymentModes: `${interRoutePrefix.list}/payment-modes`,
     paymentAggrements: `${interRoutePrefix.list}/payment-aggrements`,
     roles: `${interRoutePrefix.list}/roles`,
+    role_permissions: `${interRoutePrefix.list}/role_permissions`,
     studentPaymentsList: `${interRoutePrefix.list}/student-payments`,
     sectionsList: `${interRoutePrefix.list}/sections`
   },
   admin: {
     createUpdateUser: `${interRoutePrefix.admin}/create-update-user`,
     createUpdateSection: `${interRoutePrefix.admin}/add-update-section`,
+    createUpdateRole: `${interRoutePrefix.admin}/create-update-role`,
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
       book: `${interRoutePrefix.admin}/add-book`,

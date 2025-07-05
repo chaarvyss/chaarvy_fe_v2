@@ -18,5 +18,6 @@ export enum CacheTag {
   StudentAddress = 'studentAddress',
   User = 'user',
   UserPermissions = 'userPermissions',
-  Section = 'section'
+  Section = 'section',
+  RolesList = 'roles_list'
 }

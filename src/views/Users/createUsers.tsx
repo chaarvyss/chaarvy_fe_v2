@@ -8,20 +8,6 @@ import { useCreateUpdateUserMutation } from 'src/store/services/adminServices'
 import { useGetRolesListQuery } from 'src/store/services/listServices'
 import { UserProfile } from 'src/store/services/viewServices'
 
-enum FormType {
-  BASE_DETAIL = 'base_detail',
-  ADDRESS = 'address',
-  PERMISSIONS = 'permissions'
-}
-
-interface CreateUserRequest {
-  email: string
-  mobile: string
-  name: string
-  username: string
-  Role: string
-}
-
 const baseProfileKeys = [
   { v: 'name', l: 'Name' },
   { v: 'username', l: 'Username' },
@@ -55,7 +41,6 @@ const CreateUser = () => {
         })
     }
   }
-
   return (
     <Box>
       <Grid container spacing={7}>

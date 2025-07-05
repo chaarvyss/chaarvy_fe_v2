@@ -84,6 +84,7 @@ const listServicesApi = api.injectEndpoints({
       }
     }),
     getRolesList: build.query<RolesListResponse[], void>({
+      providesTags: [CacheTag.RolesList],
       query: () => {
         return {
           method: HttpRequestMethods.GET,
@@ -210,6 +211,15 @@ const listServicesApi = api.injectEndpoints({
           url: urlConstants.list.sectionsList
         }
       }
+    }),
+
+    getRolePermissionsList: build.query<Array<string>, string>({
+      query: role_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: `${urlConstants.list.role_permissions}?role_id=${role_id}`
+        }
+      }
     })
   })
 })
@@ -235,5 +245,6 @@ export const {
   useGetRolesListQuery,
   useGetPaymentAggrementsQuery,
   useGetSectionsListQuery,
-  useLazyGetStudentsListQuery
+  useLazyGetStudentsListQuery,
+  useLazyGetRolePermissionsListQuery
 } = listServicesApi

@@ -75,6 +75,12 @@ interface CreateUserRequest {
   user: UserProfile
 }
 
+interface CreateRoleRequest {
+  role_id?: string
+  role_name: string
+  permissions: Array<string>
+}
+
 const adminServiceApi = api.injectEndpoints({
   endpoints: build => ({
     createAddonCourse: build.mutation<string, string>({
@@ -340,6 +346,16 @@ const adminServiceApi = api.injectEndpoints({
           body
         }
       }
+    }),
+    createUpdateRole: build.mutation<string, CreateRoleRequest>({
+      invalidatesTags: [CacheTag.RolesList],
+      query: data => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.createUpdateRole,
+          body: data
+        }
+      }
     })
   })
 })
@@ -370,5 +386,6 @@ export const {
   useCreateUpdateUserMutation,
   useCreateUpdateSectionMutation,
   useUpdateUserPermissionsMutation,
-  useGetUserPermissionsQuery
+  useGetUserPermissionsQuery,
+  useCreateUpdateRoleMutation
 } = adminServiceApi
