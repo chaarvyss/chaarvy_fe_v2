@@ -1,4 +1,5 @@
 const interPrefix = 'inter'
+const masterPrefix = 'master'
 const interRoutePrefix = {
   admin: `${interPrefix}/admin`,
   admisions: `${interPrefix}/admissions`,
@@ -9,6 +10,10 @@ const interRoutePrefix = {
   program: `${interPrefix}/program`,
   view: `${interPrefix}/view`,
   dashboard: `${interPrefix}/dash_board`
+}
+
+const masterRoutePrefix = {
+  admin: `${masterPrefix}/admin`
 }
 
 export const urlConstants = {
@@ -94,7 +99,6 @@ export const urlConstants = {
     enrollAddonCourse: `${interRoutePrefix.admisions}/enroll-addon-courses`,
     getProcessingFees: `${interRoutePrefix.admisions}/get-processing-fees`
   },
-
   dashboard: {
     studentsCount: `${interRoutePrefix.dashboard}/students_count`,
     lowStationaryStockDetails: `${interRoutePrefix.dashboard}/stationary-stock`,
@@ -131,5 +135,11 @@ export const urlConstants = {
     address: `${interRoutePrefix.view}/address`,
     userProfile: `${interRoutePrefix.view}/user_base_details`,
     userCalender: `${interRoutePrefix.view}/user_calender`
+  },
+
+  master: {
+    admin: {
+      clientsList: `${masterRoutePrefix.admin}/clients-list`
+    }
   }
 }
