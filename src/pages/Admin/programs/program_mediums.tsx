@@ -32,7 +32,6 @@ const ProgramMediums = ({ program_id }: { program_id: string }) => {
       e.target.checked ? newIds.add(e.target.id) : newIds.delete(e.target.id)
 
       setIsEdited(!areSetsEqual(newIds, initialPrgMediumIds))
-
       return new Set(newIds)
     })
   }
@@ -50,6 +49,8 @@ const ProgramMediums = ({ program_id }: { program_id: string }) => {
       .unwrap()
       .then(response => {
         triggerToast(response, { variant: ToastVariants.SUCCESS })
+        setInitialPrgMediumIds(prgMediumIds)
+        setIsEdited(false)
       })
       .catch(e => {
         triggerToast(e.data, { variant: ToastVariants.ERROR })

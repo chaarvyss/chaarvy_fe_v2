@@ -1,14 +1,13 @@
 // ** Types Imports
 import { Button, Checkbox, FormControlLabel, FormGroup, Grid, IconButton, TextField, Typography } from '@mui/material'
-import { ChangeEvent, useState } from 'react'
-import { ThemeColor } from 'src/@core/layouts/types'
+import { ChangeEvent, useEffect, useState } from 'react'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Permissions } from 'src/constants/permissions'
 import { InputVariants } from 'src/lib/enums'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import { useCreateUpdateRoleMutation } from 'src/store/services/adminServices'
-import { useGetRolesListQuery, useLazyGetRolePermissionsListQuery } from 'src/store/services/listServices'
-import { ThemeColorEnum } from 'src/utils/enums'
+import { useLazyGetRolesListQuery, useLazyGetRolePermissionsListQuery } from 'src/store/services/listServices'
 import GetChaarvyIcons from 'src/utils/icons'
 
 import {
@@ -34,13 +33,19 @@ const Roles = () => {
   const [allowedPermissions, setAllowedPermissions] = useState<Set<string>>(new Set())
 
   const [role_name, setRole_name] = useState<string>()
-  const { data: rolesList } = useGetRolesListQuery()
+  const [fetchRoles, { data: rolesList }] = useLazyGetRolesListQuery()
 
   const [showCreateOrEditRoleModal, setShowCreateOrEditRoleModal] = useState<boolean>(false)
 
   const [fetchRolePermissions, { data: rolePermissions }] = useLazyGetRolePermissionsListQuery()
 
   const [createUpdateRole] = useCreateUpdateRoleMutation()
+
+  const { triggerToast } = useToast()
+
+  useEffect(() => {
+    fetchRoles()
+  }, [])
 
   const handleModalClose = () => {
     setShowCreateOrEditRoleModal(false)
@@ -53,6 +58,8 @@ const Roles = () => {
     if (role_name)
       createUpdateRole({ role_id: selectedRoleId, permissions: available_permissions, role_name }).then(res => {
         if (res) {
+          triggerToast('Role details updated', { variant: ToastVariants.SUCCESS })
+          if (selectedRoleId === undefined) fetchRoles()
           handleModalClose()
         }
       })

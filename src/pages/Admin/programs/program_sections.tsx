@@ -43,6 +43,8 @@ const ProgramSection = ({ program_id }: { program_id: string }) => {
       .unwrap()
       .then(response => {
         triggerToast(response, { variant: ToastVariants.SUCCESS })
+        setInitialPrgSectionIds(prgSectionIds)
+        setIsEdited(false)
       })
       .catch(e => {
         triggerToast(e.data, { variant: ToastVariants.ERROR })

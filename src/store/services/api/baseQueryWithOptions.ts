@@ -52,4 +52,8 @@ const baseQueryWithErrorHandling: typeof baseQueryWithRetry = async (args, api, 
   return result
 }
 
+export const serializeQueryArgsGlobal = ({ endpointName, queryArgs }) => {
+  return `${endpointName}_${JSON.stringify(queryArgs ?? {})}`
+}
+
 export default baseQueryWithErrorHandling

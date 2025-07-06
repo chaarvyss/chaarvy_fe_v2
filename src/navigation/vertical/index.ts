@@ -28,6 +28,8 @@ const navigation = (): VerticalNavItemsType => {
       path: '/Admin/users',
       icon: 'AccountGroup' as const
     },
+    { key: Permissions.NAV.ROLES, title: 'Roles', path: '/Admin/roles', icon: 'ArrangeBringToFront' as const },
+
     {
       key: Permissions.NAV.FEES_TYPES,
       title: 'Fees types',

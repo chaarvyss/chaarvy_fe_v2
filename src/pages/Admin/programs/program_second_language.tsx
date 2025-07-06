@@ -53,6 +53,7 @@ const ProgramSecondLanguage = ({ program_id }: { program_id: string }) => {
       .unwrap()
       .then(response => {
         triggerToast(response, { variant: ToastVariants.SUCCESS })
+        setInitialPrgLangIds(prgLangIds)
       })
       .catch(e => {
         triggerToast(e.data, { variant: ToastVariants.ERROR })

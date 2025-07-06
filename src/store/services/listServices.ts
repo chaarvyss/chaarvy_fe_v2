@@ -243,6 +243,7 @@ export const {
   useGetPaymentModesListQuery,
   useLazyGetPaymentsListQuery,
   useGetRolesListQuery,
+  useLazyGetRolesListQuery,
   useGetPaymentAggrementsQuery,
   useGetSectionsListQuery,
   useLazyGetStudentsListQuery,
