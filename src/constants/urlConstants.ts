@@ -139,7 +139,8 @@ export const urlConstants = {
 
   master: {
     admin: {
-      clientsList: `${masterRoutePrefix.admin}/clients-list`
+      clientsList: `${masterRoutePrefix.admin}/clients-list`,
+      addClient: `${masterRoutePrefix.admin}/add_client?inst_type=inter`
     }
   }
 }

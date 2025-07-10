@@ -21,3 +21,7 @@ export enum CacheTag {
   Section = 'section',
   RolesList = 'roles_list'
 }
+
+export enum MasterCacheTag {
+  ClientsList = 'clientsList'
+}

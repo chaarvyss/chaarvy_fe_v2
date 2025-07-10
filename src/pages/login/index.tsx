@@ -70,7 +70,7 @@ const LoginPage = () => {
   const router = useRouter()
 
   useEffect(() => {
-    if (localStorage.getItem(sessionStorageKeys.accessToken)) {
+    if (sessionStorage.getItem(sessionStorageKeys.accessToken)) {
       router.push('/')
     } else {
       setValues({ ...values, clcode: localStorage.getItem(sessionStorageKeys.clientCode) ?? '' })

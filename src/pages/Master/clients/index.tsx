@@ -1,60 +1,16 @@
-// ** Types Imports
-import { Button, Checkbox, FormControlLabel, FormGroup, Grid, IconButton, TextField, Typography } from '@mui/material'
-import { ChangeEvent, useEffect, useState } from 'react'
-import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { Permissions } from 'src/constants/permissions'
-import { InputVariants } from 'src/lib/enums'
-import ChaarvyModal from 'src/reusable_components/chaarvyModal'
+import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
-import { useCreateUpdateRoleMutation } from 'src/store/services/adminServices'
-import { useLazyGetRolesListQuery, useLazyGetRolePermissionsListQuery } from 'src/store/services/listServices'
 import { ClientsResponse, useGetClientsListQuery } from 'src/store/services/MasterServices/adminServices'
-import GetChaarvyIcons from 'src/utils/icons'
 
-import {
-  Card,
-  Chip,
-  Paper,
-  TableContainer,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow
-} from 'src/utils/muiElements'
-
-interface RowType {
-  role_name: string
-  role_id: string
-  status?: number
-}
-
-interface ClientRequestData {
-  client_name: string
-  db_name: string
-  college_name: string
-  college_code: string
-  processing_fees: number
-  contact_numbers: Array<string>
-  email_id: string
-}
+import { Card, Paper, TableContainer, Table, TableBody, TableCell, TableHead, TableRow } from 'src/utils/muiElements'
+import CreateClient from './createClient'
 
 const Clients = () => {
-  const [selectedRoleId, setSelectedRoleId] = useState<string>()
   const { data: clientsListData } = useGetClientsListQuery()
+  const { openDrawer } = useSideDrawer()
 
-  const [showCreateOrEditRoleModal, setShowCreateOrEditRoleModal] = useState<boolean>(false)
-
-  const [createUpdateRole] = useCreateUpdateRoleMutation()
-
-  const { triggerToast } = useToast()
-
-  const addUpdateClient = () => {
-    return (
-      <ChaarvyModal title='Create Update Client' isOpen={true} onClose={() => {}}>
-        <p>asdf</p>
-      </ChaarvyModal>
-    )
+  const handleEdit = data => {
+    openDrawer('Edit Client', <CreateClient clientDetails={data} />)
   }
 
   return (
@@ -62,10 +18,9 @@ const Clients = () => {
       {TableTilteHeader({
         title: 'Clients',
         buttonTitle: 'Add Client',
-        onButtonClick: () => setShowCreateOrEditRoleModal(true)
+        onButtonClick: () => openDrawer('New Client', <CreateClient />)
       })}
       <Paper>
-        {addUpdateClient()}
         <Card>
           <TableContainer>
             <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
@@ -78,6 +33,7 @@ const Clients = () => {
                   <TableCell>DB Name</TableCell>
                   <TableCell>Inst Type</TableCell>
                   <TableCell>Processing Fees</TableCell>
+                  <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -90,6 +46,7 @@ const Clients = () => {
                     <TableCell>{row.db_name}</TableCell>
                     <TableCell>{row.inst_type}</TableCell>
                     <TableCell>{row.processing_fees}</TableCell>
+                    <TableCell onClick={() => handleEdit(row)}>edit</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
