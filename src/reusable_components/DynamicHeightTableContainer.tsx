@@ -40,7 +40,6 @@ const DynamicHeightTableContainer = ({
       setTableHeight(Math.min(computed, maxHeight))
     }
 
-    // Calculate on mount and when window resizes
     calculateHeight()
     window.addEventListener('resize', calculateHeight)
 
@@ -49,9 +48,7 @@ const DynamicHeightTableContainer = ({
 
   return (
     <div>
-      {/* render the header prop inside the container so it can be measured; fall back to hidden placeholder if not provided */}
-      {/** If `header` is provided render it and attach the internal ref so we can measure it. */}
-      {externalHeaderRef ? null : header ? (
+       {externalHeaderRef ? null : header ? (
         <div ref={internalHeaderRef}>{header}</div>
       ) : (
         <div ref={internalHeaderRef} style={{ display: 'none' }} />
