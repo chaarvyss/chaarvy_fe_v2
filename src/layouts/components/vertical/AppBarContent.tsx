@@ -22,22 +22,24 @@ const AppBarContent = (props: Props) => {
   const hiddenSm = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
 
   return (
-    <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <Box className='actions-left' sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
-        {hidden ? (
-          <IconButton
-            color='inherit'
-            onClick={toggleNavVisibility}
-            sx={{ ml: -2.75, ...(hiddenSm ? {} : { mr: 3.5 }) }}
-          >
-            <MenuIcon />
-          </IconButton>
-        ) : null}
-      </Box>
-      <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
-        <ModeToggler settings={settings} saveSettings={saveSettings} />
-        {/* <NotificationDropdown /> */}
-        <UserDropdown />
+    <Box sx={{ position: 'fixed', top: '10px', width: hiddenSm ? '92%' : '79%' }}>
+      <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box className='actions-left' sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
+          {hidden ? (
+            <IconButton
+              color='inherit'
+              onClick={toggleNavVisibility}
+              sx={{ ml: -2.75, ...(hiddenSm ? {} : { mr: 3.5 }) }}
+            >
+              <MenuIcon />
+            </IconButton>
+          ) : null}
+        </Box>
+        <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
+          <ModeToggler settings={settings} saveSettings={saveSettings} />
+          {/* <NotificationDropdown /> */}
+          <UserDropdown />
+        </Box>
       </Box>
     </Box>
   )

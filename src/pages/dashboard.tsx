@@ -37,10 +37,10 @@ const Dashboard: React.FC = () => {
   }, [])
 
   const defaultLayout = [
-    // { i: 'greetingCard', x: 0, y: 0, w: 8, h: 2 },
-    { i: 'Students', x: 0, y: 0, w: 3, h: 3, shouldHide: true },
+    { i: 'greetingCard', x: 0, y: 0, w: 8, h: 2, shouldHide: false },
+    { i: 'Students', x: 0, y: 0, w: 3, h: 3, shouldHide: false },
     { i: 'Attendence', x: 3, y: 0, w: 3, h: 3, shouldHide: true },
-    { i: 'Calender', x: 6, y: 0, w: 6, h: 4, shouldHide: false },
+    { i: 'Calender', x: 6, y: 0, w: 6, h: 4, shouldHide: true },
     { i: 'Payments', x: 0, y: 3, w: 6, h: 2, shouldHide: true },
     { i: 'Stationary_stock', x: 6, y: 6, w: 6, h: 4, shouldHide: true },
     { i: 'Student_enrollments', x: 6, y: 6, w: 6, h: 4, shouldHide: true }

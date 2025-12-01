@@ -107,7 +107,9 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
                 value={clientData?.[field.v as keyof ClientData]}
                 size='small'
                 disabled={['db_name'].includes(field.v) && !!clientDetails}
-                type={['contact_numbers', 'processing_fees'].includes(field.v) ? InputVariants.NUMBER : 'text'}
+                type={
+                  ['contact_numbers', 'processing_fees'].includes(field.v) ? InputVariants.NUMBER : InputVariants.TEXT
+                }
               />
               {field.v === 'contact_numbers' && (
                 <p className='text-end' style={{ fontSize: '.7rem' }}>
@@ -120,7 +122,7 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
 
         <Grid item>
           <Button variant='contained' onClick={handleSubmit}>
-            Add Client
+            {clientDetails ? 'Update' : 'Add'} Client
           </Button>
         </Grid>
       </Grid>

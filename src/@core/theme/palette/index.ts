@@ -13,7 +13,7 @@ const DefaultPalette = (mode: PaletteMode, themeColor: ThemeColor) => {
     if (themeColor === 'primary') {
       return '#C6A7FE'
     } else if (themeColor === 'secondary') {
-      return '#9C9FA4'
+      return '#0aa9b4ff'
     } else if (themeColor === 'success') {
       return '#93DD5C'
     } else if (themeColor === 'error') {
@@ -43,8 +43,8 @@ const DefaultPalette = (mode: PaletteMode, themeColor: ThemeColor) => {
       contrastText: '#FFF'
     },
     secondary: {
-      light: '#9C9FA4',
-      main: '#8A8D93',
+      light: '#0aa9b4ff',
+      main: '#0aa9b4ff',
       dark: '#777B82',
       contrastText: '#FFF'
     },

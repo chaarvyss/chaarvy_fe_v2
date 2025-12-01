@@ -26,5 +26,6 @@ export enum InputTypes {
 export enum InputVariants {
   NUMBER = 'number',
   STRING = 'string',
-  EMAIL = 'email'
+  EMAIL = 'email',
+  TEXT = 'text'
 }
