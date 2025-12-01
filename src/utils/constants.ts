@@ -16,5 +16,6 @@ const quotes = [
 export const getDailyQuote = () => {
   const today = new Date().toISOString().slice(0, 10)
   const hash = today.split('-').reduce((acc, num) => acc + parseInt(num), 0)
+
   return quotes[hash % quotes.length]
 }

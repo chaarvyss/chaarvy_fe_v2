@@ -1,6 +1,7 @@
 import { FormControl, MenuItem, Pagination, Select, SelectChangeEvent } from '@mui/material'
-import { Box } from '@muiElements'
 import React, { useEffect, useState } from 'react'
+
+import { Box } from '@muiElements'
 import { FilterProps } from 'src/lib/interfaces'
 
 interface PaginationProps {
@@ -13,8 +14,8 @@ const ChaarvyPagination = ({ total, onChange }: PaginationProps) => {
   const [pageNumber, setPageNumber] = useState<number>(1)
 
   useEffect(() => {
-    let offset = (pageNumber - 1) * itemsPerPage
-    let limit = itemsPerPage
+    const offset = (pageNumber - 1) * itemsPerPage
+    const limit = itemsPerPage
     onChange({ offset, limit })
   }, [itemsPerPage, pageNumber])
 

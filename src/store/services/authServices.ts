@@ -37,6 +37,7 @@ const authServiceApi = api.injectEndpoints({
       query: ({ user_id, photo }) => {
         const formData = new FormData()
         formData.append('file', photo)
+
         return {
           body: formData,
           method: HttpRequestMethods.POST,

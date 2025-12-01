@@ -1,8 +1,9 @@
+import { Box, Typography, useTheme } from '@mui/material'
+import { amber, blue, green, lightBlue, lightGreen, orange, red, yellow } from '@mui/material/colors'
+import { useState, useRef, useEffect } from 'react'
+
 import { useSettings } from 'src/@core/hooks/useSettings'
 import GetChaarvyIcons from 'src/utils/icons'
-import { Box, Typography, useTheme } from '@mui/material'
-import { useState, useRef, useEffect } from 'react'
-import { amber, blue, green, lightBlue, lightGreen, orange, red, yellow } from '@mui/material/colors'
 
 export default function PaymentBoxes() {
   const { settings } = useSettings()

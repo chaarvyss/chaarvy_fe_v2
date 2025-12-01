@@ -2,12 +2,12 @@ import Box, { BoxProps } from '@mui/material/Box'
 import { deepOrange } from '@mui/material/colors'
 import { styled } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
-import { Avatar } from '@muiElements'
 import { ReactNode } from 'react'
+
+import { Avatar } from '@muiElements'
 
 // ** Type Import
 import { Settings } from 'src/@core/context/settingsContext'
-
 import { getInitials } from 'src/utils/helpers'
 
 interface Props {

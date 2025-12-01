@@ -1,7 +1,8 @@
 import { LoadingButton } from '@mui/lab'
 import { Box, Button, Checkbox, FormControlLabel, FormGroup, Typography } from '@mui/material'
-import { Grid } from '@muiElements'
 import React, { ChangeEvent, useEffect, useState } from 'react'
+
+import { Grid } from '@muiElements'
 import { useLoader } from 'src/@core/context/loaderContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import {
@@ -9,6 +10,7 @@ import {
   useLazyGetStudentEnrollendAddonCoursesQuery
 } from 'src/store/services/admisissionsService'
 import { useLazyGetProgramAddonListQuery } from 'src/store/services/programServices'
+
 import { AdmissionFormType } from '.'
 
 interface AddonCourseDetailsProps {

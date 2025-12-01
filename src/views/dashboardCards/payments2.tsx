@@ -1,5 +1,6 @@
 import { Box } from '@mui/material'
 import { useEffect } from 'react'
+
 import ReactApexcharts from 'src/@core/components/react-apexcharts'
 import { useGetPaymentsCountQuery } from 'src/store/services/dashboardServices'
 
@@ -53,6 +54,7 @@ const Payments2 = () => {
       </Box>
     )
   }
+
   return <p>Loading</p>
 }
 

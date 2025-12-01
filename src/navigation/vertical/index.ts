@@ -2,13 +2,12 @@
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
 import { MasterPagePath, PagePath } from 'src/constants/pagePathConstants'
 import { Permissions } from 'src/constants/permissions'
-
 import store from 'src/store'
 
 const navigation = (): VerticalNavItemsType => {
   const allowedPermissions = store.getState().permission.data
 
-  let navItems: VerticalNavItemsType = []
+  const navItems: VerticalNavItemsType = []
 
   const hadPermission = (key: string) => {
     return (allowedPermissions ?? []).includes(key)

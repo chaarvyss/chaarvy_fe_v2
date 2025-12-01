@@ -68,6 +68,7 @@ const TableTilteHeader = ({
 
     check()
     window.addEventListener('resize', check)
+
     return () => window.removeEventListener('resize', check)
   }, [title])
 
@@ -76,12 +77,14 @@ const TableTilteHeader = ({
     const container = statsContainerRef.current
     if (!container) {
       setMaxStatsHeight(undefined)
+
       return
     }
 
     const items = Array.from(container.querySelectorAll('[data-stat-item]')) as HTMLElement[]
     if (items.length === 0) {
       setMaxStatsHeight(undefined)
+
       return
     }
 
@@ -97,6 +100,7 @@ const TableTilteHeader = ({
 
     if (firstRowMaxHeight <= 0) {
       setMaxStatsHeight(undefined)
+
       return
     }
 
@@ -107,6 +111,7 @@ const TableTilteHeader = ({
       const items2 = Array.from(container.querySelectorAll('[data-stat-item]')) as HTMLElement[]
       if (items2.length === 0) {
         setMaxStatsHeight(undefined)
+
         return
       }
       const firstTop2 = items2[0].getBoundingClientRect().top
@@ -121,8 +126,10 @@ const TableTilteHeader = ({
     }
 
     window.addEventListener('resize', onResize)
+
     return () => window.removeEventListener('resize', onResize)
   }, [stats])
+
   return (
     <Card sx={{ mb: 2 }}>
       <CardHeader

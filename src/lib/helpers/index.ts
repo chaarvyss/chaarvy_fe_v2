@@ -1,5 +1,7 @@
-import store from 'src/store'
 import { format } from 'date-fns'
+
+import store from 'src/store'
+
 import { DateFormatTypes } from '../types'
 
 export const isPermitted = (permissionId: string) => {
@@ -16,5 +18,6 @@ export const getEmptyKeysList = (object: Object) => {
 
 export const dateToString = (date?: Date, dateFormat?: DateFormatTypes) => {
   if (!date || !dateFormat) return undefined
+
   return format(new Date(date), dateFormat)
 }

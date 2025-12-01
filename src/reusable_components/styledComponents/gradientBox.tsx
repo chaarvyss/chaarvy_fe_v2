@@ -1,4 +1,5 @@
 import { Box, useTheme } from '@mui/material'
+
 import { useSettings } from 'src/@core/hooks/useSettings'
 
 interface GradientBoxProps {

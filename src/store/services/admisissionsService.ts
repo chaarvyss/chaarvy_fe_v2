@@ -1,9 +1,9 @@
 import { urlConstants } from 'src/constants/urlConstants'
+import { FilterProps } from 'src/lib/interfaces'
 
 import { HttpRequestMethods } from '..'
 
 import api from './api'
-import { FilterProps } from 'src/lib/interfaces'
 import { CacheTag } from './cacheTag'
 
 export type Address = {
@@ -178,6 +178,7 @@ const admissionServiceApi = api.injectEndpoints({
       query: body => {
         const formData = new FormData()
         formData.append('file', body.photo)
+
         return {
           method: HttpRequestMethods.POST,
           url: urlConstants.admissions.uploadStudentPhoto,

@@ -1,12 +1,12 @@
 import { urlConstants } from 'src/constants/urlConstants'
+import { Section, UserPermissionRequest } from 'src/lib/interfaces'
 
 import { HttpRequestMethods } from '..'
 
+import { Address } from './admisissionsService'
 import api from './api'
 import { CacheTag } from './cacheTag'
-import { Address } from './admisissionsService'
 import { UserProfile } from './viewServices'
-import { Section, UserPermissionRequest } from 'src/lib/interfaces'
 
 type CreateBook = {
   book_name: string

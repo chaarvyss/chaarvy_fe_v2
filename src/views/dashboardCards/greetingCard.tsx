@@ -1,6 +1,7 @@
 import { orange, deepOrange } from '@mui/material/colors'
-import { Card, Typography, Box } from '@muiElements'
 import React from 'react'
+
+import { Card, Typography, Box } from '@muiElements'
 import { useSettings } from 'src/@core/hooks/useSettings'
 import { getDailyQuote } from 'src/utils/constants'
 
@@ -12,6 +13,7 @@ const GreetingCard = () => {
 
     if (hour < 12) return 'Good morning'
     if (hour < 18) return 'Good afternoon'
+
     return 'Good evening'
   }
 

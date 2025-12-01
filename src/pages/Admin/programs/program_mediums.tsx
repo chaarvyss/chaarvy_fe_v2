@@ -1,6 +1,7 @@
 import { Button, Checkbox, FormControlLabel, FormGroup, Grid, Typography } from '@mui/material'
-import { Box } from '@muiElements'
 import React, { ChangeEvent, useEffect, useState } from 'react'
+
+import { Box } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { useGetLanguagesListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramMediumsListQuery, useUpdateProgramMediumsMutation } from 'src/store/services/programServices'
@@ -32,15 +33,17 @@ const ProgramMediums = ({ program_id }: { program_id: string }) => {
       e.target.checked ? newIds.add(e.target.id) : newIds.delete(e.target.id)
 
       setIsEdited(!areSetsEqual(newIds, initialPrgMediumIds))
+
       return new Set(newIds)
     })
   }
 
   const areSetsEqual = (set1: Set<string>, set2: Set<string>) => {
     if (set1.size !== set2.size) return false
-    for (let item of set1) {
+    for (const item of set1) {
       if (!set2.has(item)) return false
     }
+
     return true
   }
 

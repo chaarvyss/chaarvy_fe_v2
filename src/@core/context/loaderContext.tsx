@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react'
+
 import OverlaySpinner from 'src/reusable_components/overlaySpinner'
 
 // Define Context Type
@@ -28,5 +29,6 @@ export const useLoader = (): LoaderContextType => {
   if (!context) {
     throw new Error('useLoader must be used within a LoaderProvider')
   }
+
   return context
 }

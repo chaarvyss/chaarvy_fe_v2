@@ -22,8 +22,9 @@ import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { useCreateProgramSegmentMutation } from 'src/store/services/adminServices'
 import { useGetSegmentsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
-import ProgramSecondLanguage from './program_second_language'
+
 import ProgramMediums from './program_mediums'
+import ProgramSecondLanguage from './program_second_language'
 import ProgramSection from './program_sections'
 
 interface ProgramView {

@@ -1,11 +1,13 @@
 import { AppBar, Button } from '@mui/material'
-import { Box, Typography } from '@muiElements'
 import { useRouter } from 'next/router'
 import React, { ReactNode } from 'react'
+
+import { Box, Typography } from '@muiElements'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 const AcadPro = () => {
   const router = useRouter()
+
   return (
     <Box sx={{ height: '100vh' }} display='flex' justifyContent='center' alignItems='center'>
       {/* Header  */}

@@ -9,13 +9,14 @@ import { useSettings } from 'src/@core/hooks/useSettings'
 import VerticalLayout from 'src/@core/layouts/VerticalLayout'
 
 // ** Navigation Imports
-import VerticalNavItems from 'src/navigation/vertical'
 
 // ** Component Import
-import VerticalAppBarContent from './components/vertical/AppBarContent'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
+import VerticalNavItems from 'src/navigation/vertical'
 import SideDrawer from 'src/reusable_components/sideDrawer'
 import { useLazyGetCollegeDetailsQuery } from 'src/store/services/viewServices'
+
+import VerticalAppBarContent from './components/vertical/AppBarContent'
 
 // ** Hook Import
 

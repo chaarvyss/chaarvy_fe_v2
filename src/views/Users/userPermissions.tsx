@@ -1,7 +1,8 @@
 import { Button, Checkbox, FormControlLabel, FormGroup, Grid } from '@mui/material'
-import { Box, Typography } from '@muiElements'
 import React, { ChangeEvent, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
+
+import { Box, Typography } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Permissions } from 'src/constants/permissions'
 import { setAvailablePermissionsData } from 'src/store/permissionSlice'
@@ -30,6 +31,7 @@ const UserPermissions = ({ user_id }: UserPermissionsProps) => {
     setAllowedPermissions(prevIds => {
       const newIds = new Set(prevIds)
       e.target.checked ? newIds.add(e.target.id) : newIds.delete(e.target.id)
+
       return new Set(newIds)
     })
   }

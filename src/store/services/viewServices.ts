@@ -1,8 +1,8 @@
 import { urlConstants } from 'src/constants/urlConstants'
 
 import { HttpRequestMethods } from '..'
-import { Address } from './admisissionsService'
 
+import { Address } from './admisissionsService'
 import api from './api'
 import { CacheTag } from './cacheTag'
 

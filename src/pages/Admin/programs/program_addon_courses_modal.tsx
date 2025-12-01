@@ -1,5 +1,6 @@
 import { IconButton, SelectChangeEvent, TextField, Typography } from '@mui/material'
 import { FormControl, Input, InputLabel, MenuItem, Select } from '@mui/material'
+import { Pencil } from 'mdi-material-ui'
 import React, { useEffect, useState } from 'react'
 
 import { Check, Close } from '@mdiElements'
@@ -8,16 +9,14 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
 import { ProgramAddonCourseResponse, Program, AddOnCourse } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-
-import { useGetAddonCoursesListQuery, useLazyGetProgramsListQuery } from 'src/store/services/listServices'
-import { CreateProgramAddonCourseRequest } from 'src/store/services/feesServices'
 import {
   CreateProgramAddonRequest,
   useCreateProgramAddonMutation,
   useUpdateAddonCourseMutation,
   useUpdateProgramAddonMutation
 } from 'src/store/services/adminServices'
-import { Pencil } from 'mdi-material-ui'
+import { CreateProgramAddonCourseRequest } from 'src/store/services/feesServices'
+import { useGetAddonCoursesListQuery, useLazyGetProgramsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramAddonListQuery } from 'src/store/services/programServices'
 
 interface ProgramFeesDetailsProps {

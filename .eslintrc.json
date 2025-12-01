@@ -53,10 +53,9 @@
         }
       }
     ],
-    "eslint-comments/no-unused-disable": "error",
-    "eslint-comments/require-description": ["error", { "terms": ["TODO", "FIXME"] }]
+    "eslint-comments/no-unused-disable": "error"
   },
-  "plugins": ["import", "prettier", "eslint-comments"],
+  "plugins": ["import", "prettier", "eslint-comments", "unused-imports"],
   "settings": {
     "import/parsers": {
       "@typescript-eslint/parser": [".ts", ".tsx"]
