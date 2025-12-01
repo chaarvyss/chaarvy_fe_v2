@@ -20,7 +20,8 @@ export enum InputTypes {
   SELECT = 'select',
   RADIO = 'radio',
   DATE = 'date',
-  BUTTON = 'button'
+  BUTTON = 'button',
+  CHECKBOX = 'checkbox'
 }
 
 export enum InputVariants {

@@ -60,7 +60,7 @@ export type MenuOptions = {
 }
 
 export type InputFields = {
-  type: 'input' | 'select' | 'radio' | 'date' | 'button'
+  type: 'input' | 'select' | 'radio' | 'date' | 'button' | 'checkbox'
   variant?: 'number' | 'string' | 'email'
   isDisabled?: boolean
   id: string
@@ -75,6 +75,7 @@ export type InputFields = {
   showYearDropdown?: boolean
   showMonthDropdown?: boolean
   isLoading?: boolean
+  checked?: boolean
 }
 
 export type ErrorObject = {

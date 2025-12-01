@@ -22,8 +22,8 @@ export interface ChaarvyTableColumn<T = any> {
   width?: string | number
   align?: 'left' | 'center' | 'right'
   sticky?: boolean
-  hideable?: boolean // Whether this column can be hidden by user
-  defaultHidden?: boolean // Whether this column is hidden by default
+  hideable?: boolean 
+  defaultHidden?: boolean 
   render?: (row: T, index: number) => ReactNode
   headerSx?: Record<string, any>
   cellSx?: Record<string, any>
@@ -38,7 +38,7 @@ export interface ChaarvyDataTableProps<T = any> {
   minWidth?: number
   ariaLabel?: string
   hover?: boolean
-  showColumnToggle?: boolean // Show the column visibility toggle icon
+  showColumnToggle?: boolean 
 }
 
 const ChaarvyDataTable = <T extends Record<string, any>>({
@@ -52,7 +52,6 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   hover = true,
   showColumnToggle = true
 }: ChaarvyDataTableProps<T>) => {
-  // Initialize visible columns state
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {}
     columns.forEach(col => {
