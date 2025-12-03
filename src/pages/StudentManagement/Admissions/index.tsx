@@ -28,7 +28,10 @@ const Admissions = () => {
     fetchAdmissions(filterProps)
   }, [filterProps])
 
-  setLoading(isLoading)
+  useEffect(() => {
+    setLoading(isLoading)
+  }, [isLoading])
+
   const handleCreateAdmissionClick = () => {
     router.push(PagePath.CREATE_ADMISSION)
   }
@@ -74,7 +77,8 @@ const Admissions = () => {
     {
       id: 'student_name',
       label: 'Student Name',
-      sticky: true,
+      freezable: true,
+      defaultFrozen: true,
       hideable: false, // Keep this always visible
       render: row => (
         <Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '1rem' }}>
