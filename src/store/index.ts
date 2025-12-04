@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { persistStore, persistReducer } from 'redux-persist'
+
 import { rootReducer, persistConfig } from './reducers'
 import api from './services/api'
 

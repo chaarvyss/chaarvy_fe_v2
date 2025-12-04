@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
+
 import { useLoader } from 'src/@core/context/loaderContext'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
-
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import RenderFilterOptions from 'src/common/filters'
 import { FilterProps, TableHeaderStatCardProps, User } from 'src/lib/interfaces'

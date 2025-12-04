@@ -1,7 +1,8 @@
 import { useTheme } from '@mui/material'
 import { blue, grey, lightBlue } from '@mui/material/colors'
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@muiElements'
 import React from 'react'
+
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@muiElements'
 import { useSettings } from 'src/@core/hooks/useSettings'
 import { useGetLowStationaryStockDetailsQuery } from 'src/store/services/dashboardServices'
 
@@ -26,6 +27,7 @@ const StationaryStock = () => {
   const { settings } = useSettings()
   const theme = useTheme()
   const { data: stockDetails, isLoading } = useGetLowStationaryStockDetailsQuery()
+
   return (
     <TableContainer>
       {isLoading ? (

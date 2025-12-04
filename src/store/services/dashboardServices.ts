@@ -1,6 +1,8 @@
-import api from './api'
-import { HttpRequestMethods } from '..'
 import { urlConstants } from 'src/constants/urlConstants'
+
+import { HttpRequestMethods } from '..'
+
+import api from './api'
 
 interface StationaryStockResponse {
   book_name: string

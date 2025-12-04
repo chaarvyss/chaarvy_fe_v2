@@ -1,5 +1,6 @@
-import { Box, Typography } from '@muiElements'
 import React, { useEffect, useState } from 'react'
+
+import { Box, Typography } from '@muiElements'
 import ReactApexcharts from 'src/@core/components/react-apexcharts'
 import { useGetStudentsCountQuery } from 'src/store/services/dashboardServices'
 
@@ -29,6 +30,7 @@ const Population = () => {
       if (total < 1000) {
         return total
       }
+
       return `${total / 1000}K`
     }
 
@@ -43,6 +45,7 @@ const Population = () => {
       </Box>
     )
   }
+
   return (
     <Box>
       <p>loading</p>

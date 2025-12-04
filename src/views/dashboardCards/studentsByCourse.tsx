@@ -1,5 +1,6 @@
-import React from 'react'
 import dynamic from 'next/dynamic'
+import React from 'react'
+
 import { StudentData, useGetStudentEnrollmentCountDetailsQuery } from 'src/store/services/dashboardServices'
 
 const processStudentData = (data: StudentData) => {

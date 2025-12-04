@@ -1,6 +1,7 @@
-import { HttpRequestMethods } from 'src/store'
-import api from '../api'
 import { urlConstants } from 'src/constants/urlConstants'
+import { HttpRequestMethods } from 'src/store'
+
+import api from '../api'
 import { MasterCacheTag } from '../cacheTag'
 
 interface ClientRequestData {

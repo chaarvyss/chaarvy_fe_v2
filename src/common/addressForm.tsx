@@ -1,17 +1,15 @@
+import { LoadingButton } from '@mui/lab'
 import { CardContent, CircularProgress, MenuItem, Select, SelectChangeEvent } from '@mui/material'
 import React, { ChangeEvent, useEffect, useState } from 'react'
 
 import { FormControl, Grid, TextField } from '@muiElements'
-
-import { Address } from 'src/store/services/admisissionsService'
-import { ErrorObject, InputFields } from 'src/lib/types'
-import { InputTypes, InputVariants } from 'src/lib/enums'
-import { useLazyGetDistrictsListQuery, useGetStateListQuery } from 'src/store/services/listServices'
-import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { useLoader } from 'src/@core/context/loaderContext'
-import { LoadingButton } from '@mui/lab'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import { InputTypes, InputVariants } from 'src/lib/enums'
+import { ErrorObject, InputFields } from 'src/lib/types'
 import { useCreateUpdateAddressMutation } from 'src/store/services/adminServices'
-
+import { Address } from 'src/store/services/admisissionsService'
+import { useLazyGetDistrictsListQuery, useGetStateListQuery } from 'src/store/services/listServices'
 import { useGetAddressQuery } from 'src/store/services/viewServices'
 
 export enum AddressType {
@@ -83,6 +81,7 @@ const AddressForm = ({ address_id, user_id, user_type }: AddressProps) => {
     })
 
     setErrors(newErrors)
+
     return newErrors.length === 0
   }
 
@@ -227,6 +226,7 @@ const AddressForm = ({ address_id, user_id, user_type }: AddressProps) => {
   const handleSubmit = () => {
     if (!validateForm()) {
       triggerToast('Please correct the errors before submitting.', { variant: ToastVariants.ERROR })
+
       return
     }
     if (AddressForm) {

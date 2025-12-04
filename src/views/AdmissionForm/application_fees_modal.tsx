@@ -1,6 +1,7 @@
 import { LoadingButton } from '@mui/lab'
-import { Box, Typography, Button } from '@muiElements'
 import React from 'react'
+
+import { Box, Typography, Button } from '@muiElements'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 
 interface ApplicationFeesModalProps {
@@ -12,6 +13,7 @@ interface ApplicationFeesModalProps {
 
 const ApplicationFeesModal = (data: ApplicationFeesModalProps) => {
   const { isOpen, isLoading, onCollectClick, processingFees } = data
+
   return (
     <ChaarvyModal isOpen={isOpen} title='Application Processing Fees' shouldRestrictCloseOnOuterClick>
       <Box padding={2} gap={3}>

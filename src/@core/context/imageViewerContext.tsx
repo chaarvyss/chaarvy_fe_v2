@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react'
+
 import ImageViewer from 'src/reusable_components/imageViewer'
 
 // Define Context Type
@@ -28,5 +29,6 @@ export const useImageViewer = (): ImageViewerContextType => {
   if (!context) {
     throw new Error('useLoader must be used within a LoaderProvider')
   }
+
   return context
 }

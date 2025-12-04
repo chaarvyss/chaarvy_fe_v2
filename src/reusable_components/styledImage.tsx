@@ -1,4 +1,5 @@
 import { styled } from '@mui/material'
+
 import { useImageViewer } from 'src/@core/context/imageViewerContext'
 
 const ImgStyled = styled('img')<{ $variant?: 'rounded' }>(({ theme, $variant }) => ({

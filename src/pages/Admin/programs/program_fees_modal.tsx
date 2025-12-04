@@ -1,3 +1,4 @@
+import { LoadingButton } from '@mui/lab'
 import {
   FormControlLabel,
   FormLabel,
@@ -13,6 +14,7 @@ import React, { useEffect, useState } from 'react'
 
 import { Check, Close } from '@mdiElements'
 import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@muiElements'
+import { useLoader } from 'src/@core/context/loaderContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
 import { Fees, Program } from 'src/lib/types'
@@ -31,8 +33,6 @@ import {
   useLazyGetProgramsListQuery
 } from 'src/store/services/listServices'
 import { useLazyGetProgramMediumsListQuery } from 'src/store/services/programServices'
-import { useLoader } from 'src/@core/context/loaderContext'
-import { LoadingButton } from '@mui/lab'
 
 interface ProgramFeesDetailsProps {
   selectedProgram?: Program

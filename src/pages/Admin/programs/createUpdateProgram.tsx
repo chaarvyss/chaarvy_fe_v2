@@ -2,11 +2,11 @@ import { TextField } from '@mui/material'
 import { ChangeEvent, useEffect, useState } from 'react'
 
 import { Box, Button, Grid } from '@muiElements'
+import { useLoader } from 'src/@core/context/loaderContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Program } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { useCreateProgramMutation, useUpdateProgramMutation } from 'src/store/services/adminServices'
-import { useLoader } from 'src/@core/context/loaderContext'
 
 export interface CreateProgram {
   program_name: string

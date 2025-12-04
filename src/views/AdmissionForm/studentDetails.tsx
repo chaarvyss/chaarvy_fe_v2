@@ -13,33 +13,36 @@ import {
 } from '@mui/material'
 import React, { ChangeEvent, useState, useEffect } from 'react'
 import DatePicker from 'react-datepicker'
+
 import 'react-datepicker/dist/react-datepicker.css'
 import { FormControl, Grid, TextField } from '@muiElements'
-
+import { useLoader } from 'src/@core/context/loaderContext'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import { DateFormats, InputTypes, InputVariants } from 'src/lib/enums'
+import { dateToString } from 'src/lib/helpers'
+import { InputFields } from 'src/lib/types'
+import {
+  CreateStudentAdmissionRequest,
+  useCreateUpdateAdmissionMutation,
+  useLazyGetAdmissionDetailQuery
+} from 'src/store/services/admisissionsService'
 import {
   useGetQualifiedExamsListQuery,
   useGetOccupationsListQuery,
   useGetCommunitiesListQuery,
   useGetReligionsListQuery
 } from 'src/store/services/listServices'
-import {
-  CreateStudentAdmissionRequest,
-  useCreateUpdateAdmissionMutation,
-  useLazyGetAdmissionDetailQuery
-} from 'src/store/services/admisissionsService'
-import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { InputFields } from 'src/lib/types'
-import { DateFormats, InputTypes, InputVariants } from 'src/lib/enums'
 import { convertDateStringToDate } from 'src/utils/helpers'
-import { useLoader } from 'src/@core/context/loaderContext'
-import { dateToString } from 'src/lib/helpers'
+
 import { LoadingButton } from '@mui/lab'
+
 import { AdmissionFormType } from '.'
 
 const TOP_LEVEL_ID = 'student-application-form'
 
 const getLast10Years = (): number[] => {
   const currentYear = new Date().getFullYear()
+
   return Array.from({ length: 10 }, (_, i) => currentYear - i)
 }
 
@@ -90,7 +93,7 @@ const StudentDetails = ({ application_id, onAdmissionCreation, handleNext }: stu
   }, [])
 
   const handleSubmit = () => {
-    let finalData = { ...applicationDetails }
+    const finalData = { ...applicationDetails }
 
     if (applicationDetails) {
       if (application_id) finalData.application_id = application_id

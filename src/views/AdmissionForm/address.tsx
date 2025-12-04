@@ -1,19 +1,19 @@
+import { LoadingButton } from '@mui/lab'
 import { CardContent, CircularProgress, MenuItem, Select, SelectChangeEvent } from '@mui/material'
 import React, { ChangeEvent, useEffect, useState } from 'react'
 
 import { Button, FormControl, Grid, TextField } from '@muiElements'
-
+import { useLoader } from 'src/@core/context/loaderContext'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import { InputTypes, InputVariants } from 'src/lib/enums'
+import { ErrorObject, InputFields } from 'src/lib/types'
 import {
   Address,
   useCreateStudentAddressMutation,
   useGetStudentAddressQuery
 } from 'src/store/services/admisissionsService'
-import { ErrorObject, InputFields } from 'src/lib/types'
-import { InputTypes, InputVariants } from 'src/lib/enums'
 import { useLazyGetDistrictsListQuery, useGetStateListQuery } from 'src/store/services/listServices'
-import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { useLoader } from 'src/@core/context/loaderContext'
-import { LoadingButton } from '@mui/lab'
+
 import { AdmissionFormType } from '.'
 
 interface AddressProps {
@@ -79,6 +79,7 @@ const StudentAddress = ({ application_id, handleNext }: AddressProps) => {
     })
 
     setErrors(newErrors)
+
     return newErrors.length === 0
   }
 
@@ -223,6 +224,7 @@ const StudentAddress = ({ application_id, handleNext }: AddressProps) => {
   const handleSubmit = () => {
     if (!validateForm()) {
       triggerToast('Please correct the errors before submitting.', { variant: ToastVariants.ERROR })
+
       return
     }
     if (studentAddress) {

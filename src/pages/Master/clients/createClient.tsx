@@ -1,6 +1,7 @@
 import { Button, SelectChangeEvent } from '@mui/material'
-import { Box, Grid, TextField } from '@muiElements'
 import React, { ChangeEvent, useEffect, useState } from 'react'
+
+import { Box, Grid, TextField } from '@muiElements'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { InputVariants } from 'src/lib/enums'
@@ -38,7 +39,7 @@ const defaultClientData = {
 }
 
 const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
-  const [errors, setErrors] = useState<Array<String>>([])
+  const [errors, setErrors] = useState<Array<string>>([])
 
   const { closeDrawer } = useSideDrawer()
 
@@ -63,6 +64,7 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
 
       if (value === undefined || value === null || value === '' || value === 0) {
         errors.push(key)
+
         return
       }
 
@@ -82,6 +84,7 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
     if (errors.length > 0) {
       setErrors(errors)
       console.log('Validation Errors:', errors)
+
       return
     }
 
@@ -107,7 +110,9 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
                 value={clientData?.[field.v as keyof ClientData]}
                 size='small'
                 disabled={['db_name'].includes(field.v) && !!clientDetails}
-                type={['contact_numbers', 'processing_fees'].includes(field.v) ? InputVariants.NUMBER : 'text'}
+                type={
+                  ['contact_numbers', 'processing_fees'].includes(field.v) ? InputVariants.NUMBER : InputVariants.TEXT
+                }
               />
               {field.v === 'contact_numbers' && (
                 <p className='text-end' style={{ fontSize: '.7rem' }}>
@@ -120,7 +125,7 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
 
         <Grid item>
           <Button variant='contained' onClick={handleSubmit}>
-            Add Client
+            {clientDetails ? 'Update' : 'Add'} Client
           </Button>
         </Grid>
       </Grid>

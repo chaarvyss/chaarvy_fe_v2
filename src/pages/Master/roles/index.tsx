@@ -1,6 +1,7 @@
 // ** Types Imports
 import { Button, Checkbox, FormControlLabel, FormGroup, Grid, IconButton, TextField, Typography } from '@mui/material'
 import { ChangeEvent, useEffect, useState } from 'react'
+
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Permissions } from 'src/constants/permissions'
 import { InputVariants } from 'src/lib/enums'
@@ -9,7 +10,6 @@ import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import { useCreateUpdateRoleMutation } from 'src/store/services/adminServices'
 import { useLazyGetRolesListQuery, useLazyGetRolePermissionsListQuery } from 'src/store/services/listServices'
 import GetChaarvyIcons from 'src/utils/icons'
-
 import {
   Card,
   Chip,
@@ -71,6 +71,7 @@ const Roles = () => {
     setAllowedPermissions(prevIds => {
       const newIds = new Set(prevIds)
       e.target.checked ? newIds.add(e.target.id) : newIds.delete(e.target.id)
+
       return new Set(newIds)
     })
   }

@@ -1,3 +1,4 @@
+import { LoadingButton } from '@mui/lab'
 import { TextField } from '@mui/material'
 import { ChangeEvent, useEffect, useState } from 'react'
 
@@ -6,7 +7,6 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { FeesTypesResponse } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { useCreateFeesTypeMutation, useUpdateFeesTypeMutation } from 'src/store/services/adminServices'
-import { LoadingButton } from '@mui/lab'
 
 export interface CreateFeesType {
   fees_type: string

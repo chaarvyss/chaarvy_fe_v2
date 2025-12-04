@@ -1,6 +1,7 @@
 import { Button, CircularProgress, MenuItem, Select, SelectChangeEvent } from '@mui/material'
-import { Box, FormControl, Grid, TextField, Typography } from '@muiElements'
 import React, { ChangeEvent, useState } from 'react'
+
+import { Box, FormControl, Grid, TextField, Typography } from '@muiElements'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { InputVariants } from 'src/lib/enums'
@@ -41,6 +42,7 @@ const CreateUser = () => {
         })
     }
   }
+
   return (
     <Box>
       <Grid container spacing={7}>

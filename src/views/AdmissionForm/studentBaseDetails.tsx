@@ -13,14 +13,17 @@ import {
 } from '@mui/material'
 import React, { ChangeEvent, useState, useEffect } from 'react'
 import DatePicker from 'react-datepicker'
+
 import 'react-datepicker/dist/react-datepicker.css'
 import { Button, FormControl, Grid, TextField } from '@muiElements'
-
-import {
-  useGetProgramsListQuery,
-  useGetGendersListQuery,
-  useGetSegmentsListQuery
-} from 'src/store/services/listServices'
+import { useImageViewer } from 'src/@core/context/imageViewerContext'
+import { useLoader } from 'src/@core/context/loaderContext'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import { DateFormats, InputTypes, InputVariants } from 'src/lib/enums'
+import { dateToString } from 'src/lib/helpers'
+import { ErrorObject, InputFields } from 'src/lib/types'
+import CustomDateElement from 'src/reusable_components/dateInputElement'
+import { ImgStyled } from 'src/reusable_components/styledComponents/styledImgTag'
 import {
   CreateStudentAdmissionRequest,
   useCreateUpdateAdmissionMutation,
@@ -29,27 +32,29 @@ import {
   useUploadStudentPhotoMutation
 } from 'src/store/services/admisissionsService'
 import {
+  useLazyGetApplicationFeesPaymentQuery,
+  useLazyUpdateApplicationPaymentQuery
+} from 'src/store/services/feesServices'
+import {
+  useGetProgramsListQuery,
+  useGetGendersListQuery,
+  useGetSegmentsListQuery
+} from 'src/store/services/listServices'
+import {
   useLazyGetProgramMediumsListQuery,
   useLazyGetProgramSecondLanguagesListQuery,
   useLazyGetProgramSectionListQuery
 } from 'src/store/services/programServices'
-import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { ErrorObject, InputFields } from 'src/lib/types'
-import { DateFormats, InputTypes, InputVariants } from 'src/lib/enums'
-import CustomDateElement from 'src/reusable_components/dateInputElement'
 import { convertDateStringToDate } from 'src/utils/helpers'
-import { useLoader } from 'src/@core/context/loaderContext'
-import { dateToString } from 'src/lib/helpers'
-import { useImageViewer } from 'src/@core/context/imageViewerContext'
+
 import { LoadingButton } from '@mui/lab'
-import { ImgStyled } from 'src/reusable_components/styledComponents/styledImgTag'
+
+
 import { useRouter } from 'next/router'
-import { AdmissionFormType } from '.'
-import {
-  useLazyGetApplicationFeesPaymentQuery,
-  useLazyUpdateApplicationPaymentQuery
-} from 'src/store/services/feesServices'
+
 import ApplicationFeesModal from './application_fees_modal'
+
+import { AdmissionFormType } from '.'
 
 const TOP_LEVEL_ID = 'student-application-form'
 
@@ -219,6 +224,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
     })
 
     setErrors(newErrors)
+
     return newErrors.length === 0
   }
 
@@ -235,10 +241,11 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
   const handleSubmit = () => {
     if (!validateForm()) {
       triggerToast('Please correct the errors before submitting.', { variant: ToastVariants.ERROR })
+
       return
     }
 
-    let finalData = { ...applicationDetails }
+    const finalData = { ...applicationDetails }
     if (applicationDetails) {
       if (application_id) finalData.application_id = application_id
       createUpdateAdmission({
@@ -503,6 +510,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
           ...errors,
           { errorkey: 'student_image', error: 'Allowed File size must be between 300 KB and 500 KB.' }
         ])
+
         return
       } else {
         setErrors(errors.filter(({ errorkey }) => errorkey !== 'student_image'))

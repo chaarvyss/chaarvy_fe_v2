@@ -12,10 +12,10 @@ import { useLazyGetProgramsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
 
 import CreateOrUpdateProgramModal from './createUpdateProgram'
+import ProgramAddonCourseModal from './program_addon_courses_modal'
 import ProgramBooksModal from './program_books_modal'
 import ProgramFeesModal from './program_fees_modal'
 import ProgramViewModal from './program_view_modal'
-import ProgramAddonCourseModal from './program_addon_courses_modal'
 
 const headers: TableHeaders[] = [
   { label: 's#' },

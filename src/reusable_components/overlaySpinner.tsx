@@ -8,8 +8,9 @@ const override: CSSProperties = {
 }
 
 const OverlaySpinner = () => {
-  let [loading, setLoading] = useState(true)
-  let [color, setColor] = useState('#743ccf')
+  const [loading, setLoading] = useState(true)
+  const [color, setColor] = useState('#743ccf')
+
   return (
     <div
       style={{ zIndex: 1050 }}
