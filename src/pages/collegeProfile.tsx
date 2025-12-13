@@ -1,16 +1,17 @@
-import React, { ChangeEvent, SyntheticEvent, useEffect, useState } from 'react'
-import { Box, Grid, TextField } from '@muiElements'
-import { CollegeDetailResponse, useGetCollegeDetailsQuery } from 'src/store/services/viewServices'
+import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Button, IconButton, Paper, SelectChangeEvent, Tab, Typography } from '@mui/material'
-import { InputVariants } from 'src/lib/enums'
-import StyledImage from 'src/reusable_components/styledImage'
-import { useUpdateCollegeProfileMutation, useUploadCollegeLogoMutation } from 'src/store/services/adminServices'
+import React, { ChangeEvent, SyntheticEvent, useEffect, useState } from 'react'
+
+import { Box, Grid, TextField } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { useSettings } from 'src/@core/hooks/useSettings'
-import GetChaarvyIcons from 'src/utils/icons'
 import AddressForm, { AddressType } from 'src/common/addressForm'
-import { TabContext, TabList, TabPanel } from '@mui/lab'
+import { InputVariants } from 'src/lib/enums'
 import { TabName } from 'src/reusable_components/styledComponents/TabName'
+import StyledImage from 'src/reusable_components/styledImage'
+import { useUpdateCollegeProfileMutation, useUploadCollegeLogoMutation } from 'src/store/services/adminServices'
+import { CollegeDetailResponse, useGetCollegeDetailsQuery } from 'src/store/services/viewServices'
+import GetChaarvyIcons from 'src/utils/icons'
 
 enum FormType {
   BASE_DETAIL = 'base_detail',

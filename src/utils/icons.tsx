@@ -1,5 +1,5 @@
-import * as MdiIcons from 'mdi-material-ui'
 import { SvgIconProps } from '@mui/material'
+import * as MdiIcons from 'mdi-material-ui'
 
 // Step 1: Extract icon names dynamically
 const iconNames = Object.keys(MdiIcons) as (keyof typeof MdiIcons)[]

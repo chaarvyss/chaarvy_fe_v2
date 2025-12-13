@@ -1,17 +1,17 @@
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Box, styled, TabProps } from '@mui/material'
+import { BookOutline, Cash, GoogleMaps } from 'mdi-material-ui'
 import React, { SyntheticEvent, useEffect, useState } from 'react'
 
 import { AccountOutline } from '@mdiElements'
 import { Card, MuiTab } from '@muiElements'
-
-import StudentBaseDetails from './studentBaseDetails'
-import StudentAddress from './address'
-import { BookOutline, Cash, GoogleMaps } from 'mdi-material-ui'
-import AddonCourseDetails from './addonCourseDetails'
-import FeesDetails from './feesDetails'
-import { useLazyGetAdmissionDetailQuery } from 'src/store/services/admisissionsService'
 import { TabName } from 'src/reusable_components/styledComponents/TabName'
+import { useLazyGetAdmissionDetailQuery } from 'src/store/services/admisissionsService'
+
+import AddonCourseDetails from './addonCourseDetails'
+import StudentAddress from './address'
+import FeesDetails from './feesDetails'
+import StudentBaseDetails from './studentBaseDetails'
 import StudentDetails from './studentDetails'
 
 const Tab = styled(MuiTab)<TabProps>(({ theme }) => ({
@@ -116,6 +116,7 @@ const AdmissionForm = () => {
   const shouldDisableTab = ({ value }: { value: AdmissionFormType }): boolean => {
     if (!application_id) return value !== AdmissionFormType.BASE_DETAIL
     if (studentDetail?.application_fees_status == '1') return false
+
     return true
   }
 

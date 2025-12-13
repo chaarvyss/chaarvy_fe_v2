@@ -1,13 +1,17 @@
-import { Button, IconButton, Tooltip } from '@mui/material'
+import { IconButton, Tooltip } from '@mui/material'
+
 import { ReactElement, useEffect, useRef, useState } from 'react'
 
 import { TableHeaderStatCardProps } from 'src/lib/interfaces'
+
+import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
 import GetChaarvyIcons from 'src/utils/icons'
 import { Box, Grid, Card, Avatar, CardHeader, Typography, CardContent } from 'src/utils/muiElements'
 
 export interface TableTitleHeaderProps {
   buttonTitle?: string
   buttonColor?: 'primary' | 'success' | 'error' | 'info'
+  buttonFillType?: 'solid' | 'gradient'
   onButtonClick?: () => void
   isButtonDisabled?: boolean
   title: string
@@ -48,6 +52,7 @@ const TableTilteHeader = ({
   stats,
   buttonTitle,
   buttonColor,
+  buttonFillType,
   onButtonClick,
   isButtonDisabled,
   showFilterIcon,
@@ -68,6 +73,7 @@ const TableTilteHeader = ({
 
     check()
     window.addEventListener('resize', check)
+
     return () => window.removeEventListener('resize', check)
   }, [title])
 
@@ -76,12 +82,14 @@ const TableTilteHeader = ({
     const container = statsContainerRef.current
     if (!container) {
       setMaxStatsHeight(undefined)
+
       return
     }
 
     const items = Array.from(container.querySelectorAll('[data-stat-item]')) as HTMLElement[]
     if (items.length === 0) {
       setMaxStatsHeight(undefined)
+
       return
     }
 
@@ -97,6 +105,7 @@ const TableTilteHeader = ({
 
     if (firstRowMaxHeight <= 0) {
       setMaxStatsHeight(undefined)
+
       return
     }
 
@@ -107,6 +116,7 @@ const TableTilteHeader = ({
       const items2 = Array.from(container.querySelectorAll('[data-stat-item]')) as HTMLElement[]
       if (items2.length === 0) {
         setMaxStatsHeight(undefined)
+
         return
       }
       const firstTop2 = items2[0].getBoundingClientRect().top
@@ -121,8 +131,10 @@ const TableTilteHeader = ({
     }
 
     window.addEventListener('resize', onResize)
+
     return () => window.removeEventListener('resize', onResize)
   }, [stats])
+
   return (
     <Card sx={{ mb: 2 }}>
       <CardHeader
@@ -152,18 +164,16 @@ const TableTilteHeader = ({
           <Box display='flex'>
             {buttonTitle && (
               <>
-                <Button
+                <ChaarvyButton
                   className={icon ? 'd-none d-md-block' : ''}
+                  fillType={buttonFillType ?? 'gradient'}
                   color={buttonColor ?? 'primary'}
-                  variant='contained'
                   disabled={isButtonDisabled}
                   onClick={onButtonClick}
-                >
-                  <Box display='flex' gap={2}>
-                    {icon}
-                    <Typography color='white'>{buttonTitle}</Typography>
-                  </Box>
-                </Button>
+                  size='small'
+                  leftIcon={icon}
+                  label={buttonTitle}
+                />
                 <Tooltip title={buttonTitle} placement='top'>
                   <IconButton
                     color={buttonColor ?? 'primary'}

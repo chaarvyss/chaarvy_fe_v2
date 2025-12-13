@@ -1,6 +1,7 @@
 import { Button, Checkbox, FormControlLabel, FormGroup, Grid, Typography } from '@mui/material'
-import { Box } from '@muiElements'
 import React, { ChangeEvent, useEffect, useState } from 'react'
+
+import { Box } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { useGetLanguagesListQuery } from 'src/store/services/listServices'
 import {
@@ -42,9 +43,10 @@ const ProgramSecondLanguage = ({ program_id }: { program_id: string }) => {
 
   const areSetsEqual = (set1: Set<string>, set2: Set<string>) => {
     if (set1.size !== set2.size) return false
-    for (let item of set1) {
+    for (const item of set1) {
       if (!set2.has(item)) return false
     }
+
     return true
   }
 

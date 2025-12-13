@@ -54,5 +54,6 @@ export const useSideDrawer = () => {
   if (!context) {
     throw new Error('useSideDrawer must be used within a SideDrawerProvider')
   }
+
   return context
 }

@@ -1,5 +1,9 @@
 import { LoadingButton } from '@mui/lab'
 import { CircularProgress, Grid, MenuItem, Select, SelectChangeEvent, Tooltip, Typography } from '@mui/material'
+import { FormatListChecks } from 'mdi-material-ui'
+import React, { ChangeEvent, useState } from 'react'
+import DatePicker from 'react-datepicker'
+
 import {
   Box,
   Button,
@@ -11,9 +15,6 @@ import {
   TableHead,
   TableRow
 } from '@muiElements'
-import { FormatListChecks } from 'mdi-material-ui'
-import React, { ChangeEvent, useState } from 'react'
-import DatePicker from 'react-datepicker'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
@@ -49,7 +50,7 @@ const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose, application_id, se
 
   const [paymentAggrement, setPaymentAggrement] = useState<StudentPayableFeesRequest>()
 
-  let fees = [
+  const fees = [
     {
       particular: 'Program Fees',
       totalFees: GetSumOfNumbers(feesDetails?.prg_fees?.map(each => each.fees) || []),
@@ -67,10 +68,11 @@ const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose, application_id, se
     }
   ]
 
-  let consolidatedFees = fees.reduce(
+  const consolidatedFees = fees.reduce(
     (acc, { totalFees, discount }) => {
       acc.totalFees += totalFees
       acc.totalDiscount += discount
+
       return acc
     },
     { totalFees: 0, totalDiscount: 0 }

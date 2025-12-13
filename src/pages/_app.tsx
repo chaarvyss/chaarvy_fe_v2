@@ -7,6 +7,7 @@ import { Router } from 'next/router'
 import NProgress from 'nprogress'
 import { Provider } from 'react-redux'
 import { ToastContainer } from 'react-toastify'
+import { PersistGate } from 'redux-persist/integration/react'
 
 import type { NextPage } from 'next'
 import { SettingsConsumer, SettingsProvider } from 'src/@core/context/settingsContext'
@@ -24,7 +25,6 @@ import { SideDrawerProvider } from 'src/@core/context/sideDrawerContext'
 
 import 'react-datepicker/dist/react-datepicker.css'
 import { ImageViewerProvider } from 'src/@core/context/imageViewerContext'
-import { PersistGate } from 'redux-persist/integration/react'
 
 type ExtendedAppProps = AppProps & {
   Component: NextPage

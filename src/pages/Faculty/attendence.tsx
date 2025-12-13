@@ -1,6 +1,7 @@
 import { Button, SelectChangeEvent } from '@mui/material'
-import { Box, Card, Grid, Typography } from '@muiElements'
 import React, { ChangeEvent, useState } from 'react'
+
+import { Box, Card, Grid, Typography } from '@muiElements'
 import { InputTypes } from 'src/lib/enums'
 import { FilterProps } from 'src/lib/interfaces'
 import { InputFields } from 'src/lib/types'
@@ -43,6 +44,7 @@ const GetAttendence = () => {
     if (!filterProps) {
       return true
     }
+
     return ['program', 'medium', 'section'].some(key => filterProps[key] === undefined || filterProps[key] === '')
   }
 
@@ -101,6 +103,7 @@ const GetAttendence = () => {
 
   const studentCardTile = () => {
     if (isFetching) return <Typography>Loading</Typography>
+
     return (studentsList ?? []).map(each => (
       <Grid item xs={12} md={3} xl={2}>
         <Card

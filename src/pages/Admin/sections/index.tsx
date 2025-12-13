@@ -1,3 +1,4 @@
+import { Button, SelectChangeEvent } from '@mui/material'
 import React, { ChangeEvent, useState } from 'react'
 
 import {
@@ -13,16 +14,14 @@ import {
   TextField,
   Typography
 } from '@muiElements'
+import { useLoader } from 'src/@core/context/loaderContext'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Section, TableHeaders } from 'src/lib/interfaces'
+import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
-import { useGetSectionsListQuery } from 'src/store/services/listServices'
-
-import { useLoader } from 'src/@core/context/loaderContext'
-import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import { Button, SelectChangeEvent } from '@mui/material'
 import { useCreateUpdateSectionMutation } from 'src/store/services/adminServices'
-import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import { useGetSectionsListQuery } from 'src/store/services/listServices'
 
 const Sections = () => {
   const { data: sectionsList, isLoading } = useGetSectionsListQuery()

@@ -4,11 +4,14 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { useLoader } from 'src/@core/context/loaderContext'
 
+import { useLoader } from 'src/@core/context/loaderContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import { useSettings } from 'src/@core/hooks/useSettings'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 import themeConfig from 'src/configs/themeConfig'
+import { MASTER_TYPE } from 'src/constants/constants'
+import { PagePath } from 'src/constants/pagePathConstants'
 import { sessionStorageKeys } from 'src/lib/enums'
 import { getEmptyKeysList } from 'src/lib/helpers'
 import { LoginProps } from 'src/lib/interfaces'
@@ -31,10 +34,6 @@ import {
 
 // ** Demo Imports
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
-
-import { useSettings } from 'src/@core/hooks/useSettings'
-import { MASTER_TYPE } from 'src/constants/constants'
-import { PagePath } from 'src/constants/pagePathConstants'
 
 interface State {
   clcode: string

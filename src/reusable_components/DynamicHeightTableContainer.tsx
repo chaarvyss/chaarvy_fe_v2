@@ -1,4 +1,5 @@
 import React, { ReactNode, useEffect, useRef, useState } from 'react'
+
 import { Box, Paper, Card } from '@muiElements'
 
 interface DynamicHeightTableContainerProps {
@@ -48,7 +49,7 @@ const DynamicHeightTableContainer = ({
 
   return (
     <div>
-       {externalHeaderRef ? null : header ? (
+      {externalHeaderRef ? null : header ? (
         <div ref={internalHeaderRef}>{header}</div>
       ) : (
         <div ref={internalHeaderRef} style={{ display: 'none' }} />

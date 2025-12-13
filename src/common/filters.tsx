@@ -1,13 +1,14 @@
 import { Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Box } from '@mui/material'
-import { Grid, TextField } from '@muiElements'
 import { ChangeEvent, useEffect, useState } from 'react'
 import DatePicker from 'react-datepicker'
+
+import { Grid, TextField } from '@muiElements'
+import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import { DateFormats, InputVariants } from 'src/lib/enums'
+import { dateToString } from 'src/lib/helpers'
 import { FilterProps } from 'src/lib/interfaces'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
 import { useGetProgramsListQuery, useGetRolesListQuery, useGetSectionsListQuery } from 'src/store/services/listServices'
-import { dateToString } from 'src/lib/helpers'
-import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 
 type FieldTypes =
   | 'search'
@@ -49,7 +50,7 @@ const RenderFilterOptions = ({ onSubmit, fields, statusOptions }: RenderFilterPr
 
   const handleSubmit = event => {
     event?.preventDefault()
-    let finalFilters = { ...filters, offset: 0 }
+    const finalFilters = { ...filters, offset: 0 }
 
     let date: Date
     if (startDate) {

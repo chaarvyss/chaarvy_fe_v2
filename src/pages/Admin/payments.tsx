@@ -16,9 +16,9 @@ import {
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { href } from 'react-router-dom'
+
 import { useLoader } from 'src/@core/context/loaderContext'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
-
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import RenderFilterOptions from 'src/common/filters'
 import { FilterProps, StudentPayment, TableHeaderStatCardProps } from 'src/lib/interfaces'
@@ -135,6 +135,7 @@ const Payments = () => {
       showFilterIcon: true,
       handleFilterButtonClick: onFilterButtonClick
     }
+
     return props
   }
 

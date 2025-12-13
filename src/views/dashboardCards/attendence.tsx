@@ -1,5 +1,6 @@
-import { Box, Card, Typography } from '@muiElements'
 import React from 'react'
+
+import { Box, Card, Typography } from '@muiElements'
 import ReactApexcharts from 'src/@core/components/react-apexcharts'
 
 const Attendence = () => {

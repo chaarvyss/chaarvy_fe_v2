@@ -1,10 +1,12 @@
-import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import { Box, IconButton } from '@mui/material'
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
+
 import { useImageViewer } from 'src/@core/context/imageViewerContext'
 import GetChaarvyIcons from 'src/utils/icons'
 
 const ImageViewer = ({ imageUrl }: { imageUrl: string }) => {
   const { setShowImage } = useImageViewer()
+
   return (
     <div
       style={{ zIndex: 9999, position: 'relative' }}

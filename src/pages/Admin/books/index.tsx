@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 
 import { Box, Card, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@muiElements'
+import { useLoader } from 'src/@core/context/loaderContext'
 import { TableHeaders } from 'src/lib/interfaces'
 import { BooksTypesResponse } from 'src/lib/types'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
@@ -8,7 +9,6 @@ import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import { useGetBooksListQuery } from 'src/store/services/listServices'
 
 import CreateOrUpdateBookModal from './createBookModal'
-import { useLoader } from 'src/@core/context/loaderContext'
 
 const FeesTypes = () => {
   const { data: booksTypes, isLoading } = useGetBooksListQuery()

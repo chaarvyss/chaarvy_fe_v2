@@ -1,6 +1,4 @@
-import React, { ChangeEvent, SyntheticEvent, useEffect, useState } from 'react'
-import { Box, Grid, TextField } from '@muiElements'
-import { useGetUserProfileQuery, UserProfile } from 'src/store/services/viewServices'
+import { TabContext, TabList, TabPanel } from '@mui/lab'
 import {
   Button,
   CircularProgress,
@@ -13,17 +11,21 @@ import {
   Tab,
   Typography
 } from '@mui/material'
-import { InputVariants } from 'src/lib/enums'
-import StyledImage from 'src/reusable_components/styledImage'
+import React, { ChangeEvent, SyntheticEvent, useEffect, useState } from 'react'
+
+import { Box, Grid, TextField } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import GetChaarvyIcons from 'src/utils/icons'
 import AddressForm, { AddressType } from 'src/common/addressForm'
-import { TabContext, TabList, TabPanel } from '@mui/lab'
-import { TabName } from 'src/reusable_components/styledComponents/TabName'
+import { InputVariants } from 'src/lib/enums'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
+import { TabName } from 'src/reusable_components/styledComponents/TabName'
+import StyledImage from 'src/reusable_components/styledImage'
 import { useCreateUpdateUserMutation } from 'src/store/services/adminServices'
-import { useGetRolesListQuery } from 'src/store/services/listServices'
 import { useUploadProfilePicMutation } from 'src/store/services/authServices'
+import { useGetRolesListQuery } from 'src/store/services/listServices'
+import { useGetUserProfileQuery, UserProfile } from 'src/store/services/viewServices'
+import GetChaarvyIcons from 'src/utils/icons'
+
 import UserPermissions from './userPermissions'
 
 enum FormType {

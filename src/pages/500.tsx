@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { ReactNode } from 'react'
 
 import BlankLayout from 'src/@core/layouts/BlankLayout'
-
 import FooterIllustrations from 'src/views/pages/misc/FooterIllustrations'
 
 const BoxWrapper = styled(Box)<BoxProps>(({ theme }) => ({

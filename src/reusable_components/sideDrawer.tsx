@@ -1,7 +1,8 @@
-import * as React from 'react'
+import { Typography } from '@mui/material'
 import Box from '@mui/material/Box'
 import Drawer from '@mui/material/Drawer'
-import { Typography } from '@mui/material'
+import * as React from 'react'
+
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 
 const SideDrawer = () => {

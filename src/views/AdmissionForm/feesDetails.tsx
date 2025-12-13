@@ -1,3 +1,6 @@
+import { Checkbox, FormControlLabel } from '@mui/material'
+import React, { useState, useEffect, ChangeEvent } from 'react'
+
 import {
   Card,
   Paper,
@@ -10,7 +13,7 @@ import {
   TextField,
   Typography
 } from '@muiElements'
-import React, { useState, useEffect, ChangeEvent } from 'react'
+import { useLoader } from 'src/@core/context/loaderContext'
 import { ButtonColors } from 'src/lib/enums'
 import TableTilteHeader, { TableTitleHeaderProps } from 'src/reusable_components/TableTilteHeader'
 import {
@@ -20,9 +23,8 @@ import {
 } from 'src/store/services/feesServices'
 import { ThemeColorEnum } from 'src/utils/enums'
 import GetChaarvyIcons from 'src/utils/icons'
+
 import PaymentFinaliseModal from './paymentFinaliseModal'
-import { Checkbox, FormControlLabel } from '@mui/material'
-import { useLoader } from 'src/@core/context/loaderContext'
 
 interface FeesDetailsProps {
   application_id?: string
@@ -137,7 +139,7 @@ const FeesDetails = ({ application_id, segment_id }: FeesDetailsProps) => {
     setStudentFees(prevFees => {
       if (!prevFees) return prevFees
 
-      let updatedFees = { ...prevFees }
+      const updatedFees = { ...prevFees }
 
       if (category === 'prg_fees') {
         updatedFees.prg_fees = prevFees.prg_fees.map(eachItem =>
@@ -158,6 +160,7 @@ const FeesDetails = ({ application_id, segment_id }: FeesDetailsProps) => {
             : book
         )
       }
+
       return updatedFees
     })
   }

@@ -1,3 +1,5 @@
+import { LoadingButton } from '@mui/lab'
+import { Check, Close, Pencil } from 'mdi-material-ui'
 import React, { useState } from 'react'
 
 import {
@@ -15,22 +17,20 @@ import {
   TextField,
   Typography
 } from '@muiElements'
+import { useLoader } from 'src/@core/context/loaderContext'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
 import { AddOnCourse } from 'src/lib/types'
+import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
-import { useGetAddonCoursesListQuery } from 'src/store/services/listServices'
 import Tag from 'src/reusable_components/tag'
 import {
   useCreateAddonCourseMutation,
   useUpdateAddonCourseMutation,
   useUpdateAddonCourseStatusMutation
 } from 'src/store/services/adminServices'
-import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { Check, Close, Pencil } from 'mdi-material-ui'
-import { useLoader } from 'src/@core/context/loaderContext'
-import { LoadingButton } from '@mui/lab'
+import { useGetAddonCoursesListQuery } from 'src/store/services/listServices'
 
 const FeesTypes = () => {
   const { data: addonCourses, isLoading } = useGetAddonCoursesListQuery(false)

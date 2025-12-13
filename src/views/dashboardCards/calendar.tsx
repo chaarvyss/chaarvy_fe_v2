@@ -2,12 +2,13 @@ import { Button, useTheme } from '@mui/material'
 import { lightBlue, orange, blue, purple, lightGreen, green } from '@mui/material/colors'
 import { DateCalendar, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { Box, Typography } from '@muiElements'
-import React, { useEffect } from 'react'
-import { useSettings } from 'src/@core/hooks/useSettings'
 import dayjs, { Dayjs } from 'dayjs'
-import { useLazyGetUserCalenderQuery } from 'src/store/services/viewServices'
+import React, { useEffect } from 'react'
+
+import { Box, Typography } from '@muiElements'
+import { useSettings } from 'src/@core/hooks/useSettings'
 import { useLazyGetEventsListQuery, useLazyGetGoogleAuthUrlQuery } from 'src/store/services/calenderServices'
+import { useLazyGetUserCalenderQuery } from 'src/store/services/viewServices'
 import { formatEventDate } from 'src/utils/helpers'
 
 const MyCalendar = () => {

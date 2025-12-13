@@ -1,5 +1,8 @@
 import { LoadingButton } from '@mui/lab'
 import { Grid, IconButton, MenuItem, Select, SelectChangeEvent, Tooltip } from '@mui/material'
+import React, { ChangeEvent, useEffect, useState } from 'react'
+import DatePicker from 'react-datepicker'
+
 import {
   Box,
   Button,
@@ -14,7 +17,6 @@ import {
   TextField,
   Typography
 } from '@muiElements'
-import React, { ChangeEvent, useEffect, useState } from 'react'
 import { useLoader } from 'src/@core/context/loaderContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { InputTypes, InputVariants } from 'src/lib/enums'
@@ -32,7 +34,6 @@ import { useGetPaymentModesListQuery } from 'src/store/services/listServices'
 import { printDocument } from 'src/utils/helpers'
 import GetChaarvyIcons from 'src/utils/icons'
 
-import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
 
@@ -254,6 +255,7 @@ const CollectPayment = () => {
     if (!value) {
       return { errorkey: key, error: '* Required' }
     }
+
     return null
   }
 
@@ -273,6 +275,7 @@ const CollectPayment = () => {
     setErrors(newErrors)
 
     console.log(newErrors, 'newErrors')
+
     return newErrors.length === 0
   }
 
@@ -290,6 +293,7 @@ const CollectPayment = () => {
   const handleCollectSubmit = () => {
     if (!validateForm()) {
       triggerToast('Please correct the errors before submitting.', { variant: ToastVariants.ERROR })
+
       return
     }
     paymentDetails &&
@@ -358,6 +362,7 @@ const CollectPayment = () => {
     if ([null, 3].includes(feesDetail.payment_aggrement)) {
       return 'Flexible Payment'
     }
+
     return feesDetail.due_date
   }
 

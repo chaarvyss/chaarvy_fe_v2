@@ -24,8 +24,8 @@ import {
 } from '@mui/material'
 import { DeleteOutline } from 'mdi-material-ui'
 import React, { useEffect, useState } from 'react'
-import { useLoader } from 'src/@core/context/loaderContext'
 
+import { useLoader } from 'src/@core/context/loaderContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { InputVariants } from 'src/lib/enums'
 import { TableHeaders } from 'src/lib/interfaces'
@@ -305,6 +305,7 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
 
   const isNoBooksAvailable =
     bookDetail.medium !== '' && bookDetail.second_language !== '' && booksDetails?.segments.length == 0
+
   return (
     <>
       <ChaarvyModal

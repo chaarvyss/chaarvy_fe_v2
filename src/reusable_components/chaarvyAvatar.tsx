@@ -1,6 +1,7 @@
 import { AvatarProps } from '@mui/material'
-import { Avatar } from '@muiElements'
 import React from 'react'
+
+import { Avatar } from '@muiElements'
 import { useImageViewer } from 'src/@core/context/imageViewerContext'
 
 const ChaarvyAvatar = ({ ...props }: AvatarProps) => {

@@ -3,12 +3,13 @@ import GridLayout from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import { Paper, Typography } from '@mui/material'
-import Population from 'src/views/dashboardCards/population'
+
 import Attendence from 'src/views/dashboardCards/attendence'
 import MyCalendar from 'src/views/dashboardCards/calendar'
+import Payments2 from 'src/views/dashboardCards/payments2'
+import Population from 'src/views/dashboardCards/population'
 import StationaryStock from 'src/views/dashboardCards/stationaryStock'
 import StudentEnrollmentChart from 'src/views/dashboardCards/studentsByCourse'
-import Payments2 from 'src/views/dashboardCards/payments2'
 
 const Dashboard: React.FC = () => {
   const [gridWidth, setGridWidth] = useState(window.innerWidth * 0.95)
@@ -33,6 +34,7 @@ const Dashboard: React.FC = () => {
     }
 
     window.addEventListener('resize', handleResize)
+
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 

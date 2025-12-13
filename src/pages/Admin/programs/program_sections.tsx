@@ -1,6 +1,7 @@
 import { Button, Checkbox, FormControlLabel, FormGroup, Grid, Typography } from '@mui/material'
-import { Box } from '@muiElements'
 import React, { ChangeEvent, useEffect, useState } from 'react'
+
+import { Box } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { useGetSectionsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSectionListQuery, useUpdateProgramSectionMutation } from 'src/store/services/programServices'
