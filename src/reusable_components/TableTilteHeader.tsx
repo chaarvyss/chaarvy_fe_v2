@@ -1,13 +1,17 @@
-import { Button, IconButton, Tooltip } from '@mui/material'
+import { IconButton, Tooltip } from '@mui/material'
+
 import { ReactElement, useEffect, useRef, useState } from 'react'
 
 import { TableHeaderStatCardProps } from 'src/lib/interfaces'
+
+import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
 import GetChaarvyIcons from 'src/utils/icons'
 import { Box, Grid, Card, Avatar, CardHeader, Typography, CardContent } from 'src/utils/muiElements'
 
 export interface TableTitleHeaderProps {
   buttonTitle?: string
   buttonColor?: 'primary' | 'success' | 'error' | 'info'
+  buttonFillType?: 'solid' | 'gradient'
   onButtonClick?: () => void
   isButtonDisabled?: boolean
   title: string
@@ -48,6 +52,7 @@ const TableTilteHeader = ({
   stats,
   buttonTitle,
   buttonColor,
+  buttonFillType,
   onButtonClick,
   isButtonDisabled,
   showFilterIcon,
@@ -159,18 +164,16 @@ const TableTilteHeader = ({
           <Box display='flex'>
             {buttonTitle && (
               <>
-                <Button
+                <ChaarvyButton
                   className={icon ? 'd-none d-md-block' : ''}
+                  fillType={buttonFillType ?? 'gradient'}
                   color={buttonColor ?? 'primary'}
-                  variant='contained'
                   disabled={isButtonDisabled}
                   onClick={onButtonClick}
-                >
-                  <Box display='flex' gap={2}>
-                    {icon}
-                    <Typography color='white'>{buttonTitle}</Typography>
-                  </Box>
-                </Button>
+                  size='small'
+                  leftIcon={icon}
+                  label={buttonTitle}
+                />
                 <Tooltip title={buttonTitle} placement='top'>
                   <IconButton
                     color={buttonColor ?? 'primary'}
