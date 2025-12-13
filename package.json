@@ -11,8 +11,13 @@
     "build": "next build",
     "start": "next start",
     "export": "next export",
-    "lint": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
-    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\""
+    "lint": "next lint",
+    "lint:fix": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
+    "lint:check": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\"",
+    "type-check": "tsc --noEmit",
+    "lint:all": "npm run lint:check && npm run format:check && npm run type-check"
   },
   "dependencies": {
     "@emotion/cache": "^11.6.0",
@@ -60,6 +65,7 @@
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "next-transpile-modules": "^9.0.0",
     "prettier": "^3.5.1",
     "typescript": "^5.7.3"
