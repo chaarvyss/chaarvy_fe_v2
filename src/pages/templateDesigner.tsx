@@ -26,45 +26,17 @@ const DEFAULT_SIZES = {
 }
 
 const FONT_FAMILIES = [
-  'Arial',
-  'Arial Black',
-  'Brush Script MT',
-  'Comic Sans MS',
-  'Courier New',
-  'Garamond',
-  'Georgia',
   'Helvetica',
-  'Impact',
-  'Lucida Console',
-  'Lucida Sans Unicode',
-  'Palatino Linotype',
-  'Tahoma',
-  'Times New Roman',
-  'Trebuchet MS',
-  'Verdana',
-  'monospace',
-  'cursive',
-  'fantasy',
-  'system-ui',
-  'ui-serif',
-  'ui-sans-serif',
-  'ui-monospace',
-  'ui-rounded'
+  'Times',
+  'Courier'
+  // jsPDF only supports these built-in fonts by default
 ]
 
 const FONT_WEIGHTS = [
   { value: 'normal', label: 'Normal' },
   { value: 'bold', label: 'Bold' },
-  { value: 'lighter', label: 'Lighter' },
-  { value: '100', label: '100' },
-  { value: '200', label: '200' },
-  { value: '300', label: '300' },
-  { value: '400', label: '400' },
-  { value: '500', label: '500' },
-  { value: '600', label: '600' },
-  { value: '700', label: '700' },
-  { value: '800', label: '800' },
-  { value: '900', label: '900' }
+  { value: 'italic', label: 'Italic' },
+  { value: 'bolditalic', label: 'Bold Italic' }
 ]
 
 type Field = { key: string; label: string; type: 'field' | 'text' | 'shape' | 'image' }
