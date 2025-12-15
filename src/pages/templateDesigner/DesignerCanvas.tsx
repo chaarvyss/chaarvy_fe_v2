@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { PlacedField } from './types'
+import { FieldType, ShapeType } from './enums'
 
 interface DesignerCanvasProps {
   placed: PlacedField[]
@@ -44,7 +45,6 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
   setHoveredItem,
   updateTextContent,
   setEditingItem,
-  deleteItem,
   onDrop
 }) => {
   const [colResize, setColResize] = React.useState<{
@@ -54,13 +54,14 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
     startWidth: number
   } | null>(null)
 
-  // Handler for mousedown on resizer
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
+  const [hovered, setHovered] = React.useState(false)
+
   const handleColResizeMouseDown = (e: React.MouseEvent, tableId: string, colIdx: number, colWidth: number) => {
     e.stopPropagation()
     setColResize({ tableId, colIdx, startX: e.clientX, startWidth: colWidth })
   }
 
-  // Handler for mousemove
   useEffect(() => {
     if (colResize) {
       const handleMouseMove = (e: MouseEvent) => {
@@ -85,9 +86,20 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
   }, [colResize, placed])
 
   const renderItem = (p: PlacedField) => {
-    if (p.type === 'field') {
-      return <span style={{ textAlign: p.textAlign || 'left', fontSize: p.fontSize }}>{'{{' + p.fieldKey + '}}'}</span>
-    } else if (p.type === 'text') {
+    if (p.type === FieldType.FIELD) {
+      return (
+        <span
+          style={{
+            textAlign: p.textAlign || 'left',
+            fontSize: p.fontSize,
+            color: p.color || '#000',
+            fontFamily: p.fontFamily
+          }}
+        >
+          {'{{' + p.fieldKey + '}}'}
+        </span>
+      )
+    } else if (p.type === FieldType.TEXT) {
       if (editingItem === p.id) {
         return (
           <input
@@ -100,6 +112,7 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
             }}
             style={{
               fontSize: p.fontSize,
+              color: p.color || '#000',
               width: p.width || 120,
               border: '1px solid #2196F3',
               borderRadius: 4,
@@ -110,26 +123,93 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
       }
       return (
         <span
-          style={{ textAlign: p.textAlign || 'left', fontSize: p.fontSize, cursor: 'pointer' }}
+          style={{
+            textAlign: p.textAlign || 'left',
+            fontSize: p.fontSize,
+            cursor: 'pointer',
+            color: p.color || '#000',
+            fontFamily: p.fontFamily
+          }}
           onDoubleClick={() => setEditingItem(p.id)}
         >
           {p.content || 'Text'}
         </span>
       )
-    } else if (p.type === 'shape') {
+    } else if (p.type === FieldType.SHAPE) {
       const borderStyle = p.borderWidth
         ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
         : '2px solid #333'
-      if (p.shapeType === 'rectangle') {
+      if (p.shapeType === ShapeType.RECTANGLE) {
         return <div style={{ width: p.width, height: p.height, border: borderStyle }} />
-      } else if (p.shapeType === 'circle') {
+      } else if (p.shapeType === ShapeType.CIRCLE) {
         return <div style={{ width: p.width, height: p.height, border: borderStyle, borderRadius: '50%' }} />
-      } else if (p.shapeType === 'line') {
+      } else if (p.shapeType === ShapeType.LINE) {
         return <div style={{ width: p.width, height: p.height, background: p.borderColor || '#333' }} />
       }
-    } else if (p.type === 'image') {
-      return <img src={p.imageUrl} alt='Placed' style={{ width: p.width, height: p.height, objectFit: 'contain' }} />
-    } else if (p.type === 'table') {
+    } else if (p.type === FieldType.IMAGE) {
+      return (
+        <div
+          style={{
+            position: 'relative',
+            width: p.width,
+            height: p.height
+          }}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+        >
+          <img
+            src={p.imageUrl}
+            alt='Placed'
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              display: 'block'
+            }}
+          />
+
+          {/* Hover overlay */}
+          {hovered && (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'rgba(0,0,0,0.35)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <span
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  fontSize: '24px',
+                  color: '#fff',
+                  cursor: 'pointer'
+                }}
+                title='Upload image'
+              >
+                📷
+              </span>
+            </div>
+          )}
+
+          {/* Hidden input */}
+          <input
+            ref={fileInputRef}
+            type='file'
+            accept='image/*'
+            style={{ display: 'none' }}
+            onChange={e => {
+              const file = e.target.files?.[0]
+              if (file) {
+                console.log(file)
+              }
+            }}
+          />
+        </div>
+      )
+    } else if (p.type === FieldType.TABLE) {
       // Store column widths in columns array (col.width)
       const columns = p.columns?.map(col => ({ ...col, width: col?.width || 100 }))
       return (
@@ -215,7 +295,6 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
       style={{
         flex: 1,
         overflow: 'auto',
-        maxHeight: 'calc(90vh - 80px)',
         border: '1px solid #e0e0e0',
         padding: 20,
         background: '#f5f5f5',

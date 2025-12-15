@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Field } from './types'
 
 interface SidebarProps {
@@ -21,14 +21,18 @@ interface SidebarProps {
   setCustomWidth: (w: number) => void
   customHeight: number
   setCustomHeight: (h: number) => void
-  orientation: string
-  setOrientation: (o: string) => void
+  orientation: Orientation
+  setOrientation: (o: Orientation) => void
   templateName: string
   setTemplateName: (n: string) => void
   saveTemplate: () => void
 }
 
 import { PAGE_SIZES, FONT_FAMILIES, FONT_WEIGHTS } from './constants'
+import ChaarvyAccordian from 'src/reusable_components/chaarvyAccordian'
+import { Card } from '@muiElements'
+import { Tooltip } from '@mui/material'
+import { Orientation } from './enums'
 
 const Sidebar: React.FC<SidebarProps> = ({
   availableItems,
@@ -36,7 +40,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   setShowSidebar,
   handleDragStart,
   fileInputRef,
-  handleImageUpload,
   undo,
   redo,
   historyIndex,
@@ -58,10 +61,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div
       style={{
-        width: showSidebar ? 240 : 60,
-        maxHeight: '90vh',
+        width: showSidebar ? '' : 60,
         overflowY: 'auto',
         transition: 'width 0.3s',
+        padding: 16,
         position: 'relative',
         background: '#fafbfc',
         borderRight: '1px solid #eee'
@@ -90,140 +93,64 @@ const Sidebar: React.FC<SidebarProps> = ({
       {showSidebar ? (
         <>
           <h3 style={{ marginTop: 0 }}>Elements</h3>
-          <h4 style={{ fontSize: 14, color: '#666', marginTop: 16, marginBottom: 8 }}>Fields</h4>
-          {availableItems
-            .filter(f => f.type === 'field')
-            .map(f => (
-              <div
-                key={f.key}
-                draggable
-                onDragStart={e => handleDragStart(e, f)}
-                style={{
-                  padding: 8,
-                  border: '1px solid #ddd',
-                  marginBottom: 8,
-                  cursor: 'grab',
-                  background: '#f9f9f9',
-                  borderRadius: 4
-                }}
-              >
-                {f.label}
-              </div>
-            ))}
-          <h4 style={{ fontSize: 14, color: '#666', marginTop: 16, marginBottom: 8 }}>Shapes</h4>
-          <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+          <ChaarvyAccordian title='Fields'>
             {availableItems
-              .filter(f => f.type === 'shape' || f.type === 'table')
+              .filter(f => f.type === 'field')
               .map(f => (
-                <div
+                <Card
                   key={f.key}
                   draggable
                   onDragStart={e => handleDragStart(e, f)}
                   style={{
                     padding: 8,
+                    border: '1px solid #ddd',
+                    marginBottom: 8,
                     cursor: 'grab',
                     background: '#f9f9f9',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flex: 1,
-                    borderRadius: 4,
-                    minHeight: 50,
-                    gap: 4,
-                    fontWeight: f.type === 'table' ? 500 : undefined
+                    borderRadius: 4
                   }}
                 >
-                  {f.key === 'text' && <span style={{ fontSize: 16, color: '#333', fontWeight: '500' }}>abc</span>}
-                  {f.key === 'rectangle' && <div style={{ width: 20, height: 14, border: '2px solid #333' }} />}
-                  {f.key === 'circle' && (
-                    <div style={{ width: 18, height: 18, border: '2px solid #333', borderRadius: '50%' }} />
-                  )}
-                  {f.key === 'line' && <div style={{ width: 24, height: 2, background: '#333' }} />}
-                  {f.type === 'table' && <span style={{ fontSize: 16 }}>📋 Table</span>}
-                </div>
+                  {f.label}
+                </Card>
               ))}
-          </div>
-          <h4 style={{ fontSize: 14, color: '#666', marginTop: 16, marginBottom: 8 }}>Images</h4>
-          {availableItems
-            .filter(f => f.type === 'image')
-            .map(f => (
-              <div
-                key={f.key}
-                draggable
-                onDragStart={e => handleDragStart(e, f)}
-                style={{
-                  padding: 8,
-                  border: '1px solid #ddd',
-                  marginBottom: 8,
-                  cursor: 'grab',
-                  background: '#f9f9f9',
-                  borderRadius: 4
-                }}
-              >
-                {f.label}
-              </div>
-            ))}
-          <input
-            ref={fileInputRef}
-            type='file'
-            accept='image/*'
-            onChange={handleImageUpload}
-            style={{ display: 'none' }}
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            style={{
-              width: '100%',
-              padding: 8,
-              border: '1px solid #2196F3',
-              background: 'white',
-              color: '#2196F3',
-              borderRadius: 4,
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: 500,
-              marginTop: 4
-            }}
-          >
-            📁 Upload Image
-          </button>
-          <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid #ddd' }} />
-          <h4 style={{ fontSize: 14, color: '#666', marginTop: 16, marginBottom: 8 }}>Actions</h4>
-          <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-            <button
-              onClick={undo}
-              disabled={historyIndex === 0}
-              style={{
-                flex: 1,
-                padding: 6,
-                background: historyIndex === 0 ? '#e0e0e0' : '#f5f5f5',
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                cursor: historyIndex === 0 ? 'not-allowed' : 'pointer',
-                fontSize: 12
-              }}
-              title='Undo (Ctrl+Z)'
-            >
-              ↶ Undo
-            </button>
-            <button
-              onClick={redo}
-              disabled={historyIndex >= historyLength - 1}
-              style={{
-                flex: 1,
-                padding: 6,
-                background: historyIndex >= historyLength - 1 ? '#e0e0e0' : '#f5f5f5',
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                cursor: historyIndex >= historyLength - 1 ? 'not-allowed' : 'pointer',
-                fontSize: 12
-              }}
-              title='Redo (Ctrl+Y)'
-            >
-              ↷ Redo
-            </button>
-          </div>
+          </ChaarvyAccordian>
+          <ChaarvyAccordian title='Shapes'>
+            <Card style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+              {availableItems
+                .filter(f => f.type === 'shape' || f.type === 'table' || f.key === 'image')
+                .map(f => (
+                  <Tooltip placement='top' title={f.label}>
+                    <Card
+                      key={f.key}
+                      draggable
+                      onDragStart={e => handleDragStart(e, f)}
+                      style={{
+                        cursor: 'grab',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flex: 1,
+                        borderRadius: 4,
+                        minHeight: 50,
+                        gap: 4,
+                        fontWeight: f.type === 'table' ? 500 : undefined
+                      }}
+                    >
+                      {f.key === 'text' && <span style={{ fontSize: 16, color: '#333', fontWeight: '500' }}>abc</span>}
+                      {f.key === 'rectangle' && <div style={{ width: 20, height: 14, border: '2px solid #333' }} />}
+                      {f.key === 'circle' && (
+                        <div style={{ width: 18, height: 18, border: '2px solid #333', borderRadius: '50%' }} />
+                      )}
+                      {f.key === 'line' && <div style={{ width: 24, height: 2, background: '#333' }} />}
+                      {f.type === 'table' && <span style={{ fontSize: 16 }}>📋</span>}
+                      {f.key === 'image' && <span style={{ fontSize: 16 }}>🖼️</span>}
+                    </Card>
+                  </Tooltip>
+                ))}
+            </Card>
+          </ChaarvyAccordian>
+
           <button
             onClick={exportTemplate}
             style={{
@@ -300,7 +227,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 500 }}>Orientation</label>
             <select
               value={orientation}
-              onChange={e => setOrientation(e.target.value)}
+              onChange={e => setOrientation(e.target.value as Orientation)}
               style={{ width: '100%', padding: 8, marginBottom: 12, border: '1px solid #ddd', borderRadius: 4 }}
             >
               <option value='portrait'>Portrait</option>

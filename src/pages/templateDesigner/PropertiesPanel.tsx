@@ -18,8 +18,6 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   selectedItem,
   placed,
   updateItemProperty,
-  updateTextContent,
-  setEditingItem,
   bringToFront,
   sendToBack,
   deleteItem
@@ -106,7 +104,6 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   {idx > 0 && (
                     <button
                       onClick={() => {
-                        // Move column left
                         const newColumns = [...item.columns!]
                         const temp = newColumns[idx - 1]
                         newColumns[idx - 1] = newColumns[idx]

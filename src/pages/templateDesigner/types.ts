@@ -3,6 +3,9 @@
 export type TableColumn = { header: string; dataKey: string; width?: number }
 export type TableData = Record<string, any>
 
+export type FieldType = 'text' | 'field' | 'shape' | 'image' | 'table'
+export type ShapeType = 'rectangle' | 'circle' | 'line'
+
 export type PlacedField = {
   id: string
   type: 'text' | 'field' | 'shape' | 'image' | 'table'

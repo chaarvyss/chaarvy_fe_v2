@@ -1,5 +1,18 @@
 // Constants for the template designer
 
+import { Field } from './types'
+
+export const AVAILABLE_ITEMS: Field[] = [
+  { key: 'name', type: 'field', label: 'Name' },
+  { key: 'email', type: 'field', label: 'Email' },
+  { key: 'text', type: 'shape', label: 'Text' },
+  { key: 'rectangle', type: 'shape', label: 'Rectangle' },
+  { key: 'circle', type: 'shape', label: 'Circle' },
+  { key: 'line', type: 'shape', label: 'Line' },
+  { key: 'image', type: 'image', label: 'Image' },
+  { key: 'table', type: 'table', label: 'Table' }
+]
+
 export const DEFAULT_SIZES = {
   fontSize: 16,
   rectangle: { width: 120, height: 60 },

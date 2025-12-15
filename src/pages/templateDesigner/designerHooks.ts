@@ -1,6 +1,7 @@
 // Custom hooks for template designer state and logic
 import { useState, useRef } from 'react'
 import { PlacedField } from './types'
+import { Orientation } from './enums'
 
 export function useDesignerState() {
   const [placed, setPlaced] = useState<PlacedField[]>([])
@@ -8,6 +9,7 @@ export function useDesignerState() {
   const [editingItem, setEditingItem] = useState<string | null>(null)
   const [clipboard, setClipboard] = useState<PlacedField | null>(null)
   const [history, setHistory] = useState<PlacedField[][]>([])
+  const [orientation, setOrientation] = useState<Orientation>(Orientation.PORTRAIT)
   const [historyIndex, setHistoryIndex] = useState(0)
   const [dragState, setDragState] = useState<any>({
     isDragging: false,
@@ -36,6 +38,8 @@ export function useDesignerState() {
   const canvasRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [PageSize, setPageSize] = useState('A4')
+
   return {
     placed,
     setPlaced,
@@ -60,6 +64,8 @@ export function useDesignerState() {
     templateName,
     setTemplateName,
     clientId,
+    orientation,
+    setOrientation,
     canvasWidth,
     setCanvasWidth,
     canvasHeight,
@@ -67,6 +73,8 @@ export function useDesignerState() {
     hoveredItem,
     setHoveredItem,
     canvasRef,
-    fileInputRef
+    fileInputRef,
+    PageSize,
+    setPageSize
   }
 }

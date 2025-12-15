@@ -1,28 +1,19 @@
-import React from 'react'
+import React, { DragEvent, useEffect, useState } from 'react'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 import { useDesignerState } from './designerHooks'
 import DesignerCanvas from './DesignerCanvas'
 import Sidebar from './Sidebar'
 import PropertiesPanel from './PropertiesPanel'
 
-import { DEFAULT_SIZES, DEFAULT_TABLE_COLUMNS, DEFAULT_TABLE_DATA, PAGE_SIZES } from './constants'
+import { AVAILABLE_ITEMS, DEFAULT_SIZES, DEFAULT_TABLE_COLUMNS, DEFAULT_TABLE_DATA, PAGE_SIZES } from './constants'
 import { Field, PlacedField } from './types'
-
-const AVAILABLE_ITEMS: Field[] = [
-  { key: 'name', type: 'field', label: 'Name' },
-  { key: 'email', type: 'field', label: 'Email' },
-  { key: 'text', type: 'shape', label: 'Text' },
-  { key: 'rectangle', type: 'shape', label: 'Rectangle' },
-  { key: 'circle', type: 'shape', label: 'Circle' },
-  { key: 'line', type: 'shape', label: 'Line' },
-  { key: 'image', type: 'image', label: 'Image' },
-  { key: 'table', type: 'table', label: 'Table' }
-]
+import { FieldType, Orientation } from './enums'
+import { Card } from '@muiElements'
 
 const DesignerPage = () => {
   const designer = useDesignerState()
-  // Keyboard arrow key support for moving selected item
-  React.useEffect(() => {
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!designer.selectedItem) return
       let dx = 0,
@@ -54,14 +45,15 @@ const DesignerPage = () => {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [designer.selectedItem])
-  const [showSidebar, setShowSidebar] = React.useState(true)
+
+  const [showSidebar, setShowSidebar] = useState(true)
 
   // Handlers
-  const handleDragStart = (e: React.DragEvent, item: Field) => {
+  const handleDragStart = (e: DragEvent, item: Field) => {
     e.dataTransfer.setData('application/json', JSON.stringify(item))
   }
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: DragEvent) => {
     e.preventDefault()
     const itemData = JSON.parse(e.dataTransfer.getData('application/json'))
     const rect = designer.canvasRef.current?.getBoundingClientRect()
@@ -78,12 +70,12 @@ const DesignerPage = () => {
       opacity: 1,
       rotation: 0
     }
-    if (itemData.type === 'field') {
+    if (itemData.type === FieldType.FIELD) {
       newItem.fieldKey = itemData.key
-    } else if (itemData.type === 'shape') {
-      if (itemData.key === 'text') {
+    } else if (itemData.type === FieldType.SHAPE) {
+      if (itemData.key === FieldType.TEXT) {
         newItem.content = 'Enter text here'
-        newItem.type = 'text'
+        newItem.type = FieldType.TEXT
       } else {
         newItem.shapeType = itemData.key
         const sizes = DEFAULT_SIZES[itemData.key as keyof typeof DEFAULT_SIZES]
@@ -92,11 +84,11 @@ const DesignerPage = () => {
           newItem.height = sizes.height
         }
       }
-    } else if (itemData.type === 'image') {
+    } else if (itemData.type === FieldType.IMAGE) {
       newItem.imageUrl = '/images/logos/logo.png'
       newItem.width = DEFAULT_SIZES.image.width
       newItem.height = DEFAULT_SIZES.image.height
-    } else if (itemData.type === 'table') {
+    } else if (itemData.type === FieldType.TABLE) {
       newItem.columns = DEFAULT_TABLE_COLUMNS
       newItem.data = DEFAULT_TABLE_DATA
       newItem.width = 300
@@ -104,10 +96,8 @@ const DesignerPage = () => {
     }
     const newPlaced = [...designer.placed, newItem]
     designer.setPlaced(newPlaced)
-    // Optionally: update history
   }
 
-  // Move/resize handlers
   const handleItemMouseDown = (e: React.MouseEvent, item: PlacedField) => {
     e.stopPropagation()
     const rect = designer.canvasRef.current?.getBoundingClientRect()
@@ -237,9 +227,24 @@ const DesignerPage = () => {
     }
   }
 
+  const handleOrientationChange = (orientation: Orientation) => {
+    const isPortrait = orientation === Orientation.PORTRAIT
+    const size = PAGE_SIZES[designer.PageSize as keyof typeof PAGE_SIZES] || PAGE_SIZES.A4
+    designer.setCanvasWidth(isPortrait ? size.width : size.height)
+    designer.setCanvasHeight(isPortrait ? size.height : size.width)
+    designer.setOrientation(orientation)
+  }
+
+  const handlePageSizeChange = (sizeKey: string) => {
+    const size = PAGE_SIZES[sizeKey as keyof typeof PAGE_SIZES] || PAGE_SIZES.A4
+    designer.setCanvasWidth(size.width)
+    designer.setCanvasHeight(size.height)
+    designer.setPageSize(sizeKey)
+  }
+
   return (
-    <div
-      style={{ width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex' }}
+    <Card
+      style={{ height: '100vh', overflow: 'hidden', display: 'flex' }}
       onMouseMove={e => {
         handleMouseMove(e)
         handleResizeMouseMove(e)
@@ -266,18 +271,18 @@ const DesignerPage = () => {
         historyLength={designer.history.length}
         exportTemplate={() => {}}
         importTemplate={() => {}}
-        setPageSize={() => {}}
-        pageSize={'A4'}
+        setPageSize={handlePageSizeChange}
+        pageSize={designer.PageSize}
         PAGE_SIZES={PAGE_SIZES}
         customWidth={designer.canvasWidth}
         setCustomWidth={designer.setCanvasWidth}
         customHeight={designer.canvasHeight}
         setCustomHeight={designer.setCanvasHeight}
-        orientation={'portrait'}
-        setOrientation={() => {}}
+        orientation={designer.orientation}
+        setOrientation={handleOrientationChange}
         templateName={designer.templateName}
         setTemplateName={designer.setTemplateName}
-        saveTemplate={() => {}}
+        saveTemplate={() => console.log(designer.placed)}
       />
       <DesignerCanvas
         placed={designer.placed}
@@ -298,7 +303,6 @@ const DesignerPage = () => {
         onMouseLeave={handleMouseUp}
         setHoveredItem={designer.setHoveredItem}
         updateTextContent={(id, content) => {
-          // For table header editing, id is `${tableId}_table_columns` and content is JSON string
           if (id.endsWith('_table_columns')) {
             const tableId = id.replace('_table_columns', '')
             designer.setPlaced(p =>
@@ -341,7 +345,7 @@ const DesignerPage = () => {
           designer.setPlaced(p => p.filter(item => item.id !== id))
         }}
       />
-    </div>
+    </Card>
   )
 }
 

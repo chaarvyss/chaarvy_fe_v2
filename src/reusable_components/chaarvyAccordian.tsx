@@ -8,6 +8,7 @@ interface ChaarvyAccordianProps {
   expandIcon?: React.ReactNode
   isExpanded?: boolean
   title: string
+  onToggle?: () => void
 }
 
 const ChaarvyAccordian = ({ children, expandIcon, isExpanded, title }: ChaarvyAccordianProps) => {
