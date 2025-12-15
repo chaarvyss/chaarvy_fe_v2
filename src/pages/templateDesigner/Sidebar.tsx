@@ -6,8 +6,6 @@ interface SidebarProps {
   showSidebar: boolean
   setShowSidebar: (show: boolean) => void
   handleDragStart: (e: React.DragEvent, item: Field) => void
-  fileInputRef: React.RefObject<HTMLInputElement>
-  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
   undo: () => void
   redo: () => void
   historyIndex: number
@@ -39,7 +37,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   showSidebar,
   setShowSidebar,
   handleDragStart,
-  fileInputRef,
   undo,
   redo,
   historyIndex,
@@ -277,13 +274,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           >
             🖼️
           </div>
-          <div
-            title='Upload'
-            style={{ fontSize: 20, cursor: 'pointer', padding: 8, borderRadius: 4, background: '#f9f9f9' }}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            📁
-          </div>
+
           <hr style={{ width: '80%', border: 'none', borderTop: '1px solid #ddd' }} />
           <div
             title='Undo'

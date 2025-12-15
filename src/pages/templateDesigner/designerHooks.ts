@@ -36,7 +36,6 @@ export function useDesignerState() {
   const [canvasHeight, setCanvasHeight] = useState(1123)
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [PageSize, setPageSize] = useState('A4')
 
@@ -73,7 +72,6 @@ export function useDesignerState() {
     hoveredItem,
     setHoveredItem,
     canvasRef,
-    fileInputRef,
     PageSize,
     setPageSize
   }

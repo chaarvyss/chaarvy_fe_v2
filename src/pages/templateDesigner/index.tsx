@@ -9,6 +9,7 @@ import { AVAILABLE_ITEMS, DEFAULT_SIZES, DEFAULT_TABLE_COLUMNS, DEFAULT_TABLE_DA
 import { Field, PlacedField } from './types'
 import { FieldType, Orientation } from './enums'
 import { Card } from '@muiElements'
+import { fileToBase64 } from 'src/utils/helpers'
 
 const DesignerPage = () => {
   const designer = useDesignerState()
@@ -242,6 +243,16 @@ const DesignerPage = () => {
     designer.setPageSize(sizeKey)
   }
 
+  const onFileUpload = ({ file, item }: { file: File; item: PlacedField }) => {
+    fileToBase64(file)
+      .then(base64 => {
+        designer.setPlaced(p => p.map(plcItem => (plcItem.id === item.id ? { ...plcItem, imageUrl: base64 } : plcItem)))
+      })
+      .catch(error => {
+        console.error('Error converting file to base64:', error)
+      })
+  }
+
   return (
     <Card
       style={{ height: '100vh', overflow: 'hidden', display: 'flex' }}
@@ -263,8 +274,6 @@ const DesignerPage = () => {
         showSidebar={showSidebar}
         setShowSidebar={setShowSidebar}
         handleDragStart={handleDragStart}
-        fileInputRef={designer.fileInputRef}
-        handleImageUpload={() => {}}
         undo={() => {}}
         redo={() => {}}
         historyIndex={designer.historyIndex}
@@ -294,6 +303,7 @@ const DesignerPage = () => {
         zoom={designer.zoom}
         canvasWidth={designer.canvasWidth}
         canvasHeight={designer.canvasHeight}
+        handleImageUpload={onFileUpload}
         hoveredItem={designer.hoveredItem}
         onItemClick={(e, item) => designer.setSelectedItem(item.id)}
         onItemMouseDown={handleItemMouseDown}

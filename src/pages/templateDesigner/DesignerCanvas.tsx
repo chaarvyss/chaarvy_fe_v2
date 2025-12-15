@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react'
 import { PlacedField } from './types'
 import { FieldType, ShapeType } from './enums'
+import EditableImage from 'src/reusable_components/editableImage'
+import { fileToBase64 } from 'src/utils/helpers'
 
 interface DesignerCanvasProps {
   placed: PlacedField[]
@@ -12,6 +14,7 @@ interface DesignerCanvasProps {
   zoom: number
   canvasWidth: number
   canvasHeight: number
+  handleImageUpload: ({ file, item }: { file: File; item: PlacedField }) => void
   hoveredItem: string | null
   onItemClick: (e: React.MouseEvent, item: PlacedField) => void
   onItemMouseDown: (e: React.MouseEvent, item: PlacedField) => void
@@ -35,6 +38,7 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
   zoom,
   canvasWidth,
   canvasHeight,
+  handleImageUpload,
   hoveredItem,
   onItemClick,
   onItemMouseDown,
@@ -157,54 +161,12 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
-          <img
-            src={p.imageUrl}
-            alt='Placed'
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              display: 'block'
-            }}
-          />
-
-          {/* Hover overlay */}
-          {hovered && (
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'rgba(0,0,0,0.35)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <span
-                onClick={() => fileInputRef.current?.click()}
-                style={{
-                  fontSize: '24px',
-                  color: '#fff',
-                  cursor: 'pointer'
-                }}
-                title='Upload image'
-              >
-                📷
-              </span>
-            </div>
-          )}
-
-          {/* Hidden input */}
-          <input
-            ref={fileInputRef}
-            type='file'
-            accept='image/*'
-            style={{ display: 'none' }}
-            onChange={e => {
-              const file = e.target.files?.[0]
-              if (file) {
-                console.log(file)
-              }
+          <EditableImage
+            src={p.imageUrl || ''}
+            width={p.width || 100}
+            height={p.height || 100}
+            onUpload={async file => {
+              handleImageUpload({ file, item: p })
             }}
           />
         </div>
