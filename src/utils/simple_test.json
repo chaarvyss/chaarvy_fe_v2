@@ -122,6 +122,24 @@
       "shapeType": "line",
       "width": 773,
       "height": 1
+    },
+    {
+      "id": "table_1",
+      "type": "table",
+      "x": 32,
+      "y": 300,
+      "width": 730,
+      "height": 100,
+      "columns": [
+        { "header": "Subject", "dataKey": "subject" },
+        { "header": "Marks", "dataKey": "marks" },
+        { "header": "Grade", "dataKey": "grade" }
+      ],
+      "data": "progressTableData",
+      "tableOptions": {
+        "styles": { "fontSize": 12 },
+        "headStyles": { "fillColor": [41, 128, 185] }
+      }
     }
   ]
 }

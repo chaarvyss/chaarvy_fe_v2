@@ -1,10 +1,11 @@
 import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import { pxToMm, urlToBase64, groupFieldsByPage } from '../utils/helpers'
 import { PAGE_SIZES, NAMED_COLORS } from '../utils/constants'
 
 export interface PlacedField {
   id: string
-  type: 'text' | 'field' | 'shape' | 'image'
+  type: 'text' | 'field' | 'shape' | 'image' | 'table'
   fieldKey?: string
   content?: string
   shapeType?: 'rectangle' | 'circle' | 'line'
@@ -24,6 +25,26 @@ export interface PlacedField {
   borderWidth?: number
   borderColor?: string
   rotation?: number
+}
+
+// Table field interface extension (optional, for clarity)
+export interface TableField extends PlacedField {
+  columns: Array<{ header: string; dataKey: string }>
+  data: Array<Record<string, any>>
+  tableOptions?: Record<string, any>
+}
+
+// Table rendering helper
+function drawTable(pdf: jsPDF, field: TableField, xMm: number, yMm: number, widthMm: number) {
+  // Use autoTable plugin
+  autoTable(pdf, {
+    startY: yMm,
+    margin: { left: xMm, right: xMm },
+    tableWidth: widthMm,
+    head: [field.columns.map(col => col.header)],
+    body: field.data.map(row => field.columns.map(col => row[col.dataKey])),
+    ...field.tableOptions
+  })
 }
 
 function getPageDimensions(template: any) {
@@ -135,17 +156,11 @@ function drawShape(pdf: jsPDF, field: PlacedField, xMm: number, yMm: number, wid
 }
 
 async function drawImage(pdf: jsPDF, field: PlacedField, xMm: number, yMm: number, widthMm: number, heightMm: number) {
-  if (!field.imageUrl) {
-    console.warn('No imageUrl provided for field', field)
-    return
-  }
+  if (!field.imageUrl) return
   try {
     let imageData = field.imageUrl
     if (!imageData.startsWith('data:image')) {
       imageData = await urlToBase64(field.imageUrl)
-      console.debug('Converted image URL to base64:', imageData.slice(0, 50) + '...')
-    } else {
-      console.debug('Using base64 image data directly.')
     }
     let format: 'PNG' | 'JPEG' | 'WEBP' = 'PNG'
     if (imageData.startsWith('data:image/jpeg') || imageData.startsWith('data:image/jpg')) {
@@ -163,47 +178,9 @@ async function drawImage(pdf: jsPDF, field: PlacedField, xMm: number, yMm: numbe
         format = 'PNG'
       }
     }
-
-    let finalImageData = imageData
-    if (field.opacity !== undefined && field.opacity < 100) {
-      console.debug('Processing image for opacity:', field.opacity)
-      const img = new window.Image()
-      img.crossOrigin = 'Anonymous'
-      const imgLoadPromise = new Promise<HTMLImageElement>((resolve, reject) => {
-        img.onload = () => {
-          console.debug('Image loaded for opacity processing:', field.imageUrl)
-          resolve(img)
-        }
-        img.onerror = e => {
-          console.error('Image failed to load for opacity processing:', field.imageUrl, e)
-          reject(e)
-        }
-      })
-      img.src = imageData
-      try {
-        const loadedImg = await imgLoadPromise
-        const canvas = document.createElement('canvas')
-        canvas.width = loadedImg.width
-        canvas.height = loadedImg.height
-        const ctx = canvas.getContext('2d')
-        if (ctx) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height)
-          ctx.globalAlpha = field.opacity / 100
-          ctx.drawImage(loadedImg, 0, 0)
-          finalImageData = canvas.toDataURL()
-          console.debug('Canvas image processed with opacity.')
-        } else {
-          console.error('Failed to get 2D context for canvas.')
-        }
-      } catch (imgErr) {
-        console.error('Image load promise failed:', imgErr)
-        // fallback: use original imageData
-      }
-    }
-    pdf.addImage(finalImageData, format, xMm, yMm, widthMm, heightMm)
-    console.debug('Image added to PDF:', { format, xMm, yMm, widthMm, heightMm })
+    pdf.addImage(imageData, format, xMm, yMm, widthMm, heightMm)
   } catch (error) {
-    console.error('Error in drawImage:', error, field)
+    // fail silently
   }
 }
 
@@ -243,6 +220,8 @@ export async function generateAndDownloadPDF(
         drawShape(pdf, field, xMm, yMm, widthMm, heightMm)
       } else if (field.type === 'image') {
         await drawImage(pdf, field, xMm, yMm, widthMm, heightMm)
+      } else if (field.type === 'table') {
+        drawTable(pdf, field as TableField, xMm, yMm, widthMm)
       }
     }
   }
