@@ -3,14 +3,11 @@
 import { Field } from './types'
 
 export const AVAILABLE_ITEMS: Field[] = [
-  { key: 'name', type: 'field', label: 'Name' },
-  { key: 'email', type: 'field', label: 'Email' },
   { key: 'text', type: 'shape', label: 'Text' },
   { key: 'rectangle', type: 'shape', label: 'Rectangle' },
   { key: 'circle', type: 'shape', label: 'Circle' },
   { key: 'line', type: 'shape', label: 'Line' },
-  { key: 'image', type: 'image', label: 'Image' },
-  { key: 'table', type: 'table', label: 'Table' }
+  { key: 'image', type: 'image', label: 'Image' }
 ]
 
 export const DEFAULT_SIZES = {
@@ -20,16 +17,6 @@ export const DEFAULT_SIZES = {
   line: { width: 200, height: 2 },
   image: { width: 120, height: 80 }
 }
-
-export const DEFAULT_TABLE_COLUMNS = [
-  { header: 'Column 1', dataKey: 'col2' },
-  { header: 'Column 2', dataKey: 'col1' }
-]
-
-export const DEFAULT_TABLE_DATA = [
-  { col1: 'Row 1, Col 1', col2: 'Row 1, Col 2' },
-  { col1: 'Row 2, Col 1', col2: 'Row 2, Col 2' }
-]
 
 export const PAGE_SIZES = {
   A4: { label: 'A4 (210 × 297 mm)', width: 794, height: 1123 },

@@ -27,6 +27,7 @@ interface DesignerCanvasProps {
   deleteItem: (id: string) => void
   renderPlacedItem: (p: PlacedField) => React.ReactNode
   onDrop: (e: React.DragEvent) => void
+  setSelectedItem: (id: string | null) => void
 }
 
 const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
@@ -48,7 +49,8 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
   setHoveredItem,
   updateTextContent,
   setEditingItem,
-  onDrop
+  onDrop,
+  setSelectedItem
 }) => {
   const [colResize, setColResize] = React.useState<{
     tableId: string
@@ -255,7 +257,7 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                       }}
                     >
                       {col.header} <br />
-                      <span style={{ fontSize: 10, color: '#888' }}>{col.dataKey}</span>
+                      <span style={{ fontSize: 10, color: '#888' }}>Data key: {col.dataKey}</span>
                     </span>
                   )}
                   {/* Resizer handle */}
@@ -334,6 +336,7 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
         onClick={e => {
           if (e.target === e.currentTarget) {
             setEditingItem(null)
+            setSelectedItem(null)
           }
         }}
       >

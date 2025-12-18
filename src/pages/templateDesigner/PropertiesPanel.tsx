@@ -1,5 +1,6 @@
 import React from 'react'
 import { PlacedField } from './types'
+import Typography from '@mui/material/Typography'
 
 interface PropertiesPanelProps {
   selectedItem: string | null
@@ -13,6 +14,8 @@ interface PropertiesPanelProps {
 }
 
 import { FONT_FAMILIES, FONT_WEIGHTS } from './constants'
+import { Card } from '@muiElements'
+import { Button, Grid, TextField } from '@mui/material'
 
 const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   selectedItem,
@@ -26,13 +29,15 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   if (!item) return null
 
   return (
-    <div style={{ width: 280, maxHeight: '90vh', overflowY: 'auto', borderLeft: '1px solid #ddd', paddingLeft: 20 }}>
-      <h3 style={{ marginTop: 0 }}>Properties</h3>
+    <Card sx={{ maxHeight: '90vh', overflowY: 'auto', borderLeft: '1px solid #ddd', padding: '20px' }}>
+      <Typography variant='h6' style={{ marginTop: 0 }}>
+        Properties
+      </Typography>
 
       <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+        <Typography style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
           Position X
-        </label>
+        </Typography>
         <input
           type='number'
           value={Math.round(item.x)}
@@ -40,10 +45,10 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
         />
       </div>
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+      <div style={{ marginBottom: 16, gap: 8 }}>
+        <Typography style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
           Position Y
-        </label>
+        </Typography>
         <input
           type='number'
           value={Math.round(item.y)}
@@ -54,105 +59,70 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
       {/* Table Column Editing UI */}
       {item.type === 'table' && (
-        <div style={{ marginBottom: 24 }}>
-          <h4 style={{ margin: '16px 0 8px 0', fontSize: 15 }}>Table Columns</h4>
+        <div style={{ gap: 16, marginBottom: 16 }}>
+          <Typography variant='body1'>Table Columns</Typography>
           {item.columns && item.columns.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {item.columns?.map((col, idx) => (
-                <div key={col.dataKey} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <input
-                    type='text'
-                    value={col.header}
-                    onChange={e => {
-                      const newColumns = item.columns!.map((c, i) => (i === idx ? { ...c, header: e.target.value } : c))
-                      updateItemProperty(item.id, 'columns', newColumns)
-                    }}
-                    style={{ flex: 2, padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                    placeholder='Header'
-                  />
-                  <input
-                    type='text'
-                    value={col.dataKey}
-                    onChange={e => {
-                      const newKey = e.target.value.replace(/\s+/g, '_')
-                      if (!item.columns!.some((c, i) => i !== idx && c.dataKey === newKey)) {
-                        const newColumns = item.columns!.map((c, i) => (i === idx ? { ...c, dataKey: newKey } : c))
+            <div>
+              {item.columns.map((col, idx) => (
+                <Grid container key={col.dataKey} spacing={1} alignItems='center' sx={{ mb: 1 }}>
+                  {/* Header */}
+                  <Grid item xs={5}>
+                    <TextField
+                      type='text'
+                      value={col.header}
+                      onChange={e => {
+                        const newColumns = item.columns!.map((c, i) =>
+                          i === idx ? { ...c, header: e.target.value } : c
+                        )
                         updateItemProperty(item.id, 'columns', newColumns)
-                      }
-                    }}
-                    style={{ flex: 2, padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                    placeholder='Data Key'
-                  />
-                  <button
-                    onClick={() => {
-                      const newColumns = item.columns!.filter((_, i) => i !== idx)
-                      updateItemProperty(item.id, 'columns', newColumns)
-                    }}
-                    style={{
-                      flex: 0,
-                      background: '#f44336',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: 4,
-                      padding: '4px 8px',
-                      cursor: 'pointer'
-                    }}
-                    title='Delete column'
-                  >
-                    ×
-                  </button>
-                  {idx > 0 && (
-                    <button
+                      }}
+                      fullWidth
+                      placeholder='Header'
+                      variant='outlined'
+                      size='small'
+                    />
+                  </Grid>
+
+                  {/* Data Key */}
+                  <Grid item xs={5}>
+                    <TextField
+                      type='text'
+                      value={col.dataKey}
+                      onChange={e => {
+                        const newKey = e.target.value.replace(/\s+/g, '_')
+                        if (!item.columns!.some((c, i) => i !== idx && c.dataKey === newKey)) {
+                          const newColumns = item.columns!.map((c, i) => (i === idx ? { ...c, dataKey: newKey } : c))
+                          updateItemProperty(item.id, 'columns', newColumns)
+                        }
+                      }}
+                      placeholder='Data Key'
+                      variant='outlined'
+                      size='small'
+                    />
+                  </Grid>
+
+                  {/* Delete */}
+                  <Grid item xs={1} textAlign='right'>
+                    <Button
                       onClick={() => {
-                        const newColumns = [...item.columns!]
-                        const temp = newColumns[idx - 1]
-                        newColumns[idx - 1] = newColumns[idx]
-                        newColumns[idx] = temp
+                        const newColumns = item.columns!.filter((_, i) => i !== idx)
                         updateItemProperty(item.id, 'columns', newColumns)
                       }}
-                      style={{
-                        flex: 0,
-                        background: '#eee',
-                        border: 'none',
-                        borderRadius: 4,
-                        padding: '4px 8px',
-                        cursor: 'pointer'
-                      }}
-                      title='Move left'
+                      title='Delete column'
+                      variant='contained'
+                      color='error'
+                      size='small'
                     >
-                      ←
-                    </button>
-                  )}
-                  {item.columns && idx < item.columns.length - 1 && (
-                    <button
-                      onClick={() => {
-                        // Move column right
-                        const newColumns = [...item.columns!]
-                        const temp = newColumns[idx + 1]
-                        newColumns[idx + 1] = newColumns[idx]
-                        newColumns[idx] = temp
-                        updateItemProperty(item.id, 'columns', newColumns)
-                      }}
-                      style={{
-                        flex: 0,
-                        background: '#eee',
-                        border: 'none',
-                        borderRadius: 4,
-                        padding: '4px 8px',
-                        cursor: 'pointer'
-                      }}
-                      title='Move right'
-                    >
-                      →
-                    </button>
-                  )}
-                </div>
+                      ×
+                    </Button>
+                  </Grid>
+                </Grid>
               ))}
             </div>
           )}
-          <button
+
+          <Button
             onClick={() => {
-              // Add new column with unique dataKey
               const baseKey = `col${(item.columns?.length || 0) + 1}`
               let newKey = baseKey
               let i = 1
@@ -160,25 +130,21 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 i++
                 newKey = `${baseKey}_${i}`
               }
+
               const newColumns = [
                 ...(item.columns || []),
-                { header: `Column ${item.columns ? item.columns.length + 1 : 1}`, dataKey: newKey }
+                {
+                  header: `Column ${(item.columns?.length || 0) + 1}`,
+                  dataKey: newKey
+                }
               ]
               updateItemProperty(item.id, 'columns', newColumns)
             }}
-            style={{
-              marginTop: 10,
-              background: '#2196F3',
-              color: 'white',
-              border: 'none',
-              borderRadius: 4,
-              padding: '6px 12px',
-              cursor: 'pointer',
-              width: '100%'
-            }}
+            fullWidth
+            sx={{ mt: 2 }}
           >
             + Add Column
-          </button>
+          </Button>
         </div>
       )}
 
@@ -347,7 +313,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           Delete Item
         </button>
       </div>
-    </div>
+    </Card>
   )
 }
 

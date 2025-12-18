@@ -1,18 +1,68 @@
-import React, { DragEvent, useEffect, useState } from 'react'
+import React, { DragEvent, useEffect, useMemo, useState } from 'react'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 import { useDesignerState } from './designerHooks'
 import DesignerCanvas from './DesignerCanvas'
 import Sidebar from './Sidebar'
 import PropertiesPanel from './PropertiesPanel'
 
-import { AVAILABLE_ITEMS, DEFAULT_SIZES, DEFAULT_TABLE_COLUMNS, DEFAULT_TABLE_DATA, PAGE_SIZES } from './constants'
+import { AVAILABLE_ITEMS, DEFAULT_SIZES, PAGE_SIZES } from './constants'
 import { Field, PlacedField } from './types'
 import { FieldType, Orientation } from './enums'
 import { Card } from '@muiElements'
 import { fileToBase64 } from 'src/utils/helpers'
 
 const DesignerPage = () => {
+  // Need to get from api
+  const DEFAULT_TABLE_COLUMNS = [
+    { header: 'Column 1', dataKey: 'col2' },
+    { header: 'Column 2', dataKey: 'col1' }
+  ]
+
+  /*
+  in the above DEFAULT_TABLE_COLUMNS, 
+  header is the display name of the column
+  dataKey is the key in the data object for that column
+  note: datakey must match with data from api
+  */
+
+  // Need to get from api
+  const AVAILABLE_FIELDS: Field[] = [
+    {
+      key: 'name',
+      type: 'field',
+      label: 'Name'
+    },
+    {
+      key: 'email',
+      type: 'field',
+      label: 'Email'
+    }
+  ]
+
+  // TODO: Need to add a provision to see how the data looks like in table
+  const DEFAULT_TABLE_DATA = []
+
+  // TODO: NEED TO GET FROM API OR DYNAMIC
+
+  const availableTemplates = {
+    admission_v1: {
+      label: 'Admission Template',
+      placedFields: []
+    },
+    invoice_v2: {
+      label: 'Invoice Template',
+      placedFields: []
+    }
+  }
+
   const designer = useDesignerState()
+
+  const FilteredAvailableItems = useMemo(() => {
+    if (DEFAULT_TABLE_COLUMNS.length > 0) {
+      return [...AVAILABLE_ITEMS, { key: 'table', type: 'table', label: 'Table' }]
+    }
+    return AVAILABLE_ITEMS
+  }, [DEFAULT_TABLE_COLUMNS])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -270,12 +320,12 @@ const DesignerPage = () => {
       }}
     >
       <Sidebar
-        availableItems={AVAILABLE_ITEMS}
+        availableItems={FilteredAvailableItems}
+        availableFields={AVAILABLE_FIELDS}
+        availableTemplates={availableTemplates}
         showSidebar={showSidebar}
         setShowSidebar={setShowSidebar}
         handleDragStart={handleDragStart}
-        undo={() => {}}
-        redo={() => {}}
         historyIndex={designer.historyIndex}
         historyLength={designer.history.length}
         exportTemplate={() => {}}
@@ -306,6 +356,7 @@ const DesignerPage = () => {
         handleImageUpload={onFileUpload}
         hoveredItem={designer.hoveredItem}
         onItemClick={(e, item) => designer.setSelectedItem(item.id)}
+        setSelectedItem={designer.setSelectedItem}
         onItemMouseDown={handleItemMouseDown}
         onResizeMouseDown={handleResizeMouseDown}
         onMouseMove={handleMouseMove}

@@ -1,13 +1,20 @@
-import React, { useState } from 'react'
-import { Field } from './types'
+import React from 'react'
+import { Field, PlacedField } from './types'
+
+interface AvailableTemplate {
+  label: string
+  placedFields: PlacedField[]
+}
+
+type AvailableTemplates = Record<string, AvailableTemplate>
 
 interface SidebarProps {
   availableItems: Field[]
+  availableFields: Field[]
+  availableTemplates?: AvailableTemplates
   showSidebar: boolean
   setShowSidebar: (show: boolean) => void
   handleDragStart: (e: React.DragEvent, item: Field) => void
-  undo: () => void
-  redo: () => void
   historyIndex: number
   historyLength: number
   exportTemplate: () => void
@@ -29,18 +36,17 @@ interface SidebarProps {
 import { PAGE_SIZES } from './constants'
 import ChaarvyAccordian from 'src/reusable_components/chaarvyAccordian'
 import { Card } from '@muiElements'
-import { Tooltip } from '@mui/material'
+import { Tooltip, Typography } from '@mui/material'
 import { Orientation } from './enums'
+import DropDownMenu from 'src/reusable_components/dropDownMenu'
 
 const Sidebar: React.FC<SidebarProps> = ({
   availableItems,
+  availableFields,
+  availableTemplates,
   showSidebar,
   setShowSidebar,
   handleDragStart,
-  undo,
-  redo,
-  historyIndex,
-  historyLength,
   exportTemplate,
   importTemplate,
   setPageSize,
@@ -55,6 +61,18 @@ const Sidebar: React.FC<SidebarProps> = ({
   setTemplateName,
   saveTemplate
 }) => {
+  ;[{ id: 'option1', label: 'Option 1', onOptionClick: () => console.log('Option 1 clicked') }]
+
+  const options = availableTemplates
+    ? Object.entries(availableTemplates).map(([key, template]) => ({
+        id: key,
+        label: template.label,
+        onOptionClick: () => {
+          console.log(`Template ${key} selected`)
+        }
+      }))
+    : []
+
   return (
     <div
       style={{
@@ -89,62 +107,73 @@ const Sidebar: React.FC<SidebarProps> = ({
       </button>
       {showSidebar ? (
         <>
-          <h3 style={{ marginTop: 0 }}>Elements</h3>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 16,
+              marginTop: 16
+            }}
+          >
+            <Typography variant='h5' gutterBottom>
+              Elements
+            </Typography>
+            <Tooltip title='Available Templates' placement='left'>
+              <DropDownMenu dropDownMenuOptions={options} />
+            </Tooltip>
+          </div>
           <ChaarvyAccordian title='Fields'>
-            {availableItems
-              .filter(f => f.type === 'field')
-              .map(f => (
-                <Card
-                  key={f.key}
-                  draggable
-                  onDragStart={e => handleDragStart(e, f)}
-                  style={{
-                    padding: 8,
-                    border: '1px solid #ddd',
-                    marginBottom: 8,
-                    cursor: 'grab',
-                    background: '#f9f9f9',
-                    borderRadius: 4
-                  }}
-                >
-                  {f.label}
-                </Card>
-              ))}
+            {availableFields.map(f => (
+              <Card
+                key={f.key}
+                draggable
+                onDragStart={e => handleDragStart(e, f)}
+                style={{
+                  padding: 8,
+                  border: '1px solid #ddd',
+                  marginBottom: 8,
+                  cursor: 'grab',
+                  background: '#f9f9f9',
+                  borderRadius: 4
+                }}
+              >
+                {f.label}
+              </Card>
+            ))}
           </ChaarvyAccordian>
           <ChaarvyAccordian title='Shapes'>
             <Card style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-              {availableItems
-                .filter(f => f.type === 'shape' || f.type === 'table' || f.key === 'image')
-                .map(f => (
-                  <Tooltip placement='top' title={f.label}>
-                    <Card
-                      key={f.key}
-                      draggable
-                      onDragStart={e => handleDragStart(e, f)}
-                      style={{
-                        cursor: 'grab',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flex: 1,
-                        borderRadius: 4,
-                        minHeight: 50,
-                        gap: 4,
-                        fontWeight: f.type === 'table' ? 500 : undefined
-                      }}
-                    >
-                      {f.key === 'text' && <span style={{ fontSize: 16, color: '#333', fontWeight: '500' }}>abc</span>}
-                      {f.key === 'rectangle' && <div style={{ width: 20, height: 14, border: '2px solid #333' }} />}
-                      {f.key === 'circle' && (
-                        <div style={{ width: 18, height: 18, border: '2px solid #333', borderRadius: '50%' }} />
-                      )}
-                      {f.key === 'line' && <div style={{ width: 24, height: 2, background: '#333' }} />}
-                      {f.type === 'table' && <span style={{ fontSize: 16 }}>📋</span>}
-                      {f.key === 'image' && <span style={{ fontSize: 16 }}>🖼️</span>}
-                    </Card>
-                  </Tooltip>
-                ))}
+              {availableItems.map(f => (
+                <Tooltip placement='top' title={f.label}>
+                  <Card
+                    key={f.key}
+                    draggable
+                    onDragStart={e => handleDragStart(e, f)}
+                    style={{
+                      cursor: 'grab',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flex: 1,
+                      borderRadius: 4,
+                      minHeight: 50,
+                      gap: 4,
+                      fontWeight: f.type === 'table' ? 500 : undefined
+                    }}
+                  >
+                    {f.key === 'text' && <span style={{ fontSize: 16, color: '#333', fontWeight: '500' }}>abc</span>}
+                    {f.key === 'rectangle' && <div style={{ width: 20, height: 14, border: '2px solid #333' }} />}
+                    {f.key === 'circle' && (
+                      <div style={{ width: 18, height: 18, border: '2px solid #333', borderRadius: '50%' }} />
+                    )}
+                    {f.key === 'line' && <div style={{ width: 24, height: 2, background: '#333' }} />}
+                    {f.type === 'table' && <span style={{ fontSize: 16 }}>📋</span>}
+                    {f.key === 'image' && <span style={{ fontSize: 16 }}>🖼️</span>}
+                  </Card>
+                </Tooltip>
+              ))}
             </Card>
           </ChaarvyAccordian>
 
@@ -255,84 +284,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, paddingTop: 50 }}>
-          <div
-            title='Fields'
-            style={{ fontSize: 20, cursor: 'pointer', padding: 8, borderRadius: 4, background: '#f9f9f9' }}
-          >
-            📝
-          </div>
-          <div
-            title='Shapes'
-            style={{ fontSize: 20, cursor: 'pointer', padding: 8, borderRadius: 4, background: '#f9f9f9' }}
-          >
-            ▢
-          </div>
-          <div
-            title='Images'
-            style={{ fontSize: 20, cursor: 'pointer', padding: 8, borderRadius: 4, background: '#f9f9f9' }}
-          >
-            🖼️
-          </div>
-
-          <hr style={{ width: '80%', border: 'none', borderTop: '1px solid #ddd' }} />
-          <div
-            title='Undo'
-            onClick={undo}
-            style={{
-              fontSize: 20,
-              cursor: historyIndex === 0 ? 'not-allowed' : 'pointer',
-              padding: 8,
-              borderRadius: 4,
-              background: historyIndex === 0 ? '#e0e0e0' : '#f9f9f9',
-              opacity: historyIndex === 0 ? 0.5 : 1
-            }}
-          >
-            ↶
-          </div>
-          <div
-            title='Redo'
-            onClick={redo}
-            style={{
-              fontSize: 20,
-              cursor: historyIndex >= historyLength - 1 ? 'not-allowed' : 'pointer',
-              padding: 8,
-              borderRadius: 4,
-              background: historyIndex >= historyLength - 1 ? '#e0e0e0' : '#f9f9f9',
-              opacity: historyIndex >= historyLength - 1 ? 0.5 : 1
-            }}
-          >
-            ↷
-          </div>
-          <div
-            title='Export'
-            onClick={exportTemplate}
-            style={{
-              fontSize: 20,
-              cursor: 'pointer',
-              padding: 8,
-              borderRadius: 4,
-              background: '#4CAF50',
-              color: 'white'
-            }}
-          >
-            💾
-          </div>
-          <div
-            title='Import'
-            onClick={() => document.getElementById('import-input')?.click()}
-            style={{
-              fontSize: 20,
-              cursor: 'pointer',
-              padding: 8,
-              borderRadius: 4,
-              background: '#FF9800',
-              color: 'white'
-            }}
-          >
-            📂
-          </div>
-        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, paddingTop: 50 }}></div>
       )}
     </div>
   )
