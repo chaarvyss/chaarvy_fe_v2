@@ -21,7 +21,6 @@ const EditableImage: React.FC<EditableImageProps> = ({ src, width, height, onUpl
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Image */}
       <img
         src={src}
         alt='Placed'
@@ -33,7 +32,6 @@ const EditableImage: React.FC<EditableImageProps> = ({ src, width, height, onUpl
         }}
       />
 
-      {/* Hover overlay */}
       {hovered && (
         <div
           style={{
@@ -59,7 +57,6 @@ const EditableImage: React.FC<EditableImageProps> = ({ src, width, height, onUpl
         </div>
       )}
 
-      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type='file'

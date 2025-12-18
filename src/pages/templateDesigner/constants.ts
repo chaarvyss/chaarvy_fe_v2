@@ -22,8 +22,8 @@ export const DEFAULT_SIZES = {
 }
 
 export const DEFAULT_TABLE_COLUMNS = [
-  { header: 'Column 1', dataKey: 'col1' },
-  { header: 'Column 2', dataKey: 'col2' }
+  { header: 'Column 1', dataKey: 'col2' },
+  { header: 'Column 2', dataKey: 'col1' }
 ]
 
 export const DEFAULT_TABLE_DATA = [

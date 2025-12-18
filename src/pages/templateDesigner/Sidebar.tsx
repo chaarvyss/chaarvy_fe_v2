@@ -26,7 +26,7 @@ interface SidebarProps {
   saveTemplate: () => void
 }
 
-import { PAGE_SIZES, FONT_FAMILIES, FONT_WEIGHTS } from './constants'
+import { PAGE_SIZES } from './constants'
 import ChaarvyAccordian from 'src/reusable_components/chaarvyAccordian'
 import { Card } from '@muiElements'
 import { Tooltip } from '@mui/material'

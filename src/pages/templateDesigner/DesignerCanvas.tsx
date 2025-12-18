@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import { PlacedField } from './types'
 import { FieldType, ShapeType } from './enums'
 import EditableImage from 'src/reusable_components/editableImage'
-import { fileToBase64 } from 'src/utils/helpers'
 
 interface DesignerCanvasProps {
   placed: PlacedField[]
@@ -89,6 +88,35 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
     }
   }, [colResize, placed])
 
+  const [editingColumn, setEditingColumn] = React.useState<{
+    tableId: string
+    colIdx: number
+    header: string
+    dataKey: string
+  } | null>(null)
+
+  const commitColumnEdit = () => {
+    if (!editingColumn) return
+
+    const table = placed.find(p => p.id === editingColumn.tableId)
+    if (!table || !table.columns) return
+
+    const newColumns = table.columns.map((c, i) =>
+      i === editingColumn.colIdx
+        ? {
+            ...c,
+            header: editingColumn.header,
+            dataKey: editingColumn.dataKey
+          }
+        : c
+    )
+
+    updateTextContent(`${editingColumn.tableId}_table_columns`, JSON.stringify(newColumns))
+
+    setEditingColumn(null)
+    setEditingItem(null)
+  }
+
   const renderItem = (p: PlacedField) => {
     if (p.type === FieldType.FIELD) {
       return (
@@ -172,7 +200,6 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
         </div>
       )
     } else if (p.type === FieldType.TABLE) {
-      // Store column widths in columns array (col.width)
       const columns = p.columns?.map(col => ({ ...col, width: col?.width || 100 }))
       return (
         <table style={{ borderCollapse: 'collapse', fontSize: 12 }}>
@@ -188,23 +215,47 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                     width: col.width
                   }}
                 >
-                  {editingItem === `${p.id}_col_${idx}` ? (
-                    <input
-                      autoFocus
-                      value={col.header}
-                      onChange={e => {
-                        const newColumns = columns.map((c, i) => (i === idx ? { ...c, header: e.target.value } : c))
-                        updateTextContent(`${p.id}_table_columns`, JSON.stringify(newColumns))
-                      }}
-                      onBlur={() => setEditingItem(null)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') setEditingItem(null)
-                      }}
-                      style={{ width: 80, border: '1px solid #2196F3', borderRadius: 4 }}
-                    />
+                  {editingItem === `${p.id}_col_${idx}` && editingColumn ? (
+                    <div onClick={e => e.stopPropagation()}>
+                      <input
+                        value={editingColumn.header}
+                        onChange={e => setEditingColumn(prev => (prev ? { ...prev, header: e.target.value } : prev))}
+                        style={{ width: 80 }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' || e.key === 'Escape') {
+                            commitColumnEdit()
+                          }
+                        }}
+                        onBlur={commitColumnEdit}
+                      />
+
+                      <input
+                        value={editingColumn.dataKey}
+                        onChange={e => setEditingColumn(prev => (prev ? { ...prev, dataKey: e.target.value } : prev))}
+                        style={{ width: 80 }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' || e.key === 'Escape') {
+                            commitColumnEdit()
+                          }
+                        }}
+                        onBlur={commitColumnEdit}
+                      />
+                    </div>
                   ) : (
-                    <span style={{ cursor: 'pointer' }} onDoubleClick={() => setEditingItem(`${p.id}_col_${idx}`)}>
-                      {col.header}
+                    <span
+                      style={{ cursor: 'pointer' }}
+                      onDoubleClick={() => {
+                        setEditingItem(`${p.id}_col_${idx}`)
+                        setEditingColumn({
+                          tableId: p.id,
+                          colIdx: idx,
+                          header: col.header,
+                          dataKey: col.dataKey
+                        })
+                      }}
+                    >
+                      {col.header} <br />
+                      <span style={{ fontSize: 10, color: '#888' }}>{col.dataKey}</span>
                     </span>
                   )}
                   {/* Resizer handle */}
@@ -228,7 +279,7 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
           <tbody>
             {(Array.isArray(p.data) ? p.data : []).map((row, i) => (
               <tr key={i}>
-                {columns?.map((col, idx) => (
+                {columns?.map(col => (
                   <td
                     key={col.dataKey}
                     style={{
@@ -269,6 +320,7 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
       onDragOver={e => e.preventDefault()}
     >
       <div
+        id='designer-canvas'
         style={{
           position: 'relative',
           width: canvasWidth,
@@ -278,6 +330,11 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
           transform: `scale(${zoom / 100})`,
           transformOrigin: 'top left',
           margin: 'auto'
+        }}
+        onClick={e => {
+          if (e.target === e.currentTarget) {
+            setEditingItem(null)
+          }
         }}
       >
         {placed.map(p => (
@@ -289,7 +346,7 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
               top: p.y,
               width: p.width,
               height: p.height,
-              border: selectedItem === p.id ? '2px solid #2196F3' : '1px dashed #ccc',
+              border: selectedItem === p.id ? '2px solid #2588daff' : '1px dashed #ccc',
               background: hoveredItem === p.id ? 'rgba(33, 150, 243, 0.05)' : 'transparent',
               zIndex: p.zIndex || 0,
               cursor: 'grab',
@@ -479,7 +536,7 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
                   top: 0,
                   bottom: 0,
                   width: 1,
-                  background: '#2196F3',
+                  background: '#1583deff',
                   pointerEvents: 'none',
                   zIndex: 1000
                 }}
