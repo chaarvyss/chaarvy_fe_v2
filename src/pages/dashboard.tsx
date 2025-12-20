@@ -1,9 +1,9 @@
+import { Paper, Typography } from '@mui/material'
 import React, { useState, useEffect } from 'react'
 import GridLayout from 'react-grid-layout'
+
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
-import { Paper, Typography } from '@mui/material'
-
 import Attendence from 'src/views/dashboardCards/attendence'
 import MyCalendar from 'src/views/dashboardCards/calendar'
 import Payments2 from 'src/views/dashboardCards/payments2'

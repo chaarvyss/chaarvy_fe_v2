@@ -1,3 +1,4 @@
+import { LoadingButton } from '@mui/lab'
 import {
   Box,
   CardContent,
@@ -8,8 +9,7 @@ import {
   Radio,
   RadioGroup,
   Select,
-  SelectChangeEvent,
-  Typography
+  SelectChangeEvent
 } from '@mui/material'
 import React, { ChangeEvent, useState, useEffect } from 'react'
 import DatePicker from 'react-datepicker'
@@ -34,8 +34,6 @@ import {
 } from 'src/store/services/listServices'
 import { convertDateStringToDate } from 'src/utils/helpers'
 
-import { LoadingButton } from '@mui/lab'
-
 import { AdmissionFormType } from '.'
 
 const TOP_LEVEL_ID = 'student-application-form'
@@ -48,11 +46,10 @@ const getLast10Years = (): number[] => {
 
 interface studentBaseDetailsProps {
   application_id?: string
-  onAdmissionCreation: (application_id: string) => void
   handleNext: (step: AdmissionFormType) => void
 }
 
-const StudentDetails = ({ application_id, onAdmissionCreation, handleNext }: studentBaseDetailsProps) => {
+const StudentDetails = ({ application_id, handleNext }: studentBaseDetailsProps) => {
   const [applicationDetails, setApplicationDetails] = useState<CreateStudentAdmissionRequest>()
   const [dob, setDob] = useState<Date>()
 
@@ -312,7 +309,7 @@ const StudentDetails = ({ application_id, onAdmissionCreation, handleNext }: stu
                   }
                 >
                   {(menuOptions ?? []).map(each => (
-                    <FormControlLabel value={each.value} control={<Radio />} label={each.label} />
+                    <FormControlLabel key={each.value} value={each.value} control={<Radio />} label={each.label} />
                   ))}
                 </RadioGroup>
               </FormControl>

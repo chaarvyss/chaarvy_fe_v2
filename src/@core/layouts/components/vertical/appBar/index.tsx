@@ -43,13 +43,22 @@ const Toolbar = styled(MuiToolbar)<ToolbarProps>(({ theme }) => ({
 
 const LayoutAppBar = (props: Props) => {
   // ** Props
-  const { settings, verticalAppBarContent: userVerticalAppBarContent } = props
+  const {
+    settings,
+    verticalAppBarContent: userVerticalAppBarContent,
+    hidden,
+    toggleNavVisibility,
+    saveSettings
+  } = props
 
   // ** Hooks
   const theme = useTheme()
 
   // ** Vars
   const { contentWidth } = settings
+
+  // todo: need to use below props as well
+  console.log({ hidden, toggleNavVisibility, saveSettings })
 
   return (
     <AppBar elevation={0} color='default' className='layout-navbar' position='static'>

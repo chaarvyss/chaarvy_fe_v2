@@ -10,17 +10,7 @@ import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import { useCreateUpdateRoleMutation } from 'src/store/services/adminServices'
 import { useLazyGetRolesListQuery, useLazyGetRolePermissionsListQuery } from 'src/store/services/listServices'
 import GetChaarvyIcons from 'src/utils/icons'
-import {
-  Card,
-  Chip,
-  Paper,
-  TableContainer,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow
-} from 'src/utils/muiElements'
+import { Card, Paper, TableContainer, Table, TableBody, TableCell, TableHead, TableRow } from 'src/utils/muiElements'
 
 interface RowType {
   role_name: string
@@ -37,8 +27,9 @@ const Roles = () => {
 
   const [showCreateOrEditRoleModal, setShowCreateOrEditRoleModal] = useState<boolean>(false)
 
-  const [fetchRolePermissions, { data: rolePermissions }] = useLazyGetRolePermissionsListQuery()
+  const [fetchRolePermissions] = useLazyGetRolePermissionsListQuery()
 
+  // { data: rolePermissions }
   const [createUpdateRole] = useCreateUpdateRoleMutation()
 
   const { triggerToast } = useToast()

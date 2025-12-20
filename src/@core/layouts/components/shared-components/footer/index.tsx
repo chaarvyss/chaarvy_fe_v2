@@ -19,13 +19,15 @@ interface Props {
 
 const Footer = (props: Props) => {
   // ** Props
-  const { settings, footerContent: userFooterContent } = props
+  const { settings, footerContent: userFooterContent, saveSettings } = props
 
   // ** Hook
   const theme = useTheme()
 
   // ** Vars
   const { contentWidth } = settings
+
+  console.log(saveSettings)
 
   return (
     <Box

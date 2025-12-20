@@ -1,8 +1,6 @@
 // ** MUI Imports
 import { PaletteMode } from '@mui/material'
 import IconButton from '@mui/material/IconButton'
-
-// ** Icons Imports
 import WeatherNight from 'mdi-material-ui/WeatherNight'
 import WeatherSunny from 'mdi-material-ui/WeatherSunny'
 

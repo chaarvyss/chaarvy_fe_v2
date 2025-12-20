@@ -44,6 +44,8 @@ const TableStickyHeader = ({ columns, rows, totalCount, currentPage, title, stat
     setPage(0)
   }
 
+  console.log(page) // under development
+
   return (
     <>
       <TableTilteHeader title={title} stats={stats} />

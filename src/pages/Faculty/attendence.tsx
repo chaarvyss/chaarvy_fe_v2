@@ -1,5 +1,5 @@
 import { Button, SelectChangeEvent } from '@mui/material'
-import React, { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useState } from 'react'
 
 import { Box, Card, Grid, Typography } from '@muiElements'
 import { InputTypes } from 'src/lib/enums'
@@ -105,7 +105,7 @@ const GetAttendence = () => {
     if (isFetching) return <Typography>Loading</Typography>
 
     return (studentsList ?? []).map(each => (
-      <Grid item xs={12} md={3} xl={2}>
+      <Grid key={each.application_id} item xs={12} md={3} xl={2}>
         <Card
           onClick={() => handleAttendance(each.application_id)}
           sx={{

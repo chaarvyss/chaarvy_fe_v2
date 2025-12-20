@@ -1,5 +1,5 @@
 import { Checkbox, FormControlLabel } from '@mui/material'
-import React, { useState, useEffect, ChangeEvent } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import {
   Card,
@@ -15,7 +15,7 @@ import {
 } from '@muiElements'
 import { useLoader } from 'src/@core/context/loaderContext'
 import { ButtonColors } from 'src/lib/enums'
-import TableTilteHeader, { TableTitleHeaderProps } from 'src/reusable_components/TableTilteHeader'
+import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import {
   StudentProgramFeesDetailsResponse,
   useLazyGetStudentAdmissionFeesDetailsQuery,
@@ -133,7 +133,7 @@ const FeesDetails = ({ application_id, segment_id }: FeesDetailsProps) => {
   }
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value, type, checked } = event.target
+    const { id, value, checked } = event.target
     const [item, category] = id.split('--')
     reset()
     setStudentFees(prevFees => {
@@ -169,13 +169,13 @@ const FeesDetails = ({ application_id, segment_id }: FeesDetailsProps) => {
     setShowFeesFinalizeModal(false)
   }
 
+  // finalizedFeesDetails={!!finalizedFees}
   return (
     <>
       <PaymentFinaliseModal
         application_id={application_id}
         segment_id={segment_id}
         feesDetails={studentFees}
-        finalizedFeesDetails={!!finalizedFees}
         isOpen={showFeesFinalizeModal}
         onClose={handlePaymentFinaliseModalClose}
       />

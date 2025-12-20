@@ -75,11 +75,13 @@ const CreateUser = () => {
       value: newDetails?.Role ?? '',
       onChange: handleChange('Role'),
       isLoading: isRolesListLoading,
+
       // ✅ menuOptions are reactive - they update when rolesData changes
       menuOptions: (rolesData ?? []).map(({ role_id, role_name }) => ({
         value: role_id,
         label: role_name
       }))
+
       // ✅ For dependent dropdowns, you can:
       // 1. Filter menuOptions based on other field values:
       //    menuOptions: rolesData?.filter(r => r.type === newDetails?.someField)

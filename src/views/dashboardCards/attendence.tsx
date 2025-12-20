@@ -1,10 +1,10 @@
 import React from 'react'
 
-import { Box, Card, Typography } from '@muiElements'
+import { Box } from '@muiElements'
 import ReactApexcharts from 'src/@core/components/react-apexcharts'
 
 const Attendence = () => {
-  const [state, setState] = React.useState({
+  const state = {
     series: [
       {
         name: 'Attended',
@@ -43,7 +43,7 @@ const Attendence = () => {
         categories: ['Male', 'Female'] // ✅ Define labels for the y-axis
       }
     }
-  })
+  }
 
   return (
     <Box display='flex' justifyContent='start' alignItems='center'>

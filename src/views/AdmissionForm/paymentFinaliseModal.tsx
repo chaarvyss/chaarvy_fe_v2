@@ -1,6 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { CircularProgress, Grid, MenuItem, Select, SelectChangeEvent, Tooltip, Typography } from '@mui/material'
-import { FormatListChecks } from 'mdi-material-ui'
+import { CircularProgress, Grid, MenuItem, Select, SelectChangeEvent } from '@mui/material'
 import React, { ChangeEvent, useState } from 'react'
 import DatePicker from 'react-datepicker'
 
@@ -28,7 +27,6 @@ import { GetSumOfNumbers } from 'src/utils/helpers'
 
 interface Props {
   feesDetails?: StudentProgramFeesDetailsResponse
-  finalizedFeesDetails: boolean
   isOpen: boolean
   onClose: (isSuccess?: boolean) => void
   application_id?: string
@@ -159,9 +157,13 @@ const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose, application_id, se
             </TableHead>
             <TableBody>
               {fees.map(
-                (each, index) =>
+                each =>
                   each.totalFees > 0 && (
-                    <TableRow hover sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}>
+                    <TableRow
+                      key={each.particular}
+                      hover
+                      sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}
+                    >
                       <TableCell></TableCell>
                       <TableCell>{each.particular}</TableCell>
                       <TableCell width='200px'>{each.totalFees}</TableCell>
@@ -232,7 +234,7 @@ const PaymentFinaliseModal = ({ feesDetails, isOpen, onClose, application_id, se
               </TableHead>
               <TableBody>
                 {terms.map((each, index) => (
-                  <TableRow hover sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}>
+                  <TableRow key={index} hover sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{each.payable_fees}</TableCell>
                     <TableCell>

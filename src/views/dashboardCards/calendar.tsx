@@ -81,6 +81,7 @@ const MyCalendar = () => {
               {(eventsList ?? []).length > 0 ? (
                 eventsList?.map(each => (
                   <Box
+                    key={each.id}
                     display='flex'
                     flexDirection='column'
                     padding={2}

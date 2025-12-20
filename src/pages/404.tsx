@@ -6,14 +6,7 @@ import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import { ReactNode } from 'react'
 
-// ** Next Import
-
-// ** MUI Components
-
-// ** Layout Import
 import BlankLayout from 'src/@core/layouts/BlankLayout'
-
-// ** Demo Imports
 import FooterIllustrations from 'src/views/pages/misc/FooterIllustrations'
 
 // ** Styled Components

@@ -1,6 +1,5 @@
 import { CardProps } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
@@ -31,8 +30,6 @@ import {
   TextField,
   Typography
 } from 'src/utils/muiElements'
-
-// ** Demo Imports
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
 
 interface State {

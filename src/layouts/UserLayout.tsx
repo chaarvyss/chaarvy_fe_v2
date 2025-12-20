@@ -7,10 +7,6 @@ import { ReactNode, useEffect } from 'react'
 // !Do not remove this Layout import
 import { useSettings } from 'src/@core/hooks/useSettings'
 import VerticalLayout from 'src/@core/layouts/VerticalLayout'
-
-// ** Navigation Imports
-
-// ** Component Import
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import VerticalNavItems from 'src/navigation/vertical'
 import SideDrawer from 'src/reusable_components/sideDrawer'

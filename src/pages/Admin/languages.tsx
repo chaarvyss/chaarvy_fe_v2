@@ -18,11 +18,7 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
 import { Language } from 'src/lib/types'
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
-import {
-  UpdateLanguageRequest,
-  useCreateLanguageMutation,
-  useUpdateLangugageMutation
-} from 'src/store/services/adminServices'
+import { useCreateLanguageMutation, useUpdateLangugageMutation } from 'src/store/services/adminServices'
 import { useGetLanguagesListQuery } from 'src/store/services/listServices'
 
 const Languages = () => {

@@ -3,7 +3,7 @@ import React from 'react'
 
 // TODO: Under development
 
-const ChaarvySelect = (props: SelectProps, isLoading?: boolean) => {
+const ChaarvySelect = (props: SelectProps) => {
   return <Select {...props}>{props.children}</Select>
 }
 

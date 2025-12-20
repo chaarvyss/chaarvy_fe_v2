@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 
 import {
   Box,
-  Button,
   Card,
   Grid,
   IconButton,
@@ -22,7 +21,6 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
 import { AddOnCourse } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import Tag from 'src/reusable_components/tag'
 import {

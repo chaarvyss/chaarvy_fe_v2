@@ -2,10 +2,9 @@ import { Theme } from '@mui/material/styles'
 
 import { Settings } from 'src/@core/context/settingsContext'
 import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
-import NotificationDropdown from 'src/@core/layouts/components/shared-components/NotificationDropdown'
 import UserDropdown from 'src/@core/layouts/components/shared-components/UserDropdown'
-import { MenuIcon, MagnifyIcon } from 'src/utils/mdiElements'
-import { useMediaQuery, Box, IconButton, TextField, InputAdornment } from 'src/utils/muiElements'
+import { MenuIcon } from 'src/utils/mdiElements'
+import { useMediaQuery, Box, IconButton } from 'src/utils/muiElements'
 
 interface Props {
   hidden: boolean

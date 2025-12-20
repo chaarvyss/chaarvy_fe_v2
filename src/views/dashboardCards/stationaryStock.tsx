@@ -45,7 +45,11 @@ const StationaryStock = () => {
               }}
             >
               {headers.map(each => (
-                <TableCell sx={{ color: settings.mode === 'light' ? blue[900] : grey[100] }} width='33%'>
+                <TableCell
+                  key={each.label}
+                  sx={{ color: settings.mode === 'light' ? blue[900] : grey[100] }}
+                  width='33%'
+                >
                   {each.label}
                 </TableCell>
               ))}
@@ -53,7 +57,7 @@ const StationaryStock = () => {
           </TableHead>
           <TableBody>
             {(stockDetails ?? []).map((each, index) => (
-              <TableRow>
+              <TableRow key={each.book_name}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{each.book_name}</TableCell>
                 <TableCell>{each.available_quantity}</TableCell>

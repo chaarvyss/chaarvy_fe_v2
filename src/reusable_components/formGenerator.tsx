@@ -150,14 +150,7 @@ const FormGenerator = ({
             ) : type === InputTypes.CHECKBOX ? (
               <FormControl fullWidth>
                 <FormControlLabel
-                  control={
-                    <Checkbox
-                      id={id}
-                      checked={value as boolean}
-                      onChange={onChange}
-                      disabled={isDisabled}
-                    />
-                  }
+                  control={<Checkbox id={id} checked={value as boolean} onChange={onChange} disabled={isDisabled} />}
                   label={
                     <>
                       {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}

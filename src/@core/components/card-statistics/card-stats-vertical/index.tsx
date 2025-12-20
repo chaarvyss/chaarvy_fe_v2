@@ -5,8 +5,6 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-
-// ** Icons Imports
 import DotsVertical from 'mdi-material-ui/DotsVertical'
 
 // ** Types Imports
