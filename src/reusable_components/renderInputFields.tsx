@@ -21,7 +21,6 @@ const RenderInputFields = ({ fields, mandatoryFields, errors }: RenderInputField
         ({
           type,
           id,
-          customInput,
           isDisabled,
           label,
           placeholder,

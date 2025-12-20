@@ -1,19 +1,8 @@
 // ** MUI Imports
-import Avatar from '@mui/material/Avatar'
 import Badge from '@mui/material/Badge'
-import Box from '@mui/material/Box'
-import Divider from '@mui/material/Divider'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { styled } from '@mui/material/styles'
-import Typography from '@mui/material/Typography'
-import AccountOutline from 'mdi-material-ui/AccountOutline'
-import CogOutline from 'mdi-material-ui/CogOutline'
-import CurrencyUsd from 'mdi-material-ui/CurrencyUsd'
-import EmailOutline from 'mdi-material-ui/EmailOutline'
-import HelpCircleOutline from 'mdi-material-ui/HelpCircleOutline'
-import LogoutVariant from 'mdi-material-ui/LogoutVariant'
-import MessageOutline from 'mdi-material-ui/MessageOutline'
 import { useRouter } from 'next/router'
 import { useState, SyntheticEvent, Fragment } from 'react'
 
@@ -49,20 +38,6 @@ const UserDropdown = () => {
       router.push(url)
     }
     setAnchorEl(null)
-  }
-
-  const styles = {
-    py: 2,
-    px: 4,
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    color: 'text.primary',
-    textDecoration: 'none',
-    '& svg': {
-      fontSize: '1.375rem',
-      color: 'text.secondary'
-    }
   }
 
   return (

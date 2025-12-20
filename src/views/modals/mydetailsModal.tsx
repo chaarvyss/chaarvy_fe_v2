@@ -14,7 +14,6 @@ interface Props {
 
 const MydetailsModal = ({ isOpen, details }: Props) => {
   const [newDetails, setNewDetails] = useState(details)
-  const [collegeLogo, setCollegeLogo] = useState<File>()
   const [collegeLogoUrl, setCollegeLogoUrl] = useState<string>()
 
   useEffect(() => {
@@ -32,7 +31,6 @@ const MydetailsModal = ({ isOpen, details }: Props) => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      setCollegeLogo(file)
       setCollegeLogoUrl(URL.createObjectURL(file))
     }
   }

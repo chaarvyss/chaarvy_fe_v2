@@ -1,4 +1,3 @@
-// ** React Imports
 import Box, { BoxProps } from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import { styled } from '@mui/material/styles'
@@ -6,17 +5,9 @@ import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import { ReactNode } from 'react'
 
-// ** Next Import
-
-// ** MUI Components
-
-// ** Layout Import
 import BlankLayout from 'src/@core/layouts/BlankLayout'
-
-// ** Demo Imports
 import FooterIllustrations from 'src/views/pages/misc/FooterIllustrations'
 
-// ** Styled Components
 const BoxWrapper = styled(Box)<BoxProps>(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
     width: '90vw'

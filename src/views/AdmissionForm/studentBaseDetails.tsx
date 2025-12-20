@@ -1,3 +1,4 @@
+import { LoadingButton } from '@mui/lab'
 import {
   Box,
   CardContent,
@@ -11,6 +12,7 @@ import {
   SelectChangeEvent,
   Typography
 } from '@mui/material'
+import { useRouter } from 'next/router'
 import React, { ChangeEvent, useState, useEffect } from 'react'
 import DatePicker from 'react-datepicker'
 
@@ -46,11 +48,6 @@ import {
   useLazyGetProgramSectionListQuery
 } from 'src/store/services/programServices'
 import { convertDateStringToDate } from 'src/utils/helpers'
-
-import { LoadingButton } from '@mui/lab'
-
-
-import { useRouter } from 'next/router'
 
 import ApplicationFeesModal from './application_fees_modal'
 
@@ -105,8 +102,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
   const [fetchProgramSecondLanguages, { data: programSecondLanguages, isFetching: isSecondLanguageLoading }] =
     useLazyGetProgramSecondLanguagesListQuery()
 
-  const [fetchProgramSectionsData, { data: programSections, isFetching: isSectionsLoading }] =
-    useLazyGetProgramSectionListQuery()
+  const [fetchProgramSectionsData, { data: programSections }] = useLazyGetProgramSectionListQuery()
 
   const { data: gendersList } = useGetGendersListQuery()
   const { data: segmentsList } = useGetSegmentsListQuery()
@@ -476,7 +472,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
                   }
                 >
                   {(menuOptions ?? []).map(each => (
-                    <FormControlLabel value={each.value} control={<Radio />} label={each.label} />
+                    <FormControlLabel key={each.value} value={each.value} control={<Radio />} label={each.label} />
                   ))}
                 </RadioGroup>
                 {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}

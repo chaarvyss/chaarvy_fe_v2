@@ -1,9 +1,7 @@
 import { IconButton, Tooltip } from '@mui/material'
-
 import { ReactElement, useEffect, useRef, useState } from 'react'
 
 import { TableHeaderStatCardProps } from 'src/lib/interfaces'
-
 import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
 import GetChaarvyIcons from 'src/utils/icons'
 import { Box, Grid, Card, Avatar, CardHeader, Typography, CardContent } from 'src/utils/muiElements'

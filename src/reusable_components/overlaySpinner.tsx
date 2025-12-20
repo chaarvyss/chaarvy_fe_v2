@@ -1,4 +1,4 @@
-import React, { CSSProperties, useState } from 'react'
+import React, { CSSProperties } from 'react'
 import { CircleLoader } from 'react-spinners'
 
 const override: CSSProperties = {
@@ -8,8 +8,7 @@ const override: CSSProperties = {
 }
 
 const OverlaySpinner = () => {
-  const [loading, setLoading] = useState(true)
-  const [color, setColor] = useState('#743ccf')
+  const { loading, color } = { loading: true, color: '#743ccf' }
 
   return (
     <div

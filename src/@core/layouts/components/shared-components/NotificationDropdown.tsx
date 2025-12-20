@@ -11,12 +11,8 @@ import MuiMenuItem, { MenuItemProps } from '@mui/material/MenuItem'
 import { styled, Theme } from '@mui/material/styles'
 import Typography, { TypographyProps } from '@mui/material/Typography'
 import useMediaQuery from '@mui/material/useMediaQuery'
-
-// ** Icons Imports
 import BellOutline from 'mdi-material-ui/BellOutline'
 import { useState, SyntheticEvent, Fragment, ReactNode } from 'react'
-
-// ** Third Party Components
 import PerfectScrollbarComponent from 'react-perfect-scrollbar'
 
 // ** Styled Menu component

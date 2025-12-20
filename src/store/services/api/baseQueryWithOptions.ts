@@ -21,10 +21,11 @@ const baseQuery = fetchBaseQuery({
 
 const baseQueryWithRetry = retry(
   async (args, api, extraOptions) => {
-    let { url, params = {}, ...rest } = args
+    let { url } = args
+    const { params = {}, ...rest } = args
     const filteredParams = Object.fromEntries(
       Object.entries(params)
-        .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+        .filter(([, value]) => value !== undefined && value !== null && value !== '')
         .map(([key, value]) => [key, typeof value === 'object' ? JSON.stringify(value) : String(value)])
     )
 

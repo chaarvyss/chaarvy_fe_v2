@@ -6,7 +6,6 @@ import {
   PaymentsListRequest,
   PaymentsListResponse,
   Section,
-  StudentsListRequest,
   UsersListRequest,
   UsersListResponse
 } from 'src/lib/interfaces'
@@ -15,14 +14,11 @@ import {
   BooksTypesResponse,
   Community,
   District,
-  Fees,
   FeesTypesResponse,
   Gender,
   Language,
   Occupation,
   Program,
-  ProgramAddonCourseResponse,
-  ProgramBooksDetails,
   QualifiedExam,
   Religions,
   RolesListResponse,

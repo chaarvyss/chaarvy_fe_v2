@@ -59,7 +59,7 @@ const UserPermissions = ({ user_id }: UserPermissionsProps) => {
         <FormGroup>
           <Grid container spacing={2}>
             {Object.entries(Permissions.NAV).map(([key, value]) => (
-              <Grid item sm={12} md={4}>
+              <Grid key={key} item sm={12} md={4}>
                 <FormControlLabel
                   key={value}
                   control={<Checkbox id={value} onChange={handleChange} checked={allowedPermissions.has(value)} />}

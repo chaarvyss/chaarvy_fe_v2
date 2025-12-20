@@ -5,7 +5,6 @@ import {
   FormControl,
   IconButton,
   MenuItem,
-  Paper,
   Select,
   SelectChangeEvent,
   Tab,

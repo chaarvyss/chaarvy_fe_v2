@@ -1,4 +1,3 @@
-// ** Next Imports
 import type { EmotionCache } from '@emotion/cache'
 import { CacheProvider } from '@emotion/react'
 import type { AppProps } from 'next/app'
@@ -10,7 +9,11 @@ import { ToastContainer } from 'react-toastify'
 import { PersistGate } from 'redux-persist/integration/react'
 
 import type { NextPage } from 'next'
+import { ImageViewerProvider } from 'src/@core/context/imageViewerContext'
+import { LoaderProvider } from 'src/@core/context/loaderContext'
 import { SettingsConsumer, SettingsProvider } from 'src/@core/context/settingsContext'
+import { SideDrawerProvider } from 'src/@core/context/sideDrawerContext'
+import { ToastProvider } from 'src/@core/context/toastContext'
 import ThemeComponent from 'src/@core/theme/ThemeComponent'
 import { createEmotionCache } from 'src/@core/utils/create-emotion-cache'
 import themeConfig from 'src/configs/themeConfig'
@@ -18,13 +21,8 @@ import UserLayout from 'src/layouts/UserLayout'
 import 'react-perfect-scrollbar/dist/css/styles.css'
 import '../../styles/globals.css'
 import store, { persistor } from 'src/store'
-import { ToastProvider } from 'src/@core/context/toastContext'
-import 'bootstrap/dist/css/bootstrap.min.css'
-import { LoaderProvider } from 'src/@core/context/loaderContext'
-import { SideDrawerProvider } from 'src/@core/context/sideDrawerContext'
-
 import 'react-datepicker/dist/react-datepicker.css'
-import { ImageViewerProvider } from 'src/@core/context/imageViewerContext'
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 type ExtendedAppProps = AppProps & {
   Component: NextPage

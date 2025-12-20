@@ -6,7 +6,7 @@ import * as React from 'react'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 
 const SideDrawer = () => {
-  const { isOpen, title, children, closeDrawer, className } = useSideDrawer()
+  const { isOpen, title, children, closeDrawer } = useSideDrawer()
 
   return (
     <Drawer open={isOpen} anchor='right' onClose={closeDrawer}>

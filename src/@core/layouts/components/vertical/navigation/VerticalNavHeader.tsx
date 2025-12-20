@@ -5,8 +5,6 @@ import Typography from '@mui/material/Typography'
 import { ReactNode } from 'react'
 
 import { Avatar } from '@muiElements'
-
-// ** Type Import
 import { Settings } from 'src/@core/context/settingsContext'
 import { getInitials } from 'src/utils/helpers'
 
@@ -30,7 +28,17 @@ const MenuHeaderWrapper = styled(Box)<BoxProps>(({ theme }) => ({
 
 const VerticalNavHeader = (props: Props) => {
   // ** Props
-  const { verticalNavMenuBranding: userVerticalNavMenuBranding, settings } = props
+  const {
+    verticalNavMenuBranding: userVerticalNavMenuBranding,
+    settings,
+    hidden,
+    toggleNavVisibility,
+    saveSettings
+  } = props
+
+  // todo: need to use below props as well
+
+  console.log({ hidden, toggleNavVisibility, saveSettings })
 
   return (
     <MenuHeaderWrapper className='nav-header' sx={{ pl: 0 }}>

@@ -22,8 +22,8 @@ export interface ChaarvyTableColumn<T = any> {
   width?: string | number
   align?: 'left' | 'center' | 'right'
   sticky?: boolean
-  hideable?: boolean 
-  defaultHidden?: boolean 
+  hideable?: boolean
+  defaultHidden?: boolean
   freezable?: boolean // Whether this column can be frozen by user (click header to freeze)
   defaultFrozen?: boolean // Whether this column is frozen by default
   render?: (row: T, index: number) => ReactNode
@@ -37,10 +37,9 @@ export interface ChaarvyDataTableProps<T = any> {
   getRowKey: (row: T, index: number) => string | number
   onRowClick?: (row: T) => void
   emptyMessage?: string
-  minWidth?: number
   ariaLabel?: string
   hover?: boolean
-  showColumnToggle?: boolean 
+  showColumnToggle?: boolean
 }
 
 const ChaarvyDataTable = <T extends Record<string, any>>({

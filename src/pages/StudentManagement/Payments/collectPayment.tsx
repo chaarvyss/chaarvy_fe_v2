@@ -23,6 +23,7 @@ import { InputTypes, InputVariants } from 'src/lib/enums'
 import { TableHeaders } from 'src/lib/interfaces'
 import { ErrorObject, InputFields } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
+import CustomDateElement from 'src/reusable_components/dateInputElement'
 import {
   PaymentDetailRequest,
   StudentPendingFeesDetails,
@@ -33,9 +34,7 @@ import {
 import { useGetPaymentModesListQuery } from 'src/store/services/listServices'
 import { printDocument } from 'src/utils/helpers'
 import GetChaarvyIcons from 'src/utils/icons'
-
 import 'react-datepicker/dist/react-datepicker.css'
-import CustomDateElement from 'src/reusable_components/dateInputElement'
 
 const TOP_LEVEL_ID = 'collect-payment'
 

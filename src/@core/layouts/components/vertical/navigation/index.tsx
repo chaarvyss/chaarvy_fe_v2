@@ -4,11 +4,8 @@ import { grey } from '@mui/material/colors'
 import { styled, useTheme } from '@mui/material/styles'
 import { ReactNode, useRef, useState } from 'react'
 
-// ** Type Import
 import { Settings } from 'src/@core/context/settingsContext'
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
-
-// ** Component Imports
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 
 import Drawer from './Drawer'

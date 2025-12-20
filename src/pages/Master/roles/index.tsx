@@ -1,26 +1,15 @@
 // ** Types Imports
-import { Button, Checkbox, FormControlLabel, FormGroup, Grid, IconButton, TextField, Typography } from '@mui/material'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { Button, IconButton, TextField, Typography } from '@mui/material'
+import { useEffect, useState } from 'react'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { Permissions } from 'src/constants/permissions'
 import { InputVariants } from 'src/lib/enums'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
 import { useCreateUpdateRoleMutation } from 'src/store/services/adminServices'
 import { useLazyGetRolesListQuery, useLazyGetRolePermissionsListQuery } from 'src/store/services/listServices'
 import GetChaarvyIcons from 'src/utils/icons'
-import {
-  Card,
-  Chip,
-  Paper,
-  TableContainer,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow
-} from 'src/utils/muiElements'
+import { Card, Paper, TableContainer, Table, TableBody, TableCell, TableHead, TableRow } from 'src/utils/muiElements'
 
 interface RowType {
   role_name: string
@@ -39,7 +28,9 @@ const Roles = () => {
 
   const [showCreateOrEditRoleModal, setShowCreateOrEditRoleModal] = useState<boolean>(false)
 
-  const [fetchRolePermissions, { data: rolePermissions }] = useLazyGetRolePermissionsListQuery()
+  const [fetchRolePermissions] = useLazyGetRolePermissionsListQuery()
+
+  // { data: rolePermissions }
 
   const [createUpdateRole] = useCreateUpdateRoleMutation()
 
@@ -67,14 +58,14 @@ const Roles = () => {
       })
   }
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setAllowedPermissions(prevIds => {
-      const newIds = new Set(prevIds)
-      e.target.checked ? newIds.add(e.target.id) : newIds.delete(e.target.id)
+  // const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  //   setAllowedPermissions(prevIds => {
+  //     const newIds = new Set(prevIds)
+  //     e.target.checked ? newIds.add(e.target.id) : newIds.delete(e.target.id)
 
-      return new Set(newIds)
-    })
-  }
+  //     return new Set(newIds)
+  //   })
+  // }
 
   const handleEditRole = role => {
     fetchRolePermissions(role.role_id)

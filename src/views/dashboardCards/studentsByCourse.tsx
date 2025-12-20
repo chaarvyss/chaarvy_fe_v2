@@ -41,7 +41,7 @@ const processStudentData = (data: StudentData) => {
 const StudentEnrollmentChart: React.FC = () => {
   const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
-  const { data: studentData, isLoading } = useGetStudentEnrollmentCountDetailsQuery()
+  const { data: studentData } = useGetStudentEnrollmentCountDetailsQuery()
 
   if (studentData) {
     const { categories, series, totalData } = processStudentData(studentData)

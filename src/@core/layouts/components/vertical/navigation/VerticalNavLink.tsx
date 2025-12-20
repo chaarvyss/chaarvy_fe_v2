@@ -13,8 +13,6 @@ import GetChaarvyIcons, { GetChaarvyIconsProps } from 'src/utils/icons'
 interface Props {
   item: NavLink
   settings: Settings
-  navVisible?: boolean
-  toggleNavVisibility: () => void
 }
 
 const VerticalNavLink = ({ item, settings }: Props) => {

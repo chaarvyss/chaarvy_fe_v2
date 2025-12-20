@@ -8,8 +8,6 @@ import { ReactNode } from 'react'
 
 // ** Type Imports
 import { Settings } from 'src/@core/context/settingsContext'
-
-// ** Theme Config
 import themeConfig from 'src/configs/themeConfig'
 
 // ** Theme Override Imports

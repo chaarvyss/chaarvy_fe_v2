@@ -1,5 +1,5 @@
 // ** Types Import
-import { Box, Typography } from '@muiElements'
+import { Box } from '@muiElements'
 import { Settings } from 'src/@core/context/settingsContext'
 import { NavLink, NavSectionTitle, VerticalNavItemsType } from 'src/@core/layouts/types'
 
