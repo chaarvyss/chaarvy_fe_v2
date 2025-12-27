@@ -3,7 +3,7 @@ import Box from '@mui/material/Box'
 import Button, { ButtonProps } from '@mui/material/Button'
 import React, { ReactNode } from 'react'
 
-type ColorKey = 'primary' | 'success' | 'error' | 'info' | 'secondary'
+type ColorKey = 'primary' | 'success' | 'error' | 'info' | 'secondary' | 'warning'
 
 export interface ChaarvyButtonProps extends Omit<ButtonProps, 'color'> {
   color?: ColorKey
@@ -32,8 +32,10 @@ const ChaarvyButton = ({
     const light = palette.light ?? palette.main
     const dark = palette.dark ?? palette.main
 
+    const textColor = theme.palette.getContrastText(solidBg)
+
     const base: any = {
-      color: theme.palette.getContrastText(solidBg),
+      color: textColor,
       textTransform: 'none'
     }
 
@@ -57,16 +59,27 @@ const ChaarvyButton = ({
     return { ...base, ...(sx || {}) }
   }
 
+  const styles = mergedSx
+
   return (
     <Tooltip title={typeof label === 'string' ? label : ''} placement='top'>
-      <Button {...props} color='inherit' sx={mergedSx}>
+      <Button {...props} color='inherit' sx={styles}>
         <Box component='span' sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
           {leftIcon && (
             <Box component='span' sx={{ display: 'inline-flex' }}>
               {leftIcon}
             </Box>
           )}
-          <Box component='span'>{label ?? children}</Box>
+          <Box
+            color={theme => {
+              const palette = theme.palette[color] || theme.palette.primary
+              const solidBg = palette.main
+              return theme.palette.getContrastText(solidBg)
+            }}
+            component='span'
+          >
+            {label ?? children}
+          </Box>
           {rightIcon && (
             <Box component='span' sx={{ display: 'inline-flex' }}>
               {rightIcon}

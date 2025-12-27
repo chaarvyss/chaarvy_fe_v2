@@ -88,39 +88,42 @@ function drawText(pdf: jsPDF, text: string, field: PlacedField, xMm: number, yMm
   }
   pdf.setFont(fontFamily, fontStyle)
   let color = field.color || '#000000'
-  if (!color.startsWith('#')) {
-    const hex = NAMED_COLORS[color.toLowerCase()]
-    if (hex) color = hex
+  let opacity = 1
+  if (color.startsWith('#')) {
+    if (color.length === 9) {
+      // #RRGGBBAA
+      opacity = parseInt(color.slice(7, 9), 16) / 255
+      color = color.slice(0, 7)
+    }
+    const r = parseInt(color.slice(1, 3), 16)
+    const g = parseInt(color.slice(3, 5), 16)
+    const b = parseInt(color.slice(5, 7), 16)
+    pdf.setTextColor(r, g, b)
+    if (typeof (pdf as any).setGState === 'function' && opacity < 1) {
+      pdf.setGState(new (pdf as any).GState({ opacity }))
+    }
+  } else {
+    pdf.setTextColor(0, 0, 0)
   }
-  if (!color.startsWith('#') || color.length !== 7) color = '#000000'
-  const r = parseInt(color.slice(1, 3), 16)
-  const g = parseInt(color.slice(3, 5), 16)
-  const b = parseInt(color.slice(5, 7), 16)
-  pdf.setTextColor(r, g, b)
-  if (field.opacity !== undefined && field.opacity < 100) {
-    pdf.setGState(new (pdf as any).GState({ opacity: field.opacity / 100 }))
-  }
-  const align = field.textAlign || 'left'
   let xOffset = xMm
+  const align = field.textAlign || 'left'
   if (align === 'center') {
     xOffset = xMm + widthMm / 2
   } else if (align === 'right') {
     xOffset = xMm + widthMm
   }
   pdf.text(text, xOffset, yMm, { align: align as any })
-  if (field.opacity !== undefined && field.opacity < 100) {
+  if (typeof (pdf as any).setGState === 'function' && opacity < 1) {
     pdf.setGState(new (pdf as any).GState({ opacity: 1 }))
   }
 }
 
 function drawShape(pdf: jsPDF, field: PlacedField, xMm: number, yMm: number, widthMm: number, heightMm: number) {
-  const color = field.color || '#000000'
+  const color = field.color || '#ffffff'
   const r = parseInt(color.slice(1, 3), 16)
   const g = parseInt(color.slice(3, 5), 16)
   const b = parseInt(color.slice(5, 7), 16)
-  if (field.opacity !== undefined && field.opacity < 100) {
-    pdf.setGState(new (pdf as any).GState({ opacity: field.opacity / 100 }))
-  }
+  // Opacity adjustments removed for PDF shapes
   if (field.borderWidth && field.borderWidth > 0) {
     pdf.setLineWidth(pxToMm(field.borderWidth))
     const borderColor = field.borderColor || '#000000'

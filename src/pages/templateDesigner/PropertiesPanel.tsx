@@ -11,6 +11,8 @@ interface PropertiesPanelProps {
   bringToFront: () => void
   sendToBack: () => void
   deleteItem: (id: string) => void
+  canvasWidth: number
+  canvasHeight: number
 }
 
 import { FONT_FAMILIES, FONT_WEIGHTS } from './constants'
@@ -23,7 +25,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   updateItemProperty,
   bringToFront,
   sendToBack,
-  deleteItem
+  deleteItem,
+  canvasWidth,
+  canvasHeight
 }) => {
   const item = placed.find(p => p.id === selectedItem)
   if (!item) return null
@@ -41,6 +45,8 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         <input
           type='number'
           value={Math.round(item.x)}
+          min={0}
+          max={canvasWidth}
           onChange={e => updateItemProperty(item.id, 'x', Number(e.target.value))}
           style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
         />
@@ -52,6 +58,8 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         <input
           type='number'
           value={Math.round(item.y)}
+          min={0}
+          max={canvasHeight}
           onChange={e => updateItemProperty(item.id, 'y', Number(e.target.value))}
           style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
         />
@@ -175,6 +183,43 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         </>
       )}
 
+      {item.type === 'shape' && (
+        <>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Fill Color
+            </label>
+            <input
+              type='color'
+              value={item.color || '#ffffffff'}
+              onChange={e => updateItemProperty(item.id, 'color', e.target.value)}
+              style={{
+                width: '100%',
+                height: 40,
+                padding: 2,
+                border: '1px solid #ddd',
+                borderRadius: 4,
+                cursor: 'pointer'
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Fill Opacity ({((item.opacity !== undefined ? item.opacity : 1) * 100).toFixed(0)}%)
+            </label>
+            <input
+              type='range'
+              min='0'
+              max='1'
+              step='0.01'
+              value={item.opacity !== undefined ? item.opacity : 1}
+              onChange={e => updateItemProperty(item.id, 'opacity', Number(e.target.value))}
+              style={{ width: '100%' }}
+            />
+          </div>
+        </>
+      )}
+
       {(item.type === 'text' || item.type === 'field') && (
         <>
           <div style={{ marginBottom: 16 }}>
@@ -241,21 +286,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         </>
       )}
 
-      {/* Opacity Control */}
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-          Opacity ({((item.opacity !== undefined ? item.opacity : 1) * 100).toFixed(0)}%)
-        </label>
-        <input
-          type='range'
-          min='0'
-          max='1'
-          step='0.01'
-          value={item.opacity !== undefined ? item.opacity : 1}
-          onChange={e => updateItemProperty(item.id, 'opacity', Number(e.target.value))}
-          style={{ width: '100%' }}
-        />
-      </div>
+      {/* Opacity Control removed */}
 
       {/* Z-Index Controls */}
       <div style={{ marginBottom: 16 }}>

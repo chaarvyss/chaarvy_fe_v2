@@ -12,9 +12,9 @@ export const AVAILABLE_ITEMS: Field[] = [
 
 export const DEFAULT_SIZES = {
   fontSize: 16,
-  rectangle: { width: 120, height: 60 },
-  circle: { width: 80, height: 80 },
-  line: { width: 200, height: 2 },
+  rectangle: { width: 120, height: 60, borderWidth: 2 },
+  circle: { width: 80, height: 80, borderWidth: 2 },
+  line: { width: 200, height: 2, borderWidth: 2 },
   image: { width: 120, height: 80 }
 }
 

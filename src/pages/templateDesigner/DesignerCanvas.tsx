@@ -173,12 +173,39 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
       const borderStyle = p.borderWidth
         ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
         : '2px solid #333'
+      const fillColor = p.color || 'transparent'
+      const fillOpacity = p.opacity !== undefined ? p.opacity : 1
       if (p.shapeType === ShapeType.RECTANGLE) {
-        return <div style={{ width: p.width, height: p.height, border: borderStyle }} />
+        return (
+          <div
+            style={{
+              width: p.width,
+              height: p.height,
+              border: borderStyle,
+              background: fillColor,
+              opacity: fillOpacity
+            }}
+          />
+        )
       } else if (p.shapeType === ShapeType.CIRCLE) {
-        return <div style={{ width: p.width, height: p.height, border: borderStyle, borderRadius: '50%' }} />
+        return (
+          <div
+            style={{
+              width: p.width,
+              height: p.height,
+              border: borderStyle,
+              borderRadius: '50%',
+              background: fillColor,
+              opacity: fillOpacity
+            }}
+          />
+        )
       } else if (p.shapeType === ShapeType.LINE) {
-        return <div style={{ width: p.width, height: p.height, background: p.borderColor || '#333' }} />
+        return (
+          <div
+            style={{ width: p.width, height: p.height, background: p.borderColor || '#333', opacity: fillOpacity }}
+          />
+        )
       }
     } else if (p.type === FieldType.IMAGE) {
       return (
@@ -331,7 +358,8 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
           background: 'white',
           transform: `scale(${zoom / 100})`,
           transformOrigin: 'top left',
-          margin: 'auto'
+          margin: 'auto',
+          boxSizing: 'content-box'
         }}
         onClick={e => {
           if (e.target === e.currentTarget) {
@@ -340,6 +368,72 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
           }
         }}
       >
+        {/* Helper grid overlay */}
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none',
+            zIndex: 0
+          }}
+        >
+          {/* Draw vertical grid lines */}
+          {Array.from({ length: Math.floor(canvasWidth / 40) - 1 }, (_, i) => (
+            <div
+              key={`vgrid-${i}`}
+              style={{
+                position: 'absolute',
+                left: (i + 1) * 40,
+                top: 0,
+                width: 1,
+                height: '100%',
+                background: Math.abs((i + 1) * 40 - canvasWidth / 2) < 2 ? '#ff9800' : '#e0e0e0',
+                opacity: Math.abs((i + 1) * 40 - canvasWidth / 2) < 2 ? 0.7 : 0.3
+              }}
+            />
+          ))}
+          {/* Draw horizontal grid lines */}
+          {Array.from({ length: Math.floor(canvasHeight / 40) - 1 }, (_, i) => (
+            <div
+              key={`hgrid-${i}`}
+              style={{
+                position: 'absolute',
+                top: (i + 1) * 40,
+                left: 0,
+                width: '100%',
+                height: 1,
+                background: Math.abs((i + 1) * 40 - canvasHeight / 2) < 2 ? '#ff9800' : '#e0e0e0',
+                opacity: Math.abs((i + 1) * 40 - canvasHeight / 2) < 2 ? 0.7 : 0.3
+              }}
+            />
+          ))}
+          {/* Center cross lines */}
+          <div
+            style={{
+              position: 'absolute',
+              left: canvasWidth / 2,
+              top: 0,
+              width: 1,
+              height: '100%',
+              background: '#ff9800',
+              opacity: 0.7
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: canvasHeight / 2,
+              left: 0,
+              width: '100%',
+              height: 1,
+              background: '#ff9800',
+              opacity: 0.7
+            }}
+          />
+        </div>
         {placed.map(p => (
           <div
             key={p.id}

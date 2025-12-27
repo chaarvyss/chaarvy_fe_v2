@@ -46,8 +46,468 @@ const DesignerPage = () => {
 
   const availableTemplates = {
     admission_v1: {
-      label: 'Admission Template',
-      placedFields: []
+      label: 'Admission Form Acknowledgement Template',
+      placedFields: [
+        {
+          id: 'shape_1766736931787',
+          type: 'text',
+          x: 197,
+          y: 39,
+          fontSize: 32,
+          visible: true,
+          zIndex: 0,
+          opacity: 1,
+          rotation: 0,
+          content: 'Bhavishya junior college',
+          width: 394,
+          height: 46,
+          fontWeight: 'bolder'
+        },
+        {
+          id: 'shape_1766737212614',
+          type: 'text',
+          x: 216,
+          y: 88,
+          fontSize: 16,
+          visible: true,
+          zIndex: 1,
+          opacity: 1,
+          rotation: 0,
+          content: 'AFFILIATED TO BIEAP, COLLEGE CODE:11095',
+          width: 357,
+          height: 30
+        },
+        {
+          id: 'shape_1766737297925',
+          type: 'text',
+          x: 184,
+          y: 118,
+          fontSize: 16,
+          visible: true,
+          zIndex: 2,
+          opacity: 1,
+          rotation: 0,
+          content: 'APPANAVEEDU, ELURU ROAD, HANUMAN JUNCTION',
+          width: 422,
+          height: 34
+        },
+        {
+          id: 'shape_1766737364992',
+          type: 'text',
+          x: 295,
+          y: 167,
+          fontSize: 16,
+          visible: true,
+          zIndex: 3,
+          opacity: 1,
+          rotation: 0,
+          content: 'Application for Admission',
+          width: 200,
+          height: 27
+        },
+        {
+          id: 'shape_1766737439189',
+          type: 'text',
+          x: 80,
+          y: 239,
+          fontSize: 16,
+          visible: true,
+          zIndex: 4,
+          opacity: 1,
+          rotation: 0,
+          content: '1. Name of the student',
+          width: 242,
+          height: 21
+        },
+        {
+          id: 'shape_1766737553392',
+          type: 'text',
+          x: 97,
+          y: 255,
+          fontSize: 12,
+          visible: true,
+          zIndex: 5,
+          opacity: 1,
+          rotation: 0,
+          content: '(as per SSC in Block Letters)',
+          width: 178,
+          height: 19
+        },
+        {
+          id: 'shape_1766737631952',
+          type: 'text',
+          x: 81,
+          y: 286,
+          fontSize: 16,
+          visible: true,
+          zIndex: 6,
+          opacity: 1,
+          rotation: 0,
+          content: '2. Name of the Father',
+          width: 242,
+          height: 20
+        },
+        {
+          id: 'shape_1766737690211',
+          type: 'text',
+          x: 81,
+          y: 311,
+          fontSize: 16,
+          visible: true,
+          zIndex: 7,
+          opacity: 1,
+          rotation: 0,
+          content: '3. Name of the Mother',
+          width: 242,
+          height: 24
+        },
+        {
+          id: 'shape_1766737732342',
+          type: 'text',
+          x: 81,
+          y: 340,
+          fontSize: 16,
+          visible: true,
+          zIndex: 8,
+          opacity: 1,
+          rotation: 0,
+          content: '4. Occupation of the parent',
+          width: 242
+        },
+        {
+          id: 'shape_1766737831117',
+          type: 'text',
+          x: 119,
+          y: 376,
+          fontSize: 16,
+          visible: true,
+          zIndex: 9,
+          opacity: 1,
+          rotation: 0,
+          content: 'Father '
+        },
+        {
+          id: 'shape_1766737859141',
+          type: 'text',
+          x: 397,
+          y: 376,
+          fontSize: 16,
+          visible: true,
+          zIndex: 10,
+          opacity: 1,
+          rotation: 0,
+          content: 'Mother'
+        },
+        {
+          id: 'shape_1766737880360',
+          type: 'text',
+          x: 82,
+          y: 409,
+          fontSize: 16,
+          visible: true,
+          zIndex: 11,
+          opacity: 1,
+          rotation: 0,
+          content: '5. Gender',
+          width: 242
+        },
+        {
+          id: 'shape_1766737930393',
+          type: 'text',
+          x: 81,
+          y: 438,
+          fontSize: 16,
+          visible: true,
+          zIndex: 12,
+          opacity: 1,
+          rotation: 0,
+          content: '6. Date of Birth',
+          width: 242
+        },
+        {
+          id: 'shape_1766740938093',
+          type: 'text',
+          x: 82,
+          y: 470,
+          fontSize: 16,
+          visible: true,
+          zIndex: 13,
+          opacity: 1,
+          rotation: 0,
+          content: '7. Nationality : Indian',
+          width: 242
+        },
+        {
+          id: 'shape_1766740986673',
+          type: 'text',
+          x: 397,
+          y: 470,
+          fontSize: 16,
+          visible: true,
+          zIndex: 14,
+          opacity: 1,
+          rotation: 0,
+          content: '8. Religion :',
+          width: 242
+        },
+        {
+          id: 'shape_1766741071558',
+          type: 'text',
+          x: 82,
+          y: 502,
+          fontSize: 16,
+          visible: true,
+          zIndex: 15,
+          opacity: 1,
+          rotation: 0,
+          content: '9. Community : OC / BC / SC / ST',
+          width: 262
+        },
+        {
+          id: 'shape_1766741107127',
+          type: 'text',
+          x: 397,
+          y: 502,
+          fontSize: 16,
+          visible: true,
+          zIndex: 16,
+          opacity: 1,
+          rotation: 0,
+          content: 'Sub Caste :'
+        },
+        {
+          id: 'shape_1766741173823',
+          type: 'text',
+          x: 82,
+          y: 531,
+          fontSize: 16,
+          visible: true,
+          zIndex: 17,
+          opacity: 1,
+          rotation: 0,
+          content: '10. Type of Admission : Jr. Inter / Sr. Inter',
+          width: 500
+        },
+        {
+          id: 'shape_1766741278813',
+          type: 'text',
+          x: 81,
+          y: 564,
+          fontSize: 16,
+          visible: true,
+          zIndex: 18,
+          opacity: 1,
+          rotation: 0,
+          content: '11. Student Aadhar number :',
+          width: 262,
+          height: 23
+        },
+        {
+          id: 'shape_1766741427124',
+          type: 'text',
+          x: 81,
+          y: 592,
+          fontSize: 16,
+          visible: true,
+          zIndex: 19,
+          opacity: 1,
+          rotation: 0,
+          content: '12. Father Aadhar No:',
+          width: 262
+        },
+        {
+          id: 'shape_1766741474490',
+          type: 'text',
+          x: 80,
+          y: 618,
+          fontSize: 16,
+          visible: true,
+          zIndex: 20,
+          opacity: 1,
+          rotation: 0,
+          content: '13. Mother Aadhar No :',
+          width: 262
+        },
+        {
+          id: 'shape_1766741601233',
+          type: 'text',
+          x: 82,
+          y: 648,
+          fontSize: 16,
+          visible: true,
+          zIndex: 21,
+          opacity: 1,
+          rotation: 0,
+          content: '12. Group :',
+          width: 262,
+          height: 23
+        },
+        {
+          id: 'shape_1766741817876',
+          type: 'text',
+          x: 81,
+          y: 675,
+          fontSize: 16,
+          visible: true,
+          zIndex: 22,
+          opacity: 1,
+          rotation: 0,
+          content: '13. Medium :',
+          width: 262
+        },
+        {
+          id: 'shape_1766741838829',
+          type: 'text',
+          x: 80,
+          y: 704,
+          fontSize: 16,
+          visible: true,
+          zIndex: 23,
+          opacity: 1,
+          rotation: 0,
+          content: '14. Second Landuage :',
+          width: 262
+        },
+        {
+          id: 'shape_1766741889677',
+          type: 'text',
+          x: 80,
+          y: 734,
+          fontSize: 16,
+          visible: true,
+          zIndex: 24,
+          opacity: 1,
+          rotation: 0,
+          content: '15. Siblings',
+          width: 100
+        },
+        {
+          id: 'table_1766741962320',
+          type: 'table',
+          x: 129,
+          y: 766,
+          fontSize: 16,
+          visible: true,
+          zIndex: 25,
+          opacity: 1,
+          rotation: 0,
+          columns: [
+            {
+              header: 'Student Name',
+              dataKey: 'studentName',
+              width: 216
+            },
+            {
+              header: 'Standard',
+              dataKey: 'standard',
+              width: 160
+            },
+            {
+              header: 'School',
+              dataKey: 'school',
+              width: 213
+            }
+          ],
+          data: [],
+          width: 605,
+          height: 47
+        },
+        {
+          id: 'shape_1766742221247',
+          type: 'text',
+          x: 81,
+          y: 887,
+          fontSize: 16,
+          visible: true,
+          zIndex: 26,
+          opacity: 1,
+          rotation: 0,
+          content: '14. Address for Communication:',
+          width: 262,
+          height: 29
+        },
+        {
+          id: 'shape_1766742312448',
+          type: 'shape',
+          x: 79,
+          y: 916,
+          fontSize: 16,
+          visible: true,
+          zIndex: 27,
+          opacity: 1,
+          rotation: 0,
+          shapeType: 'rectangle',
+          borderWidth: 2,
+          width: 308,
+          height: 92
+        },
+        {
+          id: 'shape_1766742363344',
+          type: 'text',
+          x: 403,
+          y: 888,
+          fontSize: 16,
+          visible: true,
+          zIndex: 28,
+          opacity: 1,
+          rotation: 0,
+          content: 'Phone number :',
+          width: 262
+        },
+        {
+          id: 'shape_1766742396276',
+          type: 'text',
+          x: 403,
+          y: 917,
+          fontSize: 16,
+          visible: true,
+          zIndex: 29,
+          opacity: 1,
+          rotation: 0,
+          content: 'Phone number 2:',
+          width: 262
+        },
+        {
+          id: 'shape_1766742518110',
+          type: 'shape',
+          x: 0,
+          y: 1028,
+          fontSize: 16,
+          visible: true,
+          zIndex: 30,
+          opacity: 1,
+          rotation: 0,
+          shapeType: 'line',
+          width: 791,
+          height: 2
+        },
+        {
+          id: 'shape_1766742539058',
+          type: 'text',
+          x: 44,
+          y: 1052,
+          fontSize: 16,
+          visible: true,
+          zIndex: 31,
+          opacity: 1,
+          rotation: 0,
+          content: 'Application No :',
+          width: 262
+        },
+        {
+          id: 'shape_1766742600345',
+          type: 'text',
+          x: 398,
+          y: 1054,
+          fontSize: 16,
+          visible: true,
+          zIndex: 32,
+          opacity: 1,
+          rotation: 0,
+          content: 'Application Fee :',
+          width: 262
+        }
+      ] as PlacedField[]
     },
     invoice_v2: {
       label: 'Invoice Template',
@@ -108,8 +568,11 @@ const DesignerPage = () => {
     e.preventDefault()
     const itemData = JSON.parse(e.dataTransfer.getData('application/json'))
     const rect = designer.canvasRef.current?.getBoundingClientRect()
-    const x = rect ? e.clientX - rect.left : 100
-    const y = rect ? e.clientY - rect.top : 100
+    let x = rect ? e.clientX - rect.left : 100
+    let y = rect ? e.clientY - rect.top : 100
+    // Clamp x and y to be within canvas bounds
+    x = Math.max(0, Math.min(x, designer.canvasWidth))
+    y = Math.max(0, Math.min(y, designer.canvasHeight))
     const newItem: PlacedField = {
       id: `${itemData.type}_${Date.now()}`,
       type: itemData.type,
@@ -133,6 +596,9 @@ const DesignerPage = () => {
         if (sizes && typeof sizes === 'object') {
           newItem.width = sizes.width
           newItem.height = sizes.height
+          if ('borderWidth' in sizes) {
+            newItem.borderWidth = (sizes as { borderWidth: number }).borderWidth
+          }
         }
       }
     } else if (itemData.type === FieldType.IMAGE) {
@@ -167,14 +633,17 @@ const DesignerPage = () => {
   const handleMouseMove = (e: React.MouseEvent) => {
     if (designer.dragState.isDragging && designer.dragState.itemId) {
       const rect = designer.canvasRef.current?.getBoundingClientRect()
-      const moveX = e.clientX - (rect ? rect.left : 0)
-      const moveY = e.clientY - (rect ? rect.top : 0)
+      let moveX = e.clientX - (rect ? rect.left : 0)
+      let moveY = e.clientY - (rect ? rect.top : 0)
+      let newX = moveX - designer.dragState.offsetX
+      let newY = moveY - designer.dragState.offsetY
+      const draggedItem = designer.placed.find(item => item.id === designer.dragState.itemId)
+      const itemWidth = draggedItem?.width || 0
+      const itemHeight = draggedItem?.height || 0
+      newX = Math.max(0, Math.min(newX, designer.canvasWidth - itemWidth))
+      newY = Math.max(0, Math.min(newY, designer.canvasHeight - itemHeight))
       designer.setPlaced(p =>
-        p.map(item =>
-          item.id === designer.dragState.itemId
-            ? { ...item, x: moveX - designer.dragState.offsetX, y: moveY - designer.dragState.offsetY }
-            : item
-        )
+        p.map(item => (item.id === designer.dragState.itemId ? { ...item, x: newX, y: newY } : item))
       )
     }
   }
@@ -303,6 +772,17 @@ const DesignerPage = () => {
       })
   }
 
+  const handleExportTemplate = () => {
+    const templateData = {
+      templateName: designer.templateName,
+      fields: designer.placed
+    }
+    console.log('Exported Template Data:', {
+      data: designer.placed,
+      stringifiedResult: JSON.stringify(templateData, null, 2)
+    })
+  }
+
   return (
     <Card
       style={{ height: '100vh', overflow: 'hidden', display: 'flex' }}
@@ -328,9 +808,11 @@ const DesignerPage = () => {
         handleDragStart={handleDragStart}
         historyIndex={designer.historyIndex}
         historyLength={designer.history.length}
-        exportTemplate={() => {}}
+        exportTemplate={handleExportTemplate}
         importTemplate={() => {}}
         setPageSize={handlePageSizeChange}
+        setPlacedFields={designer.setPlaced}
+        placedItems={designer.placed}
         pageSize={designer.PageSize}
         PAGE_SIZES={PAGE_SIZES}
         customWidth={designer.canvasWidth}
@@ -405,6 +887,8 @@ const DesignerPage = () => {
         deleteItem={id => {
           designer.setPlaced(p => p.filter(item => item.id !== id))
         }}
+        canvasWidth={designer.canvasWidth}
+        canvasHeight={designer.canvasHeight}
       />
     </Card>
   )

@@ -10,6 +10,7 @@ type AvailableTemplates = Record<string, AvailableTemplate>
 
 interface SidebarProps {
   availableItems: Field[]
+  placedItems: PlacedField[]
   availableFields: Field[]
   availableTemplates?: AvailableTemplates
   showSidebar: boolean
@@ -20,6 +21,7 @@ interface SidebarProps {
   exportTemplate: () => void
   importTemplate: (e: React.ChangeEvent<HTMLInputElement>) => void
   setPageSize: (size: string) => void
+  setPlacedFields: (fields: PlacedField[]) => void
   pageSize: string
   PAGE_SIZES: any
   customWidth: number
@@ -39,9 +41,13 @@ import { Card } from '@muiElements'
 import { Tooltip, Typography } from '@mui/material'
 import { Orientation } from './enums'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
+import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
+import ChaarvyFlex from 'src/reusable_components/ChaarvyFlex'
+import { generateAndDownloadPDF } from 'src/reusable_components/generateAndDownloadPDF'
 
 const Sidebar: React.FC<SidebarProps> = ({
   availableItems,
+  placedItems,
   availableFields,
   availableTemplates,
   showSidebar,
@@ -50,6 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   exportTemplate,
   importTemplate,
   setPageSize,
+  setPlacedFields,
   pageSize,
   customWidth,
   setCustomWidth,
@@ -68,10 +75,14 @@ const Sidebar: React.FC<SidebarProps> = ({
         id: key,
         label: template.label,
         onOptionClick: () => {
-          console.log(`Template ${key} selected`)
+          setPlacedFields(template.placedFields)
         }
       }))
     : []
+
+  const handleSampleDownloadClick = () => {
+    generateAndDownloadPDF({ fields: placedItems }, [])
+  }
 
   return (
     <div
@@ -177,43 +188,29 @@ const Sidebar: React.FC<SidebarProps> = ({
             </Card>
           </ChaarvyAccordian>
 
-          <button
-            onClick={exportTemplate}
-            style={{
-              width: '100%',
-              padding: 8,
-              background: '#4CAF50',
-              color: 'white',
-              border: 'none',
-              borderRadius: 4,
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: 500,
-              marginBottom: 8
-            }}
-          >
-            💾 Export Template
-          </button>
-          <input type='file' accept='.json' onChange={importTemplate} style={{ display: 'none' }} id='import-input' />
-          <button
-            onClick={() => document.getElementById('import-input')?.click()}
-            style={{
-              width: '100%',
-              padding: 8,
-              background: '#FF9800',
-              color: 'white',
-              border: 'none',
-              borderRadius: 4,
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: 500
-            }}
-          >
-            📂 Import Template
-          </button>
-          <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid #ddd' }} />
-          <div style={{ marginTop: 16 }}>
-            <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 500 }}>Page Size</label>
+          <ChaarvyFlex justifyContent='space-between' alignItems='center' marginTop={12}>
+            <ChaarvyButton
+              fullWidth
+              leftIcon='💾'
+              onClick={exportTemplate}
+              id='export-template-button'
+              label='Export Template'
+              color='warning'
+            />
+            <input type='file' accept='.json' onChange={importTemplate} style={{ display: 'none' }} id='import-input' />
+
+            <ChaarvyButton
+              leftIcon='📂'
+              fullWidth
+              onClick={() => document.getElementById('import-input')?.click()}
+              id='import-template-button'
+              label='Import Template'
+              color='success'
+            />
+          </ChaarvyFlex>
+          <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid #ddd' }} />
+          <ChaarvyFlex flexDirection='column' gap='8px' marginBottom={12}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 14, fontWeight: 500 }}>Page Size</label>
             <select
               value={pageSize}
               onChange={e => setPageSize(e.target.value)}
@@ -265,23 +262,15 @@ const Sidebar: React.FC<SidebarProps> = ({
               onChange={e => setTemplateName(e.target.value)}
               style={{ width: '100%', padding: 8, marginBottom: 12, border: '1px solid #ddd', borderRadius: 4 }}
             />
-            <button
-              onClick={saveTemplate}
-              style={{
-                width: '100%',
-                padding: 10,
-                background: '#2196F3',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 14,
-                fontWeight: 500
-              }}
-            >
-              Save Template
-            </button>
-          </div>
+          </ChaarvyFlex>
+          <ChaarvyFlex>
+            <ChaarvyButton onClick={saveTemplate} id='save-template-button' label='Save Template' />
+            <ChaarvyButton
+              onClick={handleSampleDownloadClick}
+              id='download-sample-template-button'
+              label='Download Sample Template'
+            />
+          </ChaarvyFlex>
         </>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, paddingTop: 50 }}></div>
