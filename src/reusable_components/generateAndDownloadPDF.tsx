@@ -66,10 +66,17 @@ function getPageDimensions(template: any) {
 
 function resolveFieldContent(field: PlacedField, data: Record<string, any>): string {
   if (field.type !== 'text' && field.type !== 'field') return field.content || ''
-  if (field.fieldKey && data[field.fieldKey] !== undefined) {
+  let content = field.content || ''
+  content = content.replace(/{{\s*([\w.]+)\s*}}/g, (match, key) => {
+    if (data[key] !== undefined && data[key] !== null) {
+      return String(data[key])
+    }
+    return match
+  })
+  if (!content && field.fieldKey && data[field.fieldKey] !== undefined) {
     return String(data[field.fieldKey])
   }
-  return field.content || ''
+  return content
 }
 
 function drawText(pdf: jsPDF, text: string, field: PlacedField, xMm: number, yMm: number, widthMm: number) {
@@ -119,7 +126,11 @@ function drawText(pdf: jsPDF, text: string, field: PlacedField, xMm: number, yMm
 }
 
 function drawShape(pdf: jsPDF, field: PlacedField, xMm: number, yMm: number, widthMm: number, heightMm: number) {
-  const color = field.color || '#ffffff'
+  let color = field.color || '#ffffff'
+  // If color is not a valid hex, default to white
+  if (!/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(color)) {
+    color = '#ffffff'
+  }
   const r = parseInt(color.slice(1, 3), 16)
   const g = parseInt(color.slice(3, 5), 16)
   const b = parseInt(color.slice(5, 7), 16)

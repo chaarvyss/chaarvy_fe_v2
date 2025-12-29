@@ -15,7 +15,7 @@ interface PropertiesPanelProps {
   canvasHeight: number
 }
 
-import { FONT_FAMILIES, FONT_WEIGHTS } from './constants'
+import { FONT_FAMILIES } from './constants'
 import { Card } from '@muiElements'
 import { Button, Grid, TextField } from '@mui/material'
 
@@ -189,19 +189,47 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
               Fill Color
             </label>
-            <input
-              type='color'
-              value={item.color || '#ffffffff'}
-              onChange={e => updateItemProperty(item.id, 'color', e.target.value)}
-              style={{
-                width: '100%',
-                height: 40,
-                padding: 2,
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                cursor: 'pointer'
-              }}
-            />
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                type='color'
+                value={item.color && item.color !== 'transparent' ? item.color : '#ffffffff'}
+                onChange={e => {
+                  // Always enable fill when picking a color
+                  updateItemProperty(item.id, 'color', e.target.value)
+                }}
+                style={{
+                  flex: 1,
+                  height: 40,
+                  padding: 2,
+                  border: '1px solid #ddd',
+                  borderRadius: 4,
+                  cursor: 'pointer'
+                }}
+              />
+              <button
+                type='button'
+                style={{
+                  flex: 'none',
+                  padding: '0 12px',
+                  height: 40,
+                  border: '1px solid #ddd',
+                  borderRadius: 4,
+                  background: item.color === 'transparent' ? '#eee' : '#fff',
+                  color: '#666',
+                  cursor: 'pointer',
+                  fontSize: 12
+                }}
+                onClick={() => updateItemProperty(item.id, 'color', 'transparent')}
+                title='No Fill (Transparent)'
+              >
+                No Fill
+              </button>
+            </div>
+            {item.color === 'transparent' && (
+              <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
+                Fill is transparent. Pick a color to enable fill.
+              </div>
+            )}
           </div>
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
@@ -215,6 +243,36 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               value={item.opacity !== undefined ? item.opacity : 1}
               onChange={e => updateItemProperty(item.id, 'opacity', Number(e.target.value))}
               style={{ width: '100%' }}
+            />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Border Width
+            </label>
+            <input
+              type='number'
+              min='0'
+              value={item.borderWidth !== undefined ? item.borderWidth : 2}
+              onChange={e => updateItemProperty(item.id, 'borderWidth', Number(e.target.value))}
+              style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+            />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Border Color
+            </label>
+            <input
+              type='color'
+              value={item.borderColor || '#333333'}
+              onChange={e => updateItemProperty(item.id, 'borderColor', e.target.value)}
+              style={{
+                width: '100%',
+                height: 40,
+                padding: 2,
+                border: '1px solid #ddd',
+                borderRadius: 4,
+                cursor: 'pointer'
+              }}
             />
           </div>
         </>
@@ -251,18 +309,17 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           </div>
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-              Font Weight
+              Font Style
             </label>
             <select
               value={item.fontWeight || 'normal'}
               onChange={e => updateItemProperty(item.id, 'fontWeight', e.target.value)}
               style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
             >
-              {FONT_WEIGHTS.map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
+              <option value='normal'>Normal</option>
+              <option value='bold'>Bold</option>
+              <option value='italic'>Italic</option>
+              <option value='bolditalic'>Bold Italic</option>
             </select>
           </div>
           <div style={{ marginBottom: 16 }}>

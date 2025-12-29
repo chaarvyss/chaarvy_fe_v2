@@ -81,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     : []
 
   const handleSampleDownloadClick = () => {
-    generateAndDownloadPDF({ fields: placedItems }, [])
+    generateAndDownloadPDF({ fields: placedItems }, { name: 'Sample Data' })
   }
 
   return (

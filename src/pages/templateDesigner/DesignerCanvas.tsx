@@ -120,20 +120,37 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
   }
 
   const renderItem = (p: PlacedField) => {
+    // Helper to map jsPDF fontWeight to CSS fontWeight/fontStyle
+    const getFontStyles = (fontWeight?: string) => {
+      switch (fontWeight) {
+        case 'bold':
+          return { fontWeight: 'bold', fontStyle: 'normal' }
+        case 'italic':
+          return { fontWeight: 'normal', fontStyle: 'italic' }
+        case 'bolditalic':
+          return { fontWeight: 'bold', fontStyle: 'italic' }
+        default:
+          return { fontWeight: 'normal', fontStyle: 'normal' }
+      }
+    }
+
     if (p.type === FieldType.FIELD) {
+      const fontStyles = getFontStyles(p.fontWeight)
       return (
         <span
           style={{
             textAlign: p.textAlign || 'left',
             fontSize: p.fontSize,
             color: p.color || '#000',
-            fontFamily: p.fontFamily
+            fontFamily: p.fontFamily,
+            ...fontStyles
           }}
         >
           {'{{' + p.fieldKey + '}}'}
         </span>
       )
     } else if (p.type === FieldType.TEXT) {
+      const fontStyles = getFontStyles(p.fontWeight)
       if (editingItem === p.id) {
         return (
           <input
@@ -150,7 +167,8 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
               width: p.width || 120,
               border: '1px solid #2196F3',
               borderRadius: 4,
-              fontFamily: p.fontFamily
+              fontFamily: p.fontFamily,
+              ...fontStyles
             }}
           />
         )
@@ -162,7 +180,8 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
             fontSize: p.fontSize,
             cursor: 'pointer',
             color: p.color || '#000',
-            fontFamily: p.fontFamily
+            fontFamily: p.fontFamily,
+            ...fontStyles
           }}
           onDoubleClick={() => setEditingItem(p.id)}
         >
@@ -170,9 +189,10 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
         </span>
       )
     } else if (p.type === FieldType.SHAPE) {
-      const borderStyle = p.borderWidth
-        ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
-        : '2px solid #333'
+      const borderStyle =
+        p.borderWidth && p.borderWidth > 0
+          ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
+          : 'none'
       const fillColor = p.color || 'transparent'
       const fillOpacity = p.opacity !== undefined ? p.opacity : 1
       if (p.shapeType === ShapeType.RECTANGLE) {

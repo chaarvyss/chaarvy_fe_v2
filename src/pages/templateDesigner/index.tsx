@@ -509,6 +509,10 @@ const DesignerPage = () => {
         }
       ] as PlacedField[]
     },
+    internship_agreement_v1: {
+      label: 'Internship Agreement Template',
+      placedFields: []
+    },
     invoice_v2: {
       label: 'Invoice Template',
       placedFields: []
@@ -592,6 +596,7 @@ const DesignerPage = () => {
         newItem.type = FieldType.TEXT
       } else {
         newItem.shapeType = itemData.key
+        newItem.color = 'transparent' // Default to no fill
         const sizes = DEFAULT_SIZES[itemData.key as keyof typeof DEFAULT_SIZES]
         if (sizes && typeof sizes === 'object') {
           newItem.width = sizes.width
