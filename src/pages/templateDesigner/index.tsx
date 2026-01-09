@@ -1,15 +1,16 @@
 import React, { DragEvent, useEffect, useMemo, useState } from 'react'
+
+import { Card } from '@muiElements'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
-import { useDesignerState } from './designerHooks'
-import DesignerCanvas from './DesignerCanvas'
-import Sidebar from './Sidebar'
-import PropertiesPanel from './PropertiesPanel'
+import { fileToBase64 } from 'src/utils/helpers'
 
 import { AVAILABLE_ITEMS, DEFAULT_SIZES, PAGE_SIZES } from './constants'
-import { Field, PlacedField } from './types'
+import DesignerCanvas from './DesignerCanvas'
+import { useDesignerState } from './designerHooks'
 import { FieldType, Orientation } from './enums'
-import { Card } from '@muiElements'
-import { fileToBase64 } from 'src/utils/helpers'
+import PropertiesPanel from './PropertiesPanel'
+import Sidebar from './Sidebar'
+import { Field, PlacedField } from './types'
 
 const DesignerPage = () => {
   // Need to get from api
@@ -18,26 +19,7 @@ const DesignerPage = () => {
     { header: 'Column 2', dataKey: 'col1' }
   ]
 
-  /*
-  in the above DEFAULT_TABLE_COLUMNS, 
-  header is the display name of the column
-  dataKey is the key in the data object for that column
-  note: datakey must match with data from api
-  */
-
-  // Need to get from api
-  const AVAILABLE_FIELDS: Field[] = [
-    {
-      key: 'name',
-      type: 'field',
-      label: 'Name'
-    },
-    {
-      key: 'email',
-      type: 'field',
-      label: 'Email'
-    }
-  ]
+  const [availableFields, setAvailableFields] = useState<Field[]>([])
 
   // TODO: Need to add a provision to see how the data looks like in table
   const DEFAULT_TABLE_DATA = []
@@ -507,15 +489,41 @@ const DesignerPage = () => {
           content: 'Application Fee :',
           width: 262
         }
-      ] as PlacedField[]
+      ] as PlacedField[],
+      availableFields: [
+        { key: 'studentName', type: 'field', label: 'Student Name' },
+        { key: 'fatherName', type: 'field', label: 'Father Name' },
+        { key: 'motherName', type: 'field', label: 'Mother Name' },
+        { key: 'fatherOccupation', type: 'field', label: 'Father Occupation' },
+        { key: 'motherOccupation', type: 'field', label: 'Mother Occupation' },
+        { key: 'gender', type: 'field', label: 'Gender' },
+        { key: 'dateOfBirth', type: 'field', label: 'Date of Birth' },
+        { key: 'religion', type: 'field', label: 'Religion' },
+        { key: 'community', type: 'field', label: 'Community' },
+        { key: 'subCaste', type: 'field', label: 'Sub Caste' },
+        { key: 'admissionType', type: 'field', label: 'Admission Type' },
+        { key: 'studentAadhar', type: 'field', label: 'Student Aadhar' },
+        { key: 'fatherAadhar', type: 'field', label: 'Father Aadhar' },
+        { key: 'motherAadhar', type: 'field', label: 'Mother Aadhar' },
+        { key: 'group', type: 'field', label: 'Group' },
+        { key: 'medium', type: 'field', label: 'Medium' },
+        { key: 'secondLanguage', type: 'field', label: 'Second Language' },
+        { key: 'address', type: 'field', label: 'Address' },
+        { key: 'phoneNumber1', type: 'field', label: 'Phone Number 1' },
+        { key: 'phoneNumber2', type: 'field', label: 'Phone Number 2' },
+        { key: 'applicationNumber', type: 'field', label: 'Application Number' },
+        { key: 'applicationFee', type: 'field', label: 'Application Fee' }
+      ]
     },
     internship_agreement_v1: {
       label: 'Internship Agreement Template',
-      placedFields: []
+      placedFields: [],
+      availableFields: []
     },
     invoice_v2: {
       label: 'Invoice Template',
-      placedFields: []
+      placedFields: [],
+      availableFields: []
     }
   }
 
@@ -525,6 +533,7 @@ const DesignerPage = () => {
     if (DEFAULT_TABLE_COLUMNS.length > 0) {
       return [...AVAILABLE_ITEMS, { key: 'table', type: 'table', label: 'Table' }]
     }
+
     return AVAILABLE_ITEMS
   }, [DEFAULT_TABLE_COLUMNS])
 
@@ -558,6 +567,7 @@ const DesignerPage = () => {
       )
     }
     window.addEventListener('keydown', handleKeyDown)
+
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [designer.selectedItem])
 
@@ -574,7 +584,6 @@ const DesignerPage = () => {
     const rect = designer.canvasRef.current?.getBoundingClientRect()
     let x = rect ? e.clientX - rect.left : 100
     let y = rect ? e.clientY - rect.top : 100
-    // Clamp x and y to be within canvas bounds
     x = Math.max(0, Math.min(x, designer.canvasWidth))
     y = Math.max(0, Math.min(y, designer.canvasHeight))
     const newItem: PlacedField = {
@@ -638,8 +647,8 @@ const DesignerPage = () => {
   const handleMouseMove = (e: React.MouseEvent) => {
     if (designer.dragState.isDragging && designer.dragState.itemId) {
       const rect = designer.canvasRef.current?.getBoundingClientRect()
-      let moveX = e.clientX - (rect ? rect.left : 0)
-      let moveY = e.clientY - (rect ? rect.top : 0)
+      const moveX = e.clientX - (rect ? rect.left : 0)
+      const moveY = e.clientY - (rect ? rect.top : 0)
       let newX = moveX - designer.dragState.offsetX
       let newY = moveY - designer.dragState.offsetY
       const draggedItem = designer.placed.find(item => item.id === designer.dragState.itemId)
@@ -691,7 +700,7 @@ const DesignerPage = () => {
       designer.setPlaced(p =>
         p.map(item => {
           if (item.id !== designer.resizeState.itemId) return item
-          let { startWidth, startHeight, startX, startY, handle } = designer.resizeState
+          const { startWidth, startHeight, startX, startY, handle } = designer.resizeState
           let newWidth = startWidth
           let newHeight = startHeight
           let newX = item.x
@@ -732,6 +741,7 @@ const DesignerPage = () => {
               newX = item.x + (moveX - startX)
               break
           }
+
           return { ...item, width: newWidth, height: newHeight, x: newX, y: newY }
         })
       )
@@ -788,6 +798,27 @@ const DesignerPage = () => {
     })
   }
 
+  const handleImportTemplate = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = event => {
+      try {
+        const content = event.target?.result as string
+        const importedData = JSON.parse(content)
+        if (importedData.fields && Array.isArray(importedData.fields)) {
+          designer.setPlaced(importedData.fields)
+        }
+        if (importedData.templateName) {
+          designer.setTemplateName(importedData.templateName)
+        }
+      } catch (error) {
+        console.error('Error parsing imported template:', error)
+      }
+    }
+    reader.readAsText(file)
+  }
+
   return (
     <Card
       style={{ height: '100vh', overflow: 'hidden', display: 'flex' }}
@@ -806,20 +837,18 @@ const DesignerPage = () => {
     >
       <Sidebar
         availableItems={FilteredAvailableItems}
-        availableFields={AVAILABLE_FIELDS}
+        availableFields={availableFields}
         availableTemplates={availableTemplates}
         showSidebar={showSidebar}
         setShowSidebar={setShowSidebar}
         handleDragStart={handleDragStart}
-        historyIndex={designer.historyIndex}
-        historyLength={designer.history.length}
         exportTemplate={handleExportTemplate}
-        importTemplate={() => {}}
+        importTemplate={handleImportTemplate}
         setPageSize={handlePageSizeChange}
         setPlacedFields={designer.setPlaced}
+        setAvailableFields={setAvailableFields}
         placedItems={designer.placed}
         pageSize={designer.PageSize}
-        PAGE_SIZES={PAGE_SIZES}
         customWidth={designer.canvasWidth}
         setCustomWidth={designer.setCanvasWidth}
         customHeight={designer.canvasHeight}
@@ -834,8 +863,6 @@ const DesignerPage = () => {
         placed={designer.placed}
         selectedItem={designer.selectedItem}
         editingItem={designer.editingItem}
-        dragState={designer.dragState}
-        resizeState={designer.resizeState}
         guides={designer.guides}
         zoom={designer.zoom}
         canvasWidth={designer.canvasWidth}
@@ -861,8 +888,6 @@ const DesignerPage = () => {
           }
         }}
         setEditingItem={designer.setEditingItem}
-        deleteItem={() => {}}
-        renderPlacedItem={() => null}
         onDrop={handleDrop}
       />
       <PropertiesPanel

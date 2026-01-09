@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react'
-import { PlacedField } from './types'
-import { FieldType, ShapeType } from './enums'
+
 import EditableImage from 'src/reusable_components/editableImage'
+
+import { FieldType, ShapeType } from './enums'
+import { PlacedField } from './types'
 
 interface DesignerCanvasProps {
   placed: PlacedField[]
   selectedItem: string | null
   editingItem: string | null
-  dragState: any
-  resizeState: any
   guides: any[]
   zoom: number
   canvasWidth: number
@@ -24,8 +24,6 @@ interface DesignerCanvasProps {
   setHoveredItem: (id: string | null) => void
   updateTextContent: (id: string, content: string) => void
   setEditingItem: (id: string | null) => void
-  deleteItem: (id: string) => void
-  renderPlacedItem: (p: PlacedField) => React.ReactNode
   onDrop: (e: React.DragEvent) => void
   setSelectedItem: (id: string | null) => void
 }
@@ -59,9 +57,6 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
     startWidth: number
   } | null>(null)
 
-  const fileInputRef = React.useRef<HTMLInputElement>(null)
-  const [hovered, setHovered] = React.useState(false)
-
   const handleColResizeMouseDown = (e: React.MouseEvent, tableId: string, colIdx: number, colWidth: number) => {
     e.stopPropagation()
     setColResize({ tableId, colIdx, startX: e.clientX, startWidth: colWidth })
@@ -72,6 +67,7 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
       const handleMouseMove = (e: MouseEvent) => {
         const delta = e.clientX - colResize.startX
         const newWidth = Math.max(40, colResize.startWidth + delta)
+
         // Find the table and update its columns
         const table = placed.find(p => p.id === colResize.tableId)
         if (!table || !table.columns) return
@@ -83,6 +79,7 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
       const handleMouseUp = () => setColResize(null)
       window.addEventListener('mousemove', handleMouseMove)
       window.addEventListener('mouseup', handleMouseUp)
+
       return () => {
         window.removeEventListener('mousemove', handleMouseMove)
         window.removeEventListener('mouseup', handleMouseUp)
@@ -136,6 +133,7 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
 
     if (p.type === FieldType.FIELD) {
       const fontStyles = getFontStyles(p.fontWeight)
+
       return (
         <span
           style={{
@@ -173,6 +171,7 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
           />
         )
       }
+
       return (
         <span
           style={{
@@ -235,8 +234,6 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
             width: p.width,
             height: p.height
           }}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
         >
           <EditableImage
             src={p.imageUrl || ''}
@@ -250,6 +247,7 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
       )
     } else if (p.type === FieldType.TABLE) {
       const columns = p.columns?.map(col => ({ ...col, width: col?.width || 100 }))
+
       return (
         <table style={{ borderCollapse: 'collapse', fontSize: 12 }}>
           <thead>
@@ -349,6 +347,7 @@ const DesignerCanvas: React.FC<DesignerCanvasProps> = ({
         </table>
       )
     }
+
     return null
   }
 

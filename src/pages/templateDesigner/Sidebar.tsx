@@ -1,9 +1,11 @@
+import { Tooltip, Typography } from '@mui/material'
 import React from 'react'
-import { Field, PlacedField } from './types'
 
 interface AvailableTemplate {
   label: string
   placedFields: PlacedField[]
+  availableFields?: Field[]
+  values?: Record<string, string>
 }
 
 type AvailableTemplates = Record<string, AvailableTemplate>
@@ -16,14 +18,12 @@ interface SidebarProps {
   showSidebar: boolean
   setShowSidebar: (show: boolean) => void
   handleDragStart: (e: React.DragEvent, item: Field) => void
-  historyIndex: number
-  historyLength: number
   exportTemplate: () => void
   importTemplate: (e: React.ChangeEvent<HTMLInputElement>) => void
   setPageSize: (size: string) => void
   setPlacedFields: (fields: PlacedField[]) => void
+  setAvailableFields: (fields: Field[]) => void
   pageSize: string
-  PAGE_SIZES: any
   customWidth: number
   setCustomWidth: (w: number) => void
   customHeight: number
@@ -35,15 +35,16 @@ interface SidebarProps {
   saveTemplate: () => void
 }
 
-import { PAGE_SIZES } from './constants'
-import ChaarvyAccordian from 'src/reusable_components/chaarvyAccordian'
 import { Card } from '@muiElements'
-import { Tooltip, Typography } from '@mui/material'
-import { Orientation } from './enums'
-import DropDownMenu from 'src/reusable_components/dropDownMenu'
+import ChaarvyAccordian from 'src/reusable_components/chaarvyAccordian'
 import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
 import ChaarvyFlex from 'src/reusable_components/ChaarvyFlex'
+import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import { generateAndDownloadPDF } from 'src/reusable_components/generateAndDownloadPDF'
+
+import { PAGE_SIZES } from './constants'
+import { Orientation } from './enums'
+import { Field, PlacedField } from './types'
 
 const Sidebar: React.FC<SidebarProps> = ({
   availableItems,
@@ -57,6 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   importTemplate,
   setPageSize,
   setPlacedFields,
+  setAvailableFields,
   pageSize,
   customWidth,
   setCustomWidth,
@@ -76,6 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         label: template.label,
         onOptionClick: () => {
           setPlacedFields(template.placedFields)
+          setAvailableFields(template.availableFields || [])
         }
       }))
     : []
