@@ -34,4 +34,4 @@ export type PlacedField = {
   tableOptions?: any
 }
 
-export type Field = { key: string; type: string; label: string }
+export type Field = { id: string; key: string; type: string; label: string }

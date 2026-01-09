@@ -8,6 +8,7 @@ const interRoutePrefix = {
   fees: `${interPrefix}/fees`,
   list: `${interPrefix}/list`,
   program: `${interPrefix}/program`,
+  templates: `${interPrefix}/templates`,
   view: `${interPrefix}/view`,
   dashboard: `${interPrefix}/dash_board`
 }
@@ -127,6 +128,10 @@ export const urlConstants = {
     updateProgramSecondLanguages: `${interRoutePrefix.program}/update-program-second-language`,
     updateProgramMediums: `${interRoutePrefix.program}/update-program-mediums`,
     updateProgramSections: `${interRoutePrefix.program}/update-program-sections`
+  },
+  templates: {
+    getAvilableTemplates: `${interRoutePrefix.templates}/available_templates`,
+    updateAvailableTemplates: `${interRoutePrefix.templates}/update_available_templates`
   },
   view: {
     programSegments: `${interRoutePrefix.view}/program-segment`,

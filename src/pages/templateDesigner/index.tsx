@@ -1,7 +1,13 @@
 import React, { DragEvent, useEffect, useMemo, useState } from 'react'
+import { toast } from 'react-toastify'
 
 import { Card } from '@muiElements'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
+import {
+  TemplatesResponse,
+  useGetAvailableTemplatesQuery,
+  useUpdateAvailableTemplatesMutation
+} from 'src/store/services/templateServices'
 import { fileToBase64 } from 'src/utils/helpers'
 
 import { AVAILABLE_ITEMS, DEFAULT_SIZES, PAGE_SIZES } from './constants'
@@ -13,525 +19,39 @@ import Sidebar from './Sidebar'
 import { Field, PlacedField } from './types'
 
 const DesignerPage = () => {
-  // Need to get from api
   const DEFAULT_TABLE_COLUMNS = [
     { header: 'Column 1', dataKey: 'col2' },
     { header: 'Column 2', dataKey: 'col1' }
   ]
 
+  const [selectedTemplate, setSelectedTemplate] = useState<string>()
   const [availableFields, setAvailableFields] = useState<Field[]>([])
+  const [availableTemplates, setAvailableTemplates] = useState<TemplatesResponse>({})
 
   // TODO: Need to add a provision to see how the data looks like in table
   const DEFAULT_TABLE_DATA = []
 
-  // TODO: NEED TO GET FROM API OR DYNAMIC
+  const { data: templateData } = useGetAvailableTemplatesQuery()
+  const [updateAvailableTemplates] = useUpdateAvailableTemplatesMutation()
 
-  const availableTemplates = {
-    admission_v1: {
-      label: 'Admission Form Acknowledgement Template',
-      placedFields: [
-        {
-          id: 'shape_1766736931787',
-          type: 'text',
-          x: 197,
-          y: 39,
-          fontSize: 32,
-          visible: true,
-          zIndex: 0,
-          opacity: 1,
-          rotation: 0,
-          content: 'Bhavishya junior college',
-          width: 394,
-          height: 46,
-          fontWeight: 'bolder'
-        },
-        {
-          id: 'shape_1766737212614',
-          type: 'text',
-          x: 216,
-          y: 88,
-          fontSize: 16,
-          visible: true,
-          zIndex: 1,
-          opacity: 1,
-          rotation: 0,
-          content: 'AFFILIATED TO BIEAP, COLLEGE CODE:11095',
-          width: 357,
-          height: 30
-        },
-        {
-          id: 'shape_1766737297925',
-          type: 'text',
-          x: 184,
-          y: 118,
-          fontSize: 16,
-          visible: true,
-          zIndex: 2,
-          opacity: 1,
-          rotation: 0,
-          content: 'APPANAVEEDU, ELURU ROAD, HANUMAN JUNCTION',
-          width: 422,
-          height: 34
-        },
-        {
-          id: 'shape_1766737364992',
-          type: 'text',
-          x: 295,
-          y: 167,
-          fontSize: 16,
-          visible: true,
-          zIndex: 3,
-          opacity: 1,
-          rotation: 0,
-          content: 'Application for Admission',
-          width: 200,
-          height: 27
-        },
-        {
-          id: 'shape_1766737439189',
-          type: 'text',
-          x: 80,
-          y: 239,
-          fontSize: 16,
-          visible: true,
-          zIndex: 4,
-          opacity: 1,
-          rotation: 0,
-          content: '1. Name of the student',
-          width: 242,
-          height: 21
-        },
-        {
-          id: 'shape_1766737553392',
-          type: 'text',
-          x: 97,
-          y: 255,
-          fontSize: 12,
-          visible: true,
-          zIndex: 5,
-          opacity: 1,
-          rotation: 0,
-          content: '(as per SSC in Block Letters)',
-          width: 178,
-          height: 19
-        },
-        {
-          id: 'shape_1766737631952',
-          type: 'text',
-          x: 81,
-          y: 286,
-          fontSize: 16,
-          visible: true,
-          zIndex: 6,
-          opacity: 1,
-          rotation: 0,
-          content: '2. Name of the Father',
-          width: 242,
-          height: 20
-        },
-        {
-          id: 'shape_1766737690211',
-          type: 'text',
-          x: 81,
-          y: 311,
-          fontSize: 16,
-          visible: true,
-          zIndex: 7,
-          opacity: 1,
-          rotation: 0,
-          content: '3. Name of the Mother',
-          width: 242,
-          height: 24
-        },
-        {
-          id: 'shape_1766737732342',
-          type: 'text',
-          x: 81,
-          y: 340,
-          fontSize: 16,
-          visible: true,
-          zIndex: 8,
-          opacity: 1,
-          rotation: 0,
-          content: '4. Occupation of the parent',
-          width: 242
-        },
-        {
-          id: 'shape_1766737831117',
-          type: 'text',
-          x: 119,
-          y: 376,
-          fontSize: 16,
-          visible: true,
-          zIndex: 9,
-          opacity: 1,
-          rotation: 0,
-          content: 'Father '
-        },
-        {
-          id: 'shape_1766737859141',
-          type: 'text',
-          x: 397,
-          y: 376,
-          fontSize: 16,
-          visible: true,
-          zIndex: 10,
-          opacity: 1,
-          rotation: 0,
-          content: 'Mother'
-        },
-        {
-          id: 'shape_1766737880360',
-          type: 'text',
-          x: 82,
-          y: 409,
-          fontSize: 16,
-          visible: true,
-          zIndex: 11,
-          opacity: 1,
-          rotation: 0,
-          content: '5. Gender',
-          width: 242
-        },
-        {
-          id: 'shape_1766737930393',
-          type: 'text',
-          x: 81,
-          y: 438,
-          fontSize: 16,
-          visible: true,
-          zIndex: 12,
-          opacity: 1,
-          rotation: 0,
-          content: '6. Date of Birth',
-          width: 242
-        },
-        {
-          id: 'shape_1766740938093',
-          type: 'text',
-          x: 82,
-          y: 470,
-          fontSize: 16,
-          visible: true,
-          zIndex: 13,
-          opacity: 1,
-          rotation: 0,
-          content: '7. Nationality : Indian',
-          width: 242
-        },
-        {
-          id: 'shape_1766740986673',
-          type: 'text',
-          x: 397,
-          y: 470,
-          fontSize: 16,
-          visible: true,
-          zIndex: 14,
-          opacity: 1,
-          rotation: 0,
-          content: '8. Religion :',
-          width: 242
-        },
-        {
-          id: 'shape_1766741071558',
-          type: 'text',
-          x: 82,
-          y: 502,
-          fontSize: 16,
-          visible: true,
-          zIndex: 15,
-          opacity: 1,
-          rotation: 0,
-          content: '9. Community : OC / BC / SC / ST',
-          width: 262
-        },
-        {
-          id: 'shape_1766741107127',
-          type: 'text',
-          x: 397,
-          y: 502,
-          fontSize: 16,
-          visible: true,
-          zIndex: 16,
-          opacity: 1,
-          rotation: 0,
-          content: 'Sub Caste :'
-        },
-        {
-          id: 'shape_1766741173823',
-          type: 'text',
-          x: 82,
-          y: 531,
-          fontSize: 16,
-          visible: true,
-          zIndex: 17,
-          opacity: 1,
-          rotation: 0,
-          content: '10. Type of Admission : Jr. Inter / Sr. Inter',
-          width: 500
-        },
-        {
-          id: 'shape_1766741278813',
-          type: 'text',
-          x: 81,
-          y: 564,
-          fontSize: 16,
-          visible: true,
-          zIndex: 18,
-          opacity: 1,
-          rotation: 0,
-          content: '11. Student Aadhar number :',
-          width: 262,
-          height: 23
-        },
-        {
-          id: 'shape_1766741427124',
-          type: 'text',
-          x: 81,
-          y: 592,
-          fontSize: 16,
-          visible: true,
-          zIndex: 19,
-          opacity: 1,
-          rotation: 0,
-          content: '12. Father Aadhar No:',
-          width: 262
-        },
-        {
-          id: 'shape_1766741474490',
-          type: 'text',
-          x: 80,
-          y: 618,
-          fontSize: 16,
-          visible: true,
-          zIndex: 20,
-          opacity: 1,
-          rotation: 0,
-          content: '13. Mother Aadhar No :',
-          width: 262
-        },
-        {
-          id: 'shape_1766741601233',
-          type: 'text',
-          x: 82,
-          y: 648,
-          fontSize: 16,
-          visible: true,
-          zIndex: 21,
-          opacity: 1,
-          rotation: 0,
-          content: '12. Group :',
-          width: 262,
-          height: 23
-        },
-        {
-          id: 'shape_1766741817876',
-          type: 'text',
-          x: 81,
-          y: 675,
-          fontSize: 16,
-          visible: true,
-          zIndex: 22,
-          opacity: 1,
-          rotation: 0,
-          content: '13. Medium :',
-          width: 262
-        },
-        {
-          id: 'shape_1766741838829',
-          type: 'text',
-          x: 80,
-          y: 704,
-          fontSize: 16,
-          visible: true,
-          zIndex: 23,
-          opacity: 1,
-          rotation: 0,
-          content: '14. Second Landuage :',
-          width: 262
-        },
-        {
-          id: 'shape_1766741889677',
-          type: 'text',
-          x: 80,
-          y: 734,
-          fontSize: 16,
-          visible: true,
-          zIndex: 24,
-          opacity: 1,
-          rotation: 0,
-          content: '15. Siblings',
-          width: 100
-        },
-        {
-          id: 'table_1766741962320',
-          type: 'table',
-          x: 129,
-          y: 766,
-          fontSize: 16,
-          visible: true,
-          zIndex: 25,
-          opacity: 1,
-          rotation: 0,
-          columns: [
-            {
-              header: 'Student Name',
-              dataKey: 'studentName',
-              width: 216
-            },
-            {
-              header: 'Standard',
-              dataKey: 'standard',
-              width: 160
-            },
-            {
-              header: 'School',
-              dataKey: 'school',
-              width: 213
-            }
-          ],
-          data: [],
-          width: 605,
-          height: 47
-        },
-        {
-          id: 'shape_1766742221247',
-          type: 'text',
-          x: 81,
-          y: 887,
-          fontSize: 16,
-          visible: true,
-          zIndex: 26,
-          opacity: 1,
-          rotation: 0,
-          content: '14. Address for Communication:',
-          width: 262,
-          height: 29
-        },
-        {
-          id: 'shape_1766742312448',
-          type: 'shape',
-          x: 79,
-          y: 916,
-          fontSize: 16,
-          visible: true,
-          zIndex: 27,
-          opacity: 1,
-          rotation: 0,
-          shapeType: 'rectangle',
-          borderWidth: 2,
-          width: 308,
-          height: 92
-        },
-        {
-          id: 'shape_1766742363344',
-          type: 'text',
-          x: 403,
-          y: 888,
-          fontSize: 16,
-          visible: true,
-          zIndex: 28,
-          opacity: 1,
-          rotation: 0,
-          content: 'Phone number :',
-          width: 262
-        },
-        {
-          id: 'shape_1766742396276',
-          type: 'text',
-          x: 403,
-          y: 917,
-          fontSize: 16,
-          visible: true,
-          zIndex: 29,
-          opacity: 1,
-          rotation: 0,
-          content: 'Phone number 2:',
-          width: 262
-        },
-        {
-          id: 'shape_1766742518110',
-          type: 'shape',
-          x: 0,
-          y: 1028,
-          fontSize: 16,
-          visible: true,
-          zIndex: 30,
-          opacity: 1,
-          rotation: 0,
-          shapeType: 'line',
-          width: 791,
-          height: 2
-        },
-        {
-          id: 'shape_1766742539058',
-          type: 'text',
-          x: 44,
-          y: 1052,
-          fontSize: 16,
-          visible: true,
-          zIndex: 31,
-          opacity: 1,
-          rotation: 0,
-          content: 'Application No :',
-          width: 262
-        },
-        {
-          id: 'shape_1766742600345',
-          type: 'text',
-          x: 398,
-          y: 1054,
-          fontSize: 16,
-          visible: true,
-          zIndex: 32,
-          opacity: 1,
-          rotation: 0,
-          content: 'Application Fee :',
-          width: 262
-        }
-      ] as PlacedField[],
-      availableFields: [
-        { key: 'studentName', type: 'field', label: 'Student Name' },
-        { key: 'fatherName', type: 'field', label: 'Father Name' },
-        { key: 'motherName', type: 'field', label: 'Mother Name' },
-        { key: 'fatherOccupation', type: 'field', label: 'Father Occupation' },
-        { key: 'motherOccupation', type: 'field', label: 'Mother Occupation' },
-        { key: 'gender', type: 'field', label: 'Gender' },
-        { key: 'dateOfBirth', type: 'field', label: 'Date of Birth' },
-        { key: 'religion', type: 'field', label: 'Religion' },
-        { key: 'community', type: 'field', label: 'Community' },
-        { key: 'subCaste', type: 'field', label: 'Sub Caste' },
-        { key: 'admissionType', type: 'field', label: 'Admission Type' },
-        { key: 'studentAadhar', type: 'field', label: 'Student Aadhar' },
-        { key: 'fatherAadhar', type: 'field', label: 'Father Aadhar' },
-        { key: 'motherAadhar', type: 'field', label: 'Mother Aadhar' },
-        { key: 'group', type: 'field', label: 'Group' },
-        { key: 'medium', type: 'field', label: 'Medium' },
-        { key: 'secondLanguage', type: 'field', label: 'Second Language' },
-        { key: 'address', type: 'field', label: 'Address' },
-        { key: 'phoneNumber1', type: 'field', label: 'Phone Number 1' },
-        { key: 'phoneNumber2', type: 'field', label: 'Phone Number 2' },
-        { key: 'applicationNumber', type: 'field', label: 'Application Number' },
-        { key: 'applicationFee', type: 'field', label: 'Application Fee' }
-      ]
-    },
-    internship_agreement_v1: {
-      label: 'Internship Agreement Template',
-      placedFields: [],
-      availableFields: []
-    },
-    invoice_v2: {
-      label: 'Invoice Template',
-      placedFields: [],
-      availableFields: []
-    }
+  const handleAvailableTemplateSelect = (templateKey: string) => {
+    setSelectedTemplate(templateKey)
+    setAvailableFields(availableTemplates[templateKey].availableFields)
+    designer.setPlaced(availableTemplates[templateKey].placedFields)
+    designer.setTemplateName(availableTemplates[templateKey].label)
   }
+
+  useEffect(() => {
+    if (templateData) {
+      setAvailableTemplates(templateData)
+    }
+  }, [templateData])
 
   const designer = useDesignerState()
 
   const FilteredAvailableItems = useMemo(() => {
     if (DEFAULT_TABLE_COLUMNS.length > 0) {
-      return [...AVAILABLE_ITEMS, { key: 'table', type: 'table', label: 'Table' }]
+      return [...AVAILABLE_ITEMS, { key: 'table', type: 'table', label: 'Table', id: 'table' }]
     }
 
     return AVAILABLE_ITEMS
@@ -675,7 +195,6 @@ const DesignerPage = () => {
     }
   }
 
-  // Resize logic
   const handleResizeMouseDown = (e: React.MouseEvent, item: PlacedField, handle: string) => {
     e.stopPropagation()
     const rect = designer.canvasRef.current?.getBoundingClientRect()
@@ -819,6 +338,29 @@ const DesignerPage = () => {
     reader.readAsText(file)
   }
 
+  const handleUpdateAvailableTemplates = () => {
+    const key = selectedTemplate || designer.templateName.replace(/\s+/g, '_')
+    const templateObj = {
+      ...availableTemplates,
+      [key]: {
+        label: designer.templateName.trim(),
+        placedFields: designer.placed,
+        availableFields
+      }
+    }
+    setAvailableTemplates(templateObj)
+
+    updateAvailableTemplates(templateObj)
+      .unwrap()
+      .then(() => {
+        toast.success('Template updated successfully')
+      })
+  }
+
+  const handleUpdateAvailableFields = (newFields: Field[]) => {
+    setAvailableFields(newFields)
+  }
+
   return (
     <Card
       style={{ height: '100vh', overflow: 'hidden', display: 'flex' }}
@@ -842,11 +384,12 @@ const DesignerPage = () => {
         showSidebar={showSidebar}
         setShowSidebar={setShowSidebar}
         handleDragStart={handleDragStart}
+        handleTemplateSelect={handleAvailableTemplateSelect}
+        handleUpdateAvailableTemplates={handleUpdateAvailableTemplates}
+        handleUpdateAvailableFields={handleUpdateAvailableFields}
         exportTemplate={handleExportTemplate}
         importTemplate={handleImportTemplate}
         setPageSize={handlePageSizeChange}
-        setPlacedFields={designer.setPlaced}
-        setAvailableFields={setAvailableFields}
         placedItems={designer.placed}
         pageSize={designer.PageSize}
         customWidth={designer.canvasWidth}

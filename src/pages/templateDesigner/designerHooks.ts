@@ -1,7 +1,8 @@
 // Custom hooks for template designer state and logic
 import { useState, useRef } from 'react'
-import { PlacedField } from './types'
+
 import { Orientation } from './enums'
+import { PlacedField } from './types'
 
 export function useDesignerState() {
   const [placed, setPlaced] = useState<PlacedField[]>([])
