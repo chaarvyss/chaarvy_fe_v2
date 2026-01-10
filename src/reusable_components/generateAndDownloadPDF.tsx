@@ -1,7 +1,8 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+
+import { PAGE_SIZES } from '../utils/constants'
 import { pxToMm, urlToBase64, groupFieldsByPage } from '../utils/helpers'
-import { PAGE_SIZES, NAMED_COLORS } from '../utils/constants'
 
 export interface PlacedField {
   id: string
@@ -61,6 +62,7 @@ function getPageDimensions(template: any) {
   if (orientation === 'landscape') {
     ;[width, height] = [height, width]
   }
+
   return { width, height }
 }
 
@@ -71,11 +73,13 @@ function resolveFieldContent(field: PlacedField, data: Record<string, any>): str
     if (data[key] !== undefined && data[key] !== null) {
       return String(data[key])
     }
+
     return match
   })
   if (!content && field.fieldKey && data[field.fieldKey] !== undefined) {
     return String(data[field.fieldKey])
   }
+
   return content
 }
 
@@ -112,14 +116,18 @@ function drawText(pdf: jsPDF, text: string, field: PlacedField, xMm: number, yMm
   } else {
     pdf.setTextColor(0, 0, 0)
   }
-  let xOffset = xMm
   const align = field.textAlign || 'left'
+
+  const lines = pdf.splitTextToSize(text, widthMm)
+
+  let xOffset = xMm
   if (align === 'center') {
     xOffset = xMm + widthMm / 2
   } else if (align === 'right') {
     xOffset = xMm + widthMm
   }
-  pdf.text(text, xOffset, yMm, { align: align as any })
+
+  pdf.text(lines, xOffset, yMm, { align: align as any, maxWidth: widthMm })
   if (typeof (pdf as any).setGState === 'function' && opacity < 1) {
     pdf.setGState(new (pdf as any).GState({ opacity: 1 }))
   }
@@ -127,6 +135,7 @@ function drawText(pdf: jsPDF, text: string, field: PlacedField, xMm: number, yMm
 
 function drawShape(pdf: jsPDF, field: PlacedField, xMm: number, yMm: number, widthMm: number, heightMm: number) {
   let color = field.color || '#ffffff'
+
   // If color is not a valid hex, default to white
   if (!/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(color)) {
     color = '#ffffff'
@@ -134,6 +143,7 @@ function drawShape(pdf: jsPDF, field: PlacedField, xMm: number, yMm: number, wid
   const r = parseInt(color.slice(1, 3), 16)
   const g = parseInt(color.slice(3, 5), 16)
   const b = parseInt(color.slice(5, 7), 16)
+
   // Opacity adjustments removed for PDF shapes
   if (field.borderWidth && field.borderWidth > 0) {
     pdf.setLineWidth(pxToMm(field.borderWidth))

@@ -1,8 +1,9 @@
 import React from 'react'
+
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 import { generateAndDownloadPDF } from 'src/reusable_components/generateAndDownloadPDF'
-import template from 'src/utils/simple_test.json'
 import sampleData from 'src/utils/simple_test - data.json'
+import template from 'src/utils/simple_test.json'
 
 const PDFGeneratorPage = () => {
   const donwloadpdf = () => {

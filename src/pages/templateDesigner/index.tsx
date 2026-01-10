@@ -123,6 +123,9 @@ const DesignerPage = () => {
       if (itemData.key === FieldType.TEXT) {
         newItem.content = 'Enter text here'
         newItem.type = FieldType.TEXT
+        newItem.width = 660
+        newItem.height = 22
+        newItem.x = 80
       } else {
         newItem.shapeType = itemData.key
         newItem.color = 'transparent' // Default to no fill

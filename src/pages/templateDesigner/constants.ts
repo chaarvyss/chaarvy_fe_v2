@@ -1,17 +1,15 @@
-// Constants for the template designer
-
 import { Field } from './types'
 
 export const AVAILABLE_ITEMS: Field[] = [
-  { key: 'text', type: 'shape', label: 'Text' },
-  { key: 'rectangle', type: 'shape', label: 'Rectangle' },
-  { key: 'circle', type: 'shape', label: 'Circle' },
-  { key: 'line', type: 'shape', label: 'Line' },
-  { key: 'image', type: 'image', label: 'Image' }
+  { key: 'text', type: 'shape', label: 'Text', id: `text-${Date.now()}` },
+  { key: 'rectangle', type: 'shape', label: 'Rectangle', id: `rectangle-${Date.now()}` },
+  { key: 'circle', type: 'shape', label: 'Circle', id: `circle-${Date.now()}` },
+  { key: 'line', type: 'shape', label: 'Line', id: `line-${Date.now()}` },
+  { key: 'image', type: 'image', label: 'Image', id: `image-${Date.now()}` }
 ]
 
 export const DEFAULT_SIZES = {
-  fontSize: 16,
+  fontSize: 14,
   rectangle: { width: 120, height: 60, borderWidth: 2 },
   circle: { width: 80, height: 80, borderWidth: 2 },
   line: { width: 200, height: 2, borderWidth: 2 },
