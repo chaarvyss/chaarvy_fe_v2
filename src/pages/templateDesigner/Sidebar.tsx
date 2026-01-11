@@ -1,4 +1,4 @@
-import { Box, IconButton, TextField, Tooltip, Typography } from '@mui/material'
+import { Box, FormControl, IconButton, TextField, Tooltip, Typography } from '@mui/material'
 import React, { ChangeEvent, useState } from 'react'
 
 interface AvailableTemplate {
@@ -18,13 +18,11 @@ interface SidebarProps {
   showSidebar: boolean
   setShowSidebar: (show: boolean) => void
   handleDragStart: (e: React.DragEvent, item: Field) => void
-  exportTemplate: () => void
-  importTemplate: (e: React.ChangeEvent<HTMLInputElement>) => void
-  setPageSize: (size: string) => void
+  setPageSize: (size: PageSizeEnum) => void
   handleTemplateSelect: (key: string) => void
   handleUpdateAvailableTemplates: () => void
   handleUpdateAvailableFields: (fields: Field[]) => void
-  pageSize: string
+  pageSize: PageSizeEnum
   customWidth: number
   setCustomWidth: (w: number) => void
   customHeight: number
@@ -34,6 +32,8 @@ interface SidebarProps {
   templateName: string
   setTemplateName: (n: string) => void
   saveTemplate: () => void
+  user?: string
+  setUser: (u: TemplateUser) => void
 }
 
 import { Card } from '@muiElements'
@@ -44,10 +44,11 @@ import ChaarvyFlex from 'src/reusable_components/ChaarvyFlex'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import { generateAndDownloadPDF } from 'src/reusable_components/generateAndDownloadPDF'
+import { captilizeFirstLetter } from 'src/utils/helpers'
 import GetChaarvyIcons from 'src/utils/icons'
 
 import { PAGE_SIZES } from './constants'
-import { Orientation } from './enums'
+import { Orientation, PageSizeEnum, TemplateUser } from './enums'
 import { Field, PlacedField } from './types'
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -58,8 +59,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   showSidebar,
   setShowSidebar,
   handleDragStart,
-  exportTemplate,
-  importTemplate,
   setPageSize,
   handleTemplateSelect,
   handleUpdateAvailableTemplates,
@@ -73,8 +72,18 @@ const Sidebar: React.FC<SidebarProps> = ({
   setOrientation,
   templateName,
   setTemplateName,
-  saveTemplate
+  saveTemplate,
+  user,
+  setUser
 }) => {
+  const selectStyle: React.CSSProperties = {
+    width: '100%',
+    padding: 6,
+    marginBottom: 12,
+    border: '1px solid #ddd',
+    borderRadius: 4
+  }
+
   const options = availableTemplates
     ? Object.entries(availableTemplates).map(([key, template]) => ({
         id: key,
@@ -268,40 +277,32 @@ const Sidebar: React.FC<SidebarProps> = ({
                 ))}
               </Card>
             </ChaarvyAccordian>
+            <Box sx={{ marginTop: 3 }}>
+              <FormControl fullWidth>
+                <label style={{ display: 'block', marginBottom: 2, fontSize: 14, fontWeight: 500 }}>User</label>
+                <select
+                  required
+                  value={user}
+                  style={user === undefined ? { ...selectStyle, border: '1px solid red' } : { ...selectStyle }}
+                  onChange={e => setUser(e.target.value as TemplateUser)}
+                >
+                  <option value={undefined}>Select User Type</option>
+                  {Object.entries(TemplateUser).map(([key, value]) => (
+                    <option key={key} value={value}>
+                      {captilizeFirstLetter(value)}
+                    </option>
+                  ))}
+                </select>
+              </FormControl>
+            </Box>
 
-            <ChaarvyFlex justifyContent='space-between' alignItems='center' marginTop={12}>
-              <ChaarvyButton
-                fullWidth
-                leftIcon='💾'
-                onClick={exportTemplate}
-                id='export-template-button'
-                label='Export Template'
-                color='warning'
-              />
-              <input
-                type='file'
-                accept='.json'
-                onChange={importTemplate}
-                style={{ display: 'none' }}
-                id='import-input'
-              />
-
-              <ChaarvyButton
-                leftIcon='📂'
-                fullWidth
-                onClick={() => document.getElementById('import-input')?.click()}
-                id='import-template-button'
-                label='Import Template'
-                color='success'
-              />
-            </ChaarvyFlex>
             <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid #ddd' }} />
             <ChaarvyFlex flexDirection='column' gap='8px' marginBottom={12}>
               <label style={{ display: 'block', marginBottom: 4, fontSize: 14, fontWeight: 500 }}>Page Size</label>
               <select
-                value={pageSize}
-                onChange={e => setPageSize(e.target.value)}
-                style={{ width: '100%', padding: 8, marginBottom: 12, border: '1px solid #ddd', borderRadius: 4 }}
+                value={pageSize ?? PAGE_SIZES.A4.label}
+                onChange={e => setPageSize(e.target.value as PageSizeEnum)}
+                style={selectStyle}
               >
                 {Object.entries(PAGE_SIZES).map(([key, { label }]) => (
                   <option key={key} value={key}>
@@ -336,19 +337,15 @@ const Sidebar: React.FC<SidebarProps> = ({
               )}
               <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 500 }}>Orientation</label>
               <select
-                value={orientation}
+                value={orientation ?? Orientation.PORTRAIT}
                 onChange={e => setOrientation(e.target.value as Orientation)}
-                style={{ width: '100%', padding: 8, marginBottom: 12, border: '1px solid #ddd', borderRadius: 4 }}
+                style={selectStyle}
               >
                 <option value='portrait'>Portrait</option>
                 <option value='landscape'>Landscape</option>
               </select>
               <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 500 }}>Template Name</label>
-              <input
-                value={templateName}
-                onChange={e => setTemplateName(e.target.value)}
-                style={{ width: '100%', padding: 8, marginBottom: 12, border: '1px solid #ddd', borderRadius: 4 }}
-              />
+              <input value={templateName} onChange={e => setTemplateName(e.target.value)} style={selectStyle} />
             </ChaarvyFlex>
             <ChaarvyFlex>
               <ChaarvyButton onClick={saveTemplate} id='save-template-button' label='Save Template' />

@@ -13,7 +13,7 @@ import { fileToBase64 } from 'src/utils/helpers'
 import { AVAILABLE_ITEMS, DEFAULT_SIZES, PAGE_SIZES } from './constants'
 import DesignerCanvas from './DesignerCanvas'
 import { useDesignerState } from './designerHooks'
-import { FieldType, Orientation } from './enums'
+import { FieldType, Orientation, PageSizeEnum, TemplateUser } from './enums'
 import PropertiesPanel from './PropertiesPanel'
 import Sidebar from './Sidebar'
 import { Field, PlacedField } from './types'
@@ -35,10 +35,22 @@ const DesignerPage = () => {
   const [updateAvailableTemplates] = useUpdateAvailableTemplatesMutation()
 
   const handleAvailableTemplateSelect = (templateKey: string) => {
+    const selectedTemplate = availableTemplates[templateKey]
+
+    const orientation = (selectedTemplate.orientation ?? Orientation.PORTRAIT) as Orientation
+    const size = PAGE_SIZES[selectedTemplate.pageSize as keyof typeof PAGE_SIZES] || PAGE_SIZES.A4
+    const isPortrait = orientation === Orientation.PORTRAIT
+
     setSelectedTemplate(templateKey)
-    setAvailableFields(availableTemplates[templateKey].availableFields)
-    designer.setPlaced(availableTemplates[templateKey].placedFields)
-    designer.setTemplateName(availableTemplates[templateKey].label)
+    setAvailableFields(selectedTemplate.availableFields)
+    designer.setPlaced(selectedTemplate.placedFields)
+    designer.setTemplateName(selectedTemplate.label)
+    designer.setUser(selectedTemplate.user as TemplateUser)
+    designer.setOrientation(orientation)
+    designer.setPageSize(selectedTemplate.pageSize as PageSizeEnum)
+
+    designer.setCanvasWidth(selectedTemplate.customWidth ?? (isPortrait ? size.width : size.height))
+    designer.setCanvasHeight(selectedTemplate.customHeight ?? (isPortrait ? size.height : size.width))
   }
 
   useEffect(() => {
@@ -292,7 +304,7 @@ const DesignerPage = () => {
     designer.setOrientation(orientation)
   }
 
-  const handlePageSizeChange = (sizeKey: string) => {
+  const handlePageSizeChange = (sizeKey: PageSizeEnum) => {
     const size = PAGE_SIZES[sizeKey as keyof typeof PAGE_SIZES] || PAGE_SIZES.A4
     designer.setCanvasWidth(size.width)
     designer.setCanvasHeight(size.height)
@@ -309,48 +321,29 @@ const DesignerPage = () => {
       })
   }
 
-  const handleExportTemplate = () => {
-    const templateData = {
-      templateName: designer.templateName,
-      fields: designer.placed
-    }
-    console.log('Exported Template Data:', {
-      data: designer.placed,
-      stringifiedResult: JSON.stringify(templateData, null, 2)
-    })
-  }
-
-  const handleImportTemplate = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = event => {
-      try {
-        const content = event.target?.result as string
-        const importedData = JSON.parse(content)
-        if (importedData.fields && Array.isArray(importedData.fields)) {
-          designer.setPlaced(importedData.fields)
-        }
-        if (importedData.templateName) {
-          designer.setTemplateName(importedData.templateName)
-        }
-      } catch (error) {
-        console.error('Error parsing imported template:', error)
-      }
-    }
-    reader.readAsText(file)
-  }
-
   const handleUpdateAvailableTemplates = () => {
+    if (designer?.user === undefined) {
+      toast.error('Please select a user type before saving the template.')
+
+      return
+    }
     const key = selectedTemplate || designer.templateName.replace(/\s+/g, '_')
+
     const templateObj = {
       ...availableTemplates,
       [key]: {
         label: designer.templateName.trim(),
         placedFields: designer.placed,
-        availableFields
+        availableFields,
+        user: designer?.user?.toLowerCase() as TemplateUser,
+        orientation: designer.orientation as Orientation,
+        pageSize: designer.PageSize as PageSizeEnum,
+        ...(designer.PageSize === PageSizeEnum.CUSTOM && {
+          customWidth: designer.canvasWidth,
+          customHeight: designer.canvasHeight
+        })
       }
-    }
+    } as TemplatesResponse
     setAvailableTemplates(templateObj)
 
     updateAvailableTemplates(templateObj)
@@ -390,8 +383,6 @@ const DesignerPage = () => {
         handleTemplateSelect={handleAvailableTemplateSelect}
         handleUpdateAvailableTemplates={handleUpdateAvailableTemplates}
         handleUpdateAvailableFields={handleUpdateAvailableFields}
-        exportTemplate={handleExportTemplate}
-        importTemplate={handleImportTemplate}
         setPageSize={handlePageSizeChange}
         placedItems={designer.placed}
         pageSize={designer.PageSize}
@@ -404,6 +395,8 @@ const DesignerPage = () => {
         templateName={designer.templateName}
         setTemplateName={designer.setTemplateName}
         saveTemplate={() => console.log(designer.placed)}
+        user={designer?.user}
+        setUser={designer.setUser}
       />
       <DesignerCanvas
         placed={designer.placed}

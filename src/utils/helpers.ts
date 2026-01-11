@@ -17,6 +17,7 @@ export const urlToBase64 = (url: string): Promise<string> => {
         alert('Failed to fetch image: ' + url + '\nStatus: ' + response.status)
         throw new Error('Failed to fetch image: ' + url)
       }
+
       return response.blob()
     })
     .then(
@@ -55,6 +56,7 @@ export const groupFieldsByPage = (fields: any[]) => {
     }
     pages[page].push(field)
   })
+
   return pages
 }
 type Event = {
@@ -157,4 +159,10 @@ export const isValidEmail = email => {
 
 export const isValidPhone = phone => {
   return /^[6-9]\d{9}$/.test(phone)
+}
+
+export const captilizeFirstLetter = (str: string) => {
+  if (!str) return str
+
+  return str.charAt(0).toUpperCase() + str.slice(1)
 }

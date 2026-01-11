@@ -1,4 +1,7 @@
+import { Orientation } from '@mui/material'
+
 import { urlConstants } from 'src/constants/urlConstants'
+import { PageSizeEnum, TemplateUser } from 'src/pages/templateDesigner/enums'
 import { PlacedField } from 'src/pages/templateDesigner/types'
 
 import { HttpRequestMethods } from '..'
@@ -8,6 +11,11 @@ import api from './api'
 type Template = {
   label: string
   placedFields: PlacedField[]
+  user: TemplateUser
+  orientation: Orientation
+  pageSize: PageSizeEnum
+  customWidth?: number
+  customHeight?: number
   availableFields: {
     id: string
     key: string

@@ -12,12 +12,19 @@ export enum ShapeType {
   LINE = 'line'
 }
 
-export enum PageSize {
+export enum PageSizeEnum {
   A4 = 'A4',
-  LETTER = 'Letter'
+  LETTER = 'Letter',
+  CUSTOM = 'Custom'
 }
 
 export enum Orientation {
   PORTRAIT = 'portrait',
   LANDSCAPE = 'landscape'
+}
+
+export enum TemplateUser {
+  INTER = 'inter',
+  MASTER = 'master',
+  SCHOOL = 'school'
 }
