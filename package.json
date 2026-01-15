@@ -24,6 +24,8 @@
     "@emotion/react": "^11.14.0",
     "@emotion/server": "^11.4.0",
     "@emotion/styled": "^11.14.0",
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/face_detection": "^0.4.1646425229",
     "@mui/lab": "^5.0.0-alpha.70",
     "@mui/material": "^5.16.14",
     "@mui/x-date-pickers": "^7.28.0",

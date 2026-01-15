@@ -9,17 +9,17 @@ The `fields` array is recreated on every render, so when state changes, the drop
 ```typescript
 const MyForm = () => {
   const [formData, setFormData] = useState({ state: '', district: '' })
-  
+
   // Fetch states list
   const { data: statesList } = useGetStatesListQuery()
-  
+
   // Lazy fetch districts based on selected state
   const [fetchDistricts, { data: districtsList, isFetching }] = useLazyGetDistrictsListQuery()
-  
+
   const handleChange = (field: string) => (event: any) => {
     const value = event.target.value
     setFormData(prev => ({ ...prev, [field]: value }))
-    
+
     // When state changes, fetch districts for that state
     if (field === 'state') {
       fetchDistricts(value)
@@ -27,7 +27,7 @@ const MyForm = () => {
       setFormData(prev => ({ ...prev, district: '' }))
     }
   }
-  
+
   const fields: InputFields[] = [
     {
       type: InputTypes.SELECT,
@@ -36,9 +36,9 @@ const MyForm = () => {
       label: 'State',
       value: formData.state,
       onChange: handleChange('state'),
-      menuOptions: (statesList ?? []).map(s => ({ 
-        value: s.state_id, 
-        label: s.state_name 
+      menuOptions: (statesList ?? []).map(s => ({
+        value: s.state_id,
+        label: s.state_name
       }))
     },
     {
@@ -53,13 +53,13 @@ const MyForm = () => {
       // ✅ Shows loading while fetching
       isLoading: isFetching,
       // ✅ Options filtered based on selected state
-      menuOptions: (districtsList ?? []).map(d => ({ 
-        value: d.district_id, 
-        label: d.district_name 
+      menuOptions: (districtsList ?? []).map(d => ({
+        value: d.district_id,
+        label: d.district_name
       }))
     }
   ]
-  
+
   return <FormGenerator fields={fields} />
 }
 ```
@@ -68,12 +68,12 @@ const MyForm = () => {
 
 ```typescript
 const StudentForm = () => {
-  const [formData, setFormData] = useState({ 
-    program: '', 
-    section: '', 
-    student: '' 
+  const [formData, setFormData] = useState({
+    program: '',
+    section: '',
+    student: ''
   })
-  
+
   const { data: programs } = useGetProgramsQuery()
   const { data: sections } = useGetSectionsQuery(formData.program, {
     skip: !formData.program // Only fetch when program is selected
@@ -82,10 +82,10 @@ const StudentForm = () => {
     { program: formData.program, section: formData.section },
     { skip: !formData.section } // Only fetch when section is selected
   )
-  
+
   const handleChange = (field: string) => (event: any) => {
     setFormData(prev => ({ ...prev, [field]: event.target.value }))
-    
+
     // Reset dependent fields when parent changes
     if (field === 'program') {
       setFormData(prev => ({ ...prev, section: '', student: '' }))
@@ -94,7 +94,7 @@ const StudentForm = () => {
       setFormData(prev => ({ ...prev, student: '' }))
     }
   }
-  
+
   const fields: InputFields[] = [
     {
       type: InputTypes.SELECT,
@@ -126,7 +126,7 @@ const StudentForm = () => {
       menuOptions: students?.map(st => ({ value: st.id, label: st.name }))
     }
   ]
-  
+
   return <FormGenerator fields={fields} />
 }
 ```
@@ -135,12 +135,12 @@ const StudentForm = () => {
 
 ```typescript
 const ConditionalForm = () => {
-  const [formData, setFormData] = useState({ 
-    hasAddress: false, 
-    country: '', 
-    state: '' 
+  const [formData, setFormData] = useState({
+    hasAddress: false,
+    country: '',
+    state: ''
   })
-  
+
   const fields: InputFields[] = [
     {
       type: InputTypes.CHECKBOX,
@@ -148,9 +148,9 @@ const ConditionalForm = () => {
       key: 'hasAddress',
       label: 'I have a permanent address',
       value: formData.hasAddress,
-      onChange: (e) => setFormData(prev => ({ 
-        ...prev, 
-        hasAddress: e.target.checked 
+      onChange: (e) => setFormData(prev => ({
+        ...prev,
+        hasAddress: e.target.checked
       }))
     },
     // ✅ Only show these fields if checkbox is checked
@@ -176,7 +176,7 @@ const ConditionalForm = () => {
       }
     ] : [])
   ]
-  
+
   return <FormGenerator fields={fields} />
 }
 ```
@@ -185,13 +185,13 @@ const ConditionalForm = () => {
 
 ```typescript
 const FilteredOptionsForm = () => {
-  const [formData, setFormData] = useState({ 
-    category: '', 
-    subcategory: '' 
+  const [formData, setFormData] = useState({
+    category: '',
+    subcategory: ''
   })
-  
+
   const { data: allSubcategories } = useGetSubcategoriesQuery()
-  
+
   const fields: InputFields[] = [
     {
       type: InputTypes.SELECT,
@@ -220,7 +220,7 @@ const FilteredOptionsForm = () => {
         .map(sub => ({ value: sub.id, label: sub.name }))
     }
   ]
-  
+
   return <FormGenerator fields={fields} />
 }
 ```
@@ -238,6 +238,7 @@ const FilteredOptionsForm = () => {
 ## ✅ Summary
 
 **YES!** FormGenerator fully supports:
+
 - ✅ Dependent dropdowns (State → District)
 - ✅ Multi-level dependencies (Program → Section → Student)
 - ✅ Conditional field visibility

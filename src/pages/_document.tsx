@@ -1,6 +1,7 @@
 // ** React Import
 import createEmotionServer from '@emotion/server/create-instance'
 import Document, { Html, Head, Main, NextScript } from 'next/document'
+import Script from 'next/script'
 import { Children } from 'react'
 
 // ** Next Import
@@ -27,6 +28,10 @@ class CustomDocument extends Document {
         <body>
           <Main />
           <NextScript />
+          <Script
+            src='https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js'
+            strategy='beforeInteractive'
+          />
         </body>
       </Html>
     )

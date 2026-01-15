@@ -13,6 +13,8 @@ import {
   useLazyGetProgramSectionListQuery
 } from 'src/store/services/programServices'
 
+import FaceDetectCapture from '../../reusable_components/FaceDetectCapture'
+
 const TOP_LEVEL_ID = 'get-attendence'
 
 const GetAttendence = () => {
@@ -147,6 +149,7 @@ const GetAttendence = () => {
         <Button onClick={handleRecordAttendence} disabled={!studentsList} variant='contained' size='small'>
           Record Attendence
         </Button>
+        <FaceDetectCapture />
       </Box>
     </>
   )
