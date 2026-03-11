@@ -10,9 +10,21 @@ jobs:
     steps:
       - checkout
 
+      # Restore cached node modules
+      - restore_cache:
+          keys:
+            - node-cache-{{ checksum "package-lock.json" }}
+            - node-cache-
+
       - run:
           name: Install dependencies
           command: npm install
+
+      # Save cache for next builds
+      - save_cache:
+          paths:
+            - node_modules
+          key: node-cache-{{ checksum "package-lock.json" }}
 
       - run:
           name: Run Jest tests with coverage
@@ -41,8 +53,6 @@ jobs:
             source $BASH_ENV
 
             if [ -n "$PR_NUMBER" ]; then
-              echo "Running Sonar analysis for Pull Request"
-
               sonar-scanner \
                 -Dsonar.host.url=https://sonarcloud.io \
                 -Dsonar.login=$SONAR_TOKEN \
@@ -51,10 +61,7 @@ jobs:
                 -Dsonar.pullrequest.key=$PR_NUMBER \
                 -Dsonar.pullrequest.branch=$CIRCLE_BRANCH \
                 -Dsonar.pullrequest.base=main
-
             else
-              echo "Running Sonar analysis for branch"
-
               sonar-scanner \
                 -Dsonar.host.url=https://sonarcloud.io \
                 -Dsonar.login=$SONAR_TOKEN \
@@ -65,7 +72,6 @@ jobs:
 
 workflows:
   version: 2
-
   test_build_analyze:
     jobs:
       - test_and_sonar
