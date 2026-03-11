@@ -12,13 +12,11 @@ jobs:
 
       - run:
           name: Install dependencies
-          command: |
-            npm install
+          command: npm install
 
       - run:
-          name: Run Jest Tests with Coverage
-          command: |
-            npm run test -- --coverage
+          name: Run Jest tests with coverage
+          command: npm run test -- --coverage
 
       - run:
           name: Install Sonar Scanner
@@ -28,23 +26,45 @@ jobs:
             wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
             unzip sonar-scanner-cli-5.0.1.3006-linux.zip
             echo 'export PATH=$PATH:$(pwd)/sonar-scanner-5.0.1.3006-linux/bin' >> $BASH_ENV
-            source $BASH_ENV
 
       - run:
-          name: Run SonarQube Analysis
+          name: Extract Pull Request number
           command: |
-            sonar-scanner \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=$SONAR_TOKEN \
-            -Dsonar.organization=rajasekharm81 \
-            -Dsonar.projectKey=rajasekharm81_chaarvy_fe_v2 \
-            -Dsonar.pullrequest.key=$CIRCLE_PR_NUMBER \
-            -Dsonar.pullrequest.branch=$CIRCLE_BRANCH \
-            -Dsonar.pullrequest.base=main
+            if [ -n "$CIRCLE_PULL_REQUEST" ]; then
+              PR_NUMBER=$(echo $CIRCLE_PULL_REQUEST | awk -F'/' '{print $NF}')
+              echo "export PR_NUMBER=$PR_NUMBER" >> $BASH_ENV
+            fi
+
+      - run:
+          name: Run SonarCloud Analysis
+          command: |
+            source $BASH_ENV
+
+            if [ -n "$PR_NUMBER" ]; then
+              echo "Running Sonar analysis for Pull Request"
+
+              sonar-scanner \
+                -Dsonar.host.url=https://sonarcloud.io \
+                -Dsonar.login=$SONAR_TOKEN \
+                -Dsonar.organization=rajasekharm81 \
+                -Dsonar.projectKey=rajasekharm81_chaarvy_fe_v2 \
+                -Dsonar.pullrequest.key=$PR_NUMBER \
+                -Dsonar.pullrequest.branch=$CIRCLE_BRANCH \
+                -Dsonar.pullrequest.base=main
+            else
+              echo "Running Sonar analysis for branch"
+
+              sonar-scanner \
+                -Dsonar.host.url=https://sonarcloud.io \
+                -Dsonar.login=$SONAR_TOKEN \
+                -Dsonar.organization=rajasekharm81 \
+                -Dsonar.projectKey=rajasekharm81_chaarvy_fe_v2 \
+                -Dsonar.branch.name=$CIRCLE_BRANCH
+            fi
 
 workflows:
   version: 2
 
-  test_and_analyze:
+  test_build_analyze:
     jobs:
       - test_and_sonar
