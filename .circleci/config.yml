@@ -5,23 +5,41 @@ jobs:
     docker:
       - image: cimg/node:20.10
 
+    working_directory: ~/project
+
     steps:
       - checkout
 
       - run:
           name: Install dependencies
-          command: npm install
+          command: |
+            npm install
 
       - run:
-          name: Run Jest tests
-          command: npm run test:coverage
+          name: Run Jest Tests with Coverage
+          command: |
+            npm run test -- --coverage
 
       - run:
-          name: SonarQube Scan
-          command: npm run sonar
+          name: Install Sonar Scanner
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y unzip wget
+            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+            unzip sonar-scanner-cli-5.0.1.3006-linux.zip
+            echo 'export PATH=$PATH:$(pwd)/sonar-scanner-5.0.1.3006-linux/bin' >> $BASH_ENV
+            source $BASH_ENV
+
+      - run:
+          name: Run SonarQube Analysis
+          command: |
+            sonar-scanner \
+            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.login=$SONAR_TOKEN
 
 workflows:
   version: 2
-  test:
+
+  test_and_analyze:
     jobs:
       - test_and_sonar
