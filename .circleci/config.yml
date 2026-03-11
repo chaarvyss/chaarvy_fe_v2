@@ -1,0 +1,27 @@
+version: 2.1
+
+jobs:
+  test_and_sonar:
+    docker:
+      - image: cimg/node:20.10
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install dependencies
+          command: npm install
+
+      - run:
+          name: Run Jest tests
+          command: npm run test:coverage
+
+      - run:
+          name: SonarQube Scan
+          command: npm run sonar
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test_and_sonar
