@@ -57,7 +57,7 @@ jobs:
                 -Dsonar.host.url=https://sonarcloud.io \
                 -Dsonar.login=$SONAR_TOKEN \
                 -Dsonar.organization=chaarvyss \
-                -Dsonar.projectKey=rajasekharm81_chaarvy_fe_v2 \
+                -Dsonar.projectKey=chaarvy_fe_v2 \
                 -Dsonar.pullrequest.key=$PR_NUMBER \
                 -Dsonar.pullrequest.branch=$CIRCLE_BRANCH \
                 -Dsonar.pullrequest.base=main
@@ -66,7 +66,7 @@ jobs:
                 -Dsonar.host.url=https://sonarcloud.io \
                 -Dsonar.login=$SONAR_TOKEN \
                 -Dsonar.organization=chaarvyss \
-                -Dsonar.projectKey=rajasekharm81_chaarvy_fe_v2 \
+                -Dsonar.projectKey=chaarvy_fe_v2 \
                 -Dsonar.branch.name=$CIRCLE_BRANCH
             fi
 
