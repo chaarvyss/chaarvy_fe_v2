@@ -92,10 +92,26 @@ export const formatEventDate = (event: Event): string => {
   }
 }
 
-export const isValidEmail = email => {
-  return /\S+@\S+\.\S+/.test(email)
+const phoneRegex = /^[6-9]\d{9}$/
+const aadharRegex = /^\d{12}$/
+
+export const isValidEmail = (email: string): boolean => {
+  if (typeof email !== 'string' || email.length > 254) return false
+
+  const parts = email.split('@')
+  if (parts.length !== 2) return false
+
+  const [local, domain] = parts
+
+  if (!local || !domain?.includes('.')) return false
+
+  return true
 }
 
 export const isValidPhone = phone => {
-  return /^[6-9]\d{9}$/.test(phone)
+  return phoneRegex.test(phone)
+}
+
+export const isValidAadhar = aadhar => {
+  return aadharRegex.test(aadhar)
 }

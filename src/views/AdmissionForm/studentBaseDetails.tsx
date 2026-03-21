@@ -47,7 +47,7 @@ import {
   useLazyGetProgramSecondLanguagesListQuery,
   useLazyGetProgramSectionListQuery
 } from 'src/store/services/programServices'
-import { convertDateStringToDate } from 'src/utils/helpers'
+import { convertDateStringToDate, isValidAadhar, isValidEmail, isValidPhone } from 'src/utils/helpers'
 
 import ApplicationFeesModal from './application_fees_modal'
 
@@ -189,20 +189,16 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
     if (!value) {
       return { errorkey: key, error: '* Required' }
     }
-
     switch (key) {
       case 'student_email':
-        return /\S+@\S+\.\S+/.test(value) ? null : { errorkey: key, error: 'Invalid email format.' }
+        return isValidEmail(value) ? null : { errorkey: key, error: 'Invalid email format.' }
       case 'contact_no_1':
-        return /^[6-9]\d{9}$/.test(value) ? null : { errorkey: key, error: 'Invalid phone number.' }
       case 'contact_no_2':
-        return /^[6-9]\d{9}$/.test(value) ? null : { errorkey: key, error: 'Invalid phone number.' }
+        return isValidPhone(value) ? null : { errorkey: key, error: 'Invalid phone number.' }
       case 'student_aadhar':
-        return /^\d{12}$/.test(value) ? null : { errorkey: key, error: 'Invalid Aadhar number. It must be 12 digits.' }
       case 'father_aadhar':
-        return /^\d{12}$/.test(value) ? null : { errorkey: key, error: 'Invalid Aadhar number. It must be 12 digits.' }
       case 'mother_aadhar':
-        return /^\d{12}$/.test(value) ? null : { errorkey: key, error: 'Invalid Aadhar number. It must be 12 digits.' }
+        return isValidAadhar(value) ? null : { errorkey: key, error: 'Invalid Aadhar number. It must be 12 digits.' }
       default:
         return null
     }
