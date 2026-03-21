@@ -96,6 +96,8 @@ const phoneRegex = /^[6-9]\d{9}$/
 const aadharRegex = /^\d{12}$/
 
 export const isValidEmail = email => {
+  if (email.length > 254) return false
+
   return emailRegex.test(email)
 }
 
