@@ -103,8 +103,7 @@ export const isValidEmail = (email: string): boolean => {
 
   const [local, domain] = parts
 
-  if (!local || !domain) return false
-  if (domain.indexOf('.') === -1) return false
+  if (!local || !domain || !domain.includes('.')) return false
 
   return true
 }
