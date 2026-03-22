@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.1.0...v1.2.0) (2026-03-22)
+
+
+### Features
+
+* **AC-8:** Automate PR Basic details ([#27](https://github.com/chaarvyss/chaarvy_fe_v2/issues/27)) ([e0739e1](https://github.com/chaarvyss/chaarvy_fe_v2/commit/e0739e1ee9c9b6b459b6ecf6ee200d0950edd098))
+
 # [1.1.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.0.0...v1.1.0) (2026-03-22)
 
 
