@@ -1,0 +1,65 @@
+name: Auto Label PR
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Auto assign label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+
+            let label = null;
+
+            if (title.includes('!') || title.toLowerCase().includes('breaking')) {
+              label = 'major';
+            } else if (title.startsWith('feat')) {
+              label = 'minor';
+            } else if (title.startsWith('fix')) {
+              label = 'patch';
+            }
+
+            if (!label) {
+              core.info('No label matched');
+              return;
+            }
+
+            await github.rest.issues.addLabels({
+              ...context.repo,
+              issue_number: context.payload.pull_request.number,
+              labels: [label]
+            });
+
+      - name: Add Jira link to PR description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const pr = context.payload.pull_request;
+
+            const match = title.match(/[A-Z]+-\d+/);
+
+            if (!match) return;
+
+            const ticket = match[0];
+            const jiraBaseUrl = "https://chaarvyss.atlassian.net/browse/";
+
+            const link = `${jiraBaseUrl}${ticket}`;
+
+            const body = pr.body || '';
+            if (body.includes(link)) return;
+
+            await github.rest.pulls.update({
+              ...context.repo,
+              pull_number: pr.number,
+              body: `${body}\n\n🔗 Jira: ${link}`
+            });

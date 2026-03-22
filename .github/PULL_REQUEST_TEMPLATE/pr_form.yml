@@ -1,0 +1,37 @@
+name: Pull Request Form
+description: Submit PR with required details
+
+body:
+  - type: input
+    id: jira
+    attributes:
+      label: Jira Ticket
+      placeholder: AC-123
+    validations:
+      required: true
+
+  - type: input
+    id: title
+    attributes:
+      label: PR Title
+      placeholder: feat(scope): AC-123 description
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Change Type
+      options:
+        - feat (minor)
+        - fix (patch)
+        - breaking (major)
+    validations:
+      required: true
