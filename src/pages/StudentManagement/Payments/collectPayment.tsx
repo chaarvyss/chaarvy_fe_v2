@@ -87,10 +87,11 @@ const CollectPayment = () => {
   }
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const queryParams = new URLSearchParams(window.location.search)
-      if (queryParams && queryParams.get('id') && queryParams.get('id') !== null) {
-        fetchStudentPendingFees(queryParams.get('id') ?? '')
+    if (globalThis.window) {
+      const queryParams = new URLSearchParams(globalThis.window.location.search)
+      const id = queryParams?.get('id')
+      if (id) {
+        fetchStudentPendingFees(id)
           .unwrap()
           .catch(e => {
             triggerToast(e.data, { variants: ToastVariants.ERROR })
@@ -109,21 +110,34 @@ const CollectPayment = () => {
     return errors.find(each => each.errorkey === key)
   }
 
+  const handleSetMandatoryFields = (isCash: boolean) => {
+    setMandatoryFields(prev =>
+      isCash ? prev.filter(item => item !== 'transaction_number') : [...new Set([...prev, 'transaction_number'])]
+    )
+  }
+
   const handlePaymentDetailChange =
     (prop: keyof PaymentDetailRequest) =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
-      const value = event?.target?.value ?? event
+      const value = typeof event === 'object' && 'target' in event ? event.target.value : event
 
-      if (prop == 'payment_mode') {
-        if (value == '1') {
-          setPaymentDetails(prev => ({ ...prev, transaction_number: undefined }))
-          setMandatoryFields(prevItems => prevItems.filter(item => item !== 'transaction_number'))
-        } else {
-          setMandatoryFields([...mandatoryFields, 'transaction_number'])
-        }
+      if (prop === 'payment_mode') {
+        const isCash = value === '1'
+
+        setPaymentDetails(prev => ({
+          ...prev,
+          payment_mode: value,
+          ...(isCash && { transaction_number: undefined })
+        }))
+
+        handleSetMandatoryFields(isCash)
+
+        return
       }
-
-      setPaymentDetails(prev => ({ ...prev, [prop]: value }))
+      setPaymentDetails(prev => ({
+        ...prev,
+        [prop]: value
+      }))
     }
 
   const fields: InputFields[] = [
@@ -133,7 +147,7 @@ const CollectPayment = () => {
       label: 'Segment',
       key: 'segment_id',
       value: paymentDetails?.segment_id,
-      isDisabled: !!paymentDetails?.payment_id as boolean,
+      isDisabled: !!paymentDetails?.payment_id,
       onChange: handlePaymentDetailChange('segment_id'),
       menuOptions: (uniqueSegments ?? []).map(each => {
         return { value: each.segment_id, label: each.segment_name }
@@ -144,7 +158,7 @@ const CollectPayment = () => {
       variant: InputVariants.NUMBER,
       id: `${TOP_LEVEL_ID}__amount`,
       label: 'Amount',
-      isDisabled: !!paymentDetails?.payment_id as boolean,
+      isDisabled: !!paymentDetails?.payment_id,
       key: 'amount',
       value: paymentDetails?.amount,
       onChange: handlePaymentDetailChange('amount')
@@ -181,74 +195,98 @@ const CollectPayment = () => {
     }
   ]
 
-  const renderInputFields = () =>
-    fields.map(
-      ({
-        type,
-        id,
-        label,
-        placeholder,
-        customInput,
-        isDisabled,
-        onChange,
-        key,
-        caption,
-        value,
-        variant,
-        menuOptions
-      }) => (
-        <Grid item xs={12} sm={6} key={id} gap={3}>
-          {type === InputTypes.INPUT ? (
-            <>
-              <small>
-                {label} {mandatoryFields.includes(key) ? '*' : ''}
-              </small>
-              <TextField
-                fullWidth
-                id={id}
-                value={value ?? ''}
-                error={!!getHadError(key)}
-                defaultValue={value}
-                type={variant}
-                disabled={isDisabled}
-                placeholder={placeholder ?? ''}
-                onChange={onChange}
-              />
-              {caption && <small>{caption}</small>}
-              {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-            </>
-          ) : type === InputTypes.SELECT ? (
-            <FormControl fullWidth error={!!getHadError(key)}>
-              <small>
-                {label} {mandatoryFields.includes(key) ? '*' : ''}
-              </small>
-              <Select id={id} value={value ?? ''} onChange={onChange} disabled={isDisabled}>
-                {(menuOptions ?? []).map(({ value, label }) => (
-                  <MenuItem key={value} value={value}>
-                    {label}
-                  </MenuItem>
-                ))}
-              </Select>
-              {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-            </FormControl>
-          ) : type === InputTypes.DATE ? (
-            <Grid item xs={12}>
-              <Box display='flex' flexDirection='column'>
-                <small>Payment Date*</small>
-                <DatePicker
-                  selected={paymentDate}
-                  required={mandatoryFields.includes(key)}
-                  customInput={customInput}
-                  id={id}
-                  onChange={onChange}
-                />
-                {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-              </Box>
-            </Grid>
-          ) : null}
-        </Grid>
+  const renderField = (field: (typeof fields)[number]) => {
+    const {
+      type,
+      id,
+      label,
+      placeholder,
+      customInput,
+      isDisabled,
+      onChange,
+      key,
+      caption,
+      value,
+      variant,
+      menuOptions
+    } = field
+
+    const error = getHadError(key)
+    const isMandatory = mandatoryFields.includes(key)
+
+    if (type === InputTypes.INPUT) {
+      return (
+        <>
+          <small>
+            {label} {isMandatory ? '*' : ''}
+          </small>
+
+          <TextField
+            fullWidth
+            id={id}
+            value={value ?? ''}
+            error={!!error}
+            type={variant}
+            disabled={isDisabled}
+            placeholder={placeholder ?? ''}
+            onChange={onChange}
+          />
+
+          {caption && <small>{caption}</small>}
+          {error && <small style={{ color: 'red' }}>{error.error}</small>}
+        </>
       )
-    )
+    }
+
+    if (type === InputTypes.SELECT) {
+      return (
+        <FormControl fullWidth error={!!error}>
+          <small>
+            {label} {isMandatory ? '*' : ''}
+          </small>
+
+          <Select id={id} value={value ?? ''} onChange={onChange} disabled={isDisabled}>
+            {(menuOptions ?? []).map(({ value, label }) => (
+              <MenuItem key={value} value={value}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+
+          {error && <small style={{ color: 'red' }}>{error.error}</small>}
+        </FormControl>
+      )
+    }
+
+    if (type === InputTypes.DATE) {
+      return (
+        <Box width='100%'>
+          <Box display='flex' flexDirection='column'>
+            <small>Payment Date*</small>
+
+            <DatePicker
+              selected={paymentDate}
+              required={isMandatory}
+              customInput={customInput}
+              id={id}
+              onChange={onChange}
+            />
+
+            {error && <small style={{ color: 'red' }}>{error.error}</small>}
+          </Box>
+        </Box>
+      )
+    }
+
+    return null
+  }
+
+  const renderInputFields = () =>
+    fields.map(field => (
+      <Grid item xs={12} sm={6} key={field.id} gap={3}>
+        {renderField(field)}
+      </Grid>
+    ))
 
   const validateField = (key: keyof PaymentDetailRequest, value: any): { errorkey: string; error: string } | null => {
     if (!value) {
@@ -272,8 +310,6 @@ const CollectPayment = () => {
     })
 
     setErrors(newErrors)
-
-    console.log(newErrors, 'newErrors')
 
     return newErrors.length === 0
   }
@@ -321,7 +357,7 @@ const CollectPayment = () => {
       .then(pdfBlob => {
         if (!pdfBlob) return
 
-        const url = window.URL.createObjectURL(pdfBlob)
+        const url = globalThis.window.URL.createObjectURL(pdfBlob)
         printDocument(url)
       })
       .catch(e => {
@@ -407,13 +443,18 @@ const CollectPayment = () => {
             <TableHead>
               <TableRow>
                 {headers.map(each => (
-                  <TableCell style={each.width ? { width: each.width } : {}}>{each.label}</TableCell>
+                  <TableCell
+                    key={`collect-payment-header__${each.label}`}
+                    style={each.width ? { width: each.width } : {}}
+                  >
+                    {each.label}
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {response?.fees_details?.map((eachFees, index) => (
-                <TableRow>
+                <TableRow key={eachFees.payment_id}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{eachFees.segment_name}</TableCell>
                   <TableCell>{eachFees.payable}</TableCell>
