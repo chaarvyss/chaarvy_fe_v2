@@ -87,7 +87,7 @@ const CollectPayment = () => {
   }
 
   useEffect(() => {
-    if (typeof globalThis.window !== 'undefined') {
+    if (globalThis.window) {
       const queryParams = new URLSearchParams(globalThis.window.location.search)
       const id = queryParams?.get('id')
       if (id) {
@@ -110,6 +110,12 @@ const CollectPayment = () => {
     return errors.find(each => each.errorkey === key)
   }
 
+  const handleSetMandatoryFields = (isCash: boolean) => {
+    setMandatoryFields(prev =>
+      isCash ? prev.filter(item => item !== 'transaction_number') : [...new Set([...prev, 'transaction_number'])]
+    )
+  }
+
   const handlePaymentDetailChange =
     (prop: keyof PaymentDetailRequest) =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
@@ -124,9 +130,7 @@ const CollectPayment = () => {
           ...(isCash && { transaction_number: undefined })
         }))
 
-        setMandatoryFields(prev =>
-          isCash ? prev.filter(item => item !== 'transaction_number') : [...new Set([...prev, 'transaction_number'])]
-        )
+        handleSetMandatoryFields(isCash)
 
         return
       }
