@@ -1,0 +1,14 @@
+{
+  "studentName": "Raja sekhar",
+  "course": "Full Stack Development",
+  "duration": "6 months",
+  "admissionDate": "2023-12-01",
+  "fatherName": "Mr. Sekhar",
+  "dob": "2000-05-15",
+  "progressTableData": [
+    { "subject": "Math", "marks": 95, "grade": "A+" },
+    { "subject": "Science", "marks": 89, "grade": "A" },
+    { "subject": "English", "marks": 92, "grade": "A+" },
+    { "subject": "History", "marks": 85, "grade": "B+" }
+  ]
+}

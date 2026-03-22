@@ -1,3 +1,64 @@
+export const pxToMm = (px: number) => px / 3.78
+
+export const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = error => reject(error)
+  })
+}
+
+export const urlToBase64 = (url: string): Promise<string> => {
+  return fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        alert('Failed to fetch image: ' + url + '\nStatus: ' + response.status)
+        throw new Error('Failed to fetch image: ' + url)
+      }
+
+      return response.blob()
+    })
+    .then(
+      blob =>
+        new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            if (typeof reader.result === 'string') resolve(reader.result)
+            else reject('Failed to convert image to base64')
+          }
+          reader.onerror = e => {
+            alert('Failed to read image as base64. Possible CORS issue.')
+            reject(e)
+          }
+          reader.readAsDataURL(blob)
+        })
+    )
+    .catch(error => {
+      alert(
+        'Image fetch or conversion failed: ' +
+          error.message +
+          '\nURL: ' +
+          url +
+          '\nCheck CORS and network. See console for details.'
+      )
+      throw error
+    })
+}
+
+export const groupFieldsByPage = (fields: any[]) => {
+  const pages: { [key: number]: any[] } = { 0: [] }
+  fields.forEach(field => {
+    const page = (field as any).page || 0
+    if (!pages[page]) {
+      pages[page] = []
+    }
+    pages[page].push(field)
+  })
+
+  return pages
+}
 type Event = {
   start: string
   end: string
@@ -114,4 +175,10 @@ export const isValidPhone = phone => {
 
 export const isValidAadhar = aadhar => {
   return aadharRegex.test(aadhar)
+}
+
+export const captilizeFirstLetter = (str: string) => {
+  if (!str) return str
+
+  return str.charAt(0).toUpperCase() + str.slice(1)
 }
