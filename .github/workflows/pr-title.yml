@@ -27,9 +27,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Validate Jira Ticket
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
         run: |
-          TITLE="${{ github.event.pull_request.title }}"
-          if [[ ! $TITLE =~ [A-Z]+-[0-9]+ ]]; then
+          if [[ ! "$TITLE" =~ [A-Z]+-[0-9]+ ]]; then
             echo "PR title must contain Jira ticket like PROJ-123"
             exit 1
           fi
