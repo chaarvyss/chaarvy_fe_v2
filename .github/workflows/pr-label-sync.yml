@@ -1,0 +1,46 @@
+name: PR Label Sync Check
+
+on:
+  pull_request:
+    types: [opened, edited, labeled, unlabeled, synchronize]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate PR title vs labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+
+            const releaseLabels = ['major', 'minor', 'patch'];
+            const applied = labels.filter(l => releaseLabels.includes(l));
+
+            if (applied.length !== 1) {
+              core.setFailed('Exactly one of [major, minor, patch] label must be applied.');
+              return;
+            }
+
+            let expected = null;
+
+            if (title.includes('!') || title.toLowerCase().includes('breaking')) {
+              expected = 'major';
+            } else if (title.startsWith('feat')) {
+              expected = 'minor';
+            } else if (title.startsWith('fix')) {
+              expected = 'patch';
+            }
+
+            if (!expected) {
+              core.setFailed('Cannot determine release type from PR title.');
+              return;
+            }
+
+            if (!labels.includes(expected)) {
+              core.setFailed(
+                `Label mismatch: expected "${expected}" but found [${labels.join(', ')}]`
+              );
+            }
