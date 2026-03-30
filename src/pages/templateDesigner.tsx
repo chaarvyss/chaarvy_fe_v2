@@ -149,22 +149,26 @@ const DesignerPage = () => {
   const clientId = 'CLIENT_ABC' // replace with actual client id from auth
 
   // Calculate canvas dimensions based on orientation
-  const canvasWidth =
-    pageSize === 'Custom'
-      ? orientation === 'portrait'
-        ? customWidth
-        : customHeight
-      : orientation === 'portrait'
-        ? PAGE_SIZES[pageSize].width
-        : PAGE_SIZES[pageSize].height
-  const canvasHeight =
-    pageSize === 'Custom'
-      ? orientation === 'portrait'
-        ? customHeight
-        : customWidth
-      : orientation === 'portrait'
-        ? PAGE_SIZES[pageSize].height
-        : PAGE_SIZES[pageSize].width
+  const getCanvasDimensions = useCallback(() => {
+    const isCustom = pageSize === 'Custom'
+    const isPortrait = orientation === 'portrait'
+
+    if (isCustom) {
+      return {
+        width: isPortrait ? customWidth : customHeight,
+        height: isPortrait ? customHeight : customWidth
+      }
+    }
+
+    const sizes = PAGE_SIZES[pageSize as keyof typeof PAGE_SIZES]
+
+    return {
+      width: isPortrait ? sizes.width : sizes.height,
+      height: isPortrait ? sizes.height : sizes.width
+    }
+  }, [pageSize, orientation, customWidth, customHeight])
+
+  const { width: canvasWidth, height: canvasHeight } = getCanvasDimensions()
 
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
@@ -221,90 +225,47 @@ const DesignerPage = () => {
     }
   }, [history, historyIndex])
 
-  // Keyboard controls for arrow key movement, copy/paste, undo/redo
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+Z for undo
-      if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
-        e.preventDefault()
-        undo()
+  // Handle copy action
+  const handleCopy = useCallback(() => {
+    if (selectedItem && !editingItem) {
+      const item = placed.find(p => p.id === selectedItem)
+      if (item) setClipboard(item)
+    }
+  }, [selectedItem, editingItem, placed])
 
-        return
+  // Handle paste action
+  const handlePaste = useCallback(() => {
+    if (clipboard && !editingItem) {
+      const newItem = {
+        ...clipboard,
+        id: `${clipboard.type}_${Date.now()}`,
+        x: clipboard.x + 20,
+        y: clipboard.y + 20
       }
+      const newPlaced = [...placed, newItem]
+      setPlaced(newPlaced)
+      saveToHistory(newPlaced)
+      setSelectedItem(newItem.id)
+    }
+  }, [clipboard, editingItem, placed, saveToHistory])
 
-      // Ctrl+Y or Ctrl+Shift+Z for redo
-      if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z')) {
-        e.preventDefault()
-        redo()
-
-        return
-      }
-
-      // Ctrl+C for copy
-      if (e.ctrlKey && e.key === 'c' && selectedItem && !editingItem) {
-        e.preventDefault()
-        const item = placed.find(p => p.id === selectedItem)
-        if (item) setClipboard(item)
-
-        return
-      }
-
-      // Ctrl+V for paste
-      if (e.ctrlKey && e.key === 'v' && clipboard && !editingItem) {
-        e.preventDefault()
-        const newItem = {
-          ...clipboard,
-          id: `${clipboard.type}_${Date.now()}`,
-          x: clipboard.x + 20,
-          y: clipboard.y + 20
-        }
-        const newPlaced = [...placed, newItem]
-        setPlaced(newPlaced)
-        saveToHistory(newPlaced)
-        setSelectedItem(newItem.id)
-
-        return
-      }
-
-      if (!selectedItem || editingItem) return
-
-      // Delete key support
-      if (e.key === 'Delete' && selectedItem) {
-        e.preventDefault()
-        deleteItem(selectedItem)
-
-        return
-      }
-
-      const step = e.shiftKey ? 10 : 1
-      const keyMap: Record<string, { axis: 'x' | 'y'; delta: number }> = {
-        ArrowUp: { axis: 'y', delta: -step },
-        ArrowDown: { axis: 'y', delta: step },
-        ArrowLeft: { axis: 'x', delta: -step },
-        ArrowRight: { axis: 'x', delta: step }
-      }
-
-      const movement = keyMap[e.key]
-      if (!movement) return
-
-      e.preventDefault()
+  // Handle arrow key movement
+  const handleArrowMovement = useCallback(
+    (axis: 'x' | 'y', delta: number) => {
       setPlaced(p =>
         p.map(item => {
           if (item.id === selectedItem) {
-            const newValue = item[movement.axis] + movement.delta
+            const newValue = item[axis] + delta
 
-            return { ...item, [movement.axis]: Math.max(0, newValue) }
+            return { ...item, [axis]: Math.max(0, newValue) }
           }
 
           return item
         })
       )
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedItem, editingItem, placed, clipboard, undo, redo, saveToHistory])
+    },
+    [selectedItem]
+  )
 
   const handleDragStart = useCallback((e: React.DragEvent, item: Field) => {
     e.dataTransfer.setData('text/plain', JSON.stringify(item))
@@ -469,149 +430,225 @@ const DesignerPage = () => {
     []
   )
 
+  // Calculate alignment guides and snap position
+  const calculateAlignmentGuides = useCallback(
+    (newX: number, newY: number, itemWidth: number, itemHeight: number, rect: DOMRect) => {
+      const newGuides: { x?: number; y?: number; type?: string }[] = []
+      let finalX = newX
+      let finalY = newY
+
+      const canvasCenterX = rect.width / 2
+      const canvasCenterY = rect.height / 2
+      const itemCenterX = newX + itemWidth / 2
+      const itemCenterY = newY + itemHeight / 2
+
+      // Check center alignment
+      if (Math.abs(itemCenterX - canvasCenterX) < ALIGNMENT_THRESHOLD) {
+        newGuides.push({ x: canvasCenterX, type: 'center' })
+        if (Math.abs(itemCenterX - canvasCenterX) < SNAP_THRESHOLD) {
+          finalX = canvasCenterX - itemWidth / 2
+        }
+      }
+
+      if (Math.abs(itemCenterY - canvasCenterY) < ALIGNMENT_THRESHOLD) {
+        newGuides.push({ y: canvasCenterY, type: 'center' })
+        if (Math.abs(itemCenterY - canvasCenterY) < SNAP_THRESHOLD) {
+          finalY = canvasCenterY - itemHeight / 2
+        }
+      }
+
+      return { finalX, finalY, newGuides }
+    },
+    []
+  )
+
+  // Check alignment with other items
+  const calculateItemAlignments = useCallback(
+    (newX: number, newY: number, itemWidth: number, itemHeight: number, dragItemId: string) => {
+      const newGuides: { x?: number; y?: number; type?: string }[] = []
+      let finalX = newX
+      let finalY = newY
+
+      const itemCenterX = newX + itemWidth / 2
+      const itemCenterY = newY + itemHeight / 2
+
+      const getSnappedValue = (axis: 'x' | 'y', pos: number, ref: number) => {
+        if (axis === 'x') {
+          const xCandidates = [
+            { pos: newX, value: ref },
+            { pos: newX + itemWidth, value: ref - itemWidth },
+            { pos: itemCenterX, value: ref - itemWidth / 2 }
+          ]
+          const candidate = xCandidates.find(c => c.pos === pos)
+
+          return candidate ? { x: candidate.value, y: undefined } : { x: undefined, y: undefined }
+        }
+
+        const yCandidates = [
+          { pos: newY, value: ref },
+          { pos: newY + itemHeight, value: ref - itemHeight },
+          { pos: itemCenterY, value: ref - itemHeight / 2 }
+        ]
+        const candidate = yCandidates.find(c => c.pos === pos)
+
+        return candidate ? { x: undefined, y: candidate.value } : { x: undefined, y: undefined }
+      }
+
+      placed.forEach(item => {
+        if (item.id === dragItemId) return
+
+        const otherWidth = item.width || 100
+        const otherHeight = item.height || 30
+        const otherCenterX = item.x + otherWidth / 2
+        const otherCenterY = item.y + otherHeight / 2
+
+        const alignments = [
+          { pos: newX, ref: item.x, axis: 'x' as const, type: 'align' },
+          { pos: newX + itemWidth, ref: item.x + otherWidth, axis: 'x' as const, type: 'align' },
+          { pos: newY, ref: item.y, axis: 'y' as const, type: 'align' },
+          { pos: newY + itemHeight, ref: item.y + otherHeight, axis: 'y' as const, type: 'align' },
+          { pos: itemCenterX, ref: otherCenterX, axis: 'x' as const, type: 'align' },
+          { pos: itemCenterY, ref: otherCenterY, axis: 'y' as const, type: 'align' }
+        ]
+
+        alignments.forEach(({ pos, ref, axis }) => {
+          const diff = Math.abs(pos - ref)
+          if (diff < ALIGNMENT_THRESHOLD) {
+            newGuides.push({ [axis]: ref, type: 'align' })
+            if (diff < SNAP_THRESHOLD) {
+              const snapped = getSnappedValue(axis, pos, ref)
+              if (snapped.x !== undefined) finalX = snapped.x
+              if (snapped.y !== undefined) finalY = snapped.y
+            }
+          }
+        })
+      })
+
+      return { finalX, finalY, newGuides }
+    },
+    [placed]
+  )
+
+  // Handle drag movement with alignment
+  const handleDragMovement = useCallback(
+    (e: React.MouseEvent) => {
+      const canvas = canvasRef.current
+      if (!canvas) return
+
+      const rect = canvas.getBoundingClientRect()
+      let newX = e.clientX - rect.left - dragState.offsetX
+      let newY = e.clientY - rect.top - dragState.offsetY
+
+      const currentItem = placed.find(p => p.id === dragState.itemId)
+      if (!currentItem) return
+
+      const itemWidth = currentItem.width || 100
+      const itemHeight = currentItem.height || 30
+
+      // Get center alignment guides
+      const centerGuidesResult = calculateAlignmentGuides(newX, newY, itemWidth, itemHeight, rect)
+      newX = centerGuidesResult.finalX
+      newY = centerGuidesResult.finalY
+
+      // Get item alignment guides
+      const itemGuidesResult = calculateItemAlignments(newX, newY, itemWidth, itemHeight, dragState.itemId!)
+      newX = itemGuidesResult.finalX
+      newY = itemGuidesResult.finalY
+
+      const allGuides = [...centerGuidesResult.newGuides, ...itemGuidesResult.newGuides]
+      setGuides(allGuides)
+
+      setPlaced(p =>
+        p.map(item => {
+          if (item.id === dragState.itemId) {
+            const maxX = rect.width - itemWidth
+            const maxY = rect.height - itemHeight
+
+            return {
+              ...item,
+              x: Math.max(0, Math.min(newX, maxX)),
+              y: Math.max(0, Math.min(newY, maxY))
+            }
+          }
+
+          return item
+        })
+      )
+    },
+    [dragState, placed, calculateAlignmentGuides, calculateItemAlignments]
+  )
+
+  // Handle resize with dimension updates
+  const handleResizeMovement = useCallback(
+    (e: React.MouseEvent) => {
+      const deltaX = e.clientX - resizeState.startX
+      const deltaY = e.clientY - resizeState.startY
+
+      setPlaced(p =>
+        p.map(item => {
+          if (item.id === resizeState.itemId) {
+            let newWidth = resizeState.startWidth
+            let newHeight = resizeState.startHeight
+            let newX = item.x
+            let newY = item.y
+
+            const handle = resizeState.handle
+            switch (handle) {
+              case 'se':
+                newWidth = Math.max(MIN_SIZE, resizeState.startWidth + deltaX)
+                newHeight = Math.max(MIN_SIZE, resizeState.startHeight + deltaY)
+                break
+              case 'sw':
+                newWidth = Math.max(MIN_SIZE, resizeState.startWidth - deltaX)
+                newHeight = Math.max(MIN_SIZE, resizeState.startHeight + deltaY)
+                newX = item.x + (resizeState.startWidth - newWidth)
+                break
+              case 'ne':
+                newWidth = Math.max(MIN_SIZE, resizeState.startWidth + deltaX)
+                newHeight = Math.max(MIN_SIZE, resizeState.startHeight - deltaY)
+                newY = item.y + (resizeState.startHeight - newHeight)
+                break
+              case 'nw':
+                newWidth = Math.max(MIN_SIZE, resizeState.startWidth - deltaX)
+                newHeight = Math.max(MIN_SIZE, resizeState.startHeight - deltaY)
+                newX = item.x + (resizeState.startWidth - newWidth)
+                newY = item.y + (resizeState.startHeight - newHeight)
+                break
+              case 'n':
+                newHeight = Math.max(MIN_SIZE, resizeState.startHeight - deltaY)
+                newY = item.y + (resizeState.startHeight - newHeight)
+                break
+              case 's':
+                newHeight = Math.max(MIN_SIZE, resizeState.startHeight + deltaY)
+                break
+              case 'e':
+                newWidth = Math.max(MIN_SIZE, resizeState.startWidth + deltaX)
+                break
+              case 'w':
+                newWidth = Math.max(MIN_SIZE, resizeState.startWidth - deltaX)
+                newX = item.x + (resizeState.startWidth - newWidth)
+                break
+            }
+
+            return { ...item, width: newWidth, height: newHeight, x: newX, y: newY }
+          }
+
+          return item
+        })
+      )
+    },
+    [resizeState]
+  )
+
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       if (dragState.isDragging && dragState.itemId) {
-        const canvas = canvasRef.current
-        if (!canvas) return
-
-        const rect = canvas.getBoundingClientRect()
-        let newX = e.clientX - rect.left - dragState.offsetX
-        let newY = e.clientY - rect.top - dragState.offsetY
-
-        const currentItem = placed.find(p => p.id === dragState.itemId)
-        if (!currentItem) return
-
-        const itemWidth = currentItem.width || 100
-        const itemHeight = currentItem.height || 30
-        const newGuides: { x?: number; y?: number; type?: string }[] = []
-
-        // Center of canvas guides
-        const canvasCenterX = rect.width / 2
-        const canvasCenterY = rect.height / 2
-        const itemCenterX = newX + itemWidth / 2
-        const itemCenterY = newY + itemHeight / 2
-
-        // Check center alignment
-        if (Math.abs(itemCenterX - canvasCenterX) < ALIGNMENT_THRESHOLD) {
-          newGuides.push({ x: canvasCenterX, type: 'center' })
-          if (Math.abs(itemCenterX - canvasCenterX) < SNAP_THRESHOLD) {
-            newX = canvasCenterX - itemWidth / 2
-          }
-        }
-
-        if (Math.abs(itemCenterY - canvasCenterY) < ALIGNMENT_THRESHOLD) {
-          newGuides.push({ y: canvasCenterY, type: 'center' })
-          if (Math.abs(itemCenterY - canvasCenterY) < SNAP_THRESHOLD) {
-            newY = canvasCenterY - itemHeight / 2
-          }
-        }
-
-        // Check alignment with other items
-        placed.forEach(item => {
-          if (item.id === dragState.itemId) return
-
-          const otherWidth = item.width || 100
-          const otherHeight = item.height || 30
-          const otherCenterX = item.x + otherWidth / 2
-          const otherCenterY = item.y + otherHeight / 2
-
-          const alignments = [
-            { pos: newX, ref: item.x, axis: 'x', type: 'align' },
-            { pos: newX + itemWidth, ref: item.x + otherWidth, axis: 'x', type: 'align' },
-            { pos: newY, ref: item.y, axis: 'y', type: 'align' },
-            { pos: newY + itemHeight, ref: item.y + otherHeight, axis: 'y', type: 'align' },
-            { pos: itemCenterX, ref: otherCenterX, axis: 'x', type: 'align' },
-            { pos: itemCenterY, ref: otherCenterY, axis: 'y', type: 'align' }
-          ]
-
-          alignments.forEach(({ pos, ref, axis, type }) => {
-            const diff = Math.abs(pos - ref)
-            if (diff < ALIGNMENT_THRESHOLD) {
-              newGuides.push({ [axis]: ref, type })
-              if (diff < SNAP_THRESHOLD) {
-                if (axis === 'x') {
-                  if (pos === newX) newX = ref
-                  else if (pos === newX + itemWidth) newX = ref - itemWidth
-                  else if (pos === itemCenterX) newX = ref - itemWidth / 2
-                } else {
-                  if (pos === newY) newY = ref
-                  else if (pos === newY + itemHeight) newY = ref - itemHeight
-                  else if (pos === itemCenterY) newY = ref - itemHeight / 2
-                }
-              }
-            }
-          })
-        })
-
-        setGuides(newGuides)
-
-        setPlaced(p =>
-          p.map(item => {
-            if (item.id === dragState.itemId) {
-              const maxX = rect.width - itemWidth
-              const maxY = rect.height - itemHeight
-
-              return {
-                ...item,
-                x: Math.max(0, Math.min(newX, maxX)),
-                y: Math.max(0, Math.min(newY, maxY))
-              }
-            }
-
-            return item
-          })
-        )
+        handleDragMovement(e)
       } else if (resizeState.isResizing && resizeState.itemId) {
-        const deltaX = e.clientX - resizeState.startX
-        const deltaY = e.clientY - resizeState.startY
-
-        setPlaced(p =>
-          p.map(item => {
-            if (item.id === resizeState.itemId) {
-              let newWidth = resizeState.startWidth
-              let newHeight = resizeState.startHeight
-              let newX = item.x
-              let newY = item.y
-
-              const handle = resizeState.handle
-              if (handle === 'se') {
-                newWidth = Math.max(MIN_SIZE, resizeState.startWidth + deltaX)
-                newHeight = Math.max(MIN_SIZE, resizeState.startHeight + deltaY)
-              } else if (handle === 'sw') {
-                newWidth = Math.max(MIN_SIZE, resizeState.startWidth - deltaX)
-                newHeight = Math.max(MIN_SIZE, resizeState.startHeight + deltaY)
-                newX = item.x + (resizeState.startWidth - newWidth)
-              } else if (handle === 'ne') {
-                newWidth = Math.max(MIN_SIZE, resizeState.startWidth + deltaX)
-                newHeight = Math.max(MIN_SIZE, resizeState.startHeight - deltaY)
-                newY = item.y + (resizeState.startHeight - newHeight)
-              } else if (handle === 'nw') {
-                newWidth = Math.max(MIN_SIZE, resizeState.startWidth - deltaX)
-                newHeight = Math.max(MIN_SIZE, resizeState.startHeight - deltaY)
-                newX = item.x + (resizeState.startWidth - newWidth)
-                newY = item.y + (resizeState.startHeight - newHeight)
-              } else if (handle === 'n') {
-                newHeight = Math.max(MIN_SIZE, resizeState.startHeight - deltaY)
-                newY = item.y + (resizeState.startHeight - newHeight)
-              } else if (handle === 's') {
-                newHeight = Math.max(MIN_SIZE, resizeState.startHeight + deltaY)
-              } else if (handle === 'e') {
-                newWidth = Math.max(MIN_SIZE, resizeState.startWidth + deltaX)
-              } else if (handle === 'w') {
-                newWidth = Math.max(MIN_SIZE, resizeState.startWidth - deltaX)
-                newX = item.x + (resizeState.startWidth - newWidth)
-              }
-
-              return { ...item, width: newWidth, height: newHeight, x: newX, y: newY }
-            }
-
-            return item
-          })
-        )
+        handleResizeMovement(e)
       }
     },
-    [dragState, resizeState, placed]
+    [dragState, resizeState, handleDragMovement, handleResizeMovement]
   )
 
   const handleMouseUp = useCallback(() => {
@@ -649,6 +686,66 @@ const DesignerPage = () => {
     },
     [selectedItem, placed, saveToHistory]
   )
+
+  // Keyboard controls for arrow key movement, copy/paste, undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        undo()
+
+        return
+      }
+
+      if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z')) {
+        e.preventDefault()
+        redo()
+
+        return
+      }
+
+      if (e.ctrlKey && e.key === 'c' && !editingItem) {
+        e.preventDefault()
+        handleCopy()
+
+        return
+      }
+
+      if (e.ctrlKey && e.key === 'v' && !editingItem) {
+        e.preventDefault()
+        handlePaste()
+
+        return
+      }
+
+      if (!selectedItem || editingItem) return
+
+      if (e.key === 'Delete') {
+        e.preventDefault()
+        deleteItem(selectedItem)
+
+        return
+      }
+
+      const step = e.shiftKey ? 10 : 1
+      const keyMap: Record<string, { axis: 'x' | 'y'; delta: number }> = {
+        ArrowUp: { axis: 'y', delta: -step },
+        ArrowDown: { axis: 'y', delta: step },
+        ArrowLeft: { axis: 'x', delta: -step },
+        ArrowRight: { axis: 'x', delta: step }
+      }
+
+      const movement = keyMap[e.key]
+      if (movement) {
+        e.preventDefault()
+        handleArrowMovement(movement.axis, movement.delta)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedItem, editingItem, handleCopy, handlePaste, handleArrowMovement, undo, redo, deleteItem])
 
   const updateTextContent = useCallback((id: string, content: string) => {
     setPlaced(p => p.map(item => (item.id === id ? { ...item, content } : item)))
@@ -720,28 +817,415 @@ const DesignerPage = () => {
     setZoom(100)
   }, [])
 
-  const renderPlacedItem = (p: PlacedField) => {
-    if (p.type === 'field') {
-      return <span style={{ textAlign: p.textAlign || 'left' }}>{'{{' + p.fieldKey + '}}'}</span>
-    } else if (p.type === 'text') {
-      return <span style={{ textAlign: p.textAlign || 'left' }}>{p.content || 'Text'}</span>
-    } else if (p.type === 'shape') {
-      const borderStyle = p.borderWidth
-        ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
-        : '2px solid #333'
-      if (p.shapeType === 'rectangle') {
-        return <div style={{ width: p.width, height: p.height, border: borderStyle }} />
-      } else if (p.shapeType === 'circle') {
-        return <div style={{ width: p.width, height: p.height, border: borderStyle, borderRadius: '50%' }} />
-      } else if (p.shapeType === 'line') {
-        return <div style={{ width: p.width, height: p.height, background: p.borderColor || '#333' }} />
-      }
-    } else if (p.type === 'image') {
-      return <img src={p.imageUrl} alt='Placed' style={{ width: p.width, height: p.height, objectFit: 'contain' }} />
+  // Render shape element based on shapeType
+  const renderShape = useCallback((p: PlacedField, borderStyle: string) => {
+    if (p.shapeType === 'rectangle') {
+      return <div style={{ width: p.width, height: p.height, border: borderStyle }} />
+    }
+    if (p.shapeType === 'circle') {
+      return <div style={{ width: p.width, height: p.height, border: borderStyle, borderRadius: '50%' }} />
+    }
+    if (p.shapeType === 'line') {
+      return <div style={{ width: p.width, height: p.height, background: p.borderColor || '#333' }} />
     }
 
     return null
-  }
+  }, [])
+
+  // Get content based on item type
+  const getItemContent = useCallback(
+    (p: PlacedField) => {
+      if (p.type === 'field') {
+        return <span style={{ textAlign: p.textAlign || 'left' }}>{'{{' + p.fieldKey + '}}'}</span>
+      }
+      if (p.type === 'text') {
+        return <span style={{ textAlign: p.textAlign || 'left' }}>{p.content || 'Text'}</span>
+      }
+      if (p.type === 'shape') {
+        const borderStyle = p.borderWidth
+          ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
+          : '2px solid #333'
+
+        return renderShape(p, borderStyle)
+      }
+      if (p.type === 'image') {
+        return <img src={p.imageUrl} alt='Placed' style={{ width: p.width, height: p.height, objectFit: 'contain' }} />
+      }
+
+      return null
+    },
+    [renderShape]
+  )
+
+  // Render properties panel for selected item
+  const renderPropertiesPanel = useCallback(() => {
+    const item = placed.find(p => p.id === selectedItem)
+    if (!item) return null
+
+    return (
+      <div
+        style={{
+          width: 280,
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          borderLeft: '1px solid #ddd',
+          paddingLeft: 20
+        }}
+      >
+        <h3 style={{ marginTop: 0 }}>Properties</h3>
+
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+            Position X
+          </label>
+          <input
+            type='number'
+            value={Math.round(item.x)}
+            onChange={e => updateItemProperty(item.id, 'x', Number(e.target.value))}
+            style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+          />
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+            Position Y
+          </label>
+          <input
+            type='number'
+            value={Math.round(item.y)}
+            onChange={e => updateItemProperty(item.id, 'y', Number(e.target.value))}
+            style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+          />
+        </div>
+
+        {(item.type === 'shape' || item.type === 'image' || item.type === 'text') && (
+          <>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+                Width
+              </label>
+              <input
+                type='number'
+                value={Math.round(item.width || 0)}
+                onChange={e => updateItemProperty(item.id, 'width', Number(e.target.value))}
+                style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+                Height
+              </label>
+              <input
+                type='number'
+                value={Math.round(item.height || 0)}
+                onChange={e => updateItemProperty(item.id, 'height', Number(e.target.value))}
+                style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+              />
+            </div>
+          </>
+        )}
+
+        {renderTextProperties(item)}
+        {renderOpacityRotation(item)}
+        {renderBorderProperties(item)}
+        {renderLayerControls()}
+        {renderDeleteButton(item)}
+      </div>
+    )
+  }, [selectedItem, placed, updateItemProperty])
+
+  // Render text-specific properties
+  const renderTextProperties = useCallback(
+    (item: PlacedField) => {
+      if (item.type !== 'text' && item.type !== 'field') return null
+
+      return (
+        <>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Font Size
+            </label>
+            <input
+              type='number'
+              value={item.fontSize || 16}
+              onChange={e => updateItemProperty(item.id, 'fontSize', Number(e.target.value))}
+              style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+            />
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Font Family
+            </label>
+            <select
+              value={item.fontFamily || 'Arial'}
+              onChange={e => updateItemProperty(item.id, 'fontFamily', e.target.value)}
+              style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+            >
+              {FONT_FAMILIES.map(font => (
+                <option key={font} value={font} style={{ fontFamily: font }}>
+                  {font}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Font Weight
+            </label>
+            <select
+              value={item.fontWeight || 'normal'}
+              onChange={e => updateItemProperty(item.id, 'fontWeight', e.target.value)}
+              style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+            >
+              {FONT_WEIGHTS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Color
+            </label>
+            <input
+              type='color'
+              value={item.color || '#000000'}
+              onChange={e => updateItemProperty(item.id, 'color', e.target.value)}
+              style={{
+                width: '100%',
+                height: 40,
+                padding: 2,
+                border: '1px solid #ddd',
+                borderRadius: 4,
+                cursor: 'pointer'
+              }}
+            />
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Letter Spacing (px)
+            </label>
+            <input
+              type='number'
+              value={item.letterSpacing || 0}
+              onChange={e => updateItemProperty(item.id, 'letterSpacing', Number(e.target.value))}
+              style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+              step='0.1'
+            />
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Text Alignment
+            </label>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {['left', 'center', 'right', 'justify'].map(align => (
+                <button
+                  key={align}
+                  onClick={() => updateItemProperty(item.id, 'textAlign', align as any)}
+                  style={{
+                    flex: 1,
+                    padding: '6px 4px',
+                    background: item.textAlign === align ? '#2196F3' : '#f9f9f9',
+                    color: item.textAlign === align ? 'white' : '#333',
+                    border: '1px solid #ddd',
+                    borderRadius: 4,
+                    cursor: 'pointer',
+                    fontSize: 11,
+                    textTransform: 'capitalize'
+                  }}
+                >
+                  {align}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )
+    },
+    [updateItemProperty]
+  )
+
+  // Render opacity and rotation controls
+  const renderOpacityRotation = useCallback(
+    (item: PlacedField) => {
+      return (
+        <>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Opacity ({((item.opacity ?? 1) * 100).toFixed(0)}%)
+            </label>
+            <input
+              type='range'
+              min='0'
+              max='1'
+              step='0.01'
+              value={item.opacity ?? 1}
+              onChange={e => updateItemProperty(item.id, 'opacity', Number(e.target.value))}
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Rotation (degrees)
+            </label>
+            <input
+              type='number'
+              min='0'
+              max='360'
+              value={item.rotation || 0}
+              onChange={e => updateItemProperty(item.id, 'rotation', Number(e.target.value))}
+              style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+            />
+          </div>
+        </>
+      )
+    },
+    [updateItemProperty]
+  )
+
+  // Render border properties
+  const renderBorderProperties = useCallback(
+    (item: PlacedField) => {
+      if (!(item.type === 'shape' || item.type === 'text' || item.type === 'field')) return null
+
+      return (
+        <>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Border Width (px)
+            </label>
+            <input
+              type='number'
+              min='0'
+              value={item.borderWidth || 0}
+              onChange={e => updateItemProperty(item.id, 'borderWidth', Number(e.target.value))}
+              style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+            />
+          </div>
+
+          {item.borderWidth && item.borderWidth > 0 && (
+            <>
+              <div style={{ marginBottom: 16 }}>
+                <label
+                  htmlFor='item-border-color'
+                  style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}
+                >
+                  Border Color
+                </label>
+                <input
+                  id='item-border-color'
+                  type='color'
+                  value={item.borderColor || '#333333'}
+                  onChange={e => updateItemProperty(item.id, 'borderColor', e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: 40,
+                    padding: 2,
+                    border: '1px solid #ddd',
+                    borderRadius: 4,
+                    cursor: 'pointer'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+                  Border Style
+                </label>
+                <select
+                  value={item.borderStyle || 'solid'}
+                  onChange={e => updateItemProperty(item.id, 'borderStyle', e.target.value as any)}
+                  style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+                >
+                  <option value='solid'>Solid</option>
+                  <option value='dashed'>Dashed</option>
+                  <option value='dotted'>Dotted</option>
+                </select>
+              </div>
+            </>
+          )}
+        </>
+      )
+    },
+    [updateItemProperty]
+  )
+
+  // Render layer controls
+  const renderLayerControls = useCallback(() => {
+    return (
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 8, fontSize: 12, fontWeight: 500, color: '#666' }}>
+          Layer Order
+        </label>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={bringToFront}
+            style={{
+              flex: 1,
+              padding: '8px 12px',
+              background: '#2196F3',
+              color: 'white',
+              border: 'none',
+              borderRadius: 4,
+              cursor: 'pointer',
+              fontSize: 12
+            }}
+          >
+            ↑ To Front
+          </button>
+          <button
+            onClick={sendToBack}
+            style={{
+              flex: 1,
+              padding: '8px 12px',
+              background: '#FF9800',
+              color: 'white',
+              border: 'none',
+              borderRadius: 4,
+              cursor: 'pointer',
+              fontSize: 12
+            }}
+          >
+            ↓ To Back
+          </button>
+        </div>
+      </div>
+    )
+  }, [bringToFront, sendToBack])
+
+  // Render delete button
+  const renderDeleteButton = useCallback(
+    (item: PlacedField) => {
+      return (
+        <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #ddd' }}>
+          <button
+            onClick={() => deleteItem(item.id)}
+            style={{
+              width: '100%',
+              padding: 8,
+              background: '#f44336',
+              color: 'white',
+              border: 'none',
+              borderRadius: 4,
+              cursor: 'pointer',
+              fontSize: 14
+            }}
+          >
+            Delete Item
+          </button>
+        </div>
+      )
+    },
+    [deleteItem]
+  )
 
   return (
     <div style={{ display: 'flex', gap: 20, padding: 20, position: 'relative' }}>
@@ -973,10 +1457,14 @@ const DesignerPage = () => {
 
               {pageSize === 'Custom' && (
                 <>
-                  <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+                  <label
+                    htmlFor='item-height'
+                    style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}
+                  >
                     Width (px)
                   </label>
                   <input
+                    id='item-height'
                     type='number'
                     value={customWidth}
                     onChange={e => setCustomWidth(Number(e.target.value))}
@@ -1287,7 +1775,7 @@ const DesignerPage = () => {
                           letterSpacing: p.letterSpacing
                         }}
                       >
-                        {renderPlacedItem(p)}
+                        {getItemContent(p)}
                       </span>
                     ) : p.type !== 'shape' && p.type !== 'image' ? (
                       <span
@@ -1298,10 +1786,10 @@ const DesignerPage = () => {
                           letterSpacing: p.letterSpacing
                         }}
                       >
-                        {renderPlacedItem(p)}
+                        {getItemContent(p)}
                       </span>
                     ) : null}
-                    {(p.type === 'shape' || p.type === 'image') && renderPlacedItem(p)}
+                    {(p.type === 'shape' || p.type === 'image') && getItemContent(p)}
                   </div>
 
                   {/* Delete Button */}
@@ -1509,334 +1997,7 @@ const DesignerPage = () => {
       </div>
 
       {/* Right Sidebar - Properties Panel */}
-      {selectedItem &&
-        (() => {
-          const item = placed.find(p => p.id === selectedItem)
-          if (!item) return null
-
-          return (
-            <div
-              style={{
-                width: 280,
-                maxHeight: '90vh',
-                overflowY: 'auto',
-                borderLeft: '1px solid #ddd',
-                paddingLeft: 20
-              }}
-            >
-              <h3 style={{ marginTop: 0 }}>Properties</h3>
-
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                  Position X
-                </label>
-                <input
-                  type='number'
-                  value={Math.round(item.x)}
-                  onChange={e => updateItemProperty(item.id, 'x', Number(e.target.value))}
-                  style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                />
-              </div>
-
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                  Position Y
-                </label>
-                <input
-                  type='number'
-                  value={Math.round(item.y)}
-                  onChange={e => updateItemProperty(item.id, 'y', Number(e.target.value))}
-                  style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                />
-              </div>
-
-              {(item.type === 'shape' || item.type === 'image' || item.type === 'text') && (
-                <>
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                      Width
-                    </label>
-                    <input
-                      type='number'
-                      value={Math.round(item.width || 0)}
-                      onChange={e => updateItemProperty(item.id, 'width', Number(e.target.value))}
-                      style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                      Height
-                    </label>
-                    <input
-                      type='number'
-                      value={Math.round(item.height || 0)}
-                      onChange={e => updateItemProperty(item.id, 'height', Number(e.target.value))}
-                      style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                    />
-                  </div>
-                </>
-              )}
-
-              {(item.type === 'text' || item.type === 'field') && (
-                <>
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                      Font Size
-                    </label>
-                    <input
-                      type='number'
-                      value={item.fontSize || 16}
-                      onChange={e => updateItemProperty(item.id, 'fontSize', Number(e.target.value))}
-                      style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                      Font Family
-                    </label>
-                    <select
-                      value={item.fontFamily || 'Arial'}
-                      onChange={e => updateItemProperty(item.id, 'fontFamily', e.target.value)}
-                      style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                    >
-                      {FONT_FAMILIES.map(font => (
-                        <option key={font} value={font} style={{ fontFamily: font }}>
-                          {font}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                      Font Weight
-                    </label>
-                    <select
-                      value={item.fontWeight || 'normal'}
-                      onChange={e => updateItemProperty(item.id, 'fontWeight', e.target.value)}
-                      style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                    >
-                      {FONT_WEIGHTS.map(({ value, label }) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                      Color
-                    </label>
-                    <input
-                      type='color'
-                      value={item.color || '#000000'}
-                      onChange={e => updateItemProperty(item.id, 'color', e.target.value)}
-                      style={{
-                        width: '100%',
-                        height: 40,
-                        padding: 2,
-                        border: '1px solid #ddd',
-                        borderRadius: 4,
-                        cursor: 'pointer'
-                      }}
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                      Letter Spacing (px)
-                    </label>
-                    <input
-                      type='number'
-                      value={item.letterSpacing || 0}
-                      onChange={e => updateItemProperty(item.id, 'letterSpacing', Number(e.target.value))}
-                      style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                      step='0.1'
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                      Text Alignment
-                    </label>
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      {['left', 'center', 'right', 'justify'].map(align => (
-                        <button
-                          key={align}
-                          onClick={() => updateItemProperty(item.id, 'textAlign', align as any)}
-                          style={{
-                            flex: 1,
-                            padding: '6px 4px',
-                            background: item.textAlign === align ? '#2196F3' : '#f9f9f9',
-                            color: item.textAlign === align ? 'white' : '#333',
-                            border: '1px solid #ddd',
-                            borderRadius: 4,
-                            cursor: 'pointer',
-                            fontSize: 11,
-                            textTransform: 'capitalize'
-                          }}
-                        >
-                          {align}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Opacity Control */}
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                  Opacity ({((item.opacity !== undefined ? item.opacity : 1) * 100).toFixed(0)}%)
-                </label>
-                <input
-                  type='range'
-                  min='0'
-                  max='1'
-                  step='0.01'
-                  value={item.opacity !== undefined ? item.opacity : 1}
-                  onChange={e => updateItemProperty(item.id, 'opacity', Number(e.target.value))}
-                  style={{ width: '100%' }}
-                />
-              </div>
-
-              {/* Rotation Control */}
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                  Rotation (degrees)
-                </label>
-                <input
-                  type='number'
-                  min='0'
-                  max='360'
-                  value={item.rotation || 0}
-                  onChange={e => updateItemProperty(item.id, 'rotation', Number(e.target.value))}
-                  style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                />
-              </div>
-
-              {/* Border Controls */}
-              {(item.type === 'shape' || item.type === 'text' || item.type === 'field') && (
-                <>
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                      Border Width (px)
-                    </label>
-                    <input
-                      type='number'
-                      min='0'
-                      value={item.borderWidth || 0}
-                      onChange={e => updateItemProperty(item.id, 'borderWidth', Number(e.target.value))}
-                      style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                    />
-                  </div>
-
-                  {item.borderWidth && item.borderWidth > 0 && (
-                    <>
-                      <div style={{ marginBottom: 16 }}>
-                        <label
-                          style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}
-                        >
-                          Border Color
-                        </label>
-                        <input
-                          type='color'
-                          value={item.borderColor || '#333333'}
-                          onChange={e => updateItemProperty(item.id, 'borderColor', e.target.value)}
-                          style={{
-                            width: '100%',
-                            height: 40,
-                            padding: 2,
-                            border: '1px solid #ddd',
-                            borderRadius: 4,
-                            cursor: 'pointer'
-                          }}
-                        />
-                      </div>
-
-                      <div style={{ marginBottom: 16 }}>
-                        <label
-                          style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}
-                        >
-                          Border Style
-                        </label>
-                        <select
-                          value={item.borderStyle || 'solid'}
-                          onChange={e => updateItemProperty(item.id, 'borderStyle', e.target.value as any)}
-                          style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                        >
-                          <option value='solid'>Solid</option>
-                          <option value='dashed'>Dashed</option>
-                          <option value='dotted'>Dotted</option>
-                        </select>
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-
-              {/* Z-Index Controls */}
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', marginBottom: 8, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                  Layer Order
-                </label>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    onClick={bringToFront}
-                    style={{
-                      flex: 1,
-                      padding: '8px 12px',
-                      background: '#2196F3',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: 4,
-                      cursor: 'pointer',
-                      fontSize: 12
-                    }}
-                  >
-                    ↑ To Front
-                  </button>
-                  <button
-                    onClick={sendToBack}
-                    style={{
-                      flex: 1,
-                      padding: '8px 12px',
-                      background: '#FF9800',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: 4,
-                      cursor: 'pointer',
-                      fontSize: 12
-                    }}
-                  >
-                    ↓ To Back
-                  </button>
-                </div>
-              </div>
-
-              <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #ddd' }}>
-                <button
-                  onClick={() => deleteItem(item.id)}
-                  style={{
-                    width: '100%',
-                    padding: 8,
-                    background: '#f44336',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 4,
-                    cursor: 'pointer',
-                    fontSize: 14
-                  }}
-                >
-                  Delete Item
-                </button>
-              </div>
-            </div>
-          )
-        })()}
+      {selectedItem && renderPropertiesPanel()}
     </div>
   )
 }
