@@ -472,6 +472,28 @@ const DesignerPage = () => {
       const itemCenterX = newX + itemWidth / 2
       const itemCenterY = newY + itemHeight / 2
 
+      const getSnappedValue = (axis: 'x' | 'y', pos: number, ref: number) => {
+        if (axis === 'x') {
+          const xCandidates = [
+            { pos: newX, value: ref },
+            { pos: newX + itemWidth, value: ref - itemWidth },
+            { pos: itemCenterX, value: ref - itemWidth / 2 }
+          ]
+          const candidate = xCandidates.find(c => c.pos === pos)
+
+          return candidate ? { x: candidate.value, y: undefined } : { x: undefined, y: undefined }
+        }
+
+        const yCandidates = [
+          { pos: newY, value: ref },
+          { pos: newY + itemHeight, value: ref - itemHeight },
+          { pos: itemCenterY, value: ref - itemHeight / 2 }
+        ]
+        const candidate = yCandidates.find(c => c.pos === pos)
+
+        return candidate ? { x: undefined, y: candidate.value } : { x: undefined, y: undefined }
+      }
+
       placed.forEach(item => {
         if (item.id === dragItemId) return
 
@@ -494,15 +516,9 @@ const DesignerPage = () => {
           if (diff < ALIGNMENT_THRESHOLD) {
             newGuides.push({ [axis]: ref, type: 'align' })
             if (diff < SNAP_THRESHOLD) {
-              if (axis === 'x') {
-                if (pos === newX) finalX = ref
-                else if (pos === newX + itemWidth) finalX = ref - itemWidth
-                else if (pos === itemCenterX) finalX = ref - itemWidth / 2
-              } else {
-                if (pos === newY) finalY = ref
-                else if (pos === newY + itemHeight) finalY = ref - itemHeight
-                else if (pos === itemCenterY) finalY = ref - itemHeight / 2
-              }
+              const snapped = getSnappedValue(axis, pos, ref)
+              if (snapped.x !== undefined) finalX = snapped.x
+              if (snapped.y !== undefined) finalY = snapped.y
             }
           }
         })
@@ -1043,14 +1059,14 @@ const DesignerPage = () => {
         <>
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-              Opacity ({((item.opacity !== undefined ? item.opacity : 1) * 100).toFixed(0)}%)
+              Opacity ({((item.opacity ?? 1) * 100).toFixed(0)}%)
             </label>
             <input
               type='range'
               min='0'
               max='1'
               step='0.01'
-              value={item.opacity !== undefined ? item.opacity : 1}
+              value={item.opacity ?? 1}
               onChange={e => updateItemProperty(item.id, 'opacity', Number(e.target.value))}
               style={{ width: '100%' }}
             />
@@ -1098,10 +1114,14 @@ const DesignerPage = () => {
           {item.borderWidth && item.borderWidth > 0 && (
             <>
               <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+                <label
+                  htmlFor='item-border-color'
+                  style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}
+                >
                   Border Color
                 </label>
                 <input
+                  id='item-border-color'
                   type='color'
                   value={item.borderColor || '#333333'}
                   onChange={e => updateItemProperty(item.id, 'borderColor', e.target.value)}
@@ -1437,10 +1457,14 @@ const DesignerPage = () => {
 
               {pageSize === 'Custom' && (
                 <>
-                  <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+                  <label
+                    htmlFor='item-height'
+                    style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}
+                  >
                     Width (px)
                   </label>
                   <input
+                    id='item-height'
                     type='number'
                     value={customWidth}
                     onChange={e => setCustomWidth(Number(e.target.value))}
