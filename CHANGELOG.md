@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.2.0...v1.2.1) (2026-03-30)
+
+
+### Bug Fixes
+
+* **sonor fixes:** AC-9 fixing high severity sonar issues in designer page ([#28](https://github.com/chaarvyss/chaarvy_fe_v2/issues/28)) ([7f42c9d](https://github.com/chaarvyss/chaarvy_fe_v2/commit/7f42c9d55d82c31d627946323043a66b3b827d26))
+
 # [1.2.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.1.0...v1.2.0) (2026-03-22)
 
 
