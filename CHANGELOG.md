@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.2.1...v1.2.2) (2026-04-03)
+
+
+### Bug Fixes
+
+* **AC-11:** fixed rtk query param issues and minor eslint issue ([#29](https://github.com/chaarvyss/chaarvy_fe_v2/issues/29)) ([6f9966f](https://github.com/chaarvyss/chaarvy_fe_v2/commit/6f9966f250219e2af93a8a9a718933c26039c555))
+
 ## [1.2.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.2.0...v1.2.1) (2026-03-30)
 
 
