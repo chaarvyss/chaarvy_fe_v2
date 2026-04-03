@@ -250,7 +250,9 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
                 label='Program'
                 onChange={handleChange('program_id')}
               >
-                {programsList?.map(each => <MenuItem value={each.program_id}>{each.program_name}</MenuItem>)}
+                {programsList?.map(each => (
+                  <MenuItem value={each.program_id}>{each.program_name}</MenuItem>
+                ))}
               </Select>
             </FormControl>
             <FormControl sx={{ mb: 4 }} fullWidth>
@@ -263,7 +265,9 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
                 label='Segment'
                 onChange={handleChange('segment_id')}
               >
-                {segmentsList?.map(each => <MenuItem value={each.segment_id}>{each.segment_name}</MenuItem>)}
+                {segmentsList?.map(each => (
+                  <MenuItem value={each.segment_id}>{each.segment_name}</MenuItem>
+                ))}
               </Select>
             </FormControl>
             <FormControl sx={{ mb: 4 }} fullWidth>
@@ -276,7 +280,9 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
                 label='Segment'
                 onChange={handleChange('book_id')}
               >
-                {booksList?.map(each => <MenuItem value={each.book_id}>{each.book_name}</MenuItem>)}
+                {booksList?.map(each => (
+                  <MenuItem value={each.book_id}>{each.book_name}</MenuItem>
+                ))}
               </Select>
             </FormControl>
             <FormControl fullWidth>

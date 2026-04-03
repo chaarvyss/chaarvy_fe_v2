@@ -47,9 +47,10 @@ const getLast10Years = (): number[] => {
 interface studentBaseDetailsProps {
   application_id?: string
   handleNext: (step: AdmissionFormType) => void
+  onAdmissionCreation: (application_id: string) => void
 }
 
-const StudentDetails = ({ application_id, handleNext }: studentBaseDetailsProps) => {
+const StudentDetails = ({ application_id, handleNext, onAdmissionCreation }: studentBaseDetailsProps) => {
   const [applicationDetails, setApplicationDetails] = useState<CreateStudentAdmissionRequest>()
   const [dob, setDob] = useState<Date>()
 
@@ -101,6 +102,7 @@ const StudentDetails = ({ application_id, handleNext }: studentBaseDetailsProps)
         .unwrap()
         .then(({ application_id, message }) => {
           if (application_id) {
+            onAdmissionCreation(application_id)
             handleNext(AdmissionFormType.ADDON_COURSE)
           }
           triggerToast(message ?? 'New application created', { variant: ToastVariants.SUCCESS })

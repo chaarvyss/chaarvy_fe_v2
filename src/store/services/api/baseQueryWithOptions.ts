@@ -21,8 +21,7 @@ const baseQuery = fetchBaseQuery({
 
 const baseQueryWithRetry = retry(
   async (args, api, extraOptions) => {
-    let { url } = args
-    const { params = {}, ...rest } = args
+    const { url, params, ...rest } = args
     const filteredParams = Object.fromEntries(
       Object.entries(params)
         .filter(([, value]) => value !== undefined && value !== null && value !== '')
@@ -31,9 +30,9 @@ const baseQueryWithRetry = retry(
 
     const extUrl = Object.keys(filteredParams).length > 0 ? `?${new URLSearchParams(filteredParams).toString()}` : ''
 
-    url = `${url}${extUrl}`
+    const custUrl = `${url}${extUrl}`
 
-    return baseQuery({ url, ...rest }, api, extraOptions)
+    return baseQuery({ url: custUrl, ...rest }, api, extraOptions)
   },
   { maxRetries: 0 }
 )
