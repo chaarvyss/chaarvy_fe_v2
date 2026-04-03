@@ -3,8 +3,7 @@ version: 2.1
 jobs:
   test:
     docker:
-      - image: cimg/node:20.10
-
+      - image: cimg/node:24.0
     working_directory: ~/project
 
     steps:
@@ -25,11 +24,28 @@ jobs:
           key: node-cache-{{ checksum "package-lock.json" }}
 
       - run:
+          name: Run ESLint (fail if any issue)
+          command: npm run lint
+
+      - run:
           name: Run Jest tests with coverage
           command: npm run test -- --coverage
 
+  deploy:
+    docker:
+      - image: cimg/node:24.0
+
+    steps:
+      - run:
+          name: Trigger Netlify Build
+          command: |
+            curl -X POST $https://api.netlify.com/build_hooks/69cf2e17b890b79911794909
+
 workflows:
   version: 2
-  test_build:
+  ci_cd_pipeline:
     jobs:
       - test
+      - deploy:
+          requires:
+            - test
