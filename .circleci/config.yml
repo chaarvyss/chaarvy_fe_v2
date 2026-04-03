@@ -38,8 +38,7 @@ jobs:
     steps:
       - run:
           name: Trigger Netlify Build
-          command: |
-            curl -X POST $https://api.netlify.com/build_hooks/69cf2e17b890b79911794909
+          command: curl -X POST $NETLIFY_BUILD_HOOK
 
 workflows:
   version: 2
@@ -49,3 +48,6 @@ workflows:
       - deploy:
           requires:
             - test
+          filters:
+            branches:
+              only: main
