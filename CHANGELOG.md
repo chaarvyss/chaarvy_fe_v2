@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.2.2...v1.2.3) (2026-04-05)
+
+
+### Bug Fixes
+
+* **api failure:** AC-13 fixed with no query params ([#30](https://github.com/chaarvyss/chaarvy_fe_v2/issues/30)) ([953b7d3](https://github.com/chaarvyss/chaarvy_fe_v2/commit/953b7d3cac0951f4474482daae773af95f5652a2))
+
 ## [1.2.2](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.2.1...v1.2.2) (2026-04-03)
 
 
