@@ -23,7 +23,7 @@ const baseQueryWithRetry = retry(
   async (args, api, extraOptions) => {
     const { url, params, ...rest } = args
     const filteredParams = Object.fromEntries(
-      Object.entries(params)
+      Object.entries(params ?? {})
         .filter(([, value]) => value !== undefined && value !== null && value !== '')
         .map(([key, value]) => [key, typeof value === 'object' ? JSON.stringify(value) : String(value)])
     )
