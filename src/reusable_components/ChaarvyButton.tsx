@@ -12,6 +12,7 @@ export interface ChaarvyButtonProps extends Omit<ButtonProps, 'color'> {
   rightIcon?: ReactNode
   label?: ReactNode
   hoverEffect?: Record<string, any>
+  variant?: 'text' | 'outlined' | 'contained'
 }
 
 const ChaarvyButton = ({
@@ -66,7 +67,7 @@ const ChaarvyButton = ({
               {leftIcon}
             </Box>
           )}
-          <Box component='span'>{label ?? children}</Box>
+          {(label || children) && <Box component='span'>{label ?? children}</Box>}
           {rightIcon && (
             <Box component='span' sx={{ display: 'inline-flex' }}>
               {rightIcon}
