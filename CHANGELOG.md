@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.2.3...v1.2.4) (2026-04-10)
+
+
+### Bug Fixes
+
+* **dashboard:** AC-18 dashboard is rendering properly now ([#31](https://github.com/chaarvyss/chaarvy_fe_v2/issues/31)) ([33186e1](https://github.com/chaarvyss/chaarvy_fe_v2/commit/33186e13226c8ad3d010e6b15746e9e4ad081d0f))
+
 ## [1.2.3](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.2.2...v1.2.3) (2026-04-05)
 
 
