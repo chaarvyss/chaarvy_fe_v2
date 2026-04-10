@@ -1,3 +1,10 @@
+## [1.2.5](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.2.4...v1.2.5) (2026-04-10)
+
+
+### Bug Fixes
+
+* **synk:** AC-000 Security upgrade next from 15.1.14 to 15.5.15 ([#32](https://github.com/chaarvyss/chaarvy_fe_v2/issues/32)) ([14dcc63](https://github.com/chaarvyss/chaarvy_fe_v2/commit/14dcc63f4dc3dbe51cac0135e0336df47c89a064))
+
 ## [1.2.4](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.2.3...v1.2.4) (2026-04-10)
 
 
