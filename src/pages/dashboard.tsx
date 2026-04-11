@@ -5,7 +5,7 @@ import GridLayout from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
-import GetChaarvyIcons, { ChaarvyIcon } from 'src/utils/icons'
+import GetChaarvyIcons from 'src/utils/icons'
 import Attendence from 'src/views/dashboardCards/attendence'
 import MyCalendar from 'src/views/dashboardCards/calendar'
 import Payments2 from 'src/views/dashboardCards/payments2'
@@ -41,7 +41,7 @@ const DashboardCard = React.forwardRef<HTMLDivElement, DashboardCardProps>(
                 padding: '4px 8px',
                 zIndex: 10
               }}
-              startIcon={<GetChaarvyIcons iconName={ChaarvyIcon.Close} />}
+              startIcon={<GetChaarvyIcons iconName='Close' />}
             />
           )}
           <Typography variant='h6' className='drag-handle'>
@@ -135,7 +135,7 @@ const Dashboard: React.FC = () => {
     <div className='container-fluid' style={{ position: 'relative' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
         <ChaarvyButton size='small' variant='outlined' color='primary' onClick={handleResetDashboard}>
-          <GetChaarvyIcons iconName={ChaarvyIcon.Undo} />
+          <GetChaarvyIcons iconName='Undo' />
         </ChaarvyButton>
       </div>
       <GridLayout
