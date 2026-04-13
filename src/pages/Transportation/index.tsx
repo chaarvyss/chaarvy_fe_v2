@@ -1,44 +1,10 @@
 import React from 'react'
 
 import { Box, Typography } from '@muiElements'
-import { Card1, DashboardTable } from 'src/components/Cards/dashboardCards'
-import { ChaarvyTableColumn } from 'src/reusable_components/ChaarvyDataTable'
+import { Card1 } from 'src/components/Cards/dashboardCards'
+import CurrentTransportationStatus from 'src/views/Transportation/Dashboard/CurrentTransportationStatus'
 
 const Transportation = () => {
-  const columns: ChaarvyTableColumn[] = [
-    {
-      id: 's_no',
-      label: 'S.No',
-      hideable: true,
-      defaultHidden: false,
-      width: 40,
-      render: (row, index) => index + 1
-    },
-    {
-      id: 'route',
-      label: 'Route',
-      hideable: true,
-      defaultHidden: true
-    },
-    {
-      id: 'vehicle',
-      label: 'Vehicle',
-      hideable: true
-    },
-
-    {
-      id: 'students_onboard',
-      label: 'Students Onboard',
-      hideable: true,
-      width: 170
-    },
-    {
-      id: 'current_location',
-      label: 'Current Location',
-      hideable: true
-    }
-  ]
-
   return (
     <>
       <Typography variant='h4' sx={{ mb: 4 }}>
@@ -93,36 +59,7 @@ const Transportation = () => {
           values={[70, 30, 10]}
           labels={['Paid', 'Close to Due', 'Overdue']}
         />
-        <DashboardTable
-          cardTitle='Current Transportation Status'
-          columns={columns}
-          data={[
-            {
-              id: 1,
-              route: 'Route A',
-              vehicle: 'Bus 101',
-              students_onboard: 30,
-              current_location: 'Downtown'
-            },
-            {
-              id: 2,
-              route: 'Route B',
-              vehicle: 'Van 202',
-              students_onboard: 15,
-              current_location: 'Uptown'
-            },
-            {
-              id: 3,
-              route: 'Route C',
-              vehicle: 'Bus 303',
-              students_onboard: 25,
-              current_location: 'Midtown'
-            }
-          ]}
-          getRowKey={row => row.id}
-          onRowClick={row => alert(`Row clicked: ${row.route}`)}
-          emptyMessage='No Transportation Data Available'
-        />
+        <CurrentTransportationStatus />
       </Box>
     </>
   )
