@@ -1,71 +1,65 @@
 import { useRouter } from 'next/router'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
-import { Box, Chip, Typography } from '@muiElements'
-import { useLoader } from 'src/@core/context/loaderContext'
+import { Box, Chip, IconButton, Typography } from '@muiElements'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import RenderFilterOptions from 'src/common/filters'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import { PagePath } from 'src/constants/pagePathConstants'
 import { FilterProps } from 'src/lib/interfaces'
-import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
 import { ChaarvyTableColumn } from 'src/reusable_components/ChaarvyDataTable'
-import DropDownMenu from 'src/reusable_components/dropDownMenu'
-import { useLazyGetAdmissionsListQuery } from 'src/store/services/admisissionsService'
 import { statusColors } from 'src/utils/constants'
 import GetChaarvyIcons from 'src/utils/icons'
 
-const Admissions = () => {
+// import { useLazyGetAdmissionsListQuery } from 'src/store/services/admisissionsService'
+const VehicleVendors = () => {
   const router = useRouter()
   const { openDrawer } = useSideDrawer()
-  const { setLoading } = useLoader()
-  const [fetchAdmissions, { data: admissionResponse, isLoading }] = useLazyGetAdmissionsListQuery()
+
+  // const { setLoading } = useLoader()
+
+  // const [fetchAdmissions, { data: admissionResponse, isLoading }] = useLazyGetAdmissionsListQuery()
   const [filterProps, setFilterProps] = useState<FilterProps>({ limit: 20, offset: 0 })
 
-  useEffect(() => {
-    fetchAdmissions(filterProps)
-  }, [filterProps])
+  // useEffect(() => {
+  //   fetchAdmissions(filterProps)
+  // }, [filterProps])
 
-  useEffect(() => {
-    setLoading(isLoading)
-  }, [isLoading])
+  // useEffect(() => {
+  //   setLoading(isLoading)
+  // }, [isLoading])
 
   const handleCreateAdmissionClick = () => {
     router.push(PagePath.CREATE_ADMISSION)
   }
 
-  const getKebabOptions = (application_id: string) => {
-    return [
-      {
-        id: 'edit application',
-        label: 'Edit Application',
-        icon: <GetChaarvyIcons iconName='GreasePencil' />,
-        onOptionClick: () => router.push(`${PagePath.CREATE_ADMISSION}?id=${application_id}`)
-      }
-    ]
-  }
-
   const handleFilteredAdmissions = (params?: FilterProps) => {
-    fetchAdmissions({ ...filterProps, ...params })
+    console.log('Filter params:', params)
+
+    // fetchAdmissions({ ...filterProps, ...params })
   }
 
   const onFilterButtonClick = () => {
     openDrawer(
       'Filters',
-      <RenderFilterOptions onSubmit={handleFilteredAdmissions} fields={['search', 'program', 'sections']} />
+      <RenderFilterOptions
+        statusOptions={[{ label: 'Active', value: 'active' }]}
+        onSubmit={handleFilteredAdmissions}
+        fields={['search', 'status']}
+      />
     )
   }
 
   const admission_stats = [
     {
-      value: admissionResponse?.counts?.total ?? 0,
-      title: 'Total Admissions',
+      value: 0,
+      title: 'Total Vendors',
       color: 'success' as const,
       icon: <GetChaarvyIcons iconName='AccountBoxMultipleOutline' />
     },
     {
-      value: admissionResponse?.counts?.filtered ?? 0,
-      title: 'Filtered Admissions',
+      value: 0,
+      title: 'Active Vendors',
       color: 'info' as const,
       icon: <GetChaarvyIcons iconName='FilterCheckOutline' />
     }
@@ -73,37 +67,19 @@ const Admissions = () => {
 
   const columns: ChaarvyTableColumn[] = [
     {
-      id: 'student_name',
-      label: 'Student Name',
+      id: 'Vendor',
+      label: 'Vendor',
       freezable: true,
       defaultFrozen: true,
-      hideable: false, // Keep this always visible
-      render: row => (
+      hideable: false,
+      render: () => (
         <Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '1rem' }}>
-          <ChaarvyAvatar src={row.photo_url} alt={row.student_name} />
           <Box sx={{ flexDirection: 'column' }}>
-            <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>{row.student_name}</Typography>
-            <Typography variant='caption'>{row.admission_number}</Typography>
+            <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>Vendor Name</Typography>
+            <Typography variant='caption'>Contact Number</Typography>
           </Box>
         </Box>
       )
-    },
-    {
-      id: 'father_name',
-      label: 'Father Name',
-      hideable: true,
-      defaultHidden: true // Hidden by default, but user can show it
-    },
-    {
-      id: 'dob',
-      label: 'Date of Birth',
-      hideable: true,
-      defaultHidden: true // Hidden by default, but user can show it
-    },
-    {
-      id: 'program_name',
-      label: 'Program',
-      hideable: true
     },
     {
       id: 'status',
@@ -132,15 +108,22 @@ const Admissions = () => {
       label: '',
       width: '10px',
       hideable: false, // Keep actions always visible
-      render: row => <DropDownMenu dropDownMenuOptions={getKebabOptions(row.application_id)} />
+      render: () => (
+        <Box>
+          <IconButton size='small'>
+            <GetChaarvyIcons iconName='Pencil' fontSize='1.25rem' />
+          </IconButton>
+        </Box>
+      )
     }
   ]
 
   return (
     <ChaarvyTable
       tableTitleHeaderProps={{
-        title: 'Admissions',
-        buttonTitle: 'New Admission',
+        title: 'Vendors',
+
+        // buttonTitle: 'New Admission',
         onButtonClick: handleCreateAdmissionClick,
         showFilterIcon: true,
         stats: admission_stats,
@@ -148,17 +131,17 @@ const Admissions = () => {
         icon: <GetChaarvyIcons iconName='FilePlus' />
       }}
       paginationProps={{
-        total: admissionResponse?.counts?.filtered ?? 0,
+        total: 0,
         onChange: data => setFilterProps({ ...filterProps, ...data })
       }}
       tableDataProps={{
         columns,
-        data: admissionResponse?.admissions ?? [],
+        data: [],
         getRowKey: row => row.application_id,
-        emptyMessage: 'No Admissions'
+        emptyMessage: 'No Vendors Found'
       }}
     />
   )
 }
 
-export default Admissions
+export default VehicleVendors

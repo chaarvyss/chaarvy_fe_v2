@@ -23,7 +23,8 @@ export const PagePath = {
   VEHICLES: '/Transportation/vehicles',
   ROUTES: '/Admin/routes',
   BOARDING_POINTS: '/Admin/boardingPoints',
-  VEHICLE_MOMENTS: '/Transportation/vehicleMoments'
+  VEHICLE_MOMENTS: '/Transportation/vehicleMoments',
+  VEHICLE_VENDORS: '/Transportation/vendors'
 }
 
 export const MasterPagePath = {

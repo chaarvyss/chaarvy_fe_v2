@@ -82,7 +82,13 @@ const navigation = (): VerticalNavItemsType => {
           key: Permissions.NAV.VEHICLE_LIVE_TRACKING,
           title: 'Live Tracking',
           path: PagePath.VEHICLE_LIVE_TRACKING,
-          icon: 'MonitorDashboard' as const
+          icon: 'MapMarkerRadius' as const
+        },
+        {
+          key: Permissions.NAV.VEHICLE_VENDORS,
+          title: 'Vehicle Vendors',
+          path: PagePath.VEHICLE_VENDORS,
+          icon: 'Handshake' as const
         }
       ]
     },

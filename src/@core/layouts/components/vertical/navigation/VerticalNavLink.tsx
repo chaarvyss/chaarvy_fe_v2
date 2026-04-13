@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box'
-import { purple, grey } from '@mui/material/colors'
+import { deepPurple, grey } from '@mui/material/colors'
 import IconButton from '@mui/material/IconButton'
 import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
@@ -46,12 +46,15 @@ const VerticalNavLink = ({
     return false
   }
 
-  const getItemBgColor = () => {
-    if (settings.mode == 'dark') {
-      return isNavLinkActive() ? purple[400] : ''
-    }
+  const getLinearGradientEffect = (color: Record<number, string> | string) => {
+    const gradientColors =
+      typeof color === 'string' ? [color, color] : [color[800] ?? color[600], color[200] ?? color[300]]
 
-    return isNavLinkActive() ? purple[700] : ''
+    return `linear-gradient(to bottom, ${gradientColors.join(', ')})`
+  }
+
+  const getItemBgColor = () => {
+    return isNavLinkActive() ? getLinearGradientEffect(deepPurple) : ''
   }
 
   const getItemColor = () => {
@@ -72,6 +75,14 @@ const VerticalNavLink = ({
     router.push(item.path === undefined ? '/' : `${item.path}`)
   }
 
+  const getHoverBgColor = () => {
+    if (settings.mode == 'dark') {
+      return 'rgba(255,255,255,0.08)'
+    }
+
+    return isNavLinkActive() ? 'black' : 'rgba(103,58,183,0.08)'
+  }
+
   return (
     <ListItem
       disablePadding
@@ -85,19 +96,19 @@ const VerticalNavLink = ({
     >
       <Box
         onClick={handleClick}
-        bgcolor={getItemBgColor()}
         display='flex'
         alignItems='center'
         justifyContent='space-between'
         width='100%'
         borderRadius='1rem'
-        boxShadow={isNavLinkActive() ? `0px 0px 0.3rem .3rem ${purple[100]}` : ''}
         padding='0.6rem'
+        boxShadow={isNavLinkActive() ? 2 : 0}
         sx={{
+          background: getItemBgColor(),
           cursor: 'pointer',
           transition: 'background-color .2s ease, transform .2s ease',
           '&:hover': {
-            backgroundColor: settings.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(103,58,183,0.08)',
+            backgroundColor: getHoverBgColor(),
             transform: 'translateX(2px)'
           }
         }}

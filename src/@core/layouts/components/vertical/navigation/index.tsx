@@ -59,7 +59,24 @@ const Navigation = (props: Props) => {
 
   return (
     <Drawer {...props}>
-      <Box height='100vh !important' bgcolor={settings.mode == 'light' ? grey[50] : 'black'}>
+      <Box
+        sx={{
+          overflowY: 'auto',
+          height: '100vh !important',
+          bgcolor: settings.mode == 'light' ? grey[50] : 'black',
+          scrollbarWidth: 'none',
+          '&::-webkit-scrollbar': {
+            display: 'none'
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent'
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'transparent'
+          },
+          '-ms-overflow-style': 'none'
+        }}
+      >
         <VerticalNavHeader {...props} />
         <StyledBoxForShadow
           ref={shadowRef}
@@ -70,8 +87,14 @@ const Navigation = (props: Props) => {
             )} 95%,${hexToRGBA(theme.palette.background.default, 0.05)})`
           }}
         />
-        <Box sx={{ position: 'relative', overflow: 'hidden' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <Box sx={{ position: 'relative' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+          >
             {userVerticalNavMenuContent ? (
               userVerticalNavMenuContent(props)
             ) : (

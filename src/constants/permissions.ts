@@ -41,7 +41,7 @@ export const Permissions = {
 
     TRANSPORTATION_DASHBOARD: 'df1e7a17-f15f-4d8a-a86e-26c1cb8bae1a', // need to update with actual permission id
     VEHICLE_LIVE_TRACKING: 'df1e7a17-f15f-4d8a-a86e-26c1cb8bae1a', // need to update with actual permission id
-    VEHICLE_VENDORS: '',
+    VEHICLE_VENDORS: 'df1e7a17-f15f-4d8a-a86e-26c1cb8bae1a', // need to update with actual permission id
     DRIVERS: '',
     VEHICLES: '',
     ROUTES: '',
