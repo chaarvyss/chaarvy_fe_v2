@@ -19,9 +19,11 @@ export type NavLink = {
   openInNewTab?: boolean
   icon?: GetChaarvyIconsProps['iconName']
   badgeColor?: 'default' | 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info'
+  children?: NavLink[]
 }
 
 export type NavSectionTitle = {
+  key?: string
   sectionTitle: string
   action?: string
   subject?: string

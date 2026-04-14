@@ -124,20 +124,17 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
     {} as Record<string, number>
   )
 
-  // Check if column toggle should be shown (at least one hideable column exists)
   const hasHideableColumns = columns.some(col => col.hideable !== false)
 
-  // Compute table minWidth based on visible columns only
   const computedMinWidth = displayedColumns.reduce((total, col) => {
     if (col.width) {
-      // Parse width if it's a string with 'px'
       const widthNum = typeof col.width === 'string' ? parseInt(col.width) : (col.width as number)
 
       return total + widthNum
     }
 
     return total + 150
-  }, 50) // 50px for padding/borders
+  }, 50)
 
   const finalMinWidth = Math.max(computedMinWidth, 300)
 

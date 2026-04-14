@@ -134,7 +134,9 @@ export const urlConstants = {
     paymentDetail: `${interRoutePrefix.view}/payment-details`,
     address: `${interRoutePrefix.view}/address`,
     userProfile: `${interRoutePrefix.view}/user_base_details`,
-    userCalender: `${interRoutePrefix.view}/user_calender`
+    userCalender: `${interRoutePrefix.view}/user_calender`,
+    viewVehicleDetails: `${interRoutePrefix.view}/vehicle-details`,
+    viewRouteDetails: `${interRoutePrefix.view}/route-details`
   },
 
   master: {

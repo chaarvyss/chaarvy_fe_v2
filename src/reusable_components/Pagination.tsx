@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Box } from '@muiElements'
 import { FilterProps } from 'src/lib/interfaces'
 
-interface PaginationProps {
+export interface PaginationProps {
   total: number
   onChange: (data: FilterProps) => void
 }

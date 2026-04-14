@@ -2,10 +2,10 @@ import { SvgIconProps } from '@mui/material'
 import * as MdiIcons from 'mdi-material-ui'
 
 // Step 1: Extract icon names dynamically
-const iconNames = Object.keys(MdiIcons) as (keyof typeof MdiIcons)[]
+export const iconNames = Object.keys(MdiIcons) as (keyof typeof MdiIcons)[]
 
 // Step 2: Generate the Enum dynamically
-export const ChaarvyIcon = Object.freeze(Object.fromEntries(iconNames.map(name => [name, name]))) as {
+const ChaarvyIcon = Object.freeze(Object.fromEntries(iconNames.map(name => [name, name]))) as {
   [K in keyof typeof MdiIcons]: K
 }
 

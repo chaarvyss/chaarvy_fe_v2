@@ -1,7 +1,10 @@
 import Box from '@mui/material/Box'
-import { purple, grey } from '@mui/material/colors'
+import { deepPurple, grey } from '@mui/material/colors'
+import IconButton from '@mui/material/IconButton'
 import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
+import ChevronDown from 'mdi-material-ui/ChevronDown'
+import ChevronRight from 'mdi-material-ui/ChevronRight'
 import { useRouter } from 'next/router'
 
 // ** Types
@@ -13,25 +16,45 @@ import GetChaarvyIcons, { GetChaarvyIconsProps } from 'src/utils/icons'
 interface Props {
   item: NavLink
   settings: Settings
+  depth?: number
+  hasChildren?: boolean
+  open?: boolean
+  toggleOpen?: () => void
+  active?: boolean
 }
 
-const VerticalNavLink = ({ item, settings }: Props) => {
+const VerticalNavLink = ({
+  item,
+  settings,
+  depth = 0,
+  hasChildren = false,
+  open = false,
+  toggleOpen,
+  active
+}: Props) => {
   const router = useRouter()
 
   const isNavLinkActive = () => {
-    if (router.pathname === item.path || handleURLQueries(router, item.path)) {
+    if (active) {
       return true
-    } else {
-      return false
     }
+
+    if (item.path) {
+      return router.pathname === item.path || handleURLQueries(router, item.path)
+    }
+
+    return false
+  }
+
+  const getLinearGradientEffect = (color: Record<number, string> | string) => {
+    const gradientColors =
+      typeof color === 'string' ? [color, color] : [color[800] ?? color[600], color[200] ?? color[300]]
+
+    return `linear-gradient(to bottom, ${gradientColors.join(', ')})`
   }
 
   const getItemBgColor = () => {
-    if (settings.mode == 'dark') {
-      return isNavLinkActive() ? purple[400] : ''
-    }
-
-    return isNavLinkActive() ? purple[700] : ''
+    return isNavLinkActive() ? getLinearGradientEffect(deepPurple) : ''
   }
 
   const getItemColor = () => {
@@ -42,24 +65,65 @@ const VerticalNavLink = ({ item, settings }: Props) => {
     return isNavLinkActive() ? 'white' : grey.A700
   }
 
+  const handleClick = () => {
+    if (hasChildren && toggleOpen) {
+      toggleOpen()
+
+      return
+    }
+
+    router.push(item.path === undefined ? '/' : `${item.path}`)
+  }
+
+  const getHoverBgColor = () => {
+    if (settings.mode == 'dark') {
+      return 'rgba(255,255,255,0.08)'
+    }
+
+    return isNavLinkActive() ? 'black' : 'rgba(103,58,183,0.08)'
+  }
+
   return (
-    <ListItem disablePadding className='nav-link' sx={{ mt: 1.5, px: '0 !important' }}>
-      <Box onClick={() => router.push(item.path === undefined ? '/' : `${item.path}`)}>
-        <Box
-          bgcolor={getItemBgColor()}
-          display='flex'
-          gap='1rem'
-          width='100vw'
-          borderRadius='1rem'
-          boxShadow={isNavLinkActive() ? `0px 0px 0.3rem .3rem ${purple[100]}` : ''}
-          padding='0.6rem'
-          style={{ borderTopRightRadius: '1rem', borderBottomRightRadius: '1rem', cursor: 'pointer' }}
-        >
+    <ListItem
+      disablePadding
+      className='nav-link'
+      sx={{
+        mt: 1.5,
+        px: '0 !important',
+        pl: `${depth * 1.5}rem`,
+        '& .MuiButtonBase-root': { minWidth: 0 }
+      }}
+    >
+      <Box
+        onClick={handleClick}
+        display='flex'
+        alignItems='center'
+        justifyContent='space-between'
+        width='100%'
+        borderRadius='1rem'
+        padding='0.6rem'
+        boxShadow={isNavLinkActive() ? 2 : 0}
+        sx={{
+          background: getItemBgColor(),
+          cursor: 'pointer',
+          transition: 'background-color .2s ease, transform .2s ease',
+          '&:hover': {
+            backgroundColor: getHoverBgColor(),
+            transform: 'translateX(2px)'
+          }
+        }}
+      >
+        <Box display='flex' alignItems='center' gap='1rem'>
           {item.icon && (
             <GetChaarvyIcons color={getItemColor()} iconName={item.icon as GetChaarvyIconsProps['iconName']} />
           )}
           <Typography color={getItemColor()}>{item.title}</Typography>
         </Box>
+        {hasChildren ? (
+          <IconButton size='small' sx={{ color: getItemColor(), p: 0.5 }}>
+            {open ? <ChevronDown fontSize='small' /> : <ChevronRight fontSize='small' />}
+          </IconButton>
+        ) : null}
       </Box>
     </ListItem>
   )
