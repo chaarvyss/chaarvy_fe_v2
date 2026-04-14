@@ -5,11 +5,13 @@ import { DashboardTable } from 'src/components/Cards/dashboardCards'
 import { ChaarvyTableColumn } from 'src/reusable_components/ChaarvyDataTable'
 
 import RouteDetailsModal from './Modals/RouteDetailsModal'
+import StudentsListViewModal from './Modals/StudentsListViewModal'
 import VehicleDetailsModal from './Modals/VehicleDetailsModal'
 
 const CurrentTransportationStatus = () => {
   const [isVehicleDetailsModalOpen, setIsVehicleDetailsModalOpen] = useState(false)
   const [isRouteDetailsModalOpen, setIsRouteDetailsModalOpen] = useState(false)
+  const [isStudentsListViewModalOpen, setIsStudentsListViewModalOpen] = useState(false)
 
   const [selectedDetails, setSelectedDetails] = useState({
     route: '',
@@ -19,15 +21,15 @@ const CurrentTransportationStatus = () => {
   })
 
   const handleCellClick = (row: any, columnId: string) => {
-    setSelectedDetails(prev => ({
-      ...prev,
-      [columnId]: row[columnId]
-    }))
+    setSelectedDetails(row)
     if (columnId === 'vehicle') {
       setIsVehicleDetailsModalOpen(true)
     }
     if (columnId === 'route') {
       setIsRouteDetailsModalOpen(true)
+    }
+    if (columnId === 'students_onboard') {
+      setIsStudentsListViewModalOpen(true)
     }
   }
 
@@ -95,21 +97,21 @@ const CurrentTransportationStatus = () => {
             id: 1,
             route: 'Route A',
             vehicle: 'Bus 101',
-            students_onboard: 30,
+            students_onboard: '30/30',
             current_location: 'Downtown'
           },
           {
             id: 2,
             route: 'Route B',
             vehicle: 'Van 202',
-            students_onboard: 15,
+            students_onboard: '15/20',
             current_location: 'Uptown'
           },
           {
             id: 3,
             route: 'Route C',
             vehicle: 'Bus 303',
-            students_onboard: 25,
+            students_onboard: '25/30',
             current_location: 'Midtown'
           }
         ]}
@@ -126,6 +128,12 @@ const CurrentTransportationStatus = () => {
       <RouteDetailsModal
         isOpen={isRouteDetailsModalOpen}
         onClose={() => setIsRouteDetailsModalOpen(false)}
+        routeId={selectedDetails.route}
+      />
+
+      <StudentsListViewModal
+        isOpen={isStudentsListViewModalOpen}
+        onClose={() => setIsStudentsListViewModalOpen(false)}
         routeId={selectedDetails.route}
       />
     </>

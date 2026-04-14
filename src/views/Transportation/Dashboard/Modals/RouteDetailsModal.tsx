@@ -10,20 +10,17 @@ interface RouteDetailsModalProps {
 }
 
 const RouteDetailsModal = ({ isOpen = true, onClose, routeId }: RouteDetailsModalProps) => {
-  //   const { data: routeDetails, isLoading = true } = useGetRouteDetailsQuery(routeId, {
-  //     skip: !routeId
-  //   })
-
   console.log('Route ID for details:', routeId)
 
   const isLoading = false
 
   const routeDetails = {
     route_id: 'R001',
-    route_name: 'Route 1',
+    route_name: 'Route A',
     points_with_time: [
       {
         point_name: 'Point A',
+        point_id: 'P001',
         morning_arrival_time: '08:00 AM',
         morning_departure_time: '08:15 AM',
         evening_arrival_time: '05:00 PM',
@@ -31,6 +28,7 @@ const RouteDetailsModal = ({ isOpen = true, onClose, routeId }: RouteDetailsModa
       },
       {
         point_name: 'Point B',
+        point_id: 'P002',
         morning_arrival_time: '08:30 AM',
         morning_departure_time: '08:45 AM',
         evening_arrival_time: '05:30 PM',
@@ -39,35 +37,41 @@ const RouteDetailsModal = ({ isOpen = true, onClose, routeId }: RouteDetailsModa
     ]
   }
 
-  const renderRouteDetails = () => {
-    if (isLoading) {
-      return <ClipLoader color={'#1976d2'} loading={true} size={50} aria-label='Loading Spinner' data-testid='loader' />
-    }
+  let content: React.ReactNode = null
 
-    if (!routeDetails) {
-      return (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}
-        >
-          <Typography variant='body1'>Route details not found</Typography>
-        </Box>
-      )
-    }
-
-    return (
+  if (isLoading) {
+    content = (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+        <ClipLoader color='#1976d2' size={50} />
+      </Box>
+    )
+  } else if (!routeDetails) {
+    content = (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100%'
+        }}
+      >
+        <Typography>Route details not found</Typography>
+      </Box>
+    )
+  } else {
+    content = (
       <Box>
-        <Box>
-          <Typography variant='h6' gutterBottom>
+        <Box sx={{ px: 4, display: 'flex' }}>
+          <Typography
+            onClick={() => alert(`open map with route id: ${routeId}`)}
+            sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}
+            variant='h6'
+            gutterBottom
+          >
             {routeDetails.route_name}
           </Typography>
         </Box>
+
         <TableContainer>
           <Table>
             <TableHead>
@@ -79,10 +83,14 @@ const RouteDetailsModal = ({ isOpen = true, onClose, routeId }: RouteDetailsModa
                 <TableCell>Evening Departure</TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
-              {routeDetails.points_with_time.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell>
+              {routeDetails.points_with_time.map(item => (
+                <TableRow key={item.point_id}>
+                  <TableCell
+                    onClick={() => alert(`open map with point id: ${item.point_id}`)}
+                    sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}
+                  >
                     <strong>{item.point_name}</strong>
                   </TableCell>
                   <TableCell>{item.morning_arrival_time}</TableCell>
@@ -100,7 +108,7 @@ const RouteDetailsModal = ({ isOpen = true, onClose, routeId }: RouteDetailsModa
 
   return (
     <ChaarvyModal modalSize='col-12 col-md-10 col-xl-8' isOpen={isOpen} onClose={onClose} title='Route Details'>
-      {renderRouteDetails()}
+      {content}
     </ChaarvyModal>
   )
 }
