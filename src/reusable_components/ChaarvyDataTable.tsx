@@ -243,7 +243,14 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
           </TableBody>
         </Table>
         {data.length === 0 && (
-          <Box justifyContent='center' alignItems='center' paddingBottom='2rem'>
+          <Box
+            sx={{
+              height: finalMinWidth / 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
             <Typography variant='h6' textAlign='center'>
               {emptyMessage}
             </Typography>

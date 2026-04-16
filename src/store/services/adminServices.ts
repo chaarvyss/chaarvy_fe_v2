@@ -81,6 +81,14 @@ interface CreateRoleRequest {
   permissions: Array<string>
 }
 
+export interface VehicleVendorRequest {
+  id?: string
+  name: string
+  contact_number: string
+  email: string
+  address?: Address
+}
+
 const adminServiceApi = api.injectEndpoints({
   endpoints: build => ({
     createAddonCourse: build.mutation<string, string>({

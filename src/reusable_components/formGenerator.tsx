@@ -17,12 +17,15 @@ import { FormControl, Grid, TextField } from '@muiElements'
 import { InputTypes } from 'src/lib/enums'
 import { ErrorObject, InputFields } from 'src/lib/types'
 
+import OverlaySpinner from './overlaySpinner'
+
 interface FormGeneratorProps {
   fields: InputFields[]
   mandatoryFields?: Array<string>
   errors?: Array<ErrorObject>
   gridSpacing?: number
   columnSize?: { xs?: number; sm?: number; md?: number; lg?: number }
+  isLoading?: boolean
 }
 
 const FormGenerator = ({
@@ -30,11 +33,14 @@ const FormGenerator = ({
   mandatoryFields = [],
   errors = [],
   gridSpacing = 7,
-  columnSize = { xs: 12, sm: 6 }
+  columnSize = { xs: 12, sm: 6 },
+  isLoading = false
 }: FormGeneratorProps) => {
   const getHadError = (key: string) => {
     return errors.find(each => each.errorkey === key)
   }
+
+  if (isLoading) <OverlaySpinner />
 
   return (
     <Grid container spacing={gridSpacing}>

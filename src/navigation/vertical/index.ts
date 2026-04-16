@@ -19,6 +19,12 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Administration',
       icon: 'Cog' as const,
       children: [
+        {
+          key: Permissions.NAV.COLLEGE_PROFILE,
+          title: 'College Profile',
+          path: PagePath.COLLEGE_PROFILE,
+          icon: 'TownHall' as const
+        },
         { key: Permissions.NAV.USERS, title: 'Users', path: PagePath.USERS_LIST, icon: 'AccountGroup' as const },
         { key: Permissions.NAV.ROLES, title: 'Roles', path: PagePath.ROLES_LIST, icon: 'ArrangeBringToFront' as const },
         {

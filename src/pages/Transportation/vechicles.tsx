@@ -22,14 +22,16 @@ const Vehicles = () => {
   }
 
   const onFilterButtonClick = () => {
-    openDrawer(
-      'Filters',
-      <RenderFilterOptions
-        statusOptions={[{ label: 'Active', value: 'active' }]}
-        onSubmit={handleFilteredVehicles}
-        fields={['search', 'status']}
-      />
-    )
+    openDrawer({
+      title: 'Filters',
+      content: (
+        <RenderFilterOptions
+          statusOptions={[{ label: 'Active', value: 'active' }]}
+          onSubmit={handleFilteredVehicles}
+          fields={['search', 'status']}
+        />
+      )
+    })
   }
 
   const vehicle_stats = [

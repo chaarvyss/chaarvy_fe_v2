@@ -1,20 +1,20 @@
 import { LoadingButton } from '@mui/lab'
-import { CardContent, CircularProgress, MenuItem, Select, SelectChangeEvent } from '@mui/material'
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 
-import { FormControl, Grid, TextField } from '@muiElements'
-import { useLoader } from 'src/@core/context/loaderContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { InputTypes, InputVariants } from 'src/lib/enums'
-import { ErrorObject, InputFields } from 'src/lib/types'
+import { FieldConfig, mapToFields, useFormBuilder } from 'src/hooks/useFormBuilder'
+import { InputTypes } from 'src/lib/enums'
+import FormGenerator from 'src/reusable_components/formGenerator'
 import { useCreateUpdateAddressMutation } from 'src/store/services/adminServices'
 import { Address } from 'src/store/services/admisissionsService'
-import { useLazyGetDistrictsListQuery, useGetStateListQuery } from 'src/store/services/listServices'
+import { useGetStateListQuery, useLazyGetDistrictsListQuery } from 'src/store/services/listServices'
 import { useGetAddressQuery } from 'src/store/services/viewServices'
 
 export enum AddressType {
   COLLEGE = 'college',
-  USER = 'user'
+  USER = 'user',
+  STUDENT = 'student',
+  VENDOR = 'vendor'
 }
 
 interface AddressProps {
@@ -23,241 +23,138 @@ interface AddressProps {
   user_id?: string
 }
 
-const TOP_LEVEL_ID = 'student-address'
-
-const mandatoryFields = [
-  'door_no',
-  'house_apartment_name',
-  'street',
-  'landmark',
-  'village_city',
-  'district',
-  'state',
-  'pincode'
-]
-
 const AddressForm = ({ address_id, user_id, user_type }: AddressProps) => {
-  const [errors, setErrors] = useState<Array<ErrorObject>>([])
-  const [AddressForm, setAddressForm] = useState<Address>()
-  const { triggerToast } = useToast()
-  const { setLoading } = useLoader()
+  const { data: address, isFetching } = useGetAddressQuery(address_id ?? '', {
+    skip: !address_id
+  })
+
+  const [createUpdateAddress, { isLoading: isSubmitting }] = useCreateUpdateAddressMutation()
 
   const { data: statesList } = useGetStateListQuery()
-  const [fetchDistrictsList, { data: districtsList, isFetching: isDistrictsLoading }] = useLazyGetDistrictsListQuery()
+  const [fetchDistricts] = useLazyGetDistrictsListQuery()
 
-  const [createUpdateAddress, { isLoading: isUpdatingAddress }] = useCreateUpdateAddressMutation()
+  const { triggerToast } = useToast()
 
-  const { data: address, isFetching: isFetchingAddress } = useGetAddressQuery(address_id ?? '', { skip: !address_id })
+  const addressFormConfig: FieldConfig<Address>[] = useMemo(
+    () => [
+      { key: 'door_no', label: 'Door No', type: InputTypes.INPUT, rules: ['required'] },
+      { key: 'house_apartment_name', label: 'House / Apartment', type: InputTypes.INPUT, rules: ['required'] },
+      { key: 'street', label: 'Street', type: InputTypes.INPUT, rules: ['required'] },
+      { key: 'landmark', label: 'Landmark', type: InputTypes.INPUT },
+      { key: 'village_city', label: 'Village / City', type: InputTypes.INPUT, rules: ['required'] },
 
-  setLoading(isFetchingAddress)
+      {
+        key: 'state',
+        label: 'State',
+        type: InputTypes.SELECT,
+        rules: ['required'],
+        staticOptions: statesList,
+
+        mapOptions: (data: any[]) =>
+          data?.map(s => ({
+            label: s.state_name,
+            value: s.state_id
+          })) ?? []
+      },
+
+      {
+        key: 'district',
+        label: 'District',
+        type: InputTypes.SELECT,
+        rules: ['required'],
+        dependsOn: 'state',
+
+        fetchOptions: async (stateId: string) => {
+          const res = await fetchDistricts(stateId).unwrap()
+
+          return res
+        },
+
+        mapOptions: (data: any[]) =>
+          data?.map(d => ({
+            label: d.district_name,
+            value: d.district_id
+          })) ?? []
+      },
+
+      {
+        key: 'pincode',
+        label: 'Pincode',
+        type: InputTypes.INPUT,
+        rules: [
+          'required',
+          'number',
+          { type: 'maxLength', value: 6, message: 'Pincode cannot exceed 6 digits' },
+          { type: 'minLength', value: 6, message: 'Pincode must be 6 digits' }
+        ]
+      }
+    ],
+    [statesList]
+  )
+
+  const { values, errors, handleChange, handleSubmit, optionsMap, loadingMap, setValues } = useFormBuilder<Address>({
+    fields: addressFormConfig,
+    initialValues: {
+      door_no: '',
+      house_apartment_name: '',
+      street: '',
+      landmark: '',
+      village_city: '',
+      state: '',
+      district: '',
+      pincode: ''
+    }
+  })
 
   useEffect(() => {
-    setAddressForm(address ?? undefined)
-    if (address?.state) {
-      fetchDistrictsList(address.state)
+    if (address) {
+      setValues(address)
     }
   }, [address])
 
-  const validateField = (key: keyof Address, value: any): { errorkey: string; error: string } | null => {
-    if (!value) {
-      return { errorkey: key, error: '* Required' }
-    }
+  const fields = mapToFields({
+    config: addressFormConfig,
+    values,
+    handleChange,
+    optionsMap,
+    loadingMap
+  })
 
-    switch (key) {
-      case 'pincode':
-        return /^[0-9]\d{5}$/.test(value) ? null : { errorkey: key, error: 'Invalid PINCODE number.' }
-      default:
-        return null
-    }
-  }
+  const onSubmit = async (data: any) => {
+    try {
+      const res = await createUpdateAddress({
+        address: data,
+        user_type,
+        user_id
+      }).unwrap()
 
-  const validateForm = (): boolean => {
-    const newErrors: ErrorObject[] = []
-
-    mandatoryFields.forEach(field => {
-      const key = field as keyof Address
-      const error = validateField(key, AddressForm?.[key])
-      if (error) newErrors.push(error)
-    })
-
-    setErrors(newErrors)
-
-    return newErrors.length === 0
-  }
-
-  const handleAddressChange =
-    (prop: keyof Address) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
-      if (prop == 'state') fetchDistrictsList(event.target.value)
-      const value = event?.target?.value ?? event
-      const error = validateField(prop, value)
-      setErrors(error ? [...errors, error] : errors.filter(({ errorkey }) => errorkey !== prop))
-      setAddressForm({ ...AddressForm, [prop]: event.target.value })
-    }
-
-  const fields: InputFields[] = [
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.STRING,
-      id: `${TOP_LEVEL_ID}__door-no`,
-      label: 'Door No',
-      key: 'door_no',
-      value: AddressForm?.door_no,
-      onChange: handleAddressChange('door_no')
-    },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.STRING,
-      id: `${TOP_LEVEL_ID}__house-apartment-name`,
-      label: 'House / Apartment name',
-      key: 'house_apartment_name',
-      value: AddressForm?.house_apartment_name,
-      onChange: handleAddressChange('house_apartment_name')
-    },
-
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.STRING,
-      id: `${TOP_LEVEL_ID}__street`,
-      label: 'Street',
-      key: 'street',
-      value: AddressForm?.street,
-      onChange: handleAddressChange('street')
-    },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.STRING,
-      id: `${TOP_LEVEL_ID}__landmark`,
-      label: 'Landmark',
-      key: 'landmark',
-      value: AddressForm?.landmark,
-      onChange: handleAddressChange('landmark')
-    },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.STRING,
-      id: `${TOP_LEVEL_ID}__village-city`,
-      label: 'Village / city / town',
-      key: 'village_city',
-      value: AddressForm?.village_city,
-      onChange: handleAddressChange('village_city')
-    },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__state`,
-      label: 'State',
-      key: 'state',
-      value: AddressForm?.state,
-      onChange: handleAddressChange('state'),
-      menuOptions: (statesList ?? []).map(each => {
-        return { value: each.state_id, label: each.state_name }
+      triggerToast(res, { variant: ToastVariants.SUCCESS })
+    } catch (err: any) {
+      triggerToast(err?.data || 'Something went wrong', {
+        variant: ToastVariants.ERROR
       })
-    },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__district`,
-      label: 'District',
-      key: 'district',
-      isLoading: isDistrictsLoading,
-      value: AddressForm?.district,
-      onChange: handleAddressChange('district'),
-      menuOptions: (districtsList ?? []).map(each => {
-        return { value: each.district_id, label: each.district_name }
-      })
-    },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.NUMBER,
-      id: `${TOP_LEVEL_ID}__pin-code`,
-      label: 'Pincode',
-      key: 'pincode',
-      value: AddressForm?.pincode,
-      onChange: handleAddressChange('pincode')
-    }
-  ]
-
-  const getHadError = (key: string) => {
-    return errors.find(each => each.errorkey === key)
-  }
-
-  const renderInputFields = () =>
-    fields.map(({ type, id, label, placeholder, onChange, key, caption, isLoading, value, variant, menuOptions }) => (
-      <Grid item xs={12} sm={6} key={id}>
-        {type === InputTypes.INPUT ? (
-          <>
-            <small>
-              {label} <span style={{ color: 'red' }}>{mandatoryFields.includes(key) ? '*' : ''}</span>
-            </small>
-            <TextField
-              fullWidth
-              id={id}
-              type={variant}
-              error={!!getHadError(key)}
-              value={value}
-              placeholder={placeholder ?? ''}
-              onChange={onChange}
-            />
-            {caption && <small>{caption}</small>}
-            {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-          </>
-        ) : type === InputTypes.SELECT ? (
-          <FormControl fullWidth required={mandatoryFields.includes(key)}>
-            <small>
-              {label} <span style={{ color: 'red' }}>{mandatoryFields.includes(key) ? '*' : ''}</span>
-            </small>
-            <Select id={id} value={value ?? ''} onChange={onChange} error={!!getHadError(key)}>
-              {isLoading ? (
-                <MenuItem disabled>
-                  <CircularProgress size={24} />
-                </MenuItem>
-              ) : (
-                (menuOptions ?? []).map(({ value, label }) => (
-                  <MenuItem key={value} value={value}>
-                    {label}
-                  </MenuItem>
-                ))
-              )}
-            </Select>
-            {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-          </FormControl>
-        ) : null}
-      </Grid>
-    ))
-
-  const handleSubmit = () => {
-    if (!validateForm()) {
-      triggerToast('Please correct the errors before submitting.', { variant: ToastVariants.ERROR })
-
-      return
-    }
-    if (AddressForm) {
-      createUpdateAddress({ address: AddressForm, user_type: user_type, user_id: user_id })
-        .unwrap()
-        .then(res => {
-          triggerToast(res, { variant: ToastVariants.SUCCESS })
-        })
-        .catch(res => triggerToast(res.data, { variant: ToastVariants.ERROR }))
     }
   }
-
-  const disableSubmitButton = mandatoryFields.some(each => !AddressForm?.[each])
 
   return (
-    <CardContent>
-      <Grid container spacing={7}>
-        {renderInputFields()}
-        <Grid item xs={12}>
-          <LoadingButton
-            loading={isUpdatingAddress}
-            disabled={disableSubmitButton || errors.length > 0}
-            variant='contained'
-            sx={{ marginRight: 3.5 }}
-            onClick={handleSubmit}
-          >
-            Save Changes
-          </LoadingButton>
-        </Grid>
-      </Grid>
-    </CardContent>
+    <>
+      <FormGenerator
+        fields={fields}
+        errors={errors}
+        mandatoryFields={addressFormConfig.filter(f => f.rules?.includes('required')).map(f => f.key)}
+        isLoading={isFetching}
+      />
+      <LoadingButton
+        onClick={handleSubmit(onSubmit)}
+        variant='contained'
+        color='primary'
+        sx={{ mt: 2 }}
+        disabled={isSubmitting}
+        loading={isSubmitting}
+      >
+        Submit
+      </LoadingButton>
+    </>
   )
 }
 
