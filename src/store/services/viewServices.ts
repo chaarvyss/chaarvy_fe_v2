@@ -120,9 +120,7 @@ const viewServiceApi = api.injectEndpoints({
         }
       }
     })
-  }),
-
-  overrideExisting: true
+  })
 })
 
 export const {

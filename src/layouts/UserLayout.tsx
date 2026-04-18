@@ -32,10 +32,10 @@ const UserLayout = ({ children }: Props) => {
       .then(collegeDetails => {
         saveSettings({
           ...settings,
-          college_name: collegeDetails.college_name ?? '',
-          campus_name: collegeDetails.campus_name ?? '',
-          college_code: collegeDetails.college_code ?? '',
-          college_logo: collegeDetails.college_logo ?? undefined
+          college_name: collegeDetails?.college_name ?? '',
+          campus_name: collegeDetails?.campus_name ?? '',
+          college_code: collegeDetails?.college_code ?? '',
+          college_logo: collegeDetails?.college_logo ?? undefined
         })
       })
   }, [])

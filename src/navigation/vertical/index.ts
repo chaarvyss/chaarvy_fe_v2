@@ -45,6 +45,18 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
+      title: 'Academics',
+      icon: 'ChairSchool' as const,
+      children: [
+        {
+          key: Permissions.NAV.TIME_TABLE,
+          title: 'Time Table',
+          path: PagePath.TIME_TABLE,
+          icon: 'Timetable' as const
+        }
+      ]
+    },
+    {
       title: 'Student Management',
       icon: 'School' as const,
       children: [
@@ -92,7 +104,6 @@ const navigation = (): VerticalNavItemsType => {
         }
       ]
     },
-
     {
       title: 'Faculty Corner',
       icon: 'AccountTie' as const,

@@ -39,6 +39,7 @@ export const Permissions = {
     ATTENDENCE_REGISTER: 'cf2eefaa-5053-4ba2-84cc-ce033ae34851',
     ROLES: '84d30bbf-e4fb-4888-b6f0-0568bf9df1b0',
 
+    TIME_TABLE: 'df1e7a17-f15f-4d8a-a86e-26c1cb8bae1a', // need to update with actual permission id
     TRANSPORTATION_DASHBOARD: 'df1e7a17-f15f-4d8a-a86e-26c1cb8bae1a', // need to update with actual permission id
     VEHICLE_LIVE_TRACKING: 'df1e7a17-f15f-4d8a-a86e-26c1cb8bae1a', // need to update with actual permission id
     VEHICLE_VENDORS: 'df1e7a17-f15f-4d8a-a86e-26c1cb8bae1a', // need to update with actual permission id

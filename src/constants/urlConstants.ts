@@ -54,6 +54,7 @@ export const urlConstants = {
     createUpdateUser: `${interRoutePrefix.admin}/create-update-user`,
     createUpdateSection: `${interRoutePrefix.admin}/add-update-section`,
     createUpdateRole: `${interRoutePrefix.admin}/create-update-role`,
+    createUpdateSegment: `${interRoutePrefix.admin}/add-update-segment`,
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
       book: `${interRoutePrefix.admin}/add-book`,

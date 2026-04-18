@@ -1,9 +1,9 @@
 import React from 'react'
 
-import ChaarvyDataTable, { ChaarvyDataTableProps } from 'src/reusable_components/ChaarvyDataTable'
-import DynamicHeightTableContainer from 'src/reusable_components/DynamicHeightTableContainer'
 import ChaarvyPagination, { PaginationProps } from 'src/reusable_components/Pagination'
-import TableTilteHeader, { TableTitleHeaderProps } from 'src/reusable_components/TableTilteHeader'
+import ChaarvyDataTable, { ChaarvyDataTableProps } from 'src/reusable_components/Table/ChaarvyDataTable'
+import DynamicHeightTableContainer from 'src/reusable_components/Table/DynamicHeightTableContainer'
+import TableTilteHeader, { TableTitleHeaderProps } from 'src/reusable_components/Table/TableTilteHeader'
 
 interface ChaarvyTableProps {
   tableTitleHeaderProps: TableTitleHeaderProps
