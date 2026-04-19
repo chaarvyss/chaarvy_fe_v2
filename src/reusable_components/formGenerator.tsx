@@ -17,6 +17,7 @@ import { FormControl, Grid, TextField } from '@muiElements'
 import { InputTypes } from 'src/lib/enums'
 import { ErrorObject, InputFields } from 'src/lib/types'
 
+import CustomDateElement from './dateInputElement'
 import OverlaySpinner from './overlaySpinner'
 
 interface FormGeneratorProps {
@@ -142,6 +143,21 @@ const FormGenerator = ({
                   showYearDropdown={showYearDropdown}
                   showMonthDropdown={showMonthDropdown}
                 />
+                {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+              </Box>
+            ) : type === InputTypes.DATE_RANGE ? (
+              <Box display='flex' flexDirection='column'>
+                <small>{label}</small>
+
+                <DatePicker
+                  selectsRange
+                  startDate={value?.[0] || null}
+                  endDate={value?.[1] || null}
+                  onChange={(dates: [Date | null, Date | null]) => onChange(dates)}
+                  customInput={<CustomDateElement label='' />}
+                  isClearable
+                />
+
                 {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
               </Box>
             ) : type === InputTypes.BUTTON ? (

@@ -60,7 +60,7 @@ export type MenuOptions = {
 }
 
 export type InputFields = {
-  type: 'input' | 'select' | 'radio' | 'date' | 'button' | 'checkbox'
+  type: 'input' | 'select' | 'radio' | 'date' | 'button' | 'checkbox' | 'date_range'
   variant?: 'number' | 'string' | 'email'
   isDisabled?: boolean
   id: string
