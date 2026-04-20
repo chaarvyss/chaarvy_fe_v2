@@ -10,7 +10,7 @@ const Clients = () => {
   const { openDrawer } = useSideDrawer()
 
   const handleEdit = data => {
-    openDrawer('Edit Client', <CreateClient clientDetails={data} />)
+    openDrawer({ title: 'Edit Client', content: <CreateClient clientDetails={data} /> })
   }
 
   return (
@@ -18,7 +18,7 @@ const Clients = () => {
       {TableTilteHeader({
         title: 'Clients',
         buttonTitle: 'Add Client',
-        onButtonClick: () => openDrawer('New Client', <CreateClient />)
+        onButtonClick: () => openDrawer({ title: 'New Client', content: <CreateClient /> })
       })}
       <Paper>
         <Card>

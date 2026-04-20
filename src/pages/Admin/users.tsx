@@ -65,7 +65,7 @@ const Users = () => {
   }, [filters])
 
   const handleCreateUserClick = () => {
-    openDrawer('New User', <CreateUser />)
+    openDrawer({ title: 'New User', content: <CreateUser /> })
   }
 
   const onSubmit = (params?: FilterProps) => {
@@ -84,10 +84,12 @@ const Users = () => {
   ]
 
   const onFilterButtonClick = () => {
-    openDrawer(
-      'Filters',
-      <RenderFilterOptions onSubmit={onSubmit} fields={['search', 'status', 'role']} statusOptions={statusOptions} />
-    )
+    openDrawer({
+      title: 'Filters',
+      content: (
+        <RenderFilterOptions onSubmit={onSubmit} fields={['search', 'status', 'role']} statusOptions={statusOptions} />
+      )
+    })
   }
 
   const getUserTableHeader = () => {

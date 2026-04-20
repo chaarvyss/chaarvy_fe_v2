@@ -1,11 +1,21 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react'
 
+type DrawerSize = 'small' | 'medium' | 'large'
+
+interface OpenDrawerParams {
+  title: string
+  content?: ReactNode
+  className?: string
+  size?: DrawerSize
+}
+
 interface SideDrawerContextProps {
   isOpen: boolean
   title: string
   children: ReactNode
   className?: string
-  openDrawer: (title: string, children?: ReactNode, className?: string) => void
+  size?: DrawerSize
+  openDrawer: (params: OpenDrawerParams) => void
   closeDrawer: () => void
   setChildren: (content: ReactNode) => void
 }
@@ -17,11 +27,13 @@ export const SideDrawerProvider = ({ children }: { children: React.ReactNode }) 
   const [title, setTitle] = useState('')
   const [drawerChildren, setDrawerChildren] = useState<ReactNode>(null)
   const [className, setClassName] = useState<string>()
+  const [size, setSize] = useState<DrawerSize>('small')
 
-  const openDrawer = (drawerTitle: string, content?: ReactNode, className?: string) => {
-    setTitle(drawerTitle)
+  const openDrawer = ({ title, content, className, size }: OpenDrawerParams) => {
+    setTitle(title)
     if (content) setDrawerChildren(content)
     if (className) setClassName(className)
+    setSize(size ?? 'small')
     setIsOpen(true)
   }
 
@@ -41,7 +53,8 @@ export const SideDrawerProvider = ({ children }: { children: React.ReactNode }) 
         openDrawer,
         className,
         closeDrawer,
-        setChildren: setDrawerChildren
+        setChildren: setDrawerChildren,
+        size
       }}
     >
       {children}

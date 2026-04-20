@@ -80,14 +80,16 @@ const Payments = () => {
   ]
 
   const onFilterButtonClick = () => {
-    openDrawer(
-      'Filters',
-      <RenderFilterOptions
-        onSubmit={onSubmit}
-        fields={['search', 'dateRange', 'status']}
-        statusOptions={statusOptions}
-      />
-    )
+    openDrawer({
+      title: 'Filters',
+      content: (
+        <RenderFilterOptions
+          onSubmit={onSubmit}
+          fields={['search', 'dateRange', 'status']}
+          statusOptions={statusOptions}
+        />
+      )
+    })
   }
 
   useEffect(() => {
