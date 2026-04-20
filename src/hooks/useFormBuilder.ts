@@ -27,6 +27,10 @@ export type FormConfig<T> = {
   initialValues: T
 }
 
+type ValidationError = { errorkey: string; error: string } | null
+
+type RuleHandler = (value: any, isEmpty: boolean, keyStr: string) => ValidationError
+
 export const mapToFields = ({ config, values, handleChange, optionsMap, loadingMap }: any): InputFields[] => {
   return config.map(field => {
     const key = String(field.key)
@@ -165,6 +169,14 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
     return null
   }
 
+  const ruleHandlers: Record<string, RuleHandler> = {
+    required: (_, isEmpty, keyStr) => validateRequired(isEmpty, keyStr),
+
+    number: (value, isEmpty, keyStr) => validateNumber(value, isEmpty, keyStr),
+
+    email: (value, isEmpty, keyStr) => validateEmail(value, isEmpty, keyStr)
+  }
+
   const validateField = (key: keyof T, value: any) => {
     const field = fields.find(f => f.key === key)
     if (!field?.rules) return null
@@ -173,44 +185,38 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
     const isEmpty = isEmptyValue(value)
 
     for (const rule of field.rules) {
-      if (rule === 'required') {
-        const error = validateRequired(isEmpty, keyStr)
-        if (error) return error
-        continue
+      let error: ValidationError = null
+
+      if (typeof rule === 'string') {
+        const handler = ruleHandlers[rule]
+        error = handler?.(value, isEmpty, keyStr) ?? null
+      } else {
+        error = validateLength(rule, value, keyStr)
       }
 
-      if (rule === 'number') {
-        const error = validateNumber(value, isEmpty, keyStr)
-        if (error) return error
-        continue
-      }
-
-      if (rule === 'email') {
-        const error = validateEmail(value, isEmpty, keyStr)
-        if (error) return error
-        continue
-      }
-
-      if (typeof rule === 'object') {
-        const error = validateLength(rule, value, keyStr)
-        if (error) return error
-      }
+      if (error) return error
     }
 
     return null
   }
 
   // ✅ HANDLE CHANGE (pure, no side-effects)
-  const handleChange = (key: keyof T) => (input: any) => {
-    const value = getValue(input)
+
+  const updateErrors = (key: keyof T, value: any) => {
     const keyStr = String(key)
     const error = validateField(key, value)
-    const updateErrors = (prev: ErrorObject[]) => {
+    const updatedErrors = (prev: ErrorObject[]) => {
       const filtered = prev.filter(e => e.errorkey !== keyStr)
 
       return error ? [...filtered, error] : filtered
     }
-    setErrors(updateErrors)
+    setErrors(updatedErrors)
+  }
+
+  const handleChange = (key: keyof T) => (input: any) => {
+    const value = getValue(input)
+    updateErrors(key, value)
+
     setValues(prev => ({ ...prev, [key]: value }))
   }
 
