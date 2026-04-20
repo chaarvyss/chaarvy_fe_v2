@@ -41,7 +41,7 @@ const FormGenerator = ({
     return errors.find(each => each.errorkey === key)
   }
 
-  if (isLoading) <OverlaySpinner />
+  if (isLoading) return <OverlaySpinner />
 
   return (
     <Grid container spacing={gridSpacing}>

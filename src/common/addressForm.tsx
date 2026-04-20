@@ -2,7 +2,7 @@ import { LoadingButton } from '@mui/lab'
 import { useEffect, useMemo } from 'react'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { FieldConfig, mapToFields, useFormBuilder } from 'src/hooks/useFormBuilder'
+import { FieldConfig, getMandatoryFieldsList, mapToFields, useFormBuilder } from 'src/hooks/useFormBuilder'
 import { InputTypes } from 'src/lib/enums'
 import FormGenerator from 'src/reusable_components/formGenerator'
 import { useCreateUpdateAddressMutation } from 'src/store/services/adminServices'
@@ -141,7 +141,7 @@ const AddressForm = ({ address_id, user_id, user_type }: AddressProps) => {
       <FormGenerator
         fields={fields}
         errors={errors}
-        mandatoryFields={addressFormConfig.filter(f => f.rules?.includes('required')).map(f => f.key)}
+        mandatoryFields={getMandatoryFieldsList(addressFormConfig)}
         isLoading={isFetching}
       />
       <LoadingButton

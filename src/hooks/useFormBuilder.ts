@@ -45,6 +45,10 @@ export const mapToFields = ({ config, values, handleChange, optionsMap, loadingM
   })
 }
 
+export const getMandatoryFieldsList = (config: FieldConfig<any>[]): string[] => {
+  return config.filter(f => f.rules?.includes('required')).map(f => String(f.key))
+}
+
 export const useFormBuilder = <T extends Record<string, any>>({ fields, initialValues }: FormConfig<T>) => {
   const [values, setValues] = useState<T>(initialValues)
   const [errors, setErrors] = useState<ErrorObject[]>([])
@@ -131,40 +135,65 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
   }, [values, fields])
 
   // ✅ VALIDATION
+
+  const isEmptyValue = (value: any) => value === null || value === undefined || value === ''
+
+  const validateRequired = (isEmpty: boolean, keyStr: string) =>
+    isEmpty ? { errorkey: keyStr, error: 'This field is required' } : null
+
+  const validateNumber = (value: any, isEmpty: boolean, keyStr: string) =>
+    !isEmpty && Number.isNaN(Number(value)) ? { errorkey: keyStr, error: 'Must be a number' } : null
+
+  const validateEmail = (value: any, isEmpty: boolean, keyStr: string) =>
+    !isEmpty && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? { errorkey: keyStr, error: 'Invalid email' } : null
+
+  const validateLength = (rule: any, value: any, keyStr: string) => {
+    if (rule.type === 'minLength' && value?.length < rule.value) {
+      return {
+        errorkey: keyStr,
+        error: rule.message || `Minimum ${rule.value} characters required`
+      }
+    }
+
+    if (rule.type === 'maxLength' && value?.length > rule.value) {
+      return {
+        errorkey: keyStr,
+        error: rule.message || `Maximum ${rule.value} characters allowed`
+      }
+    }
+
+    return null
+  }
+
   const validateField = (key: keyof T, value: any) => {
     const field = fields.find(f => f.key === key)
     if (!field?.rules) return null
 
     const keyStr = String(key)
-    const isEmpty = value === null || value === undefined || value === ''
+    const isEmpty = isEmptyValue(value)
 
     for (const rule of field.rules) {
-      if (rule === 'required' && isEmpty) {
-        return { errorkey: keyStr, error: 'This field is required' }
+      if (rule === 'required') {
+        const error = validateRequired(isEmpty, keyStr)
+        if (error) return error
+        continue
       }
 
-      if (rule === 'number' && !isEmpty && isNaN(Number(value))) {
-        return { errorkey: keyStr, error: 'Must be a number' }
+      if (rule === 'number') {
+        const error = validateNumber(value, isEmpty, keyStr)
+        if (error) return error
+        continue
       }
 
-      if (rule === 'email' && !isEmpty && !/\S+@\S+\.\S+/.test(value)) {
-        return { errorkey: keyStr, error: 'Invalid email' }
+      if (rule === 'email') {
+        const error = validateEmail(value, isEmpty, keyStr)
+        if (error) return error
+        continue
       }
 
       if (typeof rule === 'object') {
-        if (rule.type === 'minLength' && value?.length < rule.value) {
-          return {
-            errorkey: keyStr,
-            error: rule.message || `Minimum ${rule.value} characters required`
-          }
-        }
-
-        if (rule.type === 'maxLength' && value?.length > rule.value) {
-          return {
-            errorkey: keyStr,
-            error: rule.message || `Maximum ${rule.value} characters allowed`
-          }
-        }
+        const error = validateLength(rule, value, keyStr)
+        if (error) return error
       }
     }
 
@@ -175,13 +204,13 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
   const handleChange = (key: keyof T) => (input: any) => {
     const value = getValue(input)
     const keyStr = String(key)
-
     const error = validateField(key, value)
+    const updateErrors = (prev: ErrorObject[]) => {
+      const filtered = prev.filter(e => e.errorkey !== keyStr)
 
-    setErrors(prev =>
-      error ? [...prev.filter(e => e.errorkey !== keyStr), error] : prev.filter(e => e.errorkey !== keyStr)
-    )
-
+      return error ? [...filtered, error] : filtered
+    }
+    setErrors(updateErrors)
     setValues(prev => ({ ...prev, [key]: value }))
   }
 
@@ -203,8 +232,7 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
   const handleSubmit = (onSubmit: (values: T) => void) => async () => {
     const { isValid } = validateForm()
     if (!isValid) return
-
-    await onSubmit(values)
+    onSubmit(values)
   }
 
   return {

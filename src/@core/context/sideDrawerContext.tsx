@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react'
 
+type DrawerSize = 'small' | 'medium' | 'large'
+
 interface OpenDrawerParams {
   title: string
   content?: ReactNode
   className?: string
-  size?: 'small' | 'medium' | 'large'
+  size?: DrawerSize
 }
 
 interface SideDrawerContextProps {
@@ -12,7 +14,7 @@ interface SideDrawerContextProps {
   title: string
   children: ReactNode
   className?: string
-  size?: 'small' | 'medium' | 'large'
+  size?: DrawerSize
   openDrawer: (params: OpenDrawerParams) => void
   closeDrawer: () => void
   setChildren: (content: ReactNode) => void
@@ -25,7 +27,7 @@ export const SideDrawerProvider = ({ children }: { children: React.ReactNode }) 
   const [title, setTitle] = useState('')
   const [drawerChildren, setDrawerChildren] = useState<ReactNode>(null)
   const [className, setClassName] = useState<string>()
-  const [size, setSize] = useState<'small' | 'medium' | 'large'>('small')
+  const [size, setSize] = useState<DrawerSize>('small')
 
   const openDrawer = ({ title, content, className, size }: OpenDrawerParams) => {
     setTitle(title)

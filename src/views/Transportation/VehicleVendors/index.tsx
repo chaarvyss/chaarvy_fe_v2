@@ -9,6 +9,8 @@ import { ChaarvyTableColumn } from 'src/reusable_components/ChaarvyDataTable'
 import { statusColors } from 'src/utils/constants'
 import GetChaarvyIcons from 'src/utils/icons'
 
+import AddAndUpdateVehicleVendor from './addAndUpdateVehicleVendor'
+
 const stats = [
   {
     value: 0,
@@ -81,7 +83,7 @@ const VehicleVendors = () => {
   ]
 
   const handleAddVendor = () => {
-    openDrawer({ title: 'Add Vendor', content: <div>Add Vendor Form</div>, size: 'medium' })
+    openDrawer({ title: 'Add Vendor', content: <AddAndUpdateVehicleVendor address_id={''} />, size: 'medium' })
   }
 
   return (
