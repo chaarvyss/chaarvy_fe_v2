@@ -35,8 +35,8 @@ type CellData = {
 }
 
 interface TimeTableSchedulerBoardProps {
-  programId: string | null
-  segmentId: string | null
+  readonly programId: string | null
+  readonly segmentId: string | null
 }
 
 export default function TimeTableSchedulerBoard({ programId, segmentId }: TimeTableSchedulerBoardProps) {

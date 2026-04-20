@@ -22,8 +22,7 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
 import { Program } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import { useCreateProgramSegmentMutation } from 'src/store/services/adminServices'
-import { useCreateUpdateSegmentMutation } from 'src/store/services/adminServices'
+import { useCreateProgramSegmentMutation, useCreateUpdateSegmentMutation } from 'src/store/services/adminServices'
 import { useGetSegmentsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
 
@@ -201,7 +200,7 @@ const ProgramViewModal = ({ selectedProgram, isOpen, onClose }: ProgramView) => 
                 <TableHead>
                   <TableRow>
                     {headers.map((each, idx) => (
-                      <TableCell key={idx} style={each.width ? { width: each.width } : {}}>
+                      <TableCell key={`${each.label}-${idx}`} style={each.width ? { width: each.width } : {}}>
                         {each.label}
                       </TableCell>
                     ))}

@@ -49,9 +49,12 @@ const ChaarvyButton = ({
       }
     }
 
-    return typeof sx === 'function'
-      ? { ...base, ...sx(theme) } // ensure your base is not overridden unintentionally
-      : { ...base, ...(sx || {}) }
+    const sxResult = typeof sx === 'function' ? sx(theme) : sx
+
+    return {
+      ...base,
+      ...sxResult
+    }
   }
 
   return (
