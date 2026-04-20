@@ -159,7 +159,7 @@ const TableTilteHeader = ({
           </Tooltip>
         }
         action={
-          <Box display='flex'>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             {buttonTitle && (
               <>
                 <ChaarvyButton

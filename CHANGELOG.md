@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.3.0...v1.4.0) (2026-04-20)
+
+
+### Features
+
+* **transportation:** AC-26 create pages related to transportation feature ([#35](https://github.com/chaarvyss/chaarvy_fe_v2/issues/35)) ([41e59db](https://github.com/chaarvyss/chaarvy_fe_v2/commit/41e59db4409923646197c4a1e463f79932f6040c))
+
 # [1.3.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.2.5...v1.3.0) (2026-04-14)
 
 

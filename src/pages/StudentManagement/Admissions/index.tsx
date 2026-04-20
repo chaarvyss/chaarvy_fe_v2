@@ -50,10 +50,10 @@ const Admissions = () => {
   }
 
   const onFilterButtonClick = () => {
-    openDrawer(
-      'Filters',
-      <RenderFilterOptions onSubmit={handleFilteredAdmissions} fields={['search', 'program', 'sections']} />
-    )
+    openDrawer({
+      title: 'Filters',
+      content: <RenderFilterOptions onSubmit={handleFilteredAdmissions} fields={['search', 'program', 'sections']} />
+    })
   }
 
   const admission_stats = [

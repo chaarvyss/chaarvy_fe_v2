@@ -21,7 +21,8 @@ export enum InputTypes {
   RADIO = 'radio',
   DATE = 'date',
   BUTTON = 'button',
-  CHECKBOX = 'checkbox'
+  CHECKBOX = 'checkbox',
+  DATE_RANGE = 'date_range'
 }
 
 export enum InputVariants {

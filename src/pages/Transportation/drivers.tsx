@@ -22,14 +22,16 @@ const Drivers = () => {
   }
 
   const onFilterButtonClick = () => {
-    openDrawer(
-      'Filters',
-      <RenderFilterOptions
-        statusOptions={[{ label: 'Active', value: 'active' }]}
-        onSubmit={handleFilteredDrivers}
-        fields={['search', 'status']}
-      />
-    )
+    openDrawer({
+      title: 'Filters',
+      content: (
+        <RenderFilterOptions
+          statusOptions={[{ label: 'Active', value: 'active' }]}
+          onSubmit={handleFilteredDrivers}
+          fields={['search', 'status']}
+        />
+      )
+    })
   }
 
   const driver_stats = [
