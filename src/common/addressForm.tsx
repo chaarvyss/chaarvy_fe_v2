@@ -1,6 +1,7 @@
 import { LoadingButton } from '@mui/lab'
 import { useEffect, useMemo } from 'react'
 
+import { Typography } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { FieldConfig, getMandatoryFieldsList, mapToFields, useFormBuilder } from 'src/hooks/useFormBuilder'
 import { InputTypes } from 'src/lib/enums'
@@ -18,12 +19,15 @@ export enum AddressType {
 }
 
 interface AddressProps {
+  application_id?: string
   user_type: AddressType
   address_id?: string
   user_id?: string
+  isLoading?: boolean
+  handleNext?: () => void
 }
 
-const AddressForm = ({ address_id, user_id, user_type }: AddressProps) => {
+const AddressForm = ({ application_id, address_id, user_id, user_type, isLoading, handleNext }: AddressProps) => {
   const { data: address, isFetching } = useGetAddressQuery(address_id ?? '', {
     skip: !address_id
   })
@@ -42,7 +46,6 @@ const AddressForm = ({ address_id, user_id, user_type }: AddressProps) => {
       { key: 'street', label: 'Street', type: InputTypes.INPUT, rules: ['required'] },
       { key: 'landmark', label: 'Landmark', type: InputTypes.INPUT },
       { key: 'village_city', label: 'Village / City', type: InputTypes.INPUT, rules: ['required'] },
-
       {
         key: 'state',
         label: 'State',
@@ -120,21 +123,26 @@ const AddressForm = ({ address_id, user_id, user_type }: AddressProps) => {
     loadingMap
   })
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: Address) => {
+    const address_payload = { ...data, application_id, address_id }
+
     try {
       const res = await createUpdateAddress({
-        address: data,
+        address: address_payload,
         user_type,
         user_id
       }).unwrap()
 
       triggerToast(res, { variant: ToastVariants.SUCCESS })
+      handleNext?.()
     } catch (err: any) {
       triggerToast(err?.data || 'Something went wrong', {
         variant: ToastVariants.ERROR
       })
     }
   }
+
+  if (isLoading) <Typography variant='body1'>Loading...</Typography>
 
   return (
     <>

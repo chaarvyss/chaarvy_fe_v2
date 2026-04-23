@@ -154,17 +154,6 @@ const admissionServiceApi = api.injectEndpoints({
       }
     }),
 
-    createStudentAddress: build.mutation<string, Address>({
-      invalidatesTags: [CacheTag.StudentAddress],
-      query: body => {
-        return {
-          method: HttpRequestMethods.POST,
-          url: urlConstants.admissions.createStudentAddress,
-          body
-        }
-      }
-    }),
-
     getStudentEnrollendAddonCourses: build.query<StudentAddonCourseResponse[], string>({
       query: application_id => {
         return {
@@ -198,6 +187,5 @@ export const {
   useLazyGetStudentEnrollendAddonCoursesQuery,
   useEnrollAddonCourseMutation,
   useGetStudentAddressQuery,
-  useCreateStudentAddressMutation,
   useLazyGetProcessingFeesQuery
 } = admissionServiceApi

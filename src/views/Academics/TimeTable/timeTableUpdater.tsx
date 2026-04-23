@@ -2,7 +2,7 @@ import { Box, Typography, Popover, Autocomplete, TextField, Card, Button } from 
 import React, { useEffect, useState } from 'react'
 
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
-import { useLazyGetProgramMediumsListQuery } from 'src/store/services/programServices'
+import { useLazyGetProgramMediumsListQuery, useGetProgramSectionListQuery } from 'src/store/services/programServices'
 
 // Data
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -46,9 +46,14 @@ export default function TimeTableSchedulerBoard({ programId, segmentId }: TimeTa
   const [selectedSubject, setSelectedSubject] = useState<any>(null)
   const [selectedFaculty, setSelectedFaculty] = useState<any>(null)
   const [selectedMedium, setSelectedMedium] = useState<any>(null)
+  const [selectedSection, setSelectedSection] = useState<string>()
 
   const [fetchProgramMediums, { data: mediumOptions, isLoading: isMediumsLoading }] =
     useLazyGetProgramMediumsListQuery()
+
+  const { data: sectionsData } = useGetProgramSectionListQuery(programId ?? '', {
+    skip: !programId
+  })
 
   useEffect(() => {
     if (programId && segmentId) {
@@ -96,7 +101,23 @@ export default function TimeTableSchedulerBoard({ programId, segmentId }: TimeTa
           </Typography>
           <ChaarvyFlex className={{ gap: 2 }}>
             {isMediumsLoading ? (
-              <Typography>Loading...</Typography>
+              <Typography>Loading sections...</Typography>
+            ) : (
+              (sectionsData ?? [])?.map(each => (
+                <Button
+                  size='small'
+                  key={each.section_id}
+                  onClick={() => setSelectedSection(each.section_id)}
+                  variant={selectedSection === each.section_id ? 'contained' : 'outlined'}
+                >
+                  {each.section_name}
+                </Button>
+              ))
+            )}
+          </ChaarvyFlex>
+          <ChaarvyFlex className={{ gap: 2 }}>
+            {isMediumsLoading ? (
+              <Typography>Loading mediums</Typography>
             ) : (
               (mediumOptions ?? [])?.map(each => (
                 <Button

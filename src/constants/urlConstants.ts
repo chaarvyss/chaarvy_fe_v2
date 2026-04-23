@@ -95,7 +95,6 @@ export const urlConstants = {
     admissionsList: `${interRoutePrefix.admisions}/admissions-list`,
     admissionDetail: `${interRoutePrefix.admisions}/admission-details`,
     studentAddress: `${interRoutePrefix.admisions}/student-address`,
-    createStudentAddress: `${interRoutePrefix.admisions}/create-update-student-address`,
     studentEnrolledAddonCourse: `${interRoutePrefix.admisions}/student-enrolled-addon-courses`,
     enrollAddonCourse: `${interRoutePrefix.admisions}/enroll-addon-courses`,
     getProcessingFees: `${interRoutePrefix.admisions}/get-processing-fees`
