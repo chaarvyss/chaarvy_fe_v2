@@ -15,7 +15,7 @@ import {
 } from '@muiElements'
 import { useLoader } from 'src/@core/context/loaderContext'
 import { ButtonColors } from 'src/lib/enums'
-import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
+import TableTilteHeader from 'src/reusable_components/Table/TableTilteHeader'
 import {
   StudentProgramFeesDetailsResponse,
   useLazyGetStudentAdmissionFeesDetailsQuery,

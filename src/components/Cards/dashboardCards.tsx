@@ -2,7 +2,7 @@ import { ClipLoader } from 'react-spinners'
 
 import { Box, Card, Typography } from '@muiElements'
 import PieChartCard from 'src/components/Charts/PieChartCard'
-import ChaarvyDataTable, { ChaarvyDataTableProps } from 'src/reusable_components/ChaarvyDataTable'
+import ChaarvyDataTable, { ChaarvyDataTableProps } from 'src/reusable_components/Table/ChaarvyDataTable'
 
 interface Card1Props {
   variant: 'detailInfo' | 'chart'

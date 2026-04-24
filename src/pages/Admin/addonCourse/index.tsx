@@ -21,7 +21,7 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
 import { AddOnCourse } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
+import TableTilteHeader from 'src/reusable_components/Table/TableTilteHeader'
 import Tag from 'src/reusable_components/tag'
 import {
   useCreateAddonCourseMutation,

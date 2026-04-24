@@ -6,7 +6,7 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Permissions } from 'src/constants/permissions'
 import { InputVariants } from 'src/lib/enums'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
+import TableTilteHeader from 'src/reusable_components/Table/TableTilteHeader'
 import { useCreateUpdateRoleMutation } from 'src/store/services/adminServices'
 import { useLazyGetRolesListQuery, useLazyGetRolePermissionsListQuery } from 'src/store/services/listServices'
 import GetChaarvyIcons from 'src/utils/icons'
@@ -42,18 +42,21 @@ const Roles = () => {
     setShowCreateOrEditRoleModal(false)
     setSelectedRoleId(undefined)
     setRole_name('')
+    setAllowedPermissions(new Set())
   }
 
   const handleSubmit = () => {
     const available_permissions = Array.from(allowedPermissions).filter(e => e !== undefined)
     if (role_name)
-      createUpdateRole({ role_id: selectedRoleId, permissions: available_permissions, role_name }).then(res => {
-        if (res) {
-          triggerToast('Role details updated', { variant: ToastVariants.SUCCESS })
-          if (selectedRoleId === undefined) fetchRoles()
-          handleModalClose()
-        }
-      })
+      createUpdateRole({ role_id: selectedRoleId, permissions: available_permissions, role_name })
+        .unwrap()
+        .then(res => {
+          if (res) {
+            triggerToast('Role details updated', { variant: ToastVariants.SUCCESS })
+            handleModalClose()
+          }
+        })
+        .catch(e => triggerToast(e, { variant: ToastVariants.ERROR }))
   }
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

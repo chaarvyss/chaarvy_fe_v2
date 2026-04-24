@@ -140,6 +140,7 @@ const listServicesApi = api.injectEndpoints({
       }
     }),
     getSegmentsList: build.query<Segment[], void>({
+      providesTags: [CacheTag.ListSegments],
       query: () => {
         return {
           method: HttpRequestMethods.GET,

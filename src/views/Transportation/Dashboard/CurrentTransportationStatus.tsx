@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { Typography } from '@muiElements'
 import { DashboardTable } from 'src/components/Cards/dashboardCards'
-import { ChaarvyTableColumn } from 'src/reusable_components/ChaarvyDataTable'
+import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
 
 import RouteDetailsModal from './Modals/RouteDetailsModal'
 import StudentsListViewModal from './Modals/StudentsListViewModal'

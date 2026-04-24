@@ -19,7 +19,7 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Section, TableHeaders } from 'src/lib/interfaces'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
-import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
+import TableTilteHeader from 'src/reusable_components/Table/TableTilteHeader'
 import { useCreateUpdateSectionMutation } from 'src/store/services/adminServices'
 import { useGetSectionsListQuery } from 'src/store/services/listServices'
 

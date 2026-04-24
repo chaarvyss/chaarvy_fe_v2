@@ -364,6 +364,16 @@ const adminServiceApi = api.injectEndpoints({
           body: data
         }
       }
+    }),
+    createUpdateSegment: build.mutation<string, string>({
+      invalidatesTags: [CacheTag.ListSegments],
+      query: segment_name => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.createUpdateSegment,
+          body: { segment_name }
+        }
+      }
     })
   })
 })
@@ -395,5 +405,6 @@ export const {
   useCreateUpdateSectionMutation,
   useUpdateUserPermissionsMutation,
   useGetUserPermissionsQuery,
-  useCreateUpdateRoleMutation
+  useCreateUpdateRoleMutation,
+  useCreateUpdateSegmentMutation
 } = adminServiceApi

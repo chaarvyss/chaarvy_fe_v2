@@ -111,7 +111,9 @@ export const {
   useLazyGetProgramSecondLanguagesListQuery,
   useUpdateProgramSecondLanguagesListMutation,
   useLazyGetProgramMediumsListQuery,
+  useGetProgramMediumsListQuery,
   useUpdateProgramMediumsMutation,
+  useGetProgramSectionListQuery,
   useLazyGetProgramSectionListQuery,
   useUpdateProgramSectionMutation
 } = programServicesApi

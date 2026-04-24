@@ -1,6 +1,5 @@
 // ** React Import
 import Box, { BoxProps } from '@mui/material/Box'
-import { grey } from '@mui/material/colors'
 import { styled, useTheme } from '@mui/material/styles'
 import { ReactNode, useRef, useState } from 'react'
 
@@ -63,7 +62,7 @@ const Navigation = (props: Props) => {
         sx={{
           overflowY: 'auto',
           height: '100vh !important',
-          bgcolor: settings.mode == 'light' ? grey[50] : 'black',
+          backgroundImage: `linear-gradient(to right,${settings.mode == 'light' ? '#eae8f5, #ffffff' : '#000000, #1a1a1a'})`,
           scrollbarWidth: 'none',
           '&::-webkit-scrollbar': {
             display: 'none'

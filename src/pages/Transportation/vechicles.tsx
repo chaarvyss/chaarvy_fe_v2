@@ -5,7 +5,7 @@ import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import RenderFilterOptions from 'src/common/filters'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import { FilterProps } from 'src/lib/interfaces'
-import { ChaarvyTableColumn } from 'src/reusable_components/ChaarvyDataTable'
+import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
 import { statusColors } from 'src/utils/constants'
 import GetChaarvyIcons from 'src/utils/icons'
 

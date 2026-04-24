@@ -4,11 +4,13 @@ import React, { ChangeEvent, useEffect, useState } from 'react'
 import { Box } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { useGetSectionsListQuery } from 'src/store/services/listServices'
-import { useLazyGetProgramSectionListQuery, useUpdateProgramSectionMutation } from 'src/store/services/programServices'
+import { useGetProgramSectionListQuery, useUpdateProgramSectionMutation } from 'src/store/services/programServices'
 import { areSetsEqual } from 'src/utils/helpers'
 
 const ProgramSection = ({ program_id }: { program_id: string }) => {
-  const [fetchProgramSection, { data: ProgramSection }] = useLazyGetProgramSectionListQuery()
+  const { data: ProgramSection } = useGetProgramSectionListQuery(program_id, {
+    skip: !program_id
+  })
   const { data: sectionsList } = useGetSectionsListQuery()
 
   const [updateProgramSection] = useUpdateProgramSectionMutation()
@@ -16,10 +18,6 @@ const ProgramSection = ({ program_id }: { program_id: string }) => {
   const [prgSectionIds, setPrgSectionIds] = useState<Set<string>>(new Set())
   const [initialPrgSectionIds, setInitialPrgSectionIds] = useState<Set<string>>(new Set())
   const [isEdited, setIsEdited] = useState(false)
-
-  useEffect(() => {
-    fetchProgramSection(program_id)
-  }, [program_id])
 
   useEffect(() => {
     const newLangIds = new Set(ProgramSection?.map(each => each.section_id) ?? [])

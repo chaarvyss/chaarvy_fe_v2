@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box'
-import { deepPurple, grey } from '@mui/material/colors'
+import { grey } from '@mui/material/colors'
 import IconButton from '@mui/material/IconButton'
 import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
@@ -46,23 +46,12 @@ const VerticalNavLink = ({
     return false
   }
 
-  const getLinearGradientEffect = (color: Record<number, string> | string) => {
-    const gradientColors =
-      typeof color === 'string' ? [color, color] : [color[800] ?? color[600], color[200] ?? color[300]]
-
-    return `linear-gradient(to bottom, ${gradientColors.join(', ')})`
-  }
-
-  const getItemBgColor = () => {
-    return isNavLinkActive() ? getLinearGradientEffect(deepPurple) : ''
-  }
-
   const getItemColor = () => {
     if (settings.mode == 'dark') {
-      return isNavLinkActive() ? 'white' : ''
+      return isNavLinkActive() ? '#fe29f0' : ''
     }
 
-    return isNavLinkActive() ? 'white' : grey.A700
+    return isNavLinkActive() ? '#640074' : grey.A700
   }
 
   const handleClick = () => {
@@ -73,14 +62,6 @@ const VerticalNavLink = ({
     }
 
     router.push(item.path === undefined ? '/' : `${item.path}`)
-  }
-
-  const getHoverBgColor = () => {
-    if (settings.mode == 'dark') {
-      return 'rgba(255,255,255,0.08)'
-    }
-
-    return isNavLinkActive() ? 'black' : 'rgba(103,58,183,0.08)'
   }
 
   return (
@@ -102,13 +83,10 @@ const VerticalNavLink = ({
         width='100%'
         borderRadius='1rem'
         padding='0.6rem'
-        boxShadow={isNavLinkActive() ? 2 : 0}
         sx={{
-          background: getItemBgColor(),
           cursor: 'pointer',
           transition: 'background-color .2s ease, transform .2s ease',
           '&:hover': {
-            backgroundColor: getHoverBgColor(),
             transform: 'translateX(2px)'
           }
         }}
@@ -117,7 +95,9 @@ const VerticalNavLink = ({
           {item.icon && (
             <GetChaarvyIcons color={getItemColor()} iconName={item.icon as GetChaarvyIconsProps['iconName']} />
           )}
-          <Typography color={getItemColor()}>{item.title}</Typography>
+          <Typography sx={{ fontWeight: isNavLinkActive() ? 'bolder' : 'normal' }} color={getItemColor()}>
+            {item.title}
+          </Typography>
         </Box>
         {hasChildren ? (
           <IconButton size='small' sx={{ color: getItemColor(), p: 0.5 }}>

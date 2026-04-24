@@ -5,7 +5,7 @@ import { useLoader } from 'src/@core/context/loaderContext'
 import { TableHeaders } from 'src/lib/interfaces'
 import { BooksTypesResponse } from 'src/lib/types'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
-import TableTilteHeader from 'src/reusable_components/TableTilteHeader'
+import TableTilteHeader from 'src/reusable_components/Table/TableTilteHeader'
 import { useGetBooksListQuery } from 'src/store/services/listServices'
 
 import CreateOrUpdateBookModal from './createBookModal'

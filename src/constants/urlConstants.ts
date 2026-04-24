@@ -54,6 +54,7 @@ export const urlConstants = {
     createUpdateUser: `${interRoutePrefix.admin}/create-update-user`,
     createUpdateSection: `${interRoutePrefix.admin}/add-update-section`,
     createUpdateRole: `${interRoutePrefix.admin}/create-update-role`,
+    createUpdateSegment: `${interRoutePrefix.admin}/create-update-segment`,
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
       book: `${interRoutePrefix.admin}/add-book`,
@@ -94,7 +95,6 @@ export const urlConstants = {
     admissionsList: `${interRoutePrefix.admisions}/admissions-list`,
     admissionDetail: `${interRoutePrefix.admisions}/admission-details`,
     studentAddress: `${interRoutePrefix.admisions}/student-address`,
-    createStudentAddress: `${interRoutePrefix.admisions}/create-update-student-address`,
     studentEnrolledAddonCourse: `${interRoutePrefix.admisions}/student-enrolled-addon-courses`,
     enrollAddonCourse: `${interRoutePrefix.admisions}/enroll-addon-courses`,
     getProcessingFees: `${interRoutePrefix.admisions}/get-processing-fees`

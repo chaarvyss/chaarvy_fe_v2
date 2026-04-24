@@ -34,7 +34,7 @@ export enum AdmissionFormType {
 const AdmissionForm = () => {
   const [value, setValue] = useState<AdmissionFormType>(AdmissionFormType.BASE_DETAIL)
   const handleChange = (_: SyntheticEvent, newValue: AdmissionFormType) => setValue(newValue)
-  const [application_id, setApplication] = useState<string | undefined>()
+  const [application_id, setApplication] = useState<string>()
 
   const [fetchStudentDetails, { data: studentDetail }] = useLazyGetAdmissionDetailQuery()
 

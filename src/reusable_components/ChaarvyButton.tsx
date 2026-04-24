@@ -3,11 +3,11 @@ import Box from '@mui/material/Box'
 import Button, { ButtonProps } from '@mui/material/Button'
 import React, { ReactNode } from 'react'
 
-type ColorKey = 'primary' | 'success' | 'error' | 'info' | 'secondary'
+type ColorKey = 'primary' | 'success' | 'error' | 'info' | 'secondary' | 'lightblue'
 
 export interface ChaarvyButtonProps extends Omit<ButtonProps, 'color'> {
   color?: ColorKey
-  fillType?: 'solid' | 'gradient' // 'solid' -> single color fill, 'gradient' -> top-to-bottom gradient
+  fillType?: 'solid' | 'gradient'
   leftIcon?: ReactNode
   rightIcon?: ReactNode
   label?: ReactNode
@@ -25,54 +25,45 @@ const ChaarvyButton = ({
   children,
   ...props
 }: ChaarvyButtonProps) => {
-  // Use sx to compute dynamic backgrounds from theme palette
   const mergedSx = (theme: any) => {
     const palette = theme.palette[color] || theme.palette.primary
 
-    const solidBg = palette.main
-    const light = palette.light ?? palette.main
-    const dark = palette.dark ?? palette.main
+    const main = palette.main
+    const light = palette.light ?? main
+    const dark = palette.dark ?? main
 
     const base: any = {
-      color: theme.palette.getContrastText(solidBg),
+      color: theme.palette.getContrastText(main),
       textTransform: 'none'
     }
 
     if (fillType === 'solid') {
-      base.background = solidBg
+      base.backgroundColor = main
       base['&:hover'] = {
-        background: palette.dark ?? solidBg
+        backgroundColor: dark
       }
     } else {
-      // gradient
       base.background = `linear-gradient(to bottom, ${light}, ${dark})`
       base['&:hover'] = {
-        background: `linear-gradient(to bottom, ${palette.main}, ${dark})`
+        background: `linear-gradient(to bottom, ${main}, ${dark})`
       }
     }
 
-    if (typeof sx === 'function') {
-      return { ...sx(theme), ...base }
-    }
+    const sxResult = typeof sx === 'function' ? sx(theme) : sx
 
-    return { ...base, ...(sx || {}) }
+    return {
+      ...base,
+      ...sxResult
+    }
   }
 
   return (
     <Tooltip title={typeof label === 'string' ? label : ''} placement='top'>
       <Button {...props} color='inherit' sx={mergedSx}>
-        <Box component='span' sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-          {leftIcon && (
-            <Box component='span' sx={{ display: 'inline-flex' }}>
-              {leftIcon}
-            </Box>
-          )}
-          {(label || children) && <Box component='span'>{label ?? children}</Box>}
-          {rightIcon && (
-            <Box component='span' sx={{ display: 'inline-flex' }}>
-              {rightIcon}
-            </Box>
-          )}
+        <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+          {leftIcon && <Box>{leftIcon}</Box>}
+          {(label || children) && <Box>{label ?? children}</Box>}
+          {rightIcon && <Box>{rightIcon}</Box>}
         </Box>
       </Button>
     </Tooltip>
