@@ -1,7 +1,7 @@
 export const PagePath = {
   COLLEGE_PROFILE: '/collegeProfile',
   DASHBOARD: '/dashboard',
-  CHANGE_PASSWORD: '/changePwd',
+  CHANGE_PASSWORD: '/changePassword',
   CREATE_ADMISSION: '/StudentManagement/AdmissionForm',
   LOGIN_PAGE: '/login',
   MASTER_DASHBOARD: '/Master/dashboard',

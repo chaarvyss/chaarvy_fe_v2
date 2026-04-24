@@ -3,6 +3,8 @@ import Box from '@mui/material/Box'
 import Button, { ButtonProps } from '@mui/material/Button'
 import React, { ReactNode } from 'react'
 
+import ChaarvyFlex from './chaarvyFlex'
+
 type ColorKey = 'primary' | 'success' | 'error' | 'info' | 'secondary' | 'lightblue'
 
 export interface ChaarvyButtonProps extends Omit<ButtonProps, 'color'> {
@@ -60,11 +62,11 @@ const ChaarvyButton = ({
   return (
     <Tooltip title={typeof label === 'string' ? label : ''} placement='top'>
       <Button {...props} color='inherit' sx={mergedSx}>
-        <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+        <ChaarvyFlex className={{ gap: 2 }}>
           {leftIcon && <Box>{leftIcon}</Box>}
           {(label || children) && <Box>{label ?? children}</Box>}
           {rightIcon && <Box>{rightIcon}</Box>}
-        </Box>
+        </ChaarvyFlex>
       </Button>
     </Tooltip>
   )
