@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.4.0...v1.4.1) (2026-04-24)
+
+
+### Bug Fixes
+
+* **timetable:** AC-30  create base UI designs and base API integrations ([#34](https://github.com/chaarvyss/chaarvy_fe_v2/issues/34)) ([359a39b](https://github.com/chaarvyss/chaarvy_fe_v2/commit/359a39b7fbba76c95514fa14737bff74e4a13e74))
+
 # [1.4.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.3.0...v1.4.0) (2026-04-20)
 
 
