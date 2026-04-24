@@ -142,7 +142,7 @@ const AddressForm = ({ application_id, address_id, user_id, user_type, isLoading
     }
   }
 
-  if (isLoading) <Typography variant='body1'>Loading...</Typography>
+  if (isLoading) return <Typography variant='body1'>Loading...</Typography>
 
   return (
     <>
