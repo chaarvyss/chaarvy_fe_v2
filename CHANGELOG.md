@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.4.1...v1.5.0) (2026-04-24)
+
+
+### Features
+
+* **code_quality:** AC-33 Removing duplicate code ([#36](https://github.com/chaarvyss/chaarvy_fe_v2/issues/36)) ([448f5e2](https://github.com/chaarvyss/chaarvy_fe_v2/commit/448f5e21dfc0bcfb81db02c0784148c5bdac0cd9))
+
 ## [1.4.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.4.0...v1.4.1) (2026-04-24)
 
 
