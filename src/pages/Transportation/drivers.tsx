@@ -53,8 +53,6 @@ const Drivers = () => {
     {
       id: 'Driver',
       label: 'Driver',
-      freezable: true,
-      defaultFrozen: true,
       hideable: false,
       render: () => (
         <Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '1rem' }}>

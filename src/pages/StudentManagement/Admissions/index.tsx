@@ -75,8 +75,6 @@ const Admissions = () => {
     {
       id: 'student_name',
       label: 'Student Name',
-      freezable: true,
-      defaultFrozen: true,
       hideable: false, // Keep this always visible
       render: row => (
         <Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '1rem' }}>
@@ -155,7 +153,8 @@ const Admissions = () => {
         columns,
         data: admissionResponse?.admissions ?? [],
         getRowKey: row => row.application_id,
-        emptyMessage: 'No Admissions'
+        emptyMessage: 'No Admissions',
+        isLoading
       }}
     />
   )

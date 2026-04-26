@@ -40,8 +40,6 @@ const VehicleVendors = () => {
     {
       id: 'Vendor',
       label: 'Vendor',
-      freezable: true,
-      defaultFrozen: true,
       hideable: false,
       render: () => (
         <Box display='flex' gap='1rem'>

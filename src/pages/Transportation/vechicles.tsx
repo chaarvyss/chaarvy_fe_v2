@@ -53,8 +53,6 @@ const Vehicles = () => {
     {
       id: 'Vehicle',
       label: 'Vehicle',
-      freezable: true,
-      defaultFrozen: true,
       hideable: false,
       render: () => (
         <Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'row', gap: '1rem' }}>

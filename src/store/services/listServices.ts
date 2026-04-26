@@ -11,7 +11,8 @@ import {
 } from 'src/lib/interfaces'
 import {
   AddOnCourse,
-  BooksTypesResponse,
+  BooksListRequest,
+  BooksListResponse,
   Community,
   District,
   FeesTypesResponse,
@@ -44,12 +45,13 @@ const listServicesApi = api.injectEndpoints({
         }
       }
     }),
-    getBooksList: build.query<BooksTypesResponse[], void>({
+    getBooksList: build.query<BooksListResponse, BooksListRequest>({
       providesTags: [CacheTag.ListBooks],
-      query: () => {
+      query: params => {
         return {
           method: HttpRequestMethods.GET,
-          url: urlConstants.list.books
+          url: urlConstants.list.books,
+          params: { ...params }
         }
       }
     }),
@@ -223,7 +225,7 @@ const listServicesApi = api.injectEndpoints({
 
 export const {
   useGetSegmentsListQuery,
-  useGetBooksListQuery,
+  useLazyGetBooksListQuery,
   useGetProgramsListQuery,
   useGetAddonCoursesListQuery,
   useGetCommunitiesListQuery,
