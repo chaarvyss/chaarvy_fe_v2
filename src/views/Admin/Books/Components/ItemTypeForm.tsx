@@ -1,4 +1,4 @@
-import { FormControlLabel, FormLabel, Radio, RadioGroup } from '@mui/material'
+import { FormControlLabel, Radio, RadioGroup } from '@mui/material'
 import React, { useState } from 'react'
 
 import { FormControl } from '@muiElements'
@@ -29,7 +29,6 @@ const ItemTypeForm = ({ defaultValue, onValueChange }: ItemTypeFormProps) => {
 
   return (
     <FormControl>
-      <FormLabel id='Item type'></FormLabel>
       <RadioGroup
         row
         name='itemType'

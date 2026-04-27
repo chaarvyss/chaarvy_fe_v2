@@ -30,6 +30,7 @@ export type BooksListRequest = {
   program_id?: string
   medium_id?: string
   segment_id?: string
+  isCommon?: boolean
   offset?: number
   limit?: number
 }

@@ -7,7 +7,7 @@ import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewSer
 
 import ReusableSelect from './reusableSelect'
 
-export interface CascadingSelectorState {
+export type CascadingSelectorState = {
   program?: string
   segment?: string
   medium?: string
@@ -53,9 +53,9 @@ const CascadingSelectors = ({ onChange, defaultValues }: CascadingSelectorsProps
     }
   }, [])
 
-  useState(() => {
+  useEffect(() => {
     onChange?.(values)
-  })
+  }, [values])
 
   return (
     <ChaarvyFlex className={{ gap: 3 }}>

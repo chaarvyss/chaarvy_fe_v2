@@ -8,9 +8,16 @@ import api from './api'
 import { CacheTag } from './cacheTag'
 import { UserProfile } from './viewServices'
 
-type CreateBook = {
+export type CreateBookRequest = {
+  book_id?: string
   book_name: string
   price: number
+  available_quantity: number
+  program_id?: string
+  segment_id?: string
+  medium_id?: string
+  status?: number
+  isCommon?: number
 }
 
 export type CreateProgramAddonRequest = {
@@ -32,10 +39,6 @@ type CreateProgramBookRequest = {
 type updateAddonCourse = {
   id: string
   addon_course_name: string
-}
-
-type UpdateBook = CreateBook & {
-  book_id: string
 }
 
 type CreateCollegeProfileRequest = {
@@ -101,7 +104,7 @@ const adminServiceApi = api.injectEndpoints({
         }
       }
     }),
-    createBook: build.mutation<string, CreateBook>({
+    createBook: build.mutation<string, CreateBookRequest>({
       invalidatesTags: [CacheTag.ListBooks],
       query: params => {
         return {
@@ -111,6 +114,20 @@ const adminServiceApi = api.injectEndpoints({
         }
       }
     }),
+
+    // TODO: This is currently used for adding and updating books. We can separate the APIs for better clarity and type safety.
+
+    createUpdateBook: build.mutation<string, CreateBookRequest>({
+      invalidatesTags: [CacheTag.ListBooks],
+      query: params => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.add.book,
+          body: params
+        }
+      }
+    }),
+
     createLanguage: build.mutation<string, string>({
       invalidatesTags: [CacheTag.ListLanguages],
       query: language_name => {
@@ -181,16 +198,7 @@ const adminServiceApi = api.injectEndpoints({
         }
       }
     }),
-    updateBook: build.mutation<string, UpdateBook>({
-      invalidatesTags: [CacheTag.ListBooks],
-      query: params => {
-        return {
-          method: HttpRequestMethods.POST,
-          url: urlConstants.admin.update.book,
-          body: params
-        }
-      }
-    }),
+
     updateAddonCourse: build.mutation<string, updateAddonCourse>({
       invalidatesTags: [CacheTag.ListAddonCourse],
       query: params => {
@@ -388,7 +396,6 @@ export const {
   useCreateProgramBookMutation,
   useUpdateAddonCourseMutation,
   useUpdateAddonCourseStatusMutation,
-  useUpdateBookMutation,
   useUpdateCollegeProfileMutation,
   useUpdateFeesTypeMutation,
   useUpdateLangugageMutation,
@@ -406,5 +413,6 @@ export const {
   useUpdateUserPermissionsMutation,
   useGetUserPermissionsQuery,
   useCreateUpdateRoleMutation,
-  useCreateUpdateSegmentMutation
+  useCreateUpdateSegmentMutation,
+  useCreateUpdateBookMutation
 } = adminServiceApi

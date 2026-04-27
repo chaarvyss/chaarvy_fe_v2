@@ -37,7 +37,7 @@ export interface ChaarvyTableColumn<T = any> {
 export type EditedDataTableOnSubmitPayload<T = any> = {
   created: T[]
   updated: T[]
-  deleted: (string | number)[]
+  deleted: T[]
 }
 
 export interface ChaarvyDataTableProps<T = any> {
@@ -52,6 +52,7 @@ export interface ChaarvyDataTableProps<T = any> {
   hover?: boolean
   showColumnToggle?: boolean
   isLoading?: boolean
+  loadingText?: string
 }
 
 const ChaarvyDataTable = <T extends Record<string, any>>({
@@ -63,7 +64,8 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   emptyMessage = 'No data available',
   hover = true,
   showColumnToggle = true,
-  isLoading = false
+  isLoading = false,
+  loadingText
 }: ChaarvyDataTableProps<T>) => {
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({})
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -195,7 +197,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
       else if (isRowChanged(row, original)) updated.push(row)
     })
 
-    const deleted = deletedRows.map(row => getRowKey(row, 0))
+    const deleted: T[] = deletedRows.map(row => ({ ...row, status: 0 }))
 
     return { created, updated, deleted }
   }
@@ -377,7 +379,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
 
         {draftData.length === 0 && (
           <Box sx={{ height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Typography>{isLoading ? 'Loading...' : emptyMessage}</Typography>
+            <Typography>{isLoading ? (loadingText ?? 'Loading...') : emptyMessage}</Typography>
           </Box>
         )}
       </TableContainer>
