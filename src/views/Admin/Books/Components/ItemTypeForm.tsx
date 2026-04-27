@@ -2,7 +2,7 @@ import { FormControlLabel, FormLabel, Radio, RadioGroup } from '@mui/material'
 import React, { useState } from 'react'
 
 import { FormControl } from '@muiElements'
-import { ItemType } from 'src/pages/Admin/books/add_books'
+import { ItemType } from 'src/views/Admin/Books/add_books'
 
 interface ItemTypeFormProps {
   defaultValue: ItemType

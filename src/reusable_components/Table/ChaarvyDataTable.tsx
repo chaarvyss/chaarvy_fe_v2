@@ -34,13 +34,19 @@ export interface ChaarvyTableColumn<T = any> {
   cellSx?: Record<string, any>
 }
 
+export type EditedDataTableOnSubmitPayload<T = any> = {
+  created: T[]
+  updated: T[]
+  deleted: (string | number)[]
+}
+
 export interface ChaarvyDataTableProps<T = any> {
   columns: ChaarvyTableColumn<T>[]
   data: T[]
   getRowKey: (row: T, index: number) => string | number
 
   editable?: boolean
-  onSubmit?: (payload: { created: T[]; updated: T[]; deleted: (string | number)[] }) => void
+  onSubmit?: (payload: EditedDataTableOnSubmitPayload<T>) => void
 
   emptyMessage?: string
   hover?: boolean

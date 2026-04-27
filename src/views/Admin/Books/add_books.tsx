@@ -4,7 +4,10 @@ import { Box, Typography } from '@muiElements'
 import CascadingSelectors, { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import ChaarvyDataTable, { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
+import ChaarvyDataTable, {
+  ChaarvyTableColumn,
+  EditedDataTableOnSubmitPayload
+} from 'src/reusable_components/Table/ChaarvyDataTable'
 import ItemTypeForm from 'src/views/Admin/Books/Components/ItemTypeForm'
 
 export type ItemType = 'common' | 'specific'
@@ -13,12 +16,15 @@ interface AddUpdateBooksProps {
   isOpen: boolean
   onClose: () => void
   defaultData?: CascadingSelectorState
+  isCommonBook?: boolean
 }
 
-const AddUpdateBooks = ({ isOpen, onClose, defaultData }: AddUpdateBooksProps) => {
+const AddUpdateBooks = ({ isOpen, onClose, defaultData, isCommonBook }: AddUpdateBooksProps) => {
   const [itemType, setItemType] = useState<ItemType>('specific')
 
   const booksData = []
+
+  const commonBooksData = []
 
   const columns: ChaarvyTableColumn[] = [
     {
@@ -51,12 +57,20 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData }: AddUpdateBooksProps) =
   ]
 
   useEffect(() => {
-    if (defaultData) alert('fetchBooks')
-    console.log(defaultData, 'defaultData')
-  }, [defaultData])
+    if (defaultData) alert('fetchBooks request with program, segment and medium ' + JSON.stringify(defaultData))
+    if (isCommonBook) {
+      setItemType('common')
+      alert('fetch common books')
+    }
+  }, [defaultData, isCommonBook])
 
-  const handleEditSubmit = a => {
-    console.log(a)
+  const handleEditSubmit = (payload: EditedDataTableOnSubmitPayload) => {
+    if (itemType === 'specific') {
+      alert('generate payload and submit edited specific books data')
+    } else {
+      alert('fetch all active programs, segments and mediums and generate payload and submit edited common books data')
+    }
+    console.log(payload)
   }
 
   const onValueChange = (a: ItemType) => {
@@ -64,7 +78,9 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData }: AddUpdateBooksProps) =
   }
 
   const handleProgSegMediumChange = ({ program, segment, medium }: CascadingSelectorState) => {
-    console.log(program, segment, medium)
+    if (program && segment && medium) {
+      alert('fetchBooks request with program, segment and medium ' + JSON.stringify({ program, segment, medium }))
+    }
   }
 
   const handleOnclose = () => {
@@ -77,7 +93,7 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData }: AddUpdateBooksProps) =
         showColumnToggle={false}
         editable={true}
         columns={columns}
-        data={booksData}
+        data={itemType === 'specific' ? booksData : commonBooksData}
         getRowKey={row => row.book_id}
         onSubmit={handleEditSubmit}
       />
@@ -94,7 +110,7 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData }: AddUpdateBooksProps) =
             <CascadingSelectors onChange={handleProgSegMediumChange} defaultValues={defaultData} />
           )}
         </ChaarvyFlex>
-        {itemType == 'specific' ? renderAddBooksTable() : <Typography>Under progress</Typography>}
+        {renderAddBooksTable()}
       </Box>
     </ChaarvyModal>
   )

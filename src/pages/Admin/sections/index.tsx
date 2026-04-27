@@ -23,10 +23,15 @@ import TableTilteHeader from 'src/reusable_components/Table/TableTilteHeader'
 import { useCreateUpdateSectionMutation } from 'src/store/services/adminServices'
 import { useGetSectionsListQuery } from 'src/store/services/listServices'
 
+const defaultSectionState = {
+  section_id: '',
+  section_name: ''
+}
+
 const Sections = () => {
   const { data: sectionsList, isLoading } = useGetSectionsListQuery()
   const [isSectionModalOpen, setSectionModalOpen] = useState<boolean>(false)
-  const [selectedSection, setSelectedSection] = useState<Section>()
+  const [selectedSection, setSelectedSection] = useState<Section>(defaultSectionState)
 
   const [createUpdateSection, { isLoading: isCreating }] = useCreateUpdateSectionMutation()
 
@@ -55,7 +60,7 @@ const Sections = () => {
 
   const handleModalClose = () => {
     setSectionModalOpen(false)
-    setSelectedSection(undefined)
+    setSelectedSection(defaultSectionState)
   }
 
   const handleSubmit = () => {
@@ -83,7 +88,7 @@ const Sections = () => {
 
   const handleChange =
     (prop: keyof Section) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
-      const value = event?.target?.value
+      const value = event.target.value
       setSelectedSection(prev => ({ ...prev, [prop]: value }))
     }
 

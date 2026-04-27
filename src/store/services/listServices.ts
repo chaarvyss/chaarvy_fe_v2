@@ -246,5 +246,6 @@ export const {
   useGetPaymentAggrementsQuery,
   useGetSectionsListQuery,
   useLazyGetStudentsListQuery,
-  useLazyGetRolePermissionsListQuery
+  useLazyGetRolePermissionsListQuery,
+  useGetBooksListQuery
 } = listServicesApi
