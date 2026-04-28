@@ -43,9 +43,7 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
   const isFilterReady = Boolean(program && segment && medium)
 
   const queryParams = useMemo(() => {
-    return itemType === 'specific'
-      ? { program_id: program, segment_id: segment, medium_id: medium, isCommon: false }
-      : { isCommon: true }
+    return itemType === 'specific' ? { program, segment, medium, isCommon: false } : { isCommon: true }
   }, [itemType, program, segment, medium])
 
   const { data: booksListResponse, isFetching: isFetchingBooks } = useGetBooksListQuery(
@@ -172,10 +170,13 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
   }
 
   return (
-    <ChaarvyModal isOpen={isOpen} modalSize='col-12 col-md-8' onClose={onClose}>
+    <ChaarvyModal
+      isOpen={isOpen}
+      modalSize='col-12 col-md-8'
+      onClose={onClose}
+      title='Update Books and Stationary Details'
+    >
       <Box sx={{ gap: 3 }}>
-        <Typography variant='h6'>Update Books and Stationary Details</Typography>
-
         {itemType && (
           <ChaarvyFlex className={{ justifyContent: 'space-between' }}>
             <ItemTypeForm defaultValue={itemType} onValueChange={handleItemTypeChange} />

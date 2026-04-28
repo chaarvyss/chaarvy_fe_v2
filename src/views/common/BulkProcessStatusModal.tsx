@@ -26,26 +26,28 @@ const BulkProcessStatusModal = ({
   isProcessing = false,
   stats
 }: BulkProcessStatusModalProps) => {
+  const getBackgroundColor = (row: ProcessStatRow) => {
+    if (!isProcessing) {
+      if (row.target === row.processed) {
+        return '#e1ffaf'
+      } else {
+        return '#ffd0be'
+      }
+    }
+  }
+
   return (
     <ChaarvyModal title={title} isOpen={isOpen} onClose={onClose}>
       <Box sx={{ p: 4, minWidth: 350 }}>
         {/* Table Headers */}
         <Grid container spacing={2} sx={{ mb: 2, pb: 1, borderBottom: '1px solid #eee' }}>
-          <Grid item xs={4}>
-            <Typography variant='subtitle2' color='text.secondary'>
-              Action
-            </Typography>
-          </Grid>
-          <Grid item xs={4}>
-            <Typography variant='subtitle2' color='text.secondary'>
-              Target
-            </Typography>
-          </Grid>
-          <Grid item xs={4}>
-            <Typography variant='subtitle2' color='text.secondary'>
-              Processed
-            </Typography>
-          </Grid>
+          {['Action', 'Target', 'Processed'].map(each => (
+            <Grid item xs={4}>
+              <Typography variant='subtitle2' color='text.secondary'>
+                {each}
+              </Typography>
+            </Grid>
+          ))}
         </Grid>
 
         {/* Dynamic Data Rows */}
@@ -56,10 +58,10 @@ const BulkProcessStatusModal = ({
                 {row.label}
               </Typography>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={4} sx={{ backgroundColor: getBackgroundColor(row) }}>
               <Typography variant='body2'>{row.target}</Typography>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={4} sx={{ backgroundColor: getBackgroundColor(row) }}>
               <ChaarvyFlex className={{ alignItems: 'center', gap: 1 }}>
                 <Typography variant='body2'>{row.processed}</Typography>
 
