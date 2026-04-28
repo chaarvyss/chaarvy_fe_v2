@@ -104,25 +104,13 @@ const adminServiceApi = api.injectEndpoints({
         }
       }
     }),
-    createBook: build.mutation<string, CreateBookRequest>({
+
+    createUpdateBook: build.mutation<string, CreateBookRequest[]>({
       invalidatesTags: [CacheTag.ListBooks],
       query: params => {
         return {
           method: HttpRequestMethods.POST,
-          url: urlConstants.admin.add.book,
-          body: params
-        }
-      }
-    }),
-
-    // TODO: This is currently used for adding and updating books. We can separate the APIs for better clarity and type safety.
-
-    createUpdateBook: build.mutation<string, CreateBookRequest>({
-      invalidatesTags: [CacheTag.ListBooks],
-      query: params => {
-        return {
-          method: HttpRequestMethods.POST,
-          url: urlConstants.admin.add.book,
+          url: urlConstants.admin.createUpdateBook,
           body: params
         }
       }
@@ -388,7 +376,6 @@ const adminServiceApi = api.injectEndpoints({
 
 export const {
   useCreateAddonCourseMutation,
-  useCreateBookMutation,
   useCreateFeesTypeMutation,
   useCreateLanguageMutation,
   useCreateProgramMutation,

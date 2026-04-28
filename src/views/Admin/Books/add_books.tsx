@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { Box, Typography } from '@muiElements'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import CascadingSelectors, { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
@@ -8,6 +9,7 @@ import ChaarvyDataTable, {
   ChaarvyTableColumn,
   EditedDataTableOnSubmitPayload
 } from 'src/reusable_components/Table/ChaarvyDataTable'
+import { useCreateUpdateBookMutation } from 'src/store/services/adminServices'
 import { useGetBooksListQuery } from 'src/store/services/listServices'
 import ItemTypeForm from 'src/views/Admin/Books/Components/ItemTypeForm'
 
@@ -23,6 +25,9 @@ interface AddUpdateBooksProps {
 }
 
 const AddUpdateBooks = ({ isOpen, onClose, defaultData, isCommonBook }: AddUpdateBooksProps) => {
+  const [createUpdateBook, { isLoading: isLoadingSaveButton }] = useCreateUpdateBookMutation()
+  const { triggerToast } = useToast()
+
   const [itemType, setItemType] = useState<ItemType>('specific')
 
   const [filterData, setFilterData] = useState<CascadingSelectorState>(
@@ -68,7 +73,7 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, isCommonBook }: AddUpdat
         width: 40
       },
       {
-        id: 'stock',
+        id: 'available_quantity',
         label: 'Stock',
         editable: true,
         inputType: 'number',
@@ -88,9 +93,18 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, isCommonBook }: AddUpdat
     const formattedPayload =
       itemType === 'specific' ? generateSpecificBooksPayload(payload, filterData) : generateCommonBooksPayload(payload)
     if (!formattedPayload?.length) return
-    console.log(formattedPayload)
-
-    // TODO: call mutation here
+    createUpdateBook(formattedPayload)
+      .unwrap()
+      .then(res => {
+        if (res) {
+          triggerToast(res, { variant: ToastVariants.SUCCESS })
+        }
+      })
+      .catch((err: any) => {
+        triggerToast(err?.data || 'Something went wrong', {
+          variant: ToastVariants.ERROR
+        })
+      })
   }
 
   const handleItemTypeChange = (type: ItemType) => {
@@ -120,6 +134,7 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, isCommonBook }: AddUpdat
         onSubmit={handleEditSubmit}
         isLoading={isFetchingBooks}
         loadingText='Fetching books...'
+        isSubmitting={isLoadingSaveButton}
       />
     )
   }

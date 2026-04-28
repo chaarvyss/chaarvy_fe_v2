@@ -76,7 +76,7 @@ const CascadingSelectors = ({ onChange, defaultValues }: CascadingSelectorsProps
         value={values.segment}
         isLoading={isSegmentsLoading}
         options={(segmentData ?? []).map(s => ({
-          value: s.program_segment_id,
+          value: s.segment_id,
           label: s.segment_name
         }))}
         onChange={handleSegmentChange}

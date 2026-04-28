@@ -13,7 +13,7 @@ const buildBooksPayload = (
     .map(c => ({
       book_name: c.book_name ?? '',
       price: Number(c.price ?? 0),
-      available_quantity: Number(c.stock ?? 0),
+      available_quantity: Number(c.available_quantity ?? 0),
       status: 1,
       ...base
     }))
@@ -24,7 +24,7 @@ const buildBooksPayload = (
       book_id: u.book_id,
       book_name: u.book_name ?? '',
       price: Number(u.price ?? 0),
-      available_quantity: Number(u.stock ?? 0),
+      available_quantity: Number(u.available_quantity ?? 0),
       status: 1,
       had_change: true,
       ...base
@@ -34,9 +34,9 @@ const buildBooksPayload = (
     .filter(d => d?.book_id)
     .map(d => ({
       book_id: d.book_id,
-      book_name: '',
-      price: 0,
-      available_quantity: 0,
+      book_name: d.book_name,
+      price: d.price,
+      available_quantity: d.available_quantity,
       status: 0,
       ...base
     }))

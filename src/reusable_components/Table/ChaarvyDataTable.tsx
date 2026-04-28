@@ -1,3 +1,4 @@
+import { LoadingButton } from '@mui/lab'
 import { Checkbox, FormControlLabel, TextField, Select, MenuItem, Tooltip } from '@mui/material'
 import { ReactNode, useEffect, useState } from 'react'
 
@@ -53,6 +54,7 @@ export interface ChaarvyDataTableProps<T = any> {
   showColumnToggle?: boolean
   isLoading?: boolean
   loadingText?: string
+  isSubmitting?: boolean
 }
 
 const ChaarvyDataTable = <T extends Record<string, any>>({
@@ -65,7 +67,8 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   hover = true,
   showColumnToggle = true,
   isLoading = false,
-  loadingText
+  loadingText,
+  isSubmitting = false
 }: ChaarvyDataTableProps<T>) => {
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({})
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -395,9 +398,15 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
               Reset
             </ChaarvyButton>
 
-            <ChaarvyButton variant='contained' size='small' onClick={() => onSubmit?.(getDiffPayload())}>
+            <LoadingButton
+              loading={isSubmitting}
+              variant='contained'
+              size='small'
+              onClick={() => onSubmit?.(getDiffPayload())}
+              disabled={!Object.values(getDiffPayload()).find(any => any.length > 0)}
+            >
               Submit
-            </ChaarvyButton>
+            </LoadingButton>
           </ChaarvyFlex>
         </ChaarvyFlex>
       )}

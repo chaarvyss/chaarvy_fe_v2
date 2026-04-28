@@ -86,9 +86,9 @@ const BooksList = () => {
         <IconButton
           onClick={() => {
             setSelectedDetails({
-              program: row.program,
-              segment: row.segment,
-              medium: row.medium
+              program: row.program_id,
+              segment: row.segment_id,
+              medium: row.medium_id
             })
             handleAddBook()
           }}
