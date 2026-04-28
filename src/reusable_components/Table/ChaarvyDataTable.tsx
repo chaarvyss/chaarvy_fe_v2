@@ -1,6 +1,6 @@
 import { LoadingButton } from '@mui/lab'
 import { Checkbox, FormControlLabel, TextField, Select, MenuItem, Tooltip } from '@mui/material'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState, MouseEvent } from 'react'
 
 import {
   Box,
@@ -94,16 +94,16 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
     setOriginalData(data)
     setDeletedRows([])
     setEditingRows({})
+    setHistory([])
+    setFuture([])
   }, [data])
 
-  const pushToHistory = () => {
-    setHistory(prev => [...prev, draftData])
-    setFuture([])
-  }
-
   const handleCellChange = (rowIndex: number, columnId: string, value: any) => {
-    pushToHistory()
     setDraftData(prev => {
+      // Push exact previous state to history before changing
+      setHistory(h => [...h, prev])
+      setFuture([])
+
       const updated = [...prev]
       updated[rowIndex] = {
         ...updated[rowIndex],
@@ -122,6 +122,12 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
       setFuture(f => [...f, draftData])
       setDraftData(last)
 
+      const newlyDeleted = originalData.filter(
+        (origRow, oIndex) =>
+          !last.some((draftRow, dIndex) => getRowKey(draftRow, dIndex) === getRowKey(origRow, oIndex))
+      )
+      setDeletedRows(newlyDeleted)
+
       return prev.slice(0, -1)
     })
   }
@@ -134,6 +140,12 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
       setHistory(h => [...h, draftData])
       setDraftData(next)
 
+      const newlyDeleted = originalData.filter(
+        (origRow, oIndex) =>
+          !next.some((draftRow, dIndex) => getRowKey(draftRow, dIndex) === getRowKey(origRow, oIndex))
+      )
+      setDeletedRows(newlyDeleted)
+
       return prev.slice(0, -1)
     })
   }
@@ -142,35 +154,68 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   const open = Boolean(anchorEl)
 
   const handleAddRow = () => {
-    pushToHistory()
     const emptyRow: any = {}
     columns.forEach(col => {
       emptyRow[col.id] = ''
     })
 
-    setDraftData(prev => [...prev, emptyRow])
-    setEditingRows(prev => ({
-      ...prev,
-      [draftData.length]: true
-    }))
-  }
-
-  const handleDeleteRow = (index: number) => {
-    pushToHistory()
     setDraftData(prev => {
-      const row = prev[index]
+      setHistory(h => [...h, prev])
+      setFuture([])
 
-      const existsInOriginal = originalData.find(o => getRowKey(o, index) === getRowKey(row, index))
+      setEditingRows(prevEditing => ({
+        ...prevEditing,
+        [prev.length]: true
+      }))
 
-      if (existsInOriginal) {
-        setDeletedRows(d => [...d, row])
-      }
-
-      return prev.filter((_, i) => i !== index)
+      return [...prev, emptyRow]
     })
   }
 
-  const toggleRowEdit = (index: number) => {
+  const handleDeleteRow = (e: MouseEvent, index: number) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    setDraftData(prev => {
+      setHistory(h => [...h, prev])
+      setFuture([])
+
+      const nextDraft = prev.filter((_, i) => i !== index)
+
+      // Calculate deleted rows based on the guaranteed latest draft
+      const newlyDeleted = originalData.filter(
+        (origRow, oIndex) =>
+          !nextDraft.some((draftRow, dIndex) => getRowKey(draftRow, dIndex) === getRowKey(origRow, oIndex))
+      )
+      setDeletedRows(newlyDeleted)
+
+      return nextDraft
+    })
+
+    // Shift the editing boolean flags down so they stay with the correct rows
+    setEditingRows(prev => {
+      const nextEditing: Record<number, boolean> = {}
+      Object.keys(prev).forEach(key => {
+        const numKey = parseInt(key)
+        if (numKey < index) nextEditing[numKey] = prev[numKey]
+        if (numKey > index) nextEditing[numKey - 1] = prev[numKey]
+      })
+
+      return nextEditing
+    })
+  }
+
+  const handleReset = () => {
+    setDraftData(originalData)
+    setDeletedRows([])
+    setHistory([])
+    setFuture([])
+    setEditingRows({})
+  }
+
+  const toggleRowEdit = (e: MouseEvent, index: number) => {
+    e.preventDefault()
+    e.stopPropagation()
     setEditingRows(prev => ({
       ...prev,
       [index]: !prev[index]
@@ -180,11 +225,11 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   const isRowChanged = (r1: T, r2: T) => JSON.stringify(r1) !== JSON.stringify(r2)
 
   const isNewRow = (row: T, index: number) => {
-    return !originalData.find(o => getRowKey(o, index) === getRowKey(row, index))
+    return !originalData.find((o, oIdx) => getRowKey(o, oIdx) === getRowKey(row, index))
   }
 
   const isUpdatedRow = (row: T, index: number) => {
-    const original = originalData.find(o => getRowKey(o, index) === getRowKey(row, index))
+    const original = originalData.find((o, oIdx) => getRowKey(o, oIdx) === getRowKey(row, index))
 
     return original ? isRowChanged(row, original) : false
   }
@@ -194,7 +239,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
     const updated: T[] = []
 
     draftData.forEach((row, index) => {
-      const original = originalData.find(o => getRowKey(o, index) === getRowKey(row, index))
+      const original = originalData.find((o, oIdx) => getRowKey(o, oIdx) === getRowKey(row, index))
 
       if (!original) created.push(row)
       else if (isRowChanged(row, original)) updated.push(row)
@@ -207,6 +252,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
 
   const newRowBg = '#c3ffc8'
   const updatedRowBg = '#ffefaa'
+  const deletedRowBg = '#ffebee'
 
   return (
     <Box>
@@ -222,16 +268,23 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
               <Box sx={{ width: 14, height: 14, backgroundColor: updatedRowBg, borderRadius: 1 }} />
               <Typography variant='body2'>Updated Rows</Typography>
             </ChaarvyFlex>
+
+            {deletedRows.length > 0 && (
+              <ChaarvyFlex className={{ alignItems: 'center', gap: 1 }}>
+                <Box sx={{ width: 14, height: 14, backgroundColor: deletedRowBg, borderRadius: 1 }} />
+                <Typography variant='body2'>Pending Deletions ({deletedRows.length})</Typography>
+              </ChaarvyFlex>
+            )}
           </ChaarvyFlex>
 
           <ChaarvyFlex className={{ alignItems: 'end' }}>
             <Tooltip title='Undo' placement='top'>
-              <IconButton onClick={handleUndo} disabled={!history.length}>
+              <IconButton type='button' onClick={handleUndo} disabled={!history.length}>
                 <GetChaarvyIcons iconName='Undo' fontSize='1.25rem' />
               </IconButton>
             </Tooltip>
             <Tooltip title='Redo' placement='top'>
-              <IconButton onClick={handleRedo} disabled={!future.length}>
+              <IconButton type='button' onClick={handleRedo} disabled={!future.length}>
                 <GetChaarvyIcons iconName='Redo' fontSize='1.25rem' />
               </IconButton>
             </Tooltip>
@@ -241,7 +294,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
 
       {showColumnToggle && (
         <Box sx={{ position: 'absolute', top: -5, right: 5 }}>
-          <IconButton onClick={e => setAnchorEl(e.currentTarget)}>
+          <IconButton type='button' onClick={e => setAnchorEl(e.currentTarget)}>
             <GetChaarvyIcons iconName='ViewColumn' />
           </IconButton>
 
@@ -326,7 +379,12 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                   }}
                 >
                   {displayedColumns.map(col => (
-                    <TableCell key={col.id}>
+                    <TableCell
+                      key={col.id}
+                      sx={{
+                        textDecoration: row.status === 0 ? 'line-through' : 'none'
+                      }}
+                    >
                       {isRowEditing && col.editable ? (
                         col.inputType === 'select' ? (
                           <Select
@@ -362,12 +420,16 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                     <TableCell align='right'>
                       <ChaarvyFlex className={{ justifyContent: 'end' }}>
                         <Tooltip title={isRowEditing ? 'Save' : 'Edit'} placement='top'>
-                          <IconButton color={isRowEditing ? 'success' : 'warning'} onClick={() => toggleRowEdit(index)}>
+                          <IconButton
+                            type='button'
+                            color={isRowEditing ? 'success' : 'warning'}
+                            onClick={e => toggleRowEdit(e, index)}
+                          >
                             <GetChaarvyIcons fontSize='1.25rem' iconName={isRowEditing ? 'Check' : 'Pencil'} />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title='Delete' placement='top'>
-                          <IconButton color='error' onClick={() => handleDeleteRow(index)}>
+                          <IconButton type='button' color='error' onClick={e => handleDeleteRow(e, index)}>
                             <GetChaarvyIcons fontSize='1.25rem' iconName='Delete' />
                           </IconButton>
                         </Tooltip>
@@ -389,21 +451,22 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
 
       {editable && (
         <ChaarvyFlex className={{ flexDirection: 'column', alignItems: 'end', mt: 2 }}>
-          <ChaarvyButton variant='text' onClick={handleAddRow}>
+          <ChaarvyButton type='button' variant='text' onClick={handleAddRow}>
             Add New Row
           </ChaarvyButton>
 
           <ChaarvyFlex className={{ gap: 2, mt: 2 }}>
-            <ChaarvyButton variant='outlined' size='small' onClick={() => setDraftData(data)}>
+            <ChaarvyButton type='button' variant='outlined' size='small' onClick={handleReset}>
               Reset
             </ChaarvyButton>
 
             <LoadingButton
+              type='button'
               loading={isSubmitting}
               variant='contained'
               size='small'
               onClick={() => onSubmit?.(getDiffPayload())}
-              disabled={!Object.values(getDiffPayload()).find(any => any.length > 0)}
+              disabled={!Object.values(getDiffPayload()).find((arr: any) => arr.length > 0)}
             >
               Submit
             </LoadingButton>

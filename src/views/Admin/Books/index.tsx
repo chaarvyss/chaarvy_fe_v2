@@ -10,13 +10,15 @@ import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTab
 import { useLazyGetBooksListQuery } from 'src/store/services/listServices'
 import GetChaarvyIcons from 'src/utils/icons'
 
-import AddUpdateBooks from './add_books'
+import AddUpdateBooks, { ItemType } from './add_books'
 
 const BooksList = () => {
   const { openDrawer } = useSideDrawer()
   const [fetchBooks, { data: booksResponse, isLoading }] = useLazyGetBooksListQuery()
   const [filterProps, setFilterProps] = useState<FilterProps>({ limit: 20, offset: 0 })
   const [isAddBooksModalOpen, setIsAddBookModalOpen] = useState<boolean>(false)
+
+  const [selectedItemType, setSelectedItemType] = useState<ItemType>('specific')
 
   const [selectedDetails, setSelectedDetails] = useState<CascadingSelectorState>()
 
@@ -62,7 +64,7 @@ const BooksList = () => {
         <Box>
           <Typography variant='body1'>{row.book_name}</Typography>
           <Typography variant='caption' color='textSecondary'>
-            {row.is_common ? 'Common book' : `${row.program} - ${row.segment} - ${row.medium}`}
+            {row.isCommon ? 'Common book' : `${row.program} - ${row.segment} - ${row.medium}`}
           </Typography>
         </Box>
       )
@@ -85,11 +87,15 @@ const BooksList = () => {
       render: row => (
         <IconButton
           onClick={() => {
-            setSelectedDetails({
-              program: row.program_id,
-              segment: row.segment_id,
-              medium: row.medium_id
-            })
+            if (row?.isCommon == 1) {
+              setSelectedItemType('common')
+            } else {
+              setSelectedDetails({
+                program: row.program_id,
+                segment: row.segment_id,
+                medium: row.medium_id
+              })
+            }
             handleAddBook()
           }}
         >
@@ -101,7 +107,12 @@ const BooksList = () => {
 
   return (
     <>
-      <AddUpdateBooks isOpen={isAddBooksModalOpen} onClose={handleAddBooksModalClose} defaultData={selectedDetails} />
+      <AddUpdateBooks
+        isOpen={isAddBooksModalOpen}
+        onClose={handleAddBooksModalClose}
+        defaultData={selectedDetails}
+        selectedItemType={selectedItemType}
+      />
       <ChaarvyTable
         tableTitleHeaderProps={{
           title: 'Books',

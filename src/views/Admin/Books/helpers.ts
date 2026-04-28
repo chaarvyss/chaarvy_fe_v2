@@ -38,6 +38,7 @@ const buildBooksPayload = (
       price: d.price,
       available_quantity: d.available_quantity,
       status: 0,
+      had_change: true,
       ...base
     }))
 

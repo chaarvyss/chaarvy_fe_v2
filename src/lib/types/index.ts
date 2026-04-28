@@ -18,6 +18,7 @@ export type BooksListData = {
   medium_id: string
   segment_id: string
   price: number
+  status: number
   available_quantity: number
 }
 

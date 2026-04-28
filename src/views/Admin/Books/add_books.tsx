@@ -12,6 +12,7 @@ import ChaarvyDataTable, {
 import { useCreateUpdateBookMutation } from 'src/store/services/adminServices'
 import { useGetBooksListQuery } from 'src/store/services/listServices'
 import ItemTypeForm from 'src/views/Admin/Books/Components/ItemTypeForm'
+import BulkProcessStatusModal, { ProcessStatRow } from 'src/views/common/BulkProcessStatusModal'
 
 import { generateCommonBooksPayload, generateSpecificBooksPayload } from './helpers'
 
@@ -21,14 +22,18 @@ interface AddUpdateBooksProps {
   isOpen: boolean
   onClose: () => void
   defaultData?: CascadingSelectorState
-  isCommonBook?: boolean
+  selectedItemType: ItemType
 }
 
-const AddUpdateBooks = ({ isOpen, onClose, defaultData, isCommonBook }: AddUpdateBooksProps) => {
+const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddUpdateBooksProps) => {
   const [createUpdateBook, { isLoading: isLoadingSaveButton }] = useCreateUpdateBookMutation()
   const { triggerToast } = useToast()
 
-  const [itemType, setItemType] = useState<ItemType>('specific')
+  const [isBulkProcessStatusModalOpen, setIsBulkProcessStatusModalOpen] = useState(false)
+
+  const [processStats, setProcessStats] = useState<ProcessStatRow[]>([])
+
+  const [itemType, setItemType] = useState<ItemType>()
 
   const [filterData, setFilterData] = useState<CascadingSelectorState>(
     defaultData || { program: '', segment: '', medium: '' }
@@ -39,7 +44,7 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, isCommonBook }: AddUpdat
 
   const queryParams = useMemo(() => {
     return itemType === 'specific'
-      ? { program_id: program, segment_id: segment, medium_id: medium }
+      ? { program_id: program, segment_id: segment, medium_id: medium, isCommon: false }
       : { isCommon: true }
   }, [itemType, program, segment, medium])
 
@@ -84,20 +89,47 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, isCommonBook }: AddUpdat
   )
 
   useEffect(() => {
-    if (isCommonBook) {
-      setItemType('common')
-    }
-  }, [isCommonBook])
+    setItemType(selectedItemType)
+  }, [selectedItemType])
 
   const handleEditSubmit = (payload: EditedDataTableOnSubmitPayload) => {
     const formattedPayload =
       itemType === 'specific' ? generateSpecificBooksPayload(payload, filterData) : generateCommonBooksPayload(payload)
+
+    const { created, updated, deleted } = payload
+
+    setProcessStats([
+      { id: 'success_created', label: 'Creating', target: created.length, processed: 0 },
+      { id: 'success_updated', label: 'Updating', target: [...updated, ...deleted].length, processed: 0 },
+      { id: 'skipped', label: 'Skipped', target: 0, processed: 0 },
+      { id: 'failed', label: 'Failed', target: 0, processed: 0 }
+    ])
+
+    setIsBulkProcessStatusModalOpen(true)
+
     if (!formattedPayload?.length) return
     createUpdateBook(formattedPayload)
       .unwrap()
       .then(res => {
         if (res) {
-          triggerToast(res, { variant: ToastVariants.SUCCESS })
+          triggerToast('Process completed', { variant: ToastVariants.SUCCESS })
+
+          setProcessStats(prevStats =>
+            prevStats.map(stat => {
+              const responseData = res[stat.id]
+
+              const processedCount = Array.isArray(responseData)
+                ? responseData.length
+                : typeof responseData === 'number'
+                  ? responseData
+                  : 0
+
+              return {
+                ...stat,
+                processed: processedCount
+              }
+            })
+          )
         }
       })
       .catch((err: any) => {
@@ -129,7 +161,7 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, isCommonBook }: AddUpdat
         showColumnToggle={false}
         editable
         columns={columns}
-        data={tableData}
+        data={isFetchingBooks ? [] : tableData}
         getRowKey={(row, index) => row.book_id || `temp-${index}`}
         onSubmit={handleEditSubmit}
         isLoading={isFetchingBooks}
@@ -144,14 +176,24 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, isCommonBook }: AddUpdat
       <Box sx={{ gap: 3 }}>
         <Typography variant='h6'>Update Books and Stationary Details</Typography>
 
-        <ChaarvyFlex className={{ justifyContent: 'space-between' }}>
-          <ItemTypeForm defaultValue={itemType} onValueChange={handleItemTypeChange} />
+        {itemType && (
+          <ChaarvyFlex className={{ justifyContent: 'space-between' }}>
+            <ItemTypeForm defaultValue={itemType} onValueChange={handleItemTypeChange} />
 
-          {itemType === 'specific' && (
-            <CascadingSelectors onChange={handleCascadingChange} defaultValues={defaultData} />
-          )}
-        </ChaarvyFlex>
-
+            {itemType === 'specific' && (
+              <CascadingSelectors onChange={handleCascadingChange} defaultValues={defaultData} />
+            )}
+          </ChaarvyFlex>
+        )}
+        <BulkProcessStatusModal
+          isOpen={isBulkProcessStatusModalOpen}
+          onClose={() => {
+            setIsBulkProcessStatusModalOpen(false)
+            setProcessStats([])
+          }}
+          isProcessing={isLoadingSaveButton}
+          stats={processStats}
+        />
         {renderTable()}
       </Box>
     </ChaarvyModal>
