@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.5.0...v1.5.1) (2026-04-29)
+
+
+### Bug Fixes
+
+* **books:** AC-35 Books section new updates -- under process ([#37](https://github.com/chaarvyss/chaarvy_fe_v2/issues/37)) ([62ea14f](https://github.com/chaarvyss/chaarvy_fe_v2/commit/62ea14f12a4f158444addf6736582f98fa36ba9a))
+
 # [1.5.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.4.1...v1.5.0) (2026-04-24)
 
 
