@@ -65,7 +65,7 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
   const [isRemoveBookModalOpen, setIsRemoveBookModalOpen] = useState<boolean>(false)
 
   const { data: segmentsList, isFetching: isSegmentsFetching } = useGetSegmentsListQuery()
-  const { data: booksList, isFetching: isBooksFetching } = useGetBooksListQuery()
+  const { data: booksList, isFetching: isBooksFetching } = useGetBooksListQuery({})
   const { data: programsList, isFetching: isProgramsFetching } = useGetProgramsListQuery(true)
   const [fetchProgramMediums, { data: programMediums, isFetching: isProgramMediumsFetching }] =
     useLazyGetProgramMediumsListQuery()
@@ -280,7 +280,7 @@ const ProgramBooksModal = ({ selectedProgram, isOpen, onClose }: BooksModalProps
                 label='Segment'
                 onChange={handleChange('book_id')}
               >
-                {booksList?.map(each => (
+                {(booksList?.booksDetails ?? []).map(each => (
                   <MenuItem value={each.book_id}>{each.book_name}</MenuItem>
                 ))}
               </Select>

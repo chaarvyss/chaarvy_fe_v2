@@ -5,21 +5,21 @@ import React, { ReactNode } from 'react'
 
 import ChaarvyFlex from './chaarvyFlex'
 
-type ColorKey = 'primary' | 'success' | 'error' | 'info' | 'secondary' | 'lightblue'
+type ColorKey = 'primary' | 'success' | 'error' | 'info' | 'secondary'
 
-export interface ChaarvyButtonProps extends Omit<ButtonProps, 'color'> {
+export interface ChaarvyButtonProps extends ButtonProps {
   color?: ColorKey
   fillType?: 'solid' | 'gradient'
   leftIcon?: ReactNode
   rightIcon?: ReactNode
   label?: ReactNode
   hoverEffect?: Record<string, any>
-  variant?: 'text' | 'outlined' | 'contained'
 }
 
 const ChaarvyButton = ({
   color = 'primary',
   fillType = 'gradient',
+  variant = 'contained',
   sx,
   leftIcon,
   rightIcon,
@@ -35,19 +35,39 @@ const ChaarvyButton = ({
     const dark = palette.dark ?? main
 
     const base: any = {
-      color: theme.palette.getContrastText(main),
       textTransform: 'none'
     }
 
-    if (fillType === 'solid') {
-      base.backgroundColor = main
-      base['&:hover'] = {
-        backgroundColor: dark
+    // ✅ Handle variant properly
+    if (variant === 'contained') {
+      base.color = theme.palette.getContrastText(main)
+
+      if (fillType === 'solid') {
+        base.backgroundColor = main
+        base['&:hover'] = { backgroundColor: dark }
+      } else {
+        base.background = `linear-gradient(to bottom, ${light}, ${dark})`
+        base['&:hover'] = {
+          background: `linear-gradient(to bottom, ${main}, ${dark})`
+        }
       }
-    } else {
-      base.background = `linear-gradient(to bottom, ${light}, ${dark})`
+    }
+
+    if (variant === 'outlined') {
+      base.borderColor = main
+      base.color = main
+
       base['&:hover'] = {
-        background: `linear-gradient(to bottom, ${main}, ${dark})`
+        borderColor: dark,
+        backgroundColor: `${main}10`
+      }
+    }
+
+    if (variant === 'text') {
+      base.color = main
+
+      base['&:hover'] = {
+        backgroundColor: `${main}10`
       }
     }
 
@@ -61,7 +81,12 @@ const ChaarvyButton = ({
 
   return (
     <Tooltip title={typeof label === 'string' ? label : ''} placement='top'>
-      <Button {...props} color='inherit' sx={mergedSx}>
+      <Button
+        {...props}
+        variant={variant}
+        color={color ?? 'primary'} // fallback if custom
+        sx={mergedSx}
+      >
         <ChaarvyFlex className={{ gap: 2 }}>
           {leftIcon && <Box>{leftIcon}</Box>}
           {(label || children) && <Box>{label ?? children}</Box>}

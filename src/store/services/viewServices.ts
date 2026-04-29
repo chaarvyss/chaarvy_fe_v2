@@ -9,6 +9,7 @@ import { CacheTag } from './cacheTag'
 interface ProgramSegment {
   segment_name: string
   program_segment_id: string
+  segment_id: string
 }
 
 export interface CollegeDetailResponse {

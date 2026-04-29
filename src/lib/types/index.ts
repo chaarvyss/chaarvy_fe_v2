@@ -1,16 +1,39 @@
 import { ReactElement } from 'react'
 
+import { AdmissionCounts } from 'src/store/services/admisissionsService'
+
 export type AddOnCourse = {
   addon_course_id: string
   addon_course_name: string
   status: number
 }
 
-export type BooksTypesResponse = {
+export type BooksListData = {
   book_id: string
   book_name: string
+  program: string
+  medium: string
+  segment: string
+  program_id: string
+  medium_id: string
+  segment_id: string
   price: number
+  status: number
   available_quantity: number
+}
+
+export type BooksListResponse = {
+  booksDetails: BooksListData[]
+  counts: AdmissionCounts
+}
+
+export type BooksListRequest = {
+  program_id?: string
+  medium_id?: string
+  segment_id?: string
+  isCommon?: boolean
+  offset?: number
+  limit?: number
 }
 
 export type Community = { community_id: string; community_name: string }

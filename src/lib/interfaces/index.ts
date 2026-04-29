@@ -40,6 +40,7 @@ export interface FilterProps {
   startDate?: string
   endDate?: string
   program?: string
+  segment?: string
   medium?: string
   section?: string
   role?: string
@@ -123,8 +124,8 @@ export interface PaymentsListResponse {
 }
 
 export interface Section {
-  section_id?: string
-  section_name?: string
+  section_id: string
+  section_name: string
 }
 
 export interface UserPermissionRequest {
