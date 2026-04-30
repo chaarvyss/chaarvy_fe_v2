@@ -10,10 +10,10 @@ import Tag from 'src/reusable_components/tag'
 import { useUpdateProgramStatusMutation } from 'src/store/services/adminServices'
 import { useLazyGetProgramsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
+import ProgramBooksModalV2 from 'src/views/Admin/Programs/Modals/ProgramBooks'
 
 import CreateOrUpdateProgramModal from './createUpdateProgram'
 import ProgramAddonCourseModal from './program_addon_courses_modal'
-import ProgramBooksModal from './program_books_modal'
 import ProgramFeesModal from './program_fees_modal'
 import ProgramViewModal from './program_view_modal'
 
@@ -143,6 +143,8 @@ const Programs = () => {
       })
   }
 
+  console.log('selectedProgram', selectedProgram)
+
   return (
     <>
       <TableTilteHeader title='Programs' buttonTitle='Create Program' onButtonClick={handleCreateProgram} />
@@ -184,11 +186,12 @@ const Programs = () => {
         isOpen={showModal.create_program_modal}
         onClose={handleProgramModalClose}
       />
+
       {showModal.books_details_list_modal && (
-        <ProgramBooksModal
-          selectedProgram={selectedProgram}
+        <ProgramBooksModalV2
           isOpen={showModal.books_details_list_modal}
           onClose={handleBooksModalClose}
+          programId={selectedProgram?.program_id}
         />
       )}
       {showModal.fees_details_list_modal && (

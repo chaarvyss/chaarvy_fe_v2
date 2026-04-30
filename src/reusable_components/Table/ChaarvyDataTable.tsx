@@ -29,6 +29,7 @@ export interface ChaarvyTableColumn<T = any> {
   defaultHidden?: boolean
   editable?: boolean
   inputType?: 'text' | 'number' | 'select'
+  uniqueOptionsOnly?: boolean
   options?: { label: string; value: any }[]
   render?: (row: T, index: number) => ReactNode
   headerSx?: Record<string, any>
@@ -45,10 +46,8 @@ export interface ChaarvyDataTableProps<T = any> {
   columns: ChaarvyTableColumn<T>[]
   data: T[]
   getRowKey: (row: T, index: number) => string | number
-
   editable?: boolean
   onSubmit?: (payload: EditedDataTableOnSubmitPayload<T>) => void
-
   emptyMessage?: string
   hover?: boolean
   showColumnToggle?: boolean
@@ -76,7 +75,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   const [draftData, setDraftData] = useState<T[]>(data)
   const [originalData, setOriginalData] = useState<T[]>(data)
   const [deletedRows, setDeletedRows] = useState<T[]>([])
-  const [editingRows, setEditingRows] = useState<Record<number, boolean>>({})
+  const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null)
 
   const [history, setHistory] = useState<T[][]>([])
   const [future, setFuture] = useState<T[][]>([])
@@ -93,7 +92,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
     setDraftData(data)
     setOriginalData(data)
     setDeletedRows([])
-    setEditingRows({})
+    setEditingRowIndex(null)
     setHistory([])
     setFuture([])
   }, [data])
@@ -163,10 +162,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
       setHistory(h => [...h, prev])
       setFuture([])
 
-      setEditingRows(prevEditing => ({
-        ...prevEditing,
-        [prev.length]: true
-      }))
+      setEditingRowIndex(prev.length)
 
       return [...prev, emptyRow]
     })
@@ -193,15 +189,11 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
     })
 
     // Shift the editing boolean flags down so they stay with the correct rows
-    setEditingRows(prev => {
-      const nextEditing: Record<number, boolean> = {}
-      Object.keys(prev).forEach(key => {
-        const numKey = parseInt(key)
-        if (numKey < index) nextEditing[numKey] = prev[numKey]
-        if (numKey > index) nextEditing[numKey - 1] = prev[numKey]
-      })
+    setEditingRowIndex(prev => {
+      if (prev === index) return null
+      if (prev !== null && prev > index) return prev - 1
 
-      return nextEditing
+      return prev
     })
   }
 
@@ -210,16 +202,14 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
     setDeletedRows([])
     setHistory([])
     setFuture([])
-    setEditingRows({})
+    setEditingRowIndex(null)
   }
 
   const toggleRowEdit = (e: MouseEvent, index: number) => {
     e.preventDefault()
     e.stopPropagation()
-    setEditingRows(prev => ({
-      ...prev,
-      [index]: !prev[index]
-    }))
+
+    setEditingRowIndex(prev => (prev === index ? null : index))
   }
 
   const isRowChanged = (r1: T, r2: T) => JSON.stringify(r1) !== JSON.stringify(r2)
@@ -254,8 +244,35 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   const updatedRowBg = '#ffefaa'
   const deletedRowBg = '#ffebee'
 
+  const getIsEditableCell = (row: T, col: ChaarvyTableColumn, isRowEditing: boolean) => {
+    return isRowEditing && col.editable && (col.inputType !== 'select' || row.restrictEdit !== true)
+  }
+
+  const getAvailableOptions = (col: ChaarvyTableColumn, rowIndex: number) => {
+    if (!col.uniqueOptionsOnly) return col.options || []
+    const usedValues = draftData.filter((_, i) => i !== rowIndex).map(row => row[col.id])
+
+    return (col.options || []).filter(opt => {
+      if (opt.value === draftData[rowIndex][col.id]) return true
+
+      return !usedValues.includes(opt.value)
+    })
+  }
+
+  const canAddNewRow = () => {
+    return columns.every(col => {
+      if (col.inputType !== 'select' || !col.uniqueOptionsOnly) return true
+
+      const usedValues = draftData.map(row => row[col.id])
+
+      const availableOptions = (col.options || []).filter(opt => !usedValues.includes(opt.value))
+
+      return availableOptions.length > 0
+    })
+  }
+
   return (
-    <Box>
+    <Box height='100%' position='relative'>
       {editable && (
         <ChaarvyFlex className={{ justifyContent: 'space-between', mb: 5 }}>
           <ChaarvyFlex className={{ alignItems: 'end', gap: 3 }}>
@@ -293,10 +310,12 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
       )}
 
       {showColumnToggle && (
-        <Box sx={{ position: 'absolute', top: -5, right: 5 }}>
-          <IconButton type='button' onClick={e => setAnchorEl(e.currentTarget)}>
-            <GetChaarvyIcons iconName='ViewColumn' />
-          </IconButton>
+        <Box sx={{ position: 'absolute', top: 5, zIndex: 5, right: 5 }}>
+          <Tooltip title='Show/Hide Columns' placement='top'>
+            <IconButton type='button' onClick={e => setAnchorEl(e.currentTarget)}>
+              <GetChaarvyIcons iconName='ViewColumn' color='primary' />
+            </IconButton>
+          </Tooltip>
 
           <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
             {columns.map(column => (
@@ -323,7 +342,6 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
 
       <TableContainer
         sx={{
-          maxHeight: 400,
           overflow: 'auto',
           border: '1px solid #eee',
           borderRadius: 1
@@ -364,7 +382,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
 
           <TableBody>
             {draftData.map((row, index) => {
-              const isRowEditing = editingRows[index]
+              const isRowEditing = editingRowIndex === index
 
               return (
                 <TableRow
@@ -385,7 +403,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                         textDecoration: row.status === 0 ? 'line-through' : 'none'
                       }}
                     >
-                      {isRowEditing && col.editable ? (
+                      {getIsEditableCell(row, col, isRowEditing) ? (
                         col.inputType === 'select' ? (
                           <Select
                             value={row[col.id]}
@@ -393,7 +411,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                             size='small'
                             fullWidth
                           >
-                            {col.options?.map(opt => (
+                            {getAvailableOptions(col, index).map(opt => (
                               <MenuItem key={opt.value} value={opt.value}>
                                 {opt.label}
                               </MenuItem>
@@ -410,6 +428,8 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                         )
                       ) : col.render ? (
                         col.render(row, index)
+                      ) : col.inputType === 'select' ? (
+                        (col.options?.find(opt => opt.value === row[col.id])?.label ?? '')
                       ) : (
                         row[col.id]
                       )}
@@ -451,9 +471,11 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
 
       {editable && (
         <ChaarvyFlex className={{ flexDirection: 'column', alignItems: 'end', mt: 2 }}>
-          <ChaarvyButton type='button' variant='text' onClick={handleAddRow}>
-            Add New Row
-          </ChaarvyButton>
+          {canAddNewRow() && (
+            <ChaarvyButton type='button' variant='text' onClick={handleAddRow}>
+              Add New Row
+            </ChaarvyButton>
+          )}
 
           <ChaarvyFlex className={{ gap: 2, mt: 2 }}>
             <ChaarvyButton type='button' variant='outlined' size='small' onClick={handleReset}>

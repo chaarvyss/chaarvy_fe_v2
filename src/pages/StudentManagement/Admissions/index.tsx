@@ -127,7 +127,7 @@ const Admissions = () => {
     },
     {
       id: 'actions',
-      label: '',
+      label: 'Actions',
       width: '10px',
       hideable: false, // Keep actions always visible
       render: row => <DropDownMenu dropDownMenuOptions={getKebabOptions(row.application_id)} />
