@@ -1,28 +1,23 @@
 import React, { useEffect, useState } from 'react'
 
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Card, Typography } from '@muiElements'
+import { Typography } from '@muiElements'
 import { useToast, ToastVariants } from 'src/@core/context/toastContext'
-import { TableHeaders } from 'src/lib/interfaces'
+import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import { Program } from 'src/lib/types'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
-import TableTilteHeader from 'src/reusable_components/Table/TableTilteHeader'
+import OverlaySpinner from 'src/reusable_components/overlaySpinner'
+import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
 import Tag from 'src/reusable_components/tag'
 import { useUpdateProgramStatusMutation } from 'src/store/services/adminServices'
 import { useLazyGetProgramsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
+import GetChaarvyIcons from 'src/utils/icons'
 import ProgramBooksModalV2 from 'src/views/Admin/Programs/Modals/ProgramBooks'
 
 import CreateOrUpdateProgramModal from './createUpdateProgram'
 import ProgramAddonCourseModal from './program_addon_courses_modal'
 import ProgramFeesModal from './program_fees_modal'
 import ProgramViewModal from './program_view_modal'
-
-const headers: TableHeaders[] = [
-  { label: 's#' },
-  { label: 'Program Name' },
-  { label: 'Status' },
-  { label: 'Actions', width: '100px' }
-]
 
 interface ProgramModals {
   create_program_modal: boolean
@@ -45,7 +40,7 @@ const Programs = () => {
 
   const [fetchProgramsList, { data: programsListData, isFetching: isFetchingProgramsList }] =
     useLazyGetProgramsListQuery()
-  const [updateProgramStatus] = useUpdateProgramStatusMutation()
+  const [updateProgramStatus, { isLoading: isUpdatingStatus }] = useUpdateProgramStatusMutation()
 
   const [fetchProgramSegment] = useLazyGetProgramSegmentDetailsQuery()
 
@@ -144,42 +139,52 @@ const Programs = () => {
       })
   }
 
+  const columns: ChaarvyTableColumn[] = [
+    {
+      id: 's.no',
+      label: '#',
+      render: (row, index) => <Typography variant='body1'>{index + 1}</Typography>
+    },
+    {
+      id: 'program_name',
+      label: 'Program Name'
+
+      // hideable: true
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      render: row => <Tag status={row?.status} onClick={() => handleUpdateStatus(row.program_id)} />
+    },
+    {
+      id: 'actions',
+      label: 'Actions',
+      width: '10px',
+      render: row => <DropDownMenu dropDownMenuOptions={getKebabOptions(row)} />
+    }
+  ]
+
+  const isLoading = isFetchingProgramsList || isUpdatingStatus
+
   return (
     <>
-      <TableTilteHeader title='Programs' buttonTitle='Create Program' onButtonClick={handleCreateProgram} />
-      <Card>
-        {(programsListData ?? []).length > 0 ? (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  {headers.map(each => (
-                    <TableCell style={each.width ? { width: each.width } : {}}>{each.label}</TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {(programsListData ?? []).map((eachProgram: Program, index) => (
-                  <TableRow>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>{eachProgram?.program_name}</TableCell>
-                    <TableCell>
-                      <Tag status={eachProgram?.status} onClick={() => handleUpdateStatus(eachProgram.program_id)} />
-                    </TableCell>
-                    <TableCell>
-                      <DropDownMenu dropDownMenuOptions={getKebabOptions(eachProgram)} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        ) : (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Typography>No Programs Available</Typography>
-          </Box>
-        )}
-      </Card>
+      {isLoading && <OverlaySpinner />}
+      <ChaarvyTable
+        tableTitleHeaderProps={{
+          title: 'Programs',
+          buttonTitle: 'Create Program',
+          onButtonClick: handleCreateProgram,
+          icon: <GetChaarvyIcons iconName='FilePlus' />
+        }}
+        tableDataProps={{
+          columns,
+          data: programsListData ?? [],
+          getRowKey: row => row.program_id,
+          emptyMessage: 'No Programs available',
+          isLoading: isFetchingProgramsList
+        }}
+      />
+
       <CreateOrUpdateProgramModal
         selectedProgram={selectedProgram}
         isOpen={showModal.create_program_modal}

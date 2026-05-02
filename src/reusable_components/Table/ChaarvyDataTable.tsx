@@ -283,6 +283,8 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
     })
   }
 
+  const hidebleColumns = columns.filter(col => col.hideable)
+
   return (
     <Box height='100%' position='relative'>
       {editable && (
@@ -329,12 +331,12 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
         <Box sx={{ position: 'absolute', top: 5, zIndex: 5, right: 5 }}>
           <Tooltip title='Show/Hide Columns' placement='top'>
             <IconButton type='button' onClick={e => setAnchorEl(e.currentTarget)}>
-              <GetChaarvyIcons iconName='ViewColumn' color='primary' />
+              {hidebleColumns.length > 0 && <GetChaarvyIcons iconName='ViewColumn' color='primary' />}
             </IconButton>
           </Tooltip>
 
           <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
-            {columns.map(column => (
+            {hidebleColumns.map(column => (
               <MuiMenuItem key={column.id}>
                 <FormControlLabel
                   control={
