@@ -1,11 +1,11 @@
 import { urlConstants } from 'src/constants/urlConstants'
 import {
   ProgramAddonCourseResponse,
-  ProgramBookRequest,
-  ProgramBooksDetails,
   ProgramSecondLanguagesResponse,
-  ProgramSectionResponse
+  ProgramSectionResponse,
+  ProgramSegmentMediumBook
 } from 'src/lib/types'
+import { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
 
 import { HttpRequestMethods } from '..'
 
@@ -22,6 +22,13 @@ type ProgramSectionRequest = {
   sections: Array<string>
 }
 
+export type CreateProgramBookRequest = CascadingSelectorState & {
+  program_book_id?: string
+  book_id: string
+  quantity: number
+  status: number
+}
+
 const programServicesApi = api.injectEndpoints({
   endpoints: build => ({
     getProgramAddonList: build.query<ProgramAddonCourseResponse[], string>({
@@ -34,12 +41,12 @@ const programServicesApi = api.injectEndpoints({
         }
       }
     }),
-    getProgramBooksList: build.query<ProgramBooksDetails, ProgramBookRequest>({
+    getPrgMedSegBooksList: build.query<ProgramSegmentMediumBook[], CascadingSelectorState>({
       providesTags: [CacheTag.ListProgramBooks],
       query: params => {
         return {
           method: HttpRequestMethods.GET,
-          url: urlConstants.program.programBooks,
+          url: urlConstants.program.programSegmentMediumBooks,
           params
         }
       }
@@ -101,13 +108,24 @@ const programServicesApi = api.injectEndpoints({
           body: { ...body }
         }
       }
+    }),
+
+    createUpdateProgramBook: build.mutation<string, CreateProgramBookRequest[]>({
+      invalidatesTags: [CacheTag.ListProgramBooks],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.program.createUpdateProgramBook,
+          body
+        }
+      }
     })
   })
 })
 
 export const {
   useLazyGetProgramAddonListQuery,
-  useLazyGetProgramBooksListQuery,
+  useLazyGetPrgMedSegBooksListQuery,
   useLazyGetProgramSecondLanguagesListQuery,
   useUpdateProgramSecondLanguagesListMutation,
   useLazyGetProgramMediumsListQuery,
@@ -115,5 +133,6 @@ export const {
   useUpdateProgramMediumsMutation,
   useGetProgramSectionListQuery,
   useLazyGetProgramSectionListQuery,
-  useUpdateProgramSectionMutation
+  useUpdateProgramSectionMutation,
+  useCreateUpdateProgramBookMutation
 } = programServicesApi

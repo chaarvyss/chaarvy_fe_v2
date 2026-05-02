@@ -48,7 +48,8 @@ export const urlConstants = {
     roles: `${interRoutePrefix.list}/roles`,
     role_permissions: `${interRoutePrefix.list}/role_permissions`,
     studentPaymentsList: `${interRoutePrefix.list}/student-payments`,
-    sectionsList: `${interRoutePrefix.list}/sections`
+    sectionsList: `${interRoutePrefix.list}/sections`,
+    programRelatedBooksOptions: `${interRoutePrefix.list}/program-suited-books-options`
   },
   admin: {
     createUpdateUser: `${interRoutePrefix.admin}/create-update-user`,
@@ -64,7 +65,6 @@ export const urlConstants = {
       language: `${interRoutePrefix.admin}/add-language`,
       program: `${interRoutePrefix.admin}/add-program`,
       programAddon: `${interRoutePrefix.admin}/add-program-addon-course`,
-      programBook: `${interRoutePrefix.admin}/add-program-book`,
       programSegment: `${interRoutePrefix.admin}/add-program-segment`,
       createUpdateAddress: `${interRoutePrefix.admin}/create-update-address`
     },
@@ -80,7 +80,6 @@ export const urlConstants = {
       language: `${interRoutePrefix.admin}/update-language`,
       program: `${interRoutePrefix.admin}/update-program`,
       programAddon: `${interRoutePrefix.admin}/update-program-addon-course`,
-      programBook: `${interRoutePrefix.admin}/update-program-book`,
       programStatus: `${interRoutePrefix.admin}/update-program-status`,
       programSegment: `${interRoutePrefix.admin}/update-program-segment`,
       collegeProfile: `${interRoutePrefix.admin}/update-mydetails`,
@@ -123,13 +122,14 @@ export const urlConstants = {
   },
   program: {
     programAddon: `${interRoutePrefix.program}/program-addon-course`,
-    programBooks: `${interRoutePrefix.program}/program-book-detail`,
+    programSegmentMediumBooks: `${interRoutePrefix.program}/program-segment-medium-books`,
     getProgramSecondLanguages: `${interRoutePrefix.program}/program-second-language`,
     getProgramMediums: `${interRoutePrefix.program}/program-mediums`,
     getProgramSections: `${interRoutePrefix.program}/program-sections`,
     updateProgramSecondLanguages: `${interRoutePrefix.program}/update-program-second-language`,
     updateProgramMediums: `${interRoutePrefix.program}/update-program-mediums`,
-    updateProgramSections: `${interRoutePrefix.program}/update-program-sections`
+    updateProgramSections: `${interRoutePrefix.program}/update-program-sections`,
+    createUpdateProgramBook: `${interRoutePrefix.program}/create-update-program-book`
   },
   view: {
     programSegments: `${interRoutePrefix.view}/program-segment`,

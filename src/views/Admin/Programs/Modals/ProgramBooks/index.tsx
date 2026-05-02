@@ -1,10 +1,21 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { Typography } from '@muiElements'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import CascadingSelectors, { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import ChaarvyDataTable, { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
+import ChaarvyDataTable, {
+  ChaarvyTableColumn,
+  EditedDataTableOnSubmitPayload
+} from 'src/reusable_components/Table/ChaarvyDataTable'
+import { useLazyGetProgramRelatedBooksOptionsQuery } from 'src/store/services/listServices'
+import {
+  CreateProgramBookRequest,
+  useCreateUpdateProgramBookMutation,
+  useLazyGetPrgMedSegBooksListQuery
+} from 'src/store/services/programServices'
+import BulkProcessStatusModal, { ProcessStatRow } from 'src/views/common/BulkProcessStatusModal'
 
 interface ProgramBooksModalProps {
   isOpen: boolean
@@ -13,13 +24,44 @@ interface ProgramBooksModalProps {
 }
 
 const ProgramBooksModalV2 = ({ isOpen = true, onClose, programId }: ProgramBooksModalProps) => {
+  const { triggerToast } = useToast()
+  const [isBulkProcessStatusModalOpen, setIsBulkProcessStatusModalOpen] = useState(false)
   const [filterData, setFilterData] = useState<CascadingSelectorState>({ program: programId, segment: '', medium: '' })
+  const [processStats, setProcessStats] = useState<ProcessStatRow[]>([])
+
+  const isFiltersSet = useMemo(() => {
+    return Object.values(filterData).every(value => value !== '' && value !== null && value !== undefined)
+  }, [filterData])
+
+  const [fetchProgramSuitedBooks, { data: programSuitedBooks }] = useLazyGetProgramRelatedBooksOptionsQuery()
+  const [fetchProgramBooks, { data: programBooksData, isFetching: isProgramBooksLoading }] =
+    useLazyGetPrgMedSegBooksListQuery()
+
+  const [createUpdateProgramBook, { isLoading: isUpdatingProgramBooksData }] = useCreateUpdateProgramBookMutation()
 
   const handleCascadingChange = (values: any) => {
     setFilterData(values)
-    if (Object.values(values).find(value => value === '')) return
-    alert('fetch program books with values: ' + JSON.stringify(values))
+
+    const hasEmpty = Object.values(values).some(value => value === '' || value === null || value === undefined)
+
+    if (hasEmpty) {
+      return
+    }
+    fetchProgramBooks(values)
+    fetchProgramSuitedBooks(values)
   }
+
+  useEffect(() => {
+    if (isFiltersSet) {
+      fetchProgramBooks(filterData)
+      fetchProgramSuitedBooks(filterData)
+    }
+  }, [filterData])
+
+  const booksList = useMemo(
+    () => (programBooksData ?? []).map(each => ({ ...each, status: each.status })),
+    [programBooksData]
+  )
 
   const columns: ChaarvyTableColumn[] = useMemo(
     () => [
@@ -35,10 +77,7 @@ const ProgramBooksModalV2 = ({ isOpen = true, onClose, programId }: ProgramBooks
         editable: true,
         inputType: 'select',
         uniqueOptionsOnly: true,
-        options: [
-          { label: 'Book 1', value: 'book_1' },
-          { label: 'Book 2', value: 'book_2' }
-        ],
+        options: (programSuitedBooks ?? []).map(book => ({ value: book.book_id, label: book.book_name })),
         width: 250
       },
       {
@@ -49,15 +88,89 @@ const ProgramBooksModalV2 = ({ isOpen = true, onClose, programId }: ProgramBooks
         width: 40
       }
     ],
-    []
+    [programSuitedBooks]
   )
 
-  const handleSubmitClick = (data: any) => {
-    console.log('Submitted Data:', data)
+  const handleSubmitClick = (data: EditedDataTableOnSubmitPayload) => {
+    const { created, updated, deleted } = data
+
+    const payload: CreateProgramBookRequest[] = [
+      ...created
+        .filter(c => c && !Object.values(c).some(v => v === undefined))
+        .map(item => ({
+          ...filterData,
+          ...item,
+          status: 1
+        })),
+
+      ...updated
+        .filter(u => u?.program_book_id)
+        .map(item => ({
+          ...filterData,
+          ...item,
+          status: 1
+        })),
+
+      ...deleted
+        .filter(d => d?.program_book_id)
+        .map(item => ({
+          ...filterData,
+          ...item,
+          quantity: 0,
+          status: 0
+        }))
+    ]
+
+    setProcessStats([
+      { id: 'success_created', label: 'Creating', target: created.length, processed: 0 },
+      { id: 'success_updated', label: 'Updating', target: [...updated, ...deleted].length, processed: 0 },
+      { id: 'skipped', label: 'Skipped', target: 0, processed: 0 },
+      { id: 'failed', label: 'Failed', target: 0, processed: 0 }
+    ])
+
+    setIsBulkProcessStatusModalOpen(true)
+    createUpdateProgramBook(payload)
+      .unwrap()
+      .then(res => {
+        triggerToast('Process completed', { variant: ToastVariants.SUCCESS })
+
+        setProcessStats(prevStats =>
+          prevStats.map(stat => {
+            const responseData = res[stat.id]
+
+            const processedCount = Array.isArray(responseData)
+              ? responseData.length
+              : typeof responseData === 'number'
+                ? responseData
+                : 0
+
+            return {
+              ...stat,
+              processed: processedCount
+            }
+          })
+        )
+      })
   }
 
+  const defaultEntryData = useMemo(
+    () =>
+      programSuitedBooks?.map(book => ({
+        book_id: book.book_id,
+        quantity: '1',
+        status: '1'
+      })),
+    [programSuitedBooks]
+  )
+
   return (
-    <ChaarvyModal key={programId} isOpen={isOpen} onClose={onClose} title='Program Books' modalSize='col-12 col-md-6'>
+    <ChaarvyModal
+      key={programId}
+      isOpen={isOpen}
+      onClose={onClose}
+      title='Program Books'
+      modalSize='col-12 col-md-8 col-xl-6'
+    >
       <>
         <ChaarvyFlex className={{ justifyContent: 'end' }}>
           <CascadingSelectors onChange={handleCascadingChange} defaultValues={filterData} />
@@ -66,20 +179,28 @@ const ProgramBooksModalV2 = ({ isOpen = true, onClose, programId }: ProgramBooks
           showColumnToggle={false}
           editable
           columns={columns}
-          data={[
-            {
-              program_book_id: 'prg_book_1',
-              book_id: 'book_1',
-              quantity: 10,
-              status: 0, // for deleted
-              restrictEdit: true
-            }
-          ]}
+          data={isProgramBooksLoading ? [] : booksList}
+          defaultEntryData={defaultEntryData}
           getRowKey={(row, index) => row.program_book_id || `temp-${index}`}
           onSubmit={handleSubmitClick}
-          isLoading={false}
+          isLoading={isProgramBooksLoading}
           loadingText='Fetching books...'
-          isSubmitting={false}
+          isSubmitting={isUpdatingProgramBooksData}
+          emptyMessage={
+            isFiltersSet
+              ? 'No books found for the selected Program, Segment and Medium.'
+              : 'Please select Program, Segment and Medium to view the books.'
+          }
+          showDefaultEntryButton={Boolean(programBooksData && !isProgramBooksLoading && programBooksData?.length === 0)}
+        />
+        <BulkProcessStatusModal
+          isOpen={isBulkProcessStatusModalOpen}
+          onClose={() => {
+            setIsBulkProcessStatusModalOpen(false)
+            setProcessStats([])
+          }}
+          isProcessing={isUpdatingProgramBooksData}
+          stats={processStats}
         />
       </>
     </ChaarvyModal>

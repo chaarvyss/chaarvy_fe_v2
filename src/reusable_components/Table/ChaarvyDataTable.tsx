@@ -54,6 +54,8 @@ export interface ChaarvyDataTableProps<T = any> {
   isLoading?: boolean
   loadingText?: string
   isSubmitting?: boolean
+  showDefaultEntryButton?: boolean
+  defaultEntryData?: T[]
 }
 
 const ChaarvyDataTable = <T extends Record<string, any>>({
@@ -67,7 +69,9 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   showColumnToggle = true,
   isLoading = false,
   loadingText,
-  isSubmitting = false
+  isSubmitting = false,
+  showDefaultEntryButton = false,
+  defaultEntryData
 }: ChaarvyDataTableProps<T>) => {
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({})
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -79,6 +83,8 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
 
   const [history, setHistory] = useState<T[][]>([])
   const [future, setFuture] = useState<T[][]>([])
+
+  const [isDefaultDataSet, setIsDefaultDataSet] = useState(false)
 
   useEffect(() => {
     const visible: Record<string, boolean> = {}
@@ -96,6 +102,11 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
     setHistory([])
     setFuture([])
   }, [data])
+
+  const handleDefaultEntryClick = () => {
+    setDraftData(defaultEntryData ?? [])
+    setIsDefaultDataSet(true)
+  }
 
   const handleCellChange = (rowIndex: number, columnId: string, value: any) => {
     setDraftData(prev => {
@@ -203,6 +214,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
     setHistory([])
     setFuture([])
     setEditingRowIndex(null)
+    setIsDefaultDataSet(false)
   }
 
   const toggleRowEdit = (e: MouseEvent, index: number) => {
@@ -274,7 +286,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   return (
     <Box height='100%' position='relative'>
       {editable && (
-        <ChaarvyFlex className={{ justifyContent: 'space-between', mb: 5 }}>
+        <ChaarvyFlex className={{ justifyContent: 'space-between', mb: 5, mt: 5 }}>
           <ChaarvyFlex className={{ alignItems: 'end', gap: 3 }}>
             <ChaarvyFlex className={{ alignItems: 'center', gap: 1 }}>
               <Box sx={{ width: 14, height: 14, backgroundColor: newRowBg, borderRadius: 1 }} />
@@ -293,8 +305,12 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
               </ChaarvyFlex>
             )}
           </ChaarvyFlex>
-
           <ChaarvyFlex className={{ alignItems: 'end' }}>
+            {showDefaultEntryButton && !isDefaultDataSet && (
+              <ChaarvyButton color='info' onClick={handleDefaultEntryClick} size='small'>
+                Set Default data
+              </ChaarvyButton>
+            )}
             <Tooltip title='Undo' placement='top'>
               <IconButton type='button' onClick={handleUndo} disabled={!history.length}>
                 <GetChaarvyIcons iconName='Undo' fontSize='1.25rem' />
@@ -344,7 +360,8 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
         sx={{
           overflow: 'auto',
           border: '1px solid #eee',
-          borderRadius: 1
+          borderRadius: 1,
+          maxHeight: `50vh`
         }}
       >
         <Table>

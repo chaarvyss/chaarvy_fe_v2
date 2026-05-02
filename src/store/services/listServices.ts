@@ -27,6 +27,7 @@ import {
   State,
   Students
 } from 'src/lib/types'
+import { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
 
 import { HttpRequestMethods } from '..'
 
@@ -219,6 +220,15 @@ const listServicesApi = api.injectEndpoints({
           url: `${urlConstants.list.role_permissions}?role_id=${role_id}`
         }
       }
+    }),
+    getProgramRelatedBooksOptions: build.query<Array<{ book_id: string; book_name: string }>, CascadingSelectorState>({
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.list.programRelatedBooksOptions,
+          params
+        }
+      }
     })
   })
 })
@@ -247,5 +257,6 @@ export const {
   useGetSectionsListQuery,
   useLazyGetStudentsListQuery,
   useLazyGetRolePermissionsListQuery,
-  useGetBooksListQuery
+  useGetBooksListQuery,
+  useLazyGetProgramRelatedBooksOptionsQuery
 } = listServicesApi

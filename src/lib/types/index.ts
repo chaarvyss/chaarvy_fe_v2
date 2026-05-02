@@ -2,6 +2,12 @@ import { ReactElement } from 'react'
 
 import { AdmissionCounts } from 'src/store/services/admisissionsService'
 
+export type ProgramSegmentMedium = {
+  segment: string
+  program: string
+  medium: string
+}
+
 export type AddOnCourse = {
   addon_course_id: string
   addon_course_name: string
@@ -58,10 +64,19 @@ export type RolesListResponse = {
   role_name: string
 }
 
+export type ProgramSegmentMediumBook = {
+  program_book_id?: string
+  book_id: string
+  book_name?: string
+  quantity: number
+  status?: number
+}
+
 export type Books = {
   program_book_id: string
-  program_id: string
-  segment_id: string
+  program_id?: string
+  segment_id?: string
+  medium_id?: string
   book_id: string
   book_name: string
   quantity: number
@@ -120,17 +135,6 @@ export type ProgramAddonCourseResponse = {
   addon_course_id: string
   addon_coures_fees: number
   addon_course_name: string
-}
-
-export type ProgramBookRequest = {
-  program_id: string
-  medium: string
-  second_language: string
-}
-
-export type ProgramBooksDetails = {
-  program_name: string
-  segments: BooksSegment[]
 }
 
 export type ProgramDetails = {

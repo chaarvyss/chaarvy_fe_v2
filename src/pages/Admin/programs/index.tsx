@@ -43,7 +43,8 @@ const Programs = () => {
 
   const { triggerToast } = useToast()
 
-  const [fetchProgramsList, { data: programsListData }] = useLazyGetProgramsListQuery()
+  const [fetchProgramsList, { data: programsListData, isFetching: isFetchingProgramsList }] =
+    useLazyGetProgramsListQuery()
   const [updateProgramStatus] = useUpdateProgramStatusMutation()
 
   const [fetchProgramSegment] = useLazyGetProgramSegmentDetailsQuery()
@@ -142,8 +143,6 @@ const Programs = () => {
         triggerToast(e.data, { variant: ToastVariants.ERROR })
       })
   }
-
-  console.log('selectedProgram', selectedProgram)
 
   return (
     <>
