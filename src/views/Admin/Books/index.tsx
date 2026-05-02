@@ -81,7 +81,7 @@ const BooksList = () => {
     },
     {
       id: 'actions',
-      label: '',
+      label: 'Actions',
       width: '10px',
       hideable: false,
       render: row => (
@@ -98,8 +98,9 @@ const BooksList = () => {
             }
             handleAddBook()
           }}
+          sx={{ color: 'orange' }}
         >
-          <GetChaarvyIcons iconName='Pencil' />
+          <GetChaarvyIcons fontSize='1.25rem' iconName='Pencil' />
         </IconButton>
       )
     }
