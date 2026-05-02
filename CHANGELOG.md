@@ -1,3 +1,10 @@
+## [1.5.2](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.5.1...v1.5.2) (2026-05-02)
+
+
+### Bug Fixes
+
+* **ProgramBooks:** AC-36 FE program books crud operations ([#38](https://github.com/chaarvyss/chaarvy_fe_v2/issues/38)) ([03195c8](https://github.com/chaarvyss/chaarvy_fe_v2/commit/03195c8777093d37c097ea3d381cc31bc2412dfa))
+
 ## [1.5.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.5.0...v1.5.1) (2026-04-29)
 
 
