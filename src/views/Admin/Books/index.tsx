@@ -121,7 +121,7 @@ const BooksList = () => {
           onButtonClick: handleAddBook,
           showFilterIcon: true,
           handleFilterButtonClick: onFilterButtonClick,
-          icon: <GetChaarvyIcons iconName='FilePlus' />
+          iconName: 'FilePlus'
         }}
         paginationProps={{
           total: booksResponse?.counts?.filtered ?? 0,

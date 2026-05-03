@@ -12,7 +12,11 @@ import ChaarvyDataTable, {
 import { useCreateUpdateBookMutation } from 'src/store/services/adminServices'
 import { useGetBooksListQuery } from 'src/store/services/listServices'
 import ItemTypeForm from 'src/views/Admin/Books/Components/ItemTypeForm'
-import BulkProcessStatusModal, { ProcessStatRow } from 'src/views/common/BulkProcessStatusModal'
+import BulkProcessStatusModal, {
+  getDefaultProcessStats,
+  getProcessedStats,
+  ProcessStatRow
+} from 'src/views/common/BulkProcessStatusModal'
 
 import { generateCommonBooksPayload, generateSpecificBooksPayload } from './helpers'
 
@@ -93,16 +97,7 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
   const handleEditSubmit = (payload: EditedDataTableOnSubmitPayload) => {
     const formattedPayload =
       itemType === 'specific' ? generateSpecificBooksPayload(payload, filterData) : generateCommonBooksPayload(payload)
-
-    const { created, updated, deleted } = payload
-
-    setProcessStats([
-      { id: 'success_created', label: 'Creating', target: created.length, processed: 0 },
-      { id: 'success_updated', label: 'Updating', target: [...updated, ...deleted].length, processed: 0 },
-      { id: 'skipped', label: 'Skipped', target: 0, processed: 0 },
-      { id: 'failed', label: 'Failed', target: 0, processed: 0 }
-    ])
-
+    setProcessStats(getDefaultProcessStats(payload))
     setIsBulkProcessStatusModalOpen(true)
 
     if (!formattedPayload?.length) return
@@ -111,23 +106,7 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
       .then(res => {
         if (res) {
           triggerToast('Process completed', { variant: ToastVariants.SUCCESS })
-
-          setProcessStats(prevStats =>
-            prevStats.map(stat => {
-              const responseData = res[stat.id]
-
-              const processedCount = Array.isArray(responseData)
-                ? responseData.length
-                : typeof responseData === 'number'
-                  ? responseData
-                  : 0
-
-              return {
-                ...stat,
-                processed: processedCount
-              }
-            })
-          )
+          setProcessStats(prev => getProcessedStats(prev, res))
         }
       })
       .catch((err: any) => {

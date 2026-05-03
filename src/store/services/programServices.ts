@@ -6,6 +6,7 @@ import {
   ProgramSegmentMediumBook
 } from 'src/lib/types'
 import { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
+import { BulkProcessResponse } from 'src/views/common/BulkProcessStatusModal'
 
 import { HttpRequestMethods } from '..'
 
@@ -110,7 +111,7 @@ const programServicesApi = api.injectEndpoints({
       }
     }),
 
-    createUpdateProgramBook: build.mutation<string, CreateProgramBookRequest[]>({
+    createUpdateProgramBook: build.mutation<BulkProcessResponse, CreateProgramBookRequest[]>({
       invalidatesTags: [CacheTag.ListProgramBooks],
       query: body => {
         return {

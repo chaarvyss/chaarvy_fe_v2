@@ -1,9 +1,9 @@
 import { IconButton, Tooltip } from '@mui/material'
-import { ReactElement, useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { TableHeaderStatCardProps } from 'src/lib/interfaces'
 import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
-import GetChaarvyIcons from 'src/utils/icons'
+import GetChaarvyIcons, { GetChaarvyIconsProps } from 'src/utils/icons'
 import { Box, Grid, Card, Avatar, CardHeader, Typography, CardContent } from 'src/utils/muiElements'
 
 export interface TableTitleHeaderProps {
@@ -15,7 +15,7 @@ export interface TableTitleHeaderProps {
   title: string
   stats?: TableHeaderStatCardProps[]
   showFilterIcon?: boolean
-  icon?: ReactElement
+  iconName?: GetChaarvyIconsProps['iconName']
   handleFilterButtonClick?: () => void
 }
 
@@ -54,7 +54,7 @@ const TableTilteHeader = ({
   onButtonClick,
   isButtonDisabled,
   showFilterIcon,
-  icon,
+  iconName,
   handleFilterButtonClick
 }: TableTitleHeaderProps) => {
   const titleRef = useRef<HTMLElement | null>(null)
@@ -133,8 +133,12 @@ const TableTilteHeader = ({
     return () => window.removeEventListener('resize', onResize)
   }, [stats])
 
+  const showStats = useMemo(() => {
+    return stats && stats.length > 0 && window.outerHeight > 900
+  }, [stats])
+
   return (
-    <Card sx={{ mb: 2 }}>
+    <Card sx={{ mb: 2 }} id='table-title-header'>
       <CardHeader
         title={
           <Tooltip title={isTruncated ? title : ''} placement='top'>
@@ -163,13 +167,13 @@ const TableTilteHeader = ({
             {buttonTitle && (
               <>
                 <ChaarvyButton
-                  className={icon ? 'd-none d-md-block' : ''}
+                  className={iconName ? 'd-none d-md-block' : ''}
                   fillType={buttonFillType ?? 'gradient'}
                   color={buttonColor ?? 'primary'}
                   disabled={isButtonDisabled}
                   onClick={onButtonClick}
                   size='small'
-                  leftIcon={icon}
+                  leftIcon={iconName}
                   label={buttonTitle}
                 />
                 <Tooltip title={buttonTitle} placement='top'>
@@ -177,9 +181,10 @@ const TableTilteHeader = ({
                     color={buttonColor ?? 'primary'}
                     disabled={isButtonDisabled}
                     onClick={onButtonClick}
-                    className={icon ? 'd-md-none' : ''}
+                    className={iconName ? 'd-md-none' : ''}
+                    size='small'
                   >
-                    {icon}
+                    {iconName && <GetChaarvyIcons iconName={iconName} fontSize='1.25rem' />}
                   </IconButton>
                 </Tooltip>
               </>
@@ -187,17 +192,17 @@ const TableTilteHeader = ({
             {showFilterIcon && (
               <Tooltip title='Filter' placement='top'>
                 <IconButton onClick={handleFilterButtonClick} color={buttonColor ?? 'secondary'}>
-                  <GetChaarvyIcons iconName='Filter' />
+                  <GetChaarvyIcons iconName='Filter' fontSize='1.25rem' />
                 </IconButton>
               </Tooltip>
             )}
           </Box>
         }
       />
-      {stats && (
+      {showStats && (
         <CardContent sx={{ maxHeight: maxStatsHeight ? `${maxStatsHeight}px` : undefined, overflowY: 'auto' }}>
           <Grid container spacing={[5, 0]} ref={statsContainerRef}>
-            {renderStats(stats)}
+            {renderStats(stats ?? [])}
           </Grid>
         </CardContent>
       )}

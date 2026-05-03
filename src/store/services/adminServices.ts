@@ -1,5 +1,6 @@
 import { urlConstants } from 'src/constants/urlConstants'
 import { Section, UserPermissionRequest } from 'src/lib/interfaces'
+import { BulkProcessResponse } from 'src/views/common/BulkProcessStatusModal'
 
 import { HttpRequestMethods } from '..'
 
@@ -43,11 +44,6 @@ type UpdateProgramRequest = {
   program_name: string
 }
 
-type UpdateFeesTypeRequest = {
-  id?: string
-  fees_type: string
-}
-
 export type UpdateLanguageRequest = {
   id?: string
   language_name?: string
@@ -83,6 +79,12 @@ export interface VehicleVendorRequest {
   address?: Address
 }
 
+export type CreateUpdateFeesType = {
+  fees_type_id?: string
+  fees_type: string
+  status?: number
+}
+
 const adminServiceApi = api.injectEndpoints({
   endpoints: build => ({
     createAddonCourse: build.mutation<string, string>({
@@ -96,7 +98,7 @@ const adminServiceApi = api.injectEndpoints({
       }
     }),
 
-    createUpdateBook: build.mutation<string, CreateBookRequest[]>({
+    createUpdateBook: build.mutation<BulkProcessResponse, CreateBookRequest[]>({
       invalidatesTags: [CacheTag.ListBooks],
       query: params => {
         return {
@@ -147,16 +149,6 @@ const adminServiceApi = api.injectEndpoints({
         }
       }
     }),
-    createFeesType: build.mutation<string, string>({
-      invalidatesTags: [CacheTag.ListFeesTypes],
-      query: fees_type => {
-        return {
-          method: HttpRequestMethods.POST,
-          url: urlConstants.admin.add.feesType,
-          params: { fees_type }
-        }
-      }
-    }),
     getUserPermissions: build.query<string[], string>({
       providesTags: [CacheTag.UserPermissions],
       query: user_id => {
@@ -185,16 +177,6 @@ const adminServiceApi = api.injectEndpoints({
           method: HttpRequestMethods.POST,
           url: urlConstants.admin.update.addonCourseStatus,
           params: { id }
-        }
-      }
-    }),
-    updateFeesType: build.mutation<string, UpdateFeesTypeRequest>({
-      invalidatesTags: [CacheTag.ListFeesTypes],
-      query: params => {
-        return {
-          method: HttpRequestMethods.POST,
-          url: urlConstants.admin.update.feesType,
-          params
         }
       }
     }),
@@ -341,20 +323,28 @@ const adminServiceApi = api.injectEndpoints({
           body: { segment_name }
         }
       }
+    }),
+    createUpdateFeesType: build.mutation<BulkProcessResponse, CreateUpdateFeesType[]>({
+      invalidatesTags: [CacheTag.ListFeesTypes],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.createUpdateFeesType,
+          body
+        }
+      }
     })
   })
 })
 
 export const {
   useCreateAddonCourseMutation,
-  useCreateFeesTypeMutation,
   useCreateLanguageMutation,
   useCreateProgramMutation,
   useCreateProgramAddonMutation,
   useUpdateAddonCourseMutation,
   useUpdateAddonCourseStatusMutation,
   useUpdateCollegeProfileMutation,
-  useUpdateFeesTypeMutation,
   useUpdateLangugageMutation,
   useUpdateProgramMutation,
   useUpdateProgramAddonMutation,
@@ -370,5 +360,6 @@ export const {
   useGetUserPermissionsQuery,
   useCreateUpdateRoleMutation,
   useCreateUpdateSegmentMutation,
-  useCreateUpdateBookMutation
+  useCreateUpdateBookMutation,
+  useCreateUpdateFeesTypeMutation
 } = adminServiceApi
