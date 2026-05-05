@@ -23,7 +23,7 @@ interface ProgramBooksModalProps {
   programId?: string
 }
 
-const ProgramBooksModalV2 = ({ isOpen = true, onClose, programId }: ProgramBooksModalProps) => {
+const ProgramBooksModal = ({ isOpen = true, onClose, programId }: ProgramBooksModalProps) => {
   const { triggerToast } = useToast()
   const [isBulkProcessStatusModalOpen, setIsBulkProcessStatusModalOpen] = useState(false)
   const [filterData, setFilterData] = useState<CascadingSelectorState>({ program: programId, segment: '', medium: '' })
@@ -207,4 +207,4 @@ const ProgramBooksModalV2 = ({ isOpen = true, onClose, programId }: ProgramBooks
   )
 }
 
-export default ProgramBooksModalV2
+export default ProgramBooksModal
