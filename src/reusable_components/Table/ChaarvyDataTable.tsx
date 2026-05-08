@@ -285,8 +285,10 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
 
   const hidebleColumns = columns.filter(col => col.hideable)
 
+  const hadChanges = Object.values(getDiffPayload()).find((arr: any) => arr.length > 0)
+
   return (
-    <Box height='100%' position='relative'>
+    <Box position='relative' borderRadius={1} padding={2}>
       {editable && (
         <ChaarvyFlex className={{ justifyContent: 'space-between', mb: 5, mt: 5 }}>
           <ChaarvyFlex className={{ alignItems: 'end', gap: 3 }}>
@@ -361,9 +363,8 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
       <TableContainer
         sx={{
           overflow: 'auto',
-          border: '1px solid #eee',
           borderRadius: 1,
-          maxHeight: `50vh`
+          maxHeight: screen.availHeight - 370
         }}
       >
         <Table>
@@ -482,7 +483,9 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
         </Table>
 
         {draftData.length === 0 && (
-          <Box sx={{ height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Box
+            sx={{ height: screen.availHeight - 530, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
             <Typography>{isLoading ? (loadingText ?? 'Loading...') : emptyMessage}</Typography>
           </Box>
         )}
@@ -497,9 +500,11 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
           )}
 
           <ChaarvyFlex className={{ gap: 2, mt: 2 }}>
-            <ChaarvyButton type='button' variant='outlined' size='small' onClick={handleReset}>
-              Reset
-            </ChaarvyButton>
+            {hadChanges && (
+              <ChaarvyButton type='button' variant='outlined' size='small' onClick={handleReset}>
+                Reset
+              </ChaarvyButton>
+            )}
 
             <LoadingButton
               type='button'
@@ -507,7 +512,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
               variant='contained'
               size='small'
               onClick={() => onSubmit?.(getDiffPayload())}
-              disabled={!Object.values(getDiffPayload()).find((arr: any) => arr.length > 0)}
+              disabled={!hadChanges}
             >
               Submit
             </LoadingButton>

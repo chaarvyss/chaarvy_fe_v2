@@ -11,7 +11,6 @@ import Tag from 'src/reusable_components/tag'
 import { useUpdateProgramStatusMutation } from 'src/store/services/adminServices'
 import { useLazyGetProgramsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
-import GetChaarvyIcons from 'src/utils/icons'
 import ProgramBooksModalV2 from 'src/views/Admin/Programs/Modals/ProgramBooks'
 
 import CreateOrUpdateProgramModal from './createUpdateProgram'
@@ -174,7 +173,7 @@ const Programs = () => {
           title: 'Programs',
           buttonTitle: 'Create Program',
           onButtonClick: handleCreateProgram,
-          icon: <GetChaarvyIcons iconName='FilePlus' />
+          iconName: 'FilePlus'
         }}
         tableDataProps={{
           columns,

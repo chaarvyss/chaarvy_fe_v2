@@ -3,12 +3,29 @@ import React from 'react'
 
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
+import { EditedDataTableOnSubmitPayload } from 'src/reusable_components/Table/ChaarvyDataTable'
 
+export interface BulkProcessResponse {
+  success_created: number
+  success_updated: number
+  skipped: number
+  failed: number
+  exceptions: string[]
+}
+
+const enum ProcessStatIds {
+  SUCCESS_CREATED = 'success_created',
+  SUCCESS_UPDATED = 'success_updated',
+  SKIPPED = 'skipped',
+  FAILED = 'failed',
+  EXCEPTIONS = 'exceptions'
+}
 export interface ProcessStatRow {
-  id: string
+  id: ProcessStatIds
   label: string
   target: number
   processed: number
+  exceptions?: string[]
 }
 
 export interface BulkProcessStatusModalProps {
@@ -17,6 +34,37 @@ export interface BulkProcessStatusModalProps {
   title?: string
   isProcessing?: boolean
   stats: ProcessStatRow[]
+}
+
+export const getDefaultProcessStats = (data: EditedDataTableOnSubmitPayload) => {
+  const { created, updated, deleted } = data
+
+  return [
+    { id: ProcessStatIds.SUCCESS_CREATED, label: 'Creating', target: created.length, processed: 0 },
+    { id: ProcessStatIds.SUCCESS_UPDATED, label: 'Updating', target: [...updated, ...deleted].length, processed: 0 },
+    { id: ProcessStatIds.SKIPPED, label: 'Skipped', target: 0, processed: 0 },
+    { id: ProcessStatIds.FAILED, label: 'Failed', target: 0, processed: 0 },
+    { id: ProcessStatIds.EXCEPTIONS, label: 'Exceptions', target: 0, processed: 0, exceptions: [] }
+  ]
+}
+
+export const getProcessedStats = (stats: ProcessStatRow[], response: BulkProcessResponse): ProcessStatRow[] => {
+  return stats.map(stat => {
+    const responseData = response[stat.id]
+
+    if (stat.id === ProcessStatIds.EXCEPTIONS) {
+      return {
+        ...stat,
+        processed: (responseData as string[])?.length,
+        exceptions: responseData as string[]
+      }
+    }
+
+    return {
+      ...stat,
+      processed: responseData as number
+    }
+  })
 }
 
 const BulkProcessStatusModal = ({
@@ -35,6 +83,10 @@ const BulkProcessStatusModal = ({
       }
     }
   }
+
+  const exceptions = stats?.find(stat => stat.exceptions)?.exceptions ?? []
+
+  console.log(exceptions, stats)
 
   return (
     <ChaarvyModal title={title} isOpen={isOpen} onClose={onClose}>
@@ -79,6 +131,19 @@ const BulkProcessStatusModal = ({
             <Typography variant='body2' color='text.secondary'>
               Please wait, processing data...
             </Typography>
+          </Box>
+        )}
+
+        {exceptions?.length > 0 && (
+          <Box sx={{ mt: 4 }}>
+            <Typography variant='subtitle2' color='error'>
+              Exceptions:
+            </Typography>
+            {exceptions.map((exception, index) => (
+              <Typography key={index} variant='body2' color='error'>
+                - {exception}
+              </Typography>
+            ))}
           </Box>
         )}
       </Box>

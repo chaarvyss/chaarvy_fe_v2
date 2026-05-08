@@ -103,7 +103,7 @@ const VehicleVendors = () => {
               />
             )
           }),
-        icon: <GetChaarvyIcons fontSize='1.25rem' iconName='FilePlus' />
+        iconName: 'FilePlus'
       }}
       paginationProps={{
         total: 0,

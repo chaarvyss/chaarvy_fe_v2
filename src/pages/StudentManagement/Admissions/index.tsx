@@ -143,7 +143,7 @@ const Admissions = () => {
         showFilterIcon: true,
         stats: admission_stats,
         handleFilterButtonClick: onFilterButtonClick,
-        icon: <GetChaarvyIcons iconName='FilePlus' />
+        iconName: 'FilePlus'
       }}
       paginationProps={{
         total: admissionResponse?.counts?.filtered ?? 0,

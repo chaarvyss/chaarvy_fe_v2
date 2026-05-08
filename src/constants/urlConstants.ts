@@ -57,11 +57,9 @@ export const urlConstants = {
     createUpdateRole: `${interRoutePrefix.admin}/create-update-role`,
     createUpdateSegment: `${interRoutePrefix.admin}/create-update-segment`,
     createUpdateBook: `${interRoutePrefix.admin}/create-update-books`,
+    createUpdateFeesType: `${interRoutePrefix.admin}/create-update-fees-type`,
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
-
-      // book: `${interRoutePrefix.admin}/add-book`,
-      feesType: `${interRoutePrefix.admin}/add-fees-type`,
       language: `${interRoutePrefix.admin}/add-language`,
       program: `${interRoutePrefix.admin}/add-program`,
       programAddon: `${interRoutePrefix.admin}/add-program-addon-course`,
@@ -74,9 +72,6 @@ export const urlConstants = {
     update: {
       addonCourse: `${interRoutePrefix.admin}/update-addon-course`,
       addonCourseStatus: `${interRoutePrefix.admin}/update-addon-course-status`,
-
-      // book: `${interRoutePrefix.admin}/update-book`,
-      feesType: `${interRoutePrefix.admin}/update-fees-type`,
       language: `${interRoutePrefix.admin}/update-language`,
       program: `${interRoutePrefix.admin}/update-program`,
       programAddon: `${interRoutePrefix.admin}/update-program-addon-course`,

@@ -241,6 +241,7 @@ export const {
   useGetCommunitiesListQuery,
   useLazyGetDistrictsListQuery,
   useLazyGetFeesTypesListQuery,
+  useGetFeesTypesListQuery,
   useGetGendersListQuery,
   useGetLanguagesListQuery,
   useGetOccupationsListQuery,

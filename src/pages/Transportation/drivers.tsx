@@ -110,7 +110,7 @@ const Drivers = () => {
         showFilterIcon: true,
         stats: driver_stats,
         handleFilterButtonClick: onFilterButtonClick,
-        icon: <GetChaarvyIcons iconName='FilePlus' />
+        iconName: 'FilePlus'
       }}
       paginationProps={{
         total: 0,
