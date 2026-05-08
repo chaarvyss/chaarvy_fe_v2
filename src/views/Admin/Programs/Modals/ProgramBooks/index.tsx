@@ -15,7 +15,11 @@ import {
   useCreateUpdateProgramBookMutation,
   useLazyGetPrgMedSegBooksListQuery
 } from 'src/store/services/programServices'
-import BulkProcessStatusModal, { ProcessStatRow } from 'src/views/common/BulkProcessStatusModal'
+import BulkProcessStatusModal, {
+  getDefaultProcessStats,
+  getProcessedStats,
+  ProcessStatRow
+} from 'src/views/common/BulkProcessStatusModal'
 
 interface ProgramBooksModalProps {
   isOpen: boolean
@@ -121,12 +125,7 @@ const ProgramBooksModal = ({ isOpen = true, onClose, programId }: ProgramBooksMo
         }))
     ]
 
-    setProcessStats([
-      { id: 'success_created', label: 'Creating', target: created.length, processed: 0 },
-      { id: 'success_updated', label: 'Updating', target: [...updated, ...deleted].length, processed: 0 },
-      { id: 'skipped', label: 'Skipped', target: 0, processed: 0 },
-      { id: 'failed', label: 'Failed', target: 0, processed: 0 }
-    ])
+    setProcessStats(getDefaultProcessStats(data))
 
     setIsBulkProcessStatusModalOpen(true)
     createUpdateProgramBook(payload)
@@ -134,22 +133,7 @@ const ProgramBooksModal = ({ isOpen = true, onClose, programId }: ProgramBooksMo
       .then(res => {
         triggerToast('Process completed', { variant: ToastVariants.SUCCESS })
 
-        setProcessStats(prevStats =>
-          prevStats.map(stat => {
-            const responseData = res[stat.id]
-
-            const processedCount = Array.isArray(responseData)
-              ? responseData.length
-              : typeof responseData === 'number'
-                ? responseData
-                : 0
-
-            return {
-              ...stat,
-              processed: processedCount
-            }
-          })
-        )
+        setProcessStats(prevStats => getProcessedStats(prevStats, res))
       })
   }
 

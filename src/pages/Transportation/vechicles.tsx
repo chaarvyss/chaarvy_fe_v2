@@ -110,7 +110,7 @@ const Vehicles = () => {
         showFilterIcon: true,
         stats: vehicle_stats,
         handleFilterButtonClick: onFilterButtonClick,
-        icon: <GetChaarvyIcons iconName='FilePlus' />
+        iconName: 'FilePlus'
       }}
       paginationProps={{
         total: 0,

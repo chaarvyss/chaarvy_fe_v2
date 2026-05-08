@@ -3,6 +3,8 @@ import Box from '@mui/material/Box'
 import Button, { ButtonProps } from '@mui/material/Button'
 import React, { ReactNode } from 'react'
 
+import GetChaarvyIcons, { GetChaarvyIconsProps } from 'src/utils/icons'
+
 import ChaarvyFlex from './chaarvyFlex'
 
 type ColorKey = 'primary' | 'success' | 'error' | 'info' | 'secondary'
@@ -10,8 +12,8 @@ type ColorKey = 'primary' | 'success' | 'error' | 'info' | 'secondary'
 export interface ChaarvyButtonProps extends ButtonProps {
   color?: ColorKey
   fillType?: 'solid' | 'gradient'
-  leftIcon?: ReactNode
-  rightIcon?: ReactNode
+  leftIcon?: GetChaarvyIconsProps['iconName']
+  rightIcon?: GetChaarvyIconsProps['iconName']
   label?: ReactNode
   hoverEffect?: Record<string, any>
 }
@@ -88,9 +90,9 @@ const ChaarvyButton = ({
         sx={mergedSx}
       >
         <ChaarvyFlex className={{ gap: 2 }}>
-          {leftIcon && <Box>{leftIcon}</Box>}
+          {leftIcon && <GetChaarvyIcons fontSize='1.25rem' iconName={leftIcon} />}
           {(label || children) && <Box>{label ?? children}</Box>}
-          {rightIcon && <Box>{rightIcon}</Box>}
+          {rightIcon && <GetChaarvyIcons fontSize='1.25rem' iconName={rightIcon} />}
         </ChaarvyFlex>
       </Button>
     </Tooltip>

@@ -1,3 +1,10 @@
+## [1.5.3](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.5.2...v1.5.3) (2026-05-08)
+
+
+### Bug Fixes
+
+* **FeesTypes:** AC-38 Fees types work completed and bulk process info… ([#39](https://github.com/chaarvyss/chaarvy_fe_v2/issues/39)) ([28d040f](https://github.com/chaarvyss/chaarvy_fe_v2/commit/28d040fc610eab9aa6ef6652f68a729623b571f3))
+
 ## [1.5.2](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.5.1...v1.5.2) (2026-05-02)
 
 
