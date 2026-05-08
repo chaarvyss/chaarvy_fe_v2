@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { ReactNode } from 'react'
 
 import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
-import GetChaarvyIcons from 'src/utils/icons'
 import FooterIllustrations from 'src/views/pages/misc/FooterIllustrations'
 
 const TreeIllustration = styled('img')(({ theme }) => ({
@@ -81,13 +80,7 @@ const CommonWrapper = ({ error }: { error: Errors }) => {
         </BoxWrapper>
         <Img height='280' alt='error-illustration' src={`/images/pages/${errorCode}.png`} />
         <Link passHref href='/dashboard'>
-          <ChaarvyButton
-            leftIcon={<GetChaarvyIcons iconName='Home' fontSize='1.25rem' />}
-            size='small'
-            component='a'
-            variant='contained'
-            sx={{ px: 5.5 }}
-          >
+          <ChaarvyButton leftIcon='Home' size='small' component='a' variant='contained' sx={{ px: 5.5 }}>
             Back to Home
           </ChaarvyButton>
         </Link>
