@@ -98,7 +98,7 @@ const Users = () => {
       stats: usersData,
       onButtonClick: handleCreateUserClick,
       showFilterIcon: true,
-      icon: <GetChaarvyIcons iconName='AccountPlusOutline' />,
+      iconName: 'AccountPlusOutline',
       buttonTitle: 'Create User',
       handleFilterButtonClick: onFilterButtonClick
     }

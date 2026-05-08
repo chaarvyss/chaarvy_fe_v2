@@ -55,7 +55,7 @@ export const getProcessedStats = (stats: ProcessStatRow[], response: BulkProcess
     if (stat.id === ProcessStatIds.EXCEPTIONS) {
       return {
         ...stat,
-        processed: (responseData as string[]).length,
+        processed: (responseData as string[])?.length,
         exceptions: responseData as string[]
       }
     }
