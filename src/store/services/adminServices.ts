@@ -85,6 +85,22 @@ export type CreateUpdateFeesType = {
   status?: number
 }
 
+export type AddonCourseDetails = {
+  program_addon_course_id?: string
+  addon_course_id?: string
+  program_id: string
+  segment_id: string
+  medium_id: string
+  seating_capacity: number
+  addon_course_fees: number
+}
+export type ProgramAddonCourseRequest = {
+  addon_course_id?: string
+  addon_course_name: string
+  status?: number
+  program_addon_courses?: AddonCourseDetails[]
+}
+
 const adminServiceApi = api.injectEndpoints({
   endpoints: build => ({
     createAddonCourse: build.mutation<string, string>({
@@ -333,6 +349,15 @@ const adminServiceApi = api.injectEndpoints({
           body
         }
       }
+    }),
+    createUpdateProgramAddonCourse: build.mutation<string, ProgramAddonCourseRequest>({
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.createUpdateProgramAddonCourse,
+          body
+        }
+      }
     })
   })
 })
@@ -361,5 +386,6 @@ export const {
   useCreateUpdateRoleMutation,
   useCreateUpdateSegmentMutation,
   useCreateUpdateBookMutation,
-  useCreateUpdateFeesTypeMutation
+  useCreateUpdateFeesTypeMutation,
+  useCreateUpdateProgramAddonCourseMutation
 } = adminServiceApi

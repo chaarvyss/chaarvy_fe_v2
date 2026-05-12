@@ -1,13 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import {
-  AddOnCourseProps,
-  AddonCourseChangeset,
-  MediumFieldValues,
-  PreviousProgramAddonCourse,
-  ProgramNode,
-  SegmentNode
-} from './types'
+import { AddonCourseDetails } from 'src/store/services/adminServices'
+
+import { AddOnCourseProps, AddonCourseChangeset, MediumFieldValues, ProgramNode, SegmentNode } from './types'
 import { buildProgramNodes } from './utils'
 
 interface UseAddonCourseModalOptions {
@@ -15,7 +10,7 @@ interface UseAddonCourseModalOptions {
   course_id?: string
   course_name?: string
   data: AddOnCourseProps[]
-  previousData: PreviousProgramAddonCourse[]
+  previousData: AddonCourseDetails[]
 }
 
 export const useAddonCourseModal = ({
@@ -38,7 +33,7 @@ export const useAddonCourseModal = ({
   }, [course_name])
 
   const previousDataMap = useMemo(() => {
-    const map = new Map<string, PreviousProgramAddonCourse>()
+    const map = new Map<string, AddonCourseDetails>()
 
     previousData.forEach(item => {
       if (!item.segment_id) return
@@ -110,9 +105,32 @@ export const useAddonCourseModal = ({
     })
   }, [programNodes])
 
-  // Prefill from previousData when modal opens
+  const resetModalState = () => {
+    setSelectedMediumKeys(new Set())
+    setMediumFieldValues({})
+    setEditableCourseName(course_name ?? '')
+
+    const initialPrograms: Record<string, boolean> = {}
+    const initialSegments: Record<string, boolean> = {}
+
+    programNodes.forEach(program => {
+      initialPrograms[program.key] = true
+      program.segments.forEach(segment => {
+        initialSegments[segment.key] = true
+      })
+    })
+
+    setExpandedPrograms(initialPrograms)
+    setExpandedSegments(initialSegments)
+  }
+
+  // Prefill from previousData when modal opens, or clear when it closes
   useEffect(() => {
-    if (!isOpen || !previousData.length) return
+    if (!isOpen) {
+      resetModalState()
+
+      return
+    }
 
     const selectedKeys = new Set<string>()
     const values: Record<string, MediumFieldValues> = {}
@@ -127,17 +145,17 @@ export const useAddonCourseModal = ({
 
       selectedKeys.add(mediumKey)
       values[mediumKey] = {
-        capacity: item.capacity?.toString() ?? '',
-        fees: item.fees?.toString() ?? ''
+        seating_capacity: item.seating_capacity?.toString() ?? '',
+        addon_course_fees: item.addon_course_fees?.toString() ?? ''
       }
     })
 
     setSelectedMediumKeys(selectedKeys)
     setMediumFieldValues(values)
-  }, [isOpen, mediumKeyByComposite, previousData])
+  }, [isOpen, mediumKeyByComposite, previousData, course_name, programNodes])
 
   const preparedApiPayload = useMemo<AddonCourseChangeset>(() => {
-    const upsert: PreviousProgramAddonCourse[] = []
+    const upsert: AddonCourseDetails[] = []
 
     // Collect entries that are new or have changed values
     selectedMediumKeys.forEach(mediumKey => {
@@ -147,32 +165,37 @@ export const useAddonCourseModal = ({
       const compositeKey = `${path.programId}::${path.segmentId}::${path.mediumId}`
       const existing = previousDataMap.get(compositeKey)
 
-      const fields = mediumFieldValues[mediumKey] ?? { capacity: '', fees: '' }
-      const parsedCapacity = Number(fields.capacity)
-      const parsedFees = Number(fields.fees)
-      const capacity = Number.isFinite(parsedCapacity) ? Math.max(parsedCapacity, 0) : 0
-      const fees = Number.isFinite(parsedFees) ? Math.max(parsedFees, 0) : 0
+      const fields = mediumFieldValues[mediumKey] ?? { seating_capacity: '', addon_course_fees: '' }
+      const parsedseating_capacity = Number(fields.seating_capacity)
+      const parsedaddon_course_fees = Number(fields.addon_course_fees)
+      const seating_capacity = Number.isFinite(parsedseating_capacity) ? Math.max(parsedseating_capacity, 0) : 0
+      const addon_course_fees = Number.isFinite(parsedaddon_course_fees) ? Math.max(parsedaddon_course_fees, 0) : 0
 
       // Skip if values are unchanged from previousData
-      if (existing && existing.capacity === capacity && existing.fees === fees) return
+      if (
+        existing &&
+        existing.seating_capacity === seating_capacity &&
+        existing.addon_course_fees === addon_course_fees
+      )
+        return
 
       upsert.push({
         ...(existing?.program_addon_course_id ? { program_addon_course_id: existing.program_addon_course_id } : {}),
-        course_id: course_id ?? existing?.course_id,
+        addon_course_id: course_id ?? existing?.addon_course_id,
         program_id: path.programId,
         segment_id: path.segmentId,
         medium_id: path.mediumId,
-        capacity,
-        fees
+        seating_capacity,
+        addon_course_fees
       })
     })
 
     // Collect previously saved entries that have been unchecked (removed)
-    const removed: string[] = []
+    const removed: AddonCourseDetails[] = []
     previousDataMap.forEach((item, compositeKey) => {
       const mediumKey = mediumKeyByComposite.get(compositeKey)
       if (mediumKey && !selectedMediumKeys.has(mediumKey) && item.program_addon_course_id) {
-        removed.push(item.program_addon_course_id)
+        removed.push(item)
       }
     })
 
@@ -203,16 +226,16 @@ export const useAddonCourseModal = ({
 
     selectedMediumKeys.forEach(mediumKey => {
       const fields = mediumFieldValues[mediumKey]
-      const capacity = Number(fields?.capacity)
-      const fees = Number(fields?.fees)
+      const seating_capacity = Number(fields?.seating_capacity)
+      const addon_course_fees = Number(fields?.addon_course_fees)
 
       const isInvalid =
-        fields?.capacity?.trim() === '' ||
-        fields?.fees?.trim() === '' ||
-        !Number.isFinite(capacity) ||
-        !Number.isFinite(fees) ||
-        capacity < 0 ||
-        fees < 0
+        fields?.seating_capacity?.trim() === '' ||
+        fields?.addon_course_fees?.trim() === '' ||
+        !Number.isFinite(seating_capacity) ||
+        !Number.isFinite(addon_course_fees) ||
+        seating_capacity < 0 ||
+        addon_course_fees < 0
 
       if (isInvalid) {
         invalidKeys.add(mediumKey)
@@ -343,7 +366,7 @@ export const useAddonCourseModal = ({
 
     setMediumFieldValues(prev => ({
       ...prev,
-      [mediumKey]: { ...(prev[mediumKey] ?? { capacity: '', fees: '' }), [field]: value }
+      [mediumKey]: { ...(prev[mediumKey] ?? { seating_capacity: '', addon_course_fees: '' }), [field]: value }
     }))
   }
 
@@ -370,6 +393,7 @@ export const useAddonCourseModal = ({
     toggleSegmentExpanded,
     toggleMedium,
     handleFieldChange,
-    handleCourseNameChange
+    handleCourseNameChange,
+    resetModalState
   }
 }
