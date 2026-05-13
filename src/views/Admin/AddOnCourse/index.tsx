@@ -14,7 +14,6 @@ import { AddonCourseDetail } from '../Programs/Modals/AddonCourses/types'
 
 const AddOnCourse = () => {
   const [selectedCourse, setSelectedCourse] = useState<AddonCourseDetail>()
-
   const { data: addonCourses, isFetching: isfetchingAddonCourses } = useGetAddonCoursesListQuery(false)
 
   const { triggerToast } = useToast()
@@ -75,7 +74,14 @@ const AddOnCourse = () => {
     <>
       <ChaarvyTable
         tableTitleHeaderProps={{
-          title: 'Add-On Courses'
+          title: 'Add-On Courses',
+          buttonTitle: 'Add Add-On Course',
+          onButtonClick: () =>
+            setSelectedCourse({
+              addon_course_id: undefined,
+              addon_course_name: '',
+              status: 1
+            })
         }}
         tableDataProps={{
           isLoading: isfetchingAddonCourses,
@@ -85,7 +91,6 @@ const AddOnCourse = () => {
           emptyMessage: isfetchingAddonCourses ? 'Fetching Addon courses' : 'No Addon courses found'
         }}
       />
-
       <ProgramAddonCourseModal
         isOpen={!!selectedCourse}
         onClose={() => setSelectedCourse(undefined)}
