@@ -49,7 +49,9 @@ export const urlConstants = {
     role_permissions: `${interRoutePrefix.list}/role_permissions`,
     studentPaymentsList: `${interRoutePrefix.list}/student-payments`,
     sectionsList: `${interRoutePrefix.list}/sections`,
-    programRelatedBooksOptions: `${interRoutePrefix.list}/program-suited-books-options`
+    programRelatedBooksOptions: `${interRoutePrefix.list}/program-suited-books-options`,
+    getProgramSegmentMediumSectionCombinationUrl: `${interRoutePrefix.list}/program-segment-medium-section-combination`,
+    programAddonCourses: `${interRoutePrefix.list}/program-addon-courses`
   },
   admin: {
     createUpdateUser: `${interRoutePrefix.admin}/create-update-user`,
@@ -58,6 +60,7 @@ export const urlConstants = {
     createUpdateSegment: `${interRoutePrefix.admin}/create-update-segment`,
     createUpdateBook: `${interRoutePrefix.admin}/create-update-books`,
     createUpdateFeesType: `${interRoutePrefix.admin}/create-update-fees-type`,
+    createUpdateProgramAddonCourse: `${interRoutePrefix.admin}/create-update-program-addon-course`,
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
       language: `${interRoutePrefix.admin}/add-language`,

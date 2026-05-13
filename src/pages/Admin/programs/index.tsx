@@ -11,7 +11,7 @@ import Tag from 'src/reusable_components/tag'
 import { useUpdateProgramStatusMutation } from 'src/store/services/adminServices'
 import { useLazyGetProgramsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
-import ProgramBooksModalV2 from 'src/views/Admin/Programs/Modals/ProgramBooks'
+import ProgramBooksModal from 'src/views/Admin/Programs/Modals/ProgramBooks'
 
 import CreateOrUpdateProgramModal from './createUpdateProgram'
 import ProgramAddonCourseModal from './program_addon_courses_modal'
@@ -191,7 +191,7 @@ const Programs = () => {
       />
 
       {showModal.books_details_list_modal && (
-        <ProgramBooksModalV2
+        <ProgramBooksModal
           isOpen={showModal.books_details_list_modal}
           onClose={handleBooksModalClose}
           programId={selectedProgram?.program_id}

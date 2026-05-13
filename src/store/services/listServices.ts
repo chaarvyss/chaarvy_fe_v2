@@ -28,9 +28,11 @@ import {
   Students
 } from 'src/lib/types'
 import { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
+import { AddOnCourseProps } from 'src/views/Admin/Programs/Modals/AddonCourses/types'
 
 import { HttpRequestMethods } from '..'
 
+import { AddonCourseDetails } from './adminServices'
 import api from './api'
 import { CacheTag } from './cacheTag'
 
@@ -229,6 +231,23 @@ const listServicesApi = api.injectEndpoints({
           params
         }
       }
+    }),
+    getProgramSegmentMediumSectionCombination: build.query<AddOnCourseProps[], void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: `${urlConstants.list.getProgramSegmentMediumSectionCombinationUrl}`
+        }
+      }
+    }),
+    getProgramAddonCourses: build.query<AddonCourseDetails[], string>({
+      query: addon_course_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: `${urlConstants.list.programAddonCourses}`,
+          params: { addon_course_id }
+        }
+      }
     })
   })
 })
@@ -259,5 +278,7 @@ export const {
   useLazyGetStudentsListQuery,
   useLazyGetRolePermissionsListQuery,
   useGetBooksListQuery,
-  useLazyGetProgramRelatedBooksOptionsQuery
+  useLazyGetProgramRelatedBooksOptionsQuery,
+  useGetProgramSegmentMediumSectionCombinationQuery,
+  useGetProgramAddonCoursesQuery
 } = listServicesApi
