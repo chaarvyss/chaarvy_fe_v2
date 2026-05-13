@@ -84,7 +84,7 @@ export const useAddonCourseModal = ({
       const next = { ...prev }
       programNodes.forEach(program => {
         if (typeof next[program.key] === 'undefined') {
-          next[program.key] = true
+          next[program.key] = false
         }
       })
 
@@ -96,7 +96,7 @@ export const useAddonCourseModal = ({
       programNodes.forEach(program => {
         program.segments.forEach(segment => {
           if (typeof next[segment.key] === 'undefined') {
-            next[segment.key] = true
+            next[segment.key] = false
           }
         })
       })
@@ -114,9 +114,9 @@ export const useAddonCourseModal = ({
     const initialSegments: Record<string, boolean> = {}
 
     programNodes.forEach(program => {
-      initialPrograms[program.key] = true
+      initialPrograms[program.key] = false
       program.segments.forEach(segment => {
-        initialSegments[segment.key] = true
+        initialSegments[segment.key] = false
       })
     })
 

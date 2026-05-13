@@ -351,6 +351,7 @@ const adminServiceApi = api.injectEndpoints({
       }
     }),
     createUpdateProgramAddonCourse: build.mutation<string, ProgramAddonCourseRequest>({
+      invalidatesTags: [CacheTag.ListAddonCourse],
       query: body => {
         return {
           method: HttpRequestMethods.POST,

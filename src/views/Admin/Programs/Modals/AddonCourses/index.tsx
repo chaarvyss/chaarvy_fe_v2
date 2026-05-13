@@ -1,7 +1,9 @@
-import { Box, Checkbox, FormControlLabel, IconButton, TextField, Typography } from '@mui/material'
-import { useState } from 'react'
+import { LoadingButton } from '@mui/lab'
+import { Box, Checkbox, FormControlLabel, IconButton, TextField, Tooltip, Typography } from '@mui/material'
+import { useEffect, useState } from 'react'
 
-import { Button, Grid } from '@muiElements'
+import { Grid } from '@muiElements'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { ProgramAddonCourseRequest, useCreateUpdateProgramAddonCourseMutation } from 'src/store/services/adminServices'
@@ -25,8 +27,9 @@ const ProgramAddonCourseModal = ({ isOpen, onClose, addon_course }: ProgramAddon
     }
   )
 
-  const [createUpdateProgramAddonCourse] = useCreateUpdateProgramAddonCourseMutation()
+  const [createUpdateProgramAddonCourse, { isLoading: isSaving }] = useCreateUpdateProgramAddonCourseMutation()
 
+  const { triggerToast } = useToast()
   const { addon_course_id: course_id, addon_course_name: course_name } = addon_course ?? {}
 
   const {
@@ -56,7 +59,7 @@ const ProgramAddonCourseModal = ({ isOpen, onClose, addon_course }: ProgramAddon
     onClose()
   }
 
-  const [isEditingCourseName, setIsEditingCourseName] = useState(course_name ? false : true)
+  const [isEditingCourseName, setIsEditingCourseName] = useState(true)
 
   const renderMediums = (mediums: MediumNode[]) => {
     return mediums.map(medium => {
@@ -185,7 +188,25 @@ const ProgramAddonCourseModal = ({ isOpen, onClose, addon_course }: ProgramAddon
     } as ProgramAddonCourseRequest
 
     createUpdateProgramAddonCourse(payload)
+      .unwrap()
+      .then(() => {
+        triggerToast('Program add-on course saved successfully', {
+          variant: ToastVariants.SUCCESS
+        })
+        handleClose()
+      })
+      .catch((e: string) => {
+        triggerToast(e, {
+          variant: ToastVariants.ERROR
+        })
+      })
   }
+
+  useEffect(() => {
+    if (course_name) {
+      setIsEditingCourseName(false)
+    }
+  }, [course_name])
 
   const isLoading = isFetchingDefaultData || isFetchingOldData
 
@@ -201,9 +222,9 @@ const ProgramAddonCourseModal = ({ isOpen, onClose, addon_course }: ProgramAddon
             {preparedApiPayload.upsert.length} change{preparedApiPayload.upsert.length !== 1 ? 's' : ''}
             {preparedApiPayload.removed.length > 0 ? `, ${preparedApiPayload.removed.length} removed` : ''}
           </Typography>
-          <Button variant='contained' onClick={handleSave} disabled={!canSave}>
+          <LoadingButton loading={isSaving} variant='contained' onClick={handleSave} disabled={!canSave}>
             Save
-          </Button>
+          </LoadingButton>
         </Box>
       }
     >
@@ -223,14 +244,15 @@ const ProgramAddonCourseModal = ({ isOpen, onClose, addon_course }: ProgramAddon
             ) : (
               <Typography variant='h6'>{editableCourseName}</Typography>
             )}
-
-            <IconButton onClick={() => setIsEditingCourseName(!isEditingCourseName)}>
-              <GetChaarvyIcons
-                iconName={isEditingCourseName ? 'Floppy' : 'Pencil'}
-                color={isEditingCourseName ? 'green' : 'orange'}
-                fontSize='1.25rem'
-              />
-            </IconButton>
+            <Tooltip placement='right-start' title={isEditingCourseName ? 'Save course name' : 'Edit course name'}>
+              <IconButton onClick={() => setIsEditingCourseName(!isEditingCourseName)}>
+                <GetChaarvyIcons
+                  iconName={isEditingCourseName ? 'Floppy' : 'Pencil'}
+                  color={isEditingCourseName ? 'green' : 'orange'}
+                  fontSize='1.25rem'
+                />
+              </IconButton>
+            </Tooltip>
           </ChaarvyFlex>
         </Box>
 
