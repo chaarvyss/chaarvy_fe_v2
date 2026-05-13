@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.5.3...v1.6.0) (2026-05-13)
+
+
+### Features
+
+* **addonCourse:** AC-42 addon and program addon course allogation ([#40](https://github.com/chaarvyss/chaarvy_fe_v2/issues/40)) ([e15b70a](https://github.com/chaarvyss/chaarvy_fe_v2/commit/e15b70acf113b8c5cd6a5789fac1908baf93caa4))
+
 ## [1.5.3](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.5.2...v1.5.3) (2026-05-08)
 
 
