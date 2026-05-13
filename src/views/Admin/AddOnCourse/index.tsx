@@ -48,7 +48,7 @@ const AddOnCourse = () => {
     {
       id: 'status',
       label: 'Status',
-      render: rowData => <Tag status={parseInt(rowData.status)} onClick={() => handleToggleStatus(rowData)} />
+      render: rowData => <Tag status={Number.parseInt(rowData.status)} onClick={() => handleToggleStatus(rowData)} />
     },
     {
       id: 'actions',

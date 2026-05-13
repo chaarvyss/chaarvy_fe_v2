@@ -219,7 +219,7 @@ const ProgramAddonCourseModal = ({ isOpen, onClose, addon_course }: ProgramAddon
       footer={
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 1.5, pb: 1 }}>
           <Typography variant='body2'>
-            {preparedApiPayload.upsert.length} change{preparedApiPayload.upsert.length !== 1 ? 's' : ''}
+            {preparedApiPayload.upsert.length} change{preparedApiPayload.upsert.length === 1 ? '' : 's'}
             {preparedApiPayload.removed.length > 0 ? `, ${preparedApiPayload.removed.length} removed` : ''}
           </Typography>
           <LoadingButton loading={isSaving} variant='contained' onClick={handleSave} disabled={!canSave}>

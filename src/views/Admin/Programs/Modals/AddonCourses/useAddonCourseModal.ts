@@ -13,6 +13,77 @@ interface UseAddonCourseModalOptions {
   previousData: AddonCourseDetails[]
 }
 
+const getMediumPathByKey = (programNodes: ProgramNode[]) => {
+  const map = new Map<string, { programId: string; segmentId: string; mediumId: string }>()
+  programNodes.forEach(program => {
+    program.segments.forEach(segment => {
+      segment.mediums.forEach(medium => {
+        map.set(medium.key, {
+          programId: program.id,
+          segmentId: segment.id,
+          mediumId: medium.id
+        })
+      })
+    })
+  })
+
+  return map
+}
+
+const getMediumKeyByComposite = (programNodes: ProgramNode[]) => {
+  const map = new Map<string, string>()
+  programNodes.forEach(program => {
+    program.segments.forEach(segment => {
+      segment.mediums.forEach(medium => {
+        const compositeKey = `${program.id}::${segment.id}::${medium.id}`
+        map.set(compositeKey, medium.key)
+      })
+    })
+  })
+
+  return map
+}
+
+const getExpandedSegments = ({
+  prev,
+  programNodes
+}: {
+  prev: Record<string, boolean>
+  programNodes: ProgramNode[]
+}) => {
+  const next = { ...prev }
+
+  for (const program of programNodes) {
+    for (const segment of program.segments) {
+      if (!(segment.key in next)) {
+        next[segment.key] = false
+      }
+    }
+  }
+
+  return next
+}
+
+const getInvalidSegmentKeys = ({
+  invalidSelectedMediumKeys,
+  programNodes
+}: {
+  invalidSelectedMediumKeys: Set<string>
+  programNodes: ProgramNode[]
+}) => {
+  const invalidKeys = new Set<string>()
+
+  programNodes.forEach(program => {
+    program.segments.forEach(segment => {
+      if (segment.mediumKeys.some(mediumKey => invalidSelectedMediumKeys.has(mediumKey))) {
+        invalidKeys.add(segment.key)
+      }
+    })
+  })
+
+  return invalidKeys
+}
+
 export const useAddonCourseModal = ({
   isOpen,
   course_id,
@@ -46,36 +117,11 @@ export const useAddonCourseModal = ({
   }, [previousData])
 
   const mediumPathByKey = useMemo(() => {
-    const map = new Map<string, { programId: string; segmentId: string; mediumId: string }>()
-
-    programNodes.forEach(program => {
-      program.segments.forEach(segment => {
-        segment.mediums.forEach(medium => {
-          map.set(medium.key, {
-            programId: program.id,
-            segmentId: segment.id,
-            mediumId: medium.id
-          })
-        })
-      })
-    })
-
-    return map
+    return getMediumPathByKey(programNodes)
   }, [programNodes])
 
   const mediumKeyByComposite = useMemo(() => {
-    const map = new Map<string, string>()
-
-    programNodes.forEach(program => {
-      program.segments.forEach(segment => {
-        segment.mediums.forEach(medium => {
-          const compositeKey = `${program.id}::${segment.id}::${medium.id}`
-          map.set(compositeKey, medium.key)
-        })
-      })
-    })
-
-    return map
+    return getMediumKeyByComposite(programNodes)
   }, [programNodes])
 
   // Initialize expand state when nodes load
@@ -91,18 +137,7 @@ export const useAddonCourseModal = ({
       return next
     })
 
-    setExpandedSegments(prev => {
-      const next = { ...prev }
-      programNodes.forEach(program => {
-        program.segments.forEach(segment => {
-          if (typeof next[segment.key] === 'undefined') {
-            next[segment.key] = false
-          }
-        })
-      })
-
-      return next
-    })
+    setExpandedSegments(prev => getExpandedSegments({ prev, programNodes }))
   }, [programNodes])
 
   const resetModalState = () => {
@@ -172,12 +207,7 @@ export const useAddonCourseModal = ({
       const addon_course_fees = Number.isFinite(parsedaddon_course_fees) ? Math.max(parsedaddon_course_fees, 0) : 0
 
       // Skip if values are unchanged from previousData
-      if (
-        existing &&
-        existing.seating_capacity === seating_capacity &&
-        existing.addon_course_fees === addon_course_fees
-      )
-        return
+      if (existing?.seating_capacity === seating_capacity && existing?.addon_course_fees === addon_course_fees) return
 
       upsert.push({
         ...(existing?.program_addon_course_id ? { program_addon_course_id: existing.program_addon_course_id } : {}),
@@ -246,17 +276,10 @@ export const useAddonCourseModal = ({
   }, [mediumFieldValues, selectedMediumKeys])
 
   const invalidSegmentKeys = useMemo(() => {
-    const invalidKeys = new Set<string>()
-
-    programNodes.forEach(program => {
-      program.segments.forEach(segment => {
-        if (segment.mediumKeys.some(mediumKey => invalidSelectedMediumKeys.has(mediumKey))) {
-          invalidKeys.add(segment.key)
-        }
-      })
+    return getInvalidSegmentKeys({
+      invalidSelectedMediumKeys,
+      programNodes
     })
-
-    return invalidKeys
   }, [invalidSelectedMediumKeys, programNodes])
 
   const invalidProgramKeys = useMemo(() => {
