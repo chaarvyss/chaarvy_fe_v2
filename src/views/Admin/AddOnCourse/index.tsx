@@ -1,9 +1,11 @@
 import { useState } from 'react'
 
 import { IconButton } from '@muiElements'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
 import Tag from 'src/reusable_components/tag'
+import { useCreateUpdateProgramAddonCourseMutation } from 'src/store/services/adminServices'
 import { useGetAddonCoursesListQuery } from 'src/store/services/listServices'
 import GetChaarvyIcons from 'src/utils/icons'
 
@@ -14,6 +16,23 @@ const AddOnCourse = () => {
   const [selectedCourse, setSelectedCourse] = useState<AddonCourseDetail>()
 
   const { data: addonCourses, isFetching: isfetchingAddonCourses } = useGetAddonCoursesListQuery(false)
+
+  const { triggerToast } = useToast()
+  const [createUpdateProgramAddonCourse] = useCreateUpdateProgramAddonCourseMutation()
+
+  const handleToggleStatus = async (courseData: AddonCourseDetail) => {
+    createUpdateProgramAddonCourse({
+      addon_course_id: courseData.addon_course_id,
+      addon_course_name: courseData.addon_course_name,
+      status: courseData.status === 1 ? 0 : 1
+    })
+      .unwrap()
+      .then(() => {
+        triggerToast('Course saved successfully', { variant: ToastVariants.SUCCESS })
+        setSelectedCourse(undefined)
+      })
+      .catch(() => triggerToast('Failed to save course', { variant: ToastVariants.ERROR }))
+  }
 
   const columns: ChaarvyTableColumn[] = [
     {
@@ -30,7 +49,7 @@ const AddOnCourse = () => {
     {
       id: 'status',
       label: 'Status',
-      render: rowData => <Tag status={parseInt(rowData.status)} onClick={() => alert(`Status: ${rowData.status}`)} />
+      render: rowData => <Tag status={parseInt(rowData.status)} onClick={() => handleToggleStatus(rowData)} />
     },
     {
       id: 'actions',
@@ -41,7 +60,8 @@ const AddOnCourse = () => {
           onClick={() =>
             setSelectedCourse({
               addon_course_id: rowData.addon_course_id,
-              addon_course_name: rowData.addon_course_name
+              addon_course_name: rowData.addon_course_name,
+              status: rowData.status
             })
           }
         >

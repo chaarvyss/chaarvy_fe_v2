@@ -42,6 +42,7 @@ export interface MediumFieldValues {
 export interface AddonCourseDetail {
   addon_course_id: string
   addon_course_name: string
+  status?: number
 }
 
 export interface ProgramAddonCourseModalProps {
