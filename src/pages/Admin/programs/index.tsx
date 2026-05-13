@@ -1,3 +1,4 @@
+import { useFlags } from 'launchdarkly-react-client-sdk'
 import React, { useEffect, useState } from 'react'
 
 import { Typography } from '@muiElements'
@@ -12,10 +13,10 @@ import { useUpdateProgramStatusMutation } from 'src/store/services/adminServices
 import { useLazyGetProgramsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
 import ProgramBooksModal from 'src/views/Admin/Programs/Modals/ProgramBooks'
+import ProgramFeesModal from 'src/views/Admin/Programs/Modals/ProgramFees'
 
 import CreateOrUpdateProgramModal from './createUpdateProgram'
-import ProgramAddonCourseModal from './program_addon_courses_modal'
-import ProgramFeesModal from './program_fees_modal'
+import ProgramFeesModalOld from './program_fees_modal'
 import ProgramViewModal from './program_view_modal'
 
 interface ProgramModals {
@@ -23,7 +24,6 @@ interface ProgramModals {
   fees_details_list_modal: boolean
   books_details_list_modal: boolean
   view_program_details_modal: boolean
-  program_addon_details_modal: boolean
 }
 
 const Programs = () => {
@@ -31,9 +31,10 @@ const Programs = () => {
     create_program_modal: false,
     fees_details_list_modal: false,
     books_details_list_modal: false,
-    view_program_details_modal: false,
-    program_addon_details_modal: false
+    view_program_details_modal: false
   })
+
+  const { programFees: isProgramFeesEnabled } = useFlags()
 
   const { triggerToast } = useToast()
 
@@ -72,12 +73,7 @@ const Programs = () => {
     setShowModal({ ...showModal, view_program_details_modal: false })
   }
 
-  const handleProgramAddonModalClose = () => {
-    setSelectedProgram(undefined)
-    setShowModal({ ...showModal, program_addon_details_modal: false })
-  }
-
-  const handleKebabOptionClick = (program: Program, option: 'addon' | 'Edit' | 'view' | 'books' | 'fees') => {
+  const handleKebabOptionClick = (program: Program, option: 'Edit' | 'view' | 'books' | 'fees') => {
     setSelectedProgram(program)
     switch (option) {
       case 'Edit':
@@ -92,9 +88,6 @@ const Programs = () => {
         break
       case 'books':
         setShowModal({ ...showModal, books_details_list_modal: true })
-        break
-      case 'addon':
-        setShowModal({ ...showModal, program_addon_details_modal: true })
         break
     }
   }
@@ -120,11 +113,6 @@ const Programs = () => {
         id: eachProgram.program_id,
         label: 'Fees details',
         onOptionClick: () => handleKebabOptionClick(eachProgram, 'fees')
-      },
-      {
-        id: eachProgram.program_id,
-        label: 'Addon programs',
-        onOptionClick: () => handleKebabOptionClick(eachProgram, 'addon')
       }
     ]
   }
@@ -197,24 +185,24 @@ const Programs = () => {
           programId={selectedProgram?.program_id}
         />
       )}
-      {showModal.fees_details_list_modal && (
-        <ProgramFeesModal
-          selectedProgram={selectedProgram}
-          isOpen={showModal.fees_details_list_modal}
-          onClose={handleFeesModalClose}
-        />
-      )}
+      {showModal.fees_details_list_modal &&
+        (isProgramFeesEnabled ? (
+          <ProgramFeesModal
+            selectedProgram={selectedProgram}
+            isOpen={showModal.fees_details_list_modal}
+            onClose={handleFeesModalClose}
+          />
+        ) : (
+          <ProgramFeesModalOld
+            selectedProgram={selectedProgram}
+            isOpen={showModal.fees_details_list_modal}
+            onClose={handleFeesModalClose}
+          />
+        ))}
       {showModal.view_program_details_modal && (
         <ProgramViewModal
           isOpen={showModal.view_program_details_modal}
           onClose={handleProgramViewModalClose}
-          selectedProgram={selectedProgram}
-        />
-      )}
-      {showModal.program_addon_details_modal && (
-        <ProgramAddonCourseModal
-          isOpen={showModal.program_addon_details_modal}
-          onClose={handleProgramAddonModalClose}
           selectedProgram={selectedProgram}
         />
       )}

@@ -34,7 +34,7 @@ import {
 } from 'src/store/services/listServices'
 import { useLazyGetProgramMediumsListQuery } from 'src/store/services/programServices'
 
-interface ProgramFeesDetailsProps {
+export interface ProgramFeesDetailsProps {
   selectedProgram?: Program
   isOpen: boolean
   onClose: () => void
@@ -46,7 +46,7 @@ interface CRUDFees {
   fees?: string | number
 }
 
-const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetailsProps) => {
+const ProgramFeesModalOld = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetailsProps) => {
   const { triggerToast } = useToast()
 
   const [isCreateProgramFeesModalOpen, setIsCreateProgramFeesModalOpen] = useState<boolean>(false)
@@ -385,4 +385,4 @@ const ProgramFeesModal = ({ selectedProgram, isOpen, onClose }: ProgramFeesDetai
   )
 }
 
-export default ProgramFeesModal
+export default ProgramFeesModalOld

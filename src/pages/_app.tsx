@@ -1,9 +1,11 @@
 import type { EmotionCache } from '@emotion/cache'
 import { CacheProvider } from '@emotion/react'
+import { LDProvider } from 'launchdarkly-react-client-sdk'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { Router } from 'next/router'
 import NProgress from 'nprogress'
+import { StrictMode } from 'react'
 import { Provider } from 'react-redux'
 import { ToastContainer } from 'react-toastify'
 import { PersistGate } from 'redux-persist/integration/react'
@@ -43,6 +45,12 @@ if (themeConfig.routingLoader) {
   })
 }
 
+const context = {
+  kind: 'user',
+  key: 'EXAMPLE_CONTEXT_KEY',
+  email: 'biz@face.dev'
+}
+
 const App = (props: ExtendedAppProps) => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
   const getLayout = Component.getLayout ?? (page => <UserLayout>{page}</UserLayout>)
@@ -50,37 +58,43 @@ const App = (props: ExtendedAppProps) => {
   // Variables
 
   return (
-    <ToastProvider>
-      <LoaderProvider>
-        <ImageViewerProvider>
-          <SideDrawerProvider>
-            <Provider store={store}>
-              <PersistGate loading={null} persistor={persistor}>
-                <CacheProvider value={emotionCache}>
-                  <Head>
-                    <title>{`${themeConfig.templateName}`}</title>
-                    <meta name='description' content={`${themeConfig.templateName}`} />
-                    <meta name='keywords' content='Education, ERP, inter, school, Acadamics,Management,Chaarvy' />
-                    <meta name='viewport' content='initial-scale=1, width=device-width' />
-                  </Head>
+    <StrictMode>
+      <LDProvider clientSideID='69f20aac969ff00ab28bbe1f' context={context}>
+        <ToastProvider>
+          <LoaderProvider>
+            <ImageViewerProvider>
+              <SideDrawerProvider>
+                <Provider store={store}>
+                  <PersistGate loading={null} persistor={persistor}>
+                    <CacheProvider value={emotionCache}>
+                      <Head>
+                        <title>{`${themeConfig.templateName}`}</title>
+                        <meta name='description' content={`${themeConfig.templateName}`} />
+                        <meta name='keywords' content='Education, ERP, inter, school, Acadamics,Management,Chaarvy' />
+                        <meta name='viewport' content='initial-scale=1, width=device-width' />
+                      </Head>
 
-                  <SettingsProvider>
-                    <SettingsConsumer>
-                      {({ settings }) => {
-                        return (
-                          <ThemeComponent settings={settings}>{getLayout(<Component {...pageProps} />)}</ThemeComponent>
-                        )
-                      }}
-                    </SettingsConsumer>
-                    <ToastContainer />
-                  </SettingsProvider>
-                </CacheProvider>
-              </PersistGate>
-            </Provider>
-          </SideDrawerProvider>
-        </ImageViewerProvider>
-      </LoaderProvider>
-    </ToastProvider>
+                      <SettingsProvider>
+                        <SettingsConsumer>
+                          {({ settings }) => {
+                            return (
+                              <ThemeComponent settings={settings}>
+                                {getLayout(<Component {...pageProps} />)}
+                              </ThemeComponent>
+                            )
+                          }}
+                        </SettingsConsumer>
+                        <ToastContainer />
+                      </SettingsProvider>
+                    </CacheProvider>
+                  </PersistGate>
+                </Provider>
+              </SideDrawerProvider>
+            </ImageViewerProvider>
+          </LoaderProvider>
+        </ToastProvider>
+      </LDProvider>
+    </StrictMode>
   )
 }
 
