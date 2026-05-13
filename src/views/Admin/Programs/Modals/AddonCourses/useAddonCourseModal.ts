@@ -128,11 +128,12 @@ export const useAddonCourseModal = ({
   useEffect(() => {
     setExpandedPrograms(prev => {
       const next = { ...prev }
-      programNodes.forEach(program => {
-        if (typeof next[program.key] === 'undefined') {
+
+      for (const program of programNodes) {
+        if (!(program.key in next)) {
           next[program.key] = false
         }
-      })
+      }
 
       return next
     })
