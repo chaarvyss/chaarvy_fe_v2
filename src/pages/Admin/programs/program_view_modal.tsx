@@ -20,25 +20,17 @@ import React, { useEffect, useState } from 'react'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TableHeaders } from 'src/lib/interfaces'
-import { Program } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { useCreateProgramSegmentMutation, useCreateUpdateSegmentMutation } from 'src/store/services/adminServices'
 import { useGetSegmentsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
-
-// ✅ NEW API (you must implement this in your service)
+import { ProgramView } from 'src/views/Admin/Programs/Modals/ProgramView'
 
 import ProgramMediums from './program_mediums'
 import ProgramSecondLanguage from './program_second_language'
 import ProgramSection from './program_sections'
 
-interface ProgramView {
-  selectedProgram?: Program
-  isOpen: boolean
-  onClose: () => void
-}
-
-const ProgramViewModal = ({ selectedProgram, isOpen, onClose }: ProgramView) => {
+const ProgramViewModalOld = ({ selectedProgram, isOpen, onClose }: ProgramView) => {
   const { triggerToast } = useToast()
 
   const { data: segments } = useGetSegmentsListQuery()
@@ -239,4 +231,4 @@ const ProgramViewModal = ({ selectedProgram, isOpen, onClose }: ProgramView) => 
   )
 }
 
-export default ProgramViewModal
+export default ProgramViewModalOld

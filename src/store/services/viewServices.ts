@@ -6,7 +6,7 @@ import { Address } from './admisissionsService'
 import api from './api'
 import { CacheTag } from './cacheTag'
 
-interface ProgramSegment {
+export interface ProgramSegment {
   segment_name: string
   program_segment_id: string
   segment_id: string
@@ -126,6 +126,7 @@ const viewServiceApi = api.injectEndpoints({
 
 export const {
   useLazyGetProgramSegmentDetailsQuery,
+  useGetProgramSegmentDetailsQuery,
   useGetCollegeDetailsQuery,
   useLazyGetCollegeDetailsQuery,
   useLazyGetPaymentDetailQuery,

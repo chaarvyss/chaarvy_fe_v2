@@ -28,7 +28,9 @@ export interface ChaarvyTableColumn<T = any> {
   hideable?: boolean
   defaultHidden?: boolean
   editable?: boolean
-  inputType?: 'text' | 'number' | 'select'
+  readonly?: boolean
+  inputType?: 'text' | 'number' | 'select' | 'checkbox'
+  inputLabel?: string
   uniqueOptionsOnly?: boolean
   options?: { label: string; value: any }[]
   render?: (row: T, index: number) => ReactNode
@@ -56,6 +58,7 @@ export interface ChaarvyDataTableProps<T = any> {
   isSubmitting?: boolean
   showDefaultEntryButton?: boolean
   defaultEntryData?: T[]
+  shouldHideActions?: boolean
 }
 
 const ChaarvyDataTable = <T extends Record<string, any>>({
@@ -71,7 +74,8 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   loadingText,
   isSubmitting = false,
   showDefaultEntryButton = false,
-  defaultEntryData
+  defaultEntryData,
+  shouldHideActions = false
 }: ChaarvyDataTableProps<T>) => {
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({})
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -166,7 +170,8 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   const handleAddRow = () => {
     const emptyRow: any = {}
     columns.forEach(col => {
-      emptyRow[col.id] = ''
+      if (col.inputType === 'checkbox') emptyRow[col.id] = false
+      else emptyRow[col.id] = ''
     })
 
     setDraftData(prev => {
@@ -257,7 +262,14 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   const deletedRowBg = '#ffebee'
 
   const getIsEditableCell = (row: T, col: ChaarvyTableColumn, isRowEditing: boolean) => {
+    if (col.readonly) return false
+    if (col.inputType === 'checkbox' && col.editable) return true
+
     return isRowEditing && col.editable && (col.inputType !== 'select' || row.restrictEdit !== true)
+  }
+
+  const getIsReadonlyEditCell = (row: T, col: ChaarvyTableColumn, isRowEditing: boolean) => {
+    return isRowEditing && col.readonly
   }
 
   const getAvailableOptions = (col: ChaarvyTableColumn, rowIndex: number) => {
@@ -384,7 +396,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                 </TableCell>
               ))}
 
-              {editable && (
+              {editable && !shouldHideActions && (
                 <TableCell
                   align='right'
                   sx={{
@@ -423,13 +435,15 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                         textDecoration: row.status === 0 ? 'line-through' : 'none'
                       }}
                     >
-                      {getIsEditableCell(row, col, isRowEditing) ? (
+                      {getIsEditableCell(row, col, isRowEditing) || getIsReadonlyEditCell(row, col, isRowEditing) ? (
                         col.inputType === 'select' ? (
                           <Select
                             value={row[col.id]}
                             onChange={e => handleCellChange(index, col.id, e.target.value)}
                             size='small'
                             fullWidth
+                            disabled={getIsReadonlyEditCell(row, col, isRowEditing)}
+                            sx={getIsReadonlyEditCell(row, col, isRowEditing) ? { cursor: 'not-allowed' } : undefined}
                           >
                             {getAvailableOptions(col, index).map(opt => (
                               <MenuItem key={opt.value} value={opt.value}>
@@ -437,6 +451,21 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                               </MenuItem>
                             ))}
                           </Select>
+                        ) : col.inputType === 'checkbox' ? (
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={Boolean(row[col.id])}
+                                onChange={e => handleCellChange(index, col.id, e.target.checked)}
+                                size='small'
+                                disabled={getIsReadonlyEditCell(row, col, isRowEditing)}
+                                sx={
+                                  getIsReadonlyEditCell(row, col, isRowEditing) ? { cursor: 'not-allowed' } : undefined
+                                }
+                              />
+                            }
+                            label={col.inputLabel ?? ''}
+                          />
                         ) : (
                           <TextField
                             type={col.inputType || 'text'}
@@ -444,19 +473,26 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                             onChange={e => handleCellChange(index, col.id, e.target.value)}
                             size='small'
                             fullWidth
+                            disabled={getIsReadonlyEditCell(row, col, isRowEditing)}
+                            sx={getIsReadonlyEditCell(row, col, isRowEditing) ? { cursor: 'not-allowed' } : undefined}
                           />
                         )
                       ) : col.render ? (
                         col.render(row, index)
                       ) : col.inputType === 'select' ? (
                         (col.options?.find(opt => opt.value === row[col.id])?.label ?? '')
+                      ) : col.inputType === 'checkbox' ? (
+                        <FormControlLabel
+                          control={<Checkbox checked={Boolean(row[col.id])} disabled size='small' />}
+                          label={col.inputLabel ?? ''}
+                        />
                       ) : (
                         row[col.id]
                       )}
                     </TableCell>
                   ))}
 
-                  {editable && (
+                  {editable && !shouldHideActions && (
                     <TableCell align='right'>
                       <ChaarvyFlex className={{ justifyContent: 'end' }}>
                         <Tooltip title={isRowEditing ? 'Save' : 'Edit'} placement='top'>
