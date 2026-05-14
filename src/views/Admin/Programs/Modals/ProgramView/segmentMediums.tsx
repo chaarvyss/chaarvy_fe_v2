@@ -16,7 +16,7 @@ const SegmentMediums = ({ segments, languages, isLoading }: ProgramViewTabProps)
 
   const columns: ChaarvyTableColumn[] = useMemo(() => {
     const languagesColumns: ChaarvyTableColumn[] = (languages ?? []).map(each => ({
-      id: each.languages_id,
+      id: `lgid__${each.languages_id}`,
       label: each.languages_name,
       editable: true,
       inputType: 'checkbox'
@@ -42,13 +42,21 @@ const SegmentMediums = ({ segments, languages, isLoading }: ProgramViewTabProps)
   }, [segments, languages])
 
   const defaultEntryData = useMemo(() => {
-    if (!segments || !languages) return []
+    if (!segments?.length || !languages?.length) return []
 
-    const language_ids = languages.map(({ languages_id }) => languages_id)
+    const getValue = (name: string) => {
+      const lower = name.toLowerCase()
+
+      return lower.startsWith('eng') || lower.startsWith('tel')
+    }
+
+    const languageDefaults = Object.fromEntries(
+      languages.map(({ languages_id, languages_name }) => [`lgid__${languages_id}`, getValue(languages_name)])
+    )
 
     return segments.map(({ segment_id }) => ({
       segment_id,
-      ...Object.fromEntries(language_ids.map(languageId => [`lgid__${languageId}`, false]))
+      ...languageDefaults
     }))
   }, [segments, languages])
 
