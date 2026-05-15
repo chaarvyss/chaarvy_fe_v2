@@ -10,10 +10,11 @@ import { ReactNode } from 'react'
 import { Settings } from 'src/@core/context/settingsContext'
 
 interface Props {
-  hidden: boolean
   settings: Settings
-  toggleNavVisibility: () => void
-  saveSettings: (values: Settings) => void
+
+  // hidden: boolean
+  // toggleNavVisibility: () => void
+  // saveSettings: (values: Settings) => void
   verticalAppBarContent?: (props?: any) => ReactNode
 }
 
@@ -45,10 +46,11 @@ const LayoutAppBar = (props: Props) => {
   // ** Props
   const {
     settings,
-    verticalAppBarContent: userVerticalAppBarContent,
-    hidden,
-    toggleNavVisibility,
-    saveSettings
+    verticalAppBarContent: userVerticalAppBarContent
+
+    // hidden,
+    // toggleNavVisibility,
+    // saveSettings
   } = props
 
   // ** Hooks
@@ -56,9 +58,6 @@ const LayoutAppBar = (props: Props) => {
 
   // ** Vars
   const { contentWidth } = settings
-
-  // todo: need to use below props as well
-  console.log({ hidden, toggleNavVisibility, saveSettings })
 
   return (
     <AppBar elevation={0} color='default' className='layout-navbar' position='static'>

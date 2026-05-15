@@ -30,6 +30,12 @@ export type CreateProgramBookRequest = CascadingSelectorState & {
   status: number
 }
 
+export type CreateUpdateProgramSegmentMedium = CascadingSelectorState & {
+  program_segment_medium_id?: string
+  status?: number
+  sequence?: number
+}
+
 const programServicesApi = api.injectEndpoints({
   endpoints: build => ({
     getProgramAddonList: build.query<ProgramAddonCourseResponse[], string>({
@@ -72,7 +78,6 @@ const programServicesApi = api.injectEndpoints({
         }
       }
     }),
-
     getProgramMediumsList: build.query<ProgramSecondLanguagesResponse[], string>({
       query: program_id => {
         return {
@@ -110,7 +115,6 @@ const programServicesApi = api.injectEndpoints({
         }
       }
     }),
-
     createUpdateProgramBook: build.mutation<BulkProcessResponse, CreateProgramBookRequest[]>({
       invalidatesTags: [CacheTag.ListProgramBooks],
       query: body => {
@@ -118,6 +122,26 @@ const programServicesApi = api.injectEndpoints({
           method: HttpRequestMethods.POST,
           url: urlConstants.program.createUpdateProgramBook,
           body
+        }
+      }
+    }),
+    createUpdateProgramSegmentMedium: build.mutation<BulkProcessResponse, CreateUpdateProgramSegmentMedium[]>({
+      invalidatesTags: [CacheTag.ListProgramSegmentMediums],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.program.createUpdateProgramSegmentMedium,
+          body
+        }
+      }
+    }),
+    getProgramSegmentMediumsList: build.query<CreateUpdateProgramSegmentMedium[], string>({
+      providesTags: [CacheTag.ListProgramSegmentMediums],
+      query: program_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.program.getProgramSegmentMediums,
+          params: { program_id }
         }
       }
     })
@@ -135,5 +159,7 @@ export const {
   useGetProgramSectionListQuery,
   useLazyGetProgramSectionListQuery,
   useUpdateProgramSectionMutation,
-  useCreateUpdateProgramBookMutation
+  useCreateUpdateProgramBookMutation,
+  useCreateUpdateProgramSegmentMediumMutation,
+  useGetProgramSegmentMediumsListQuery
 } = programServicesApi

@@ -28,6 +28,7 @@ interface ProgramViewTabs {
 }
 
 export interface ProgramViewTabProps {
+  program_id?: string
   segments?: ProgramSegment[]
   languages?: Language[]
   isLoading: boolean
@@ -50,7 +51,14 @@ const ProgramViewModal = ({ selectedProgram, isOpen, onClose }: ProgramView) => 
   const tabs: ProgramViewTabs[] = [
     {
       value: Tabs.MEDIUMS,
-      component: <SegmentMediums segments={programSegments} isLoading={isLoading} languages={languagesList} />,
+      component: (
+        <SegmentMediums
+          program_id={selectedProgram?.program_id}
+          segments={programSegments}
+          isLoading={isLoading}
+          languages={languagesList}
+        />
+      ),
       label: 'Mediums'
     },
     { value: Tabs.LANGUAGES, component: <Typography>Languages</Typography>, label: 'Languages' }

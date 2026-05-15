@@ -20,7 +20,8 @@ export enum CacheTag {
   User = 'user',
   UserPermissions = 'userPermissions',
   Section = 'section',
-  RolesList = 'roles_list'
+  RolesList = 'roles_list',
+  ListProgramSegmentMediums = 'prgSegMed'
 }
 
 export enum MasterCacheTag {

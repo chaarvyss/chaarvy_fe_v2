@@ -124,10 +124,12 @@ export const urlConstants = {
     getProgramSecondLanguages: `${interRoutePrefix.program}/program-second-language`,
     getProgramMediums: `${interRoutePrefix.program}/program-mediums`,
     getProgramSections: `${interRoutePrefix.program}/program-sections`,
+    getProgramSegmentMediums: `${interRoutePrefix.program}/program-segment-mediums`,
     updateProgramSecondLanguages: `${interRoutePrefix.program}/update-program-second-language`,
     updateProgramMediums: `${interRoutePrefix.program}/update-program-mediums`,
     updateProgramSections: `${interRoutePrefix.program}/update-program-sections`,
-    createUpdateProgramBook: `${interRoutePrefix.program}/create-update-program-book`
+    createUpdateProgramBook: `${interRoutePrefix.program}/create-update-program-book`,
+    createUpdateProgramSegmentMedium: `${interRoutePrefix.program}/create-update-program-segment-medium`
   },
   view: {
     programSegments: `${interRoutePrefix.view}/program-segment`,

@@ -91,38 +91,30 @@ const Programs = () => {
       case 'books':
         setShowModal({ ...showModal, books_details_list_modal: true })
         break
-      case 'addon':
-        setShowModal({ ...showModal, program_addon_details_modal: true })
-        break
     }
   }
 
   const getKebabOptions = (eachProgram: Program) => {
     return [
       {
-        id: eachProgram.program_id,
+        id: `${eachProgram.program_id}__view`,
         label: 'View',
         onOptionClick: () => handleKebabOptionClick(eachProgram, 'view')
       },
       {
-        id: eachProgram.program_id,
+        id: `${eachProgram.program_id}__edit`,
         label: 'Edit',
         onOptionClick: () => handleKebabOptionClick(eachProgram, 'Edit')
       },
       {
-        id: eachProgram.program_id,
+        id: `${eachProgram.program_id}__book-details`,
         label: 'Books Details',
         onOptionClick: () => handleKebabOptionClick(eachProgram, 'books')
       },
       {
-        id: eachProgram.program_id,
+        id: `${eachProgram.program_id}__fees-details`,
         label: 'Fees details',
         onOptionClick: () => handleKebabOptionClick(eachProgram, 'fees')
-      },
-      {
-        id: eachProgram.program_id,
-        label: 'Addon programs',
-        onOptionClick: () => handleKebabOptionClick(eachProgram, 'addon')
       }
     ]
   }

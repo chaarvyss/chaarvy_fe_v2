@@ -1,18 +1,29 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 
 import { Typography } from '@muiElements'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import ChaarvyDataTable, {
   ChaarvyTableColumn,
   EditedDataTableOnSubmitPayload
 } from 'src/reusable_components/Table/ChaarvyDataTable'
+import {
+  useCreateUpdateProgramSegmentMediumMutation,
+  useGetProgramSegmentMediumsListQuery
+} from 'src/store/services/programServices'
 
 import { ProgramViewTabProps } from '.'
 
-const SegmentMediums = ({ segments, languages, isLoading }: ProgramViewTabProps) => {
-  const [showDefaultSetButton, setShowDefaultSetButton] = useState<boolean>(false)
-  useEffect(() => {
-    setShowDefaultSetButton(true)
-  }, [])
+const SegmentMediums = ({ program_id, segments, languages, isLoading }: ProgramViewTabProps) => {
+  const { triggerToast } = useToast()
+
+  const [createUpdateData, { isLoading: isSubmitting }] = useCreateUpdateProgramSegmentMediumMutation()
+
+  const { data: programSegmentMediumsResponse, isFetching: isFetchingData } = useGetProgramSegmentMediumsListQuery(
+    program_id ?? '',
+    {
+      skip: !program_id
+    }
+  )
 
   const columns: ChaarvyTableColumn[] = useMemo(() => {
     const languagesColumns: ChaarvyTableColumn[] = (languages ?? []).map(each => ({
@@ -60,34 +71,69 @@ const SegmentMediums = ({ segments, languages, isLoading }: ProgramViewTabProps)
     }))
   }, [segments, languages])
 
-  const data = [
-    // {
-    //   '67abe199-4a38-4559-92ac-a003ca11eeae': true,
-    //   segment_id: 'ca15f750-335f-44ae-8b6e-a5832e34fcca'
-    // }
-  ]
+  const data = useMemo(() => {
+    if (!programSegmentMediumsResponse) return []
+    const obs: Record<string, any> = {}
+    programSegmentMediumsResponse.forEach(each => {
+      if (!each.segment) return
+
+      obs[each?.segment] = {
+        ...obs[each?.segment],
+        segment_id: each.segment,
+        [`lgid__${each.medium}`]: each.status === 1
+      }
+    })
+
+    return Object.values(obs)
+  }, [programSegmentMediumsResponse])
 
   const handleSubmitClick = (data: EditedDataTableOnSubmitPayload) => {
-    const { created, updated, deleted } = data
-    console.log(created, updated, deleted)
+    const format_data_to_payload = (item: any) => {
+      return Object.entries(item)
+        .filter(([key]) => key.startsWith('lgid__'))
+        .map(([key, value]) => ({
+          ...(item?.program_segment_medium_id && { uid: item.program_segment_medium_id }),
+          program: program_id,
+          segment: item?.segment_id,
+          medium: key.replace('lgid__', ''),
+          status: value ? 1 : 0
+        }))
+    }
+
+    const { created, updated } = data
+    const payload = [...created, ...updated].flatMap(each => format_data_to_payload(each))
+
+    createUpdateData(payload)
+      .unwrap()
+      .then(() => triggerToast('Process completed', { variant: ToastVariants.SUCCESS }))
+      .catch(e => {
+        triggerToast(e, { variant: ToastVariants.ERROR })
+      })
   }
 
+  const showDefaultSetButton = useMemo(
+    () => !isLoading && !isFetchingData && programSegmentMediumsResponse?.length == 0,
+    [isLoading, isFetchingData, programSegmentMediumsResponse]
+  )
+
   return (
-    <ChaarvyDataTable
-      showColumnToggle={false}
-      editable
-      columns={columns}
-      data={data}
-      defaultEntryData={defaultEntryData}
-      getRowKey={row => `${row?.segment_id}`}
-      onSubmit={handleSubmitClick}
-      isLoading={isLoading}
-      loadingText='Fetching data...'
-      isSubmitting={false}
-      emptyMessage={''}
-      showDefaultEntryButton={showDefaultSetButton}
-      shouldHideActions
-    />
+    <>
+      <ChaarvyDataTable
+        showColumnToggle={false}
+        editable
+        columns={columns}
+        data={data}
+        defaultEntryData={defaultEntryData}
+        getRowKey={row => `${row?.segment_id}`}
+        onSubmit={handleSubmitClick}
+        isLoading={isLoading || isFetchingData}
+        loadingText='Fetching data...'
+        isSubmitting={isSubmitting}
+        emptyMessage={'No default data found. Please use default data'}
+        showDefaultEntryButton={showDefaultSetButton}
+        shouldHideActions
+      />
+    </>
   )
 }
 
