@@ -8,6 +8,7 @@ import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { useGetLanguagesListQuery } from 'src/store/services/listServices'
 import { ProgramSegment, useGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
 
+import ProgramSegmentView from './programSegments'
 import SegmentMediums from './segmentMediums'
 
 export interface ProgramView {
@@ -17,7 +18,9 @@ export interface ProgramView {
 }
 
 enum Tabs {
+  SEGMENTS = 'segments',
   MEDIUMS = 'mediums',
+  SECTIONS = 'sections',
   LANGUAGES = 'languages'
 }
 
@@ -44,11 +47,18 @@ const ProgramViewModal = ({ selectedProgram, isOpen, onClose }: ProgramView) => 
 
   const { data: languagesList, isFetching: isFetchingLanguages } = useGetLanguagesListQuery()
 
-  const [value, setValue] = useState<Tabs>(Tabs.MEDIUMS)
+  const [value, setValue] = useState<Tabs>(Tabs.SEGMENTS)
 
   const isLoading = isFetchingLanguages || isFetchingSegments
 
   const tabs: ProgramViewTabs[] = [
+    {
+      value: Tabs.SEGMENTS,
+      component: (
+        <ProgramSegmentView program_id={selectedProgram?.program_id} segments={programSegments} isLoading={isLoading} />
+      ),
+      label: 'Segments'
+    },
     {
       value: Tabs.MEDIUMS,
       component: (
@@ -60,6 +70,11 @@ const ProgramViewModal = ({ selectedProgram, isOpen, onClose }: ProgramView) => 
         />
       ),
       label: 'Mediums'
+    },
+    {
+      value: Tabs.SECTIONS,
+      component: <Typography>Sections</Typography>,
+      label: 'Sections'
     },
     { value: Tabs.LANGUAGES, component: <Typography>Languages</Typography>, label: 'Languages' }
   ]

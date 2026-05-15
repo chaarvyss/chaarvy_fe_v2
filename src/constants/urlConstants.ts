@@ -83,7 +83,8 @@ export const urlConstants = {
       collegeProfile: `${interRoutePrefix.admin}/update-mydetails`,
       collgeLogo: `${interRoutePrefix.admin}/update-college-logo`,
       userStatus: `${interRoutePrefix.admin}/update-user-status`,
-      updateUserPermissions: `${interRoutePrefix.admin}/update-user-permission`
+      updateUserPermissions: `${interRoutePrefix.admin}/update-user-permission`,
+      programSegmentStatus: `${interRoutePrefix.admin}/update-program-segment-status`
     },
     delete: {
       programBook: `${interRoutePrefix.admin}/delete-program-book`

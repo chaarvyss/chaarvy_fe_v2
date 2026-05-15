@@ -101,6 +101,11 @@ export type ProgramAddonCourseRequest = {
   program_addon_courses?: AddonCourseDetails[]
 }
 
+type ProgramSegmentStatusUpdateRequest = {
+  program_segment_id: string
+  status: number
+}
+
 const adminServiceApi = api.injectEndpoints({
   endpoints: build => ({
     createAddonCourse: build.mutation<string, string>({
@@ -359,6 +364,16 @@ const adminServiceApi = api.injectEndpoints({
           body
         }
       }
+    }),
+    updateProgramSegmentStatus: build.mutation<string, ProgramSegmentStatusUpdateRequest[]>({
+      invalidatesTags: [CacheTag.ListProgramSegments],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.update.programSegmentStatus,
+          body
+        }
+      }
     })
   })
 })
@@ -388,5 +403,6 @@ export const {
   useCreateUpdateSegmentMutation,
   useCreateUpdateBookMutation,
   useCreateUpdateFeesTypeMutation,
-  useCreateUpdateProgramAddonCourseMutation
+  useCreateUpdateProgramAddonCourseMutation,
+  useUpdateProgramSegmentStatusMutation
 } = adminServiceApi

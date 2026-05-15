@@ -10,6 +10,7 @@ export interface ProgramSegment {
   segment_name: string
   program_segment_id: string
   segment_id: string
+  status: number
 }
 
 export interface CollegeDetailResponse {
