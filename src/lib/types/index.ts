@@ -156,8 +156,8 @@ export type ProgramSegmentMediumsListResponse = {
   program_segment_medium_id: string
   program_id: string
   segment_name: string
-  segment: string
-  medium: string
+  segment_id: string
+  medium_id: string
   medium_name: string
   status: number
 }

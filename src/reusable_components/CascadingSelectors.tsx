@@ -34,33 +34,37 @@ const CascadingSelectors = ({ onChange, defaultValues }: CascadingSelectorsProps
       }
     )
 
-  const segmentData = useMemo(() => {
-    const seen = new Set<string>()
+  const getUniqueLists = (data: ProgramSegmentMediumsListResponse[]) => {
+    const mediums = [
+      ...new Map(
+        data.map(item => [
+          item.medium_id,
+          {
+            medium_id: item.medium_id,
+            medium_name: item.medium_name
+          }
+        ])
+      ).values()
+    ]
 
-    return (programSegmentMediumsResponse ?? []).reduce<ProgramSegmentMediumsListResponse[]>((segments, item) => {
-      if (!seen.has(item.segment)) {
-        seen.add(item.segment)
-        segments.push(item)
-      }
+    const segments = [
+      ...new Map(
+        data.map(item => [
+          item.segment_id,
+          {
+            segment_id: item.segment_id,
+            segment_name: item.segment_name
+          }
+        ])
+      ).values()
+    ]
 
-      return segments
-    }, [])
+    return { mediums, segments }
+  }
+
+  const { mediums: mediumsData, segments: segmentData } = useMemo(() => {
+    return getUniqueLists(programSegmentMediumsResponse || [])
   }, [programSegmentMediumsResponse])
-
-  const mediumsData = useMemo(() => {
-    const seen = new Set<string>()
-
-    return (programSegmentMediumsResponse ?? [])
-      .filter(item => !values.segment || item.segment === values.segment)
-      .reduce<ProgramSegmentMediumsListResponse[]>((mediums, item) => {
-        if (!seen.has(item.medium)) {
-          seen.add(item.medium)
-          mediums.push(item)
-        }
-
-        return mediums
-      }, [])
-  }, [programSegmentMediumsResponse, values.segment])
 
   useEffect(() => {
     if (defaultValues) {
@@ -107,7 +111,7 @@ const CascadingSelectors = ({ onChange, defaultValues }: CascadingSelectorsProps
         value={values.segment}
         isLoading={isProgramSegmentMediumsLoading}
         options={(segmentData ?? []).map(s => ({
-          value: s.segment,
+          value: s.segment_id,
           label: s.segment_name
         }))}
         onChange={handleSegmentChange}
@@ -119,7 +123,7 @@ const CascadingSelectors = ({ onChange, defaultValues }: CascadingSelectorsProps
         value={values.medium}
         isLoading={isProgramSegmentMediumsLoading}
         options={(mediumsData ?? []).map(m => ({
-          value: m.medium ?? '',
+          value: m.medium_id ?? '',
           label: m.medium_name
         }))}
         onChange={handleMediumChange}
