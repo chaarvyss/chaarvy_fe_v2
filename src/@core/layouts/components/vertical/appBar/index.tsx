@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // ** React Imports
 
 // ** MUI Imports
@@ -11,10 +12,9 @@ import { Settings } from 'src/@core/context/settingsContext'
 
 interface Props {
   settings: Settings
-
-  // hidden: boolean
-  // toggleNavVisibility: () => void
-  // saveSettings: (values: Settings) => void
+  hidden: boolean
+  toggleNavVisibility: () => void
+  saveSettings: (values: Settings) => void
   verticalAppBarContent?: (props?: any) => ReactNode
 }
 
@@ -46,11 +46,10 @@ const LayoutAppBar = (props: Props) => {
   // ** Props
   const {
     settings,
-    verticalAppBarContent: userVerticalAppBarContent
-
-    // hidden,
-    // toggleNavVisibility,
-    // saveSettings
+    verticalAppBarContent: userVerticalAppBarContent,
+    hidden,
+    toggleNavVisibility,
+    saveSettings
   } = props
 
   // ** Hooks

@@ -51,7 +51,9 @@ export const urlConstants = {
     sectionsList: `${interRoutePrefix.list}/sections`,
     programRelatedBooksOptions: `${interRoutePrefix.list}/program-suited-books-options`,
     getProgramSegmentMediumSectionCombinationUrl: `${interRoutePrefix.list}/program-segment-medium-section-combination`,
-    programAddonCourses: `${interRoutePrefix.list}/program-addon-courses`
+    programAddonCourses: `${interRoutePrefix.list}/program-addon-courses`,
+    getProgramCommonMediumsUrl: `${interRoutePrefix.list}/get-program-common-mediums`,
+    getSegementsByProgramAndMediumUrl: `${interRoutePrefix.list}/segments-by-program-medium`
   },
   admin: {
     createUpdateUser: `${interRoutePrefix.admin}/create-update-user`,

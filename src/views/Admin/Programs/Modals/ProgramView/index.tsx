@@ -40,7 +40,7 @@ export interface ProgramViewTabProps {
 
 const ProgramViewModal = ({ selectedProgram, isOpen, onClose }: ProgramView) => {
   const { data: programSegments, isFetching: isFetchingSegments } = useGetProgramSegmentDetailsQuery(
-    selectedProgram?.program_id ?? '',
+    { program_id: selectedProgram?.program_id ?? '' },
     {
       skip: !selectedProgram?.program_id
     }

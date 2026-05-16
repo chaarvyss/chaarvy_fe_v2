@@ -1,12 +1,17 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
-import { Typography } from '@muiElements'
+import { Button, Typography } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
 import ChaarvyDataTable, {
   ChaarvyTableColumn,
   EditedDataTableOnSubmitPayload
 } from 'src/reusable_components/Table/ChaarvyDataTable'
-import { useGetSectionsListQuery } from 'src/store/services/listServices'
+import {
+  useGetProgramCommonMediumsQuery,
+  useGetSectionsListQuery,
+  useGetSegmentsByProgramMediumQuery
+} from 'src/store/services/listServices'
 import {
   useCreateUpdateProgramSegmentSectionMutation,
   useGetProgramSectionListQuery
@@ -14,16 +19,36 @@ import {
 
 import { ProgramViewTabProps } from '.'
 
-const SegmentSections = ({ program_id, segments, isLoading }: ProgramViewTabProps) => {
+const SegmentSections = ({ program_id, isLoading }: ProgramViewTabProps) => {
   const custom_id_prefix = 'seating_capacity__'
 
   const { triggerToast } = useToast()
 
+  const [selectedMedium, setSelectedMedium] = useState<string>()
+
+  const { data: segments, isFetching: isFetchingSegments } = useGetSegmentsByProgramMediumQuery(
+    { program_id: program_id ?? '', medium_id: selectedMedium },
+    {
+      skip: !program_id || !selectedMedium
+    }
+  )
+
   const { data: sectionsData, isFetching: isFetchingSections } = useGetSectionsListQuery()
 
-  const { data: programSections, isFetching: isLoadingData } = useGetProgramSectionListQuery(program_id ?? '', {
+  const { data: segmentMediums } = useGetProgramCommonMediumsQuery(program_id ?? '', {
     skip: !program_id
   })
+
+  const { data: programSections, isFetching: isLoadingData } = useGetProgramSectionListQuery(
+    { program_id: program_id ?? '', medium_id: selectedMedium },
+    {
+      skip: !program_id || !selectedMedium
+    }
+  )
+
+  useEffect(() => {
+    if (segmentMediums) setSelectedMedium(segmentMediums[0].medium_id)
+  }, [segmentMediums])
 
   const [createUpdateSegmentSection, { isLoading: isSubmitting }] = useCreateUpdateProgramSegmentSectionMutation()
 
@@ -48,7 +73,7 @@ const SegmentSections = ({ program_id, segments, isLoading }: ProgramViewTabProp
         id: 'segment_id',
         inputType: 'select',
         label: 'Segments',
-        editable: false,
+        editable: true,
         uniqueOptionsOnly: true,
         options: (segments ?? []).map(segment => ({ value: segment.segment_id, label: segment.segment_name }))
       },
@@ -87,6 +112,7 @@ const SegmentSections = ({ program_id, segments, isLoading }: ProgramViewTabProp
             program_id: program_id,
             segment_id: item?.segment_id,
             section_id,
+            medium_id: selectedMedium,
             seating_capacity: value
           }
         })
@@ -108,7 +134,7 @@ const SegmentSections = ({ program_id, segments, isLoading }: ProgramViewTabProp
   }
 
   const data = useMemo(() => {
-    if (!programSections || isLoadingData) return []
+    if (!programSections || isLoadingData || isFetchingSegments) return []
 
     const rowMap: Record<string, any> = {}
 
@@ -138,6 +164,17 @@ const SegmentSections = ({ program_id, segments, isLoading }: ProgramViewTabProp
 
   return (
     <>
+      <ChaarvyFlex className={{ gap: 2, flexDirection: 'row', justifyContent: 'end', marginTop: 2 }}>
+        {(segmentMediums ?? []).map(each => (
+          <Button
+            size='small'
+            onClick={() => setSelectedMedium(each.medium_id)}
+            variant={selectedMedium == each.medium_id ? 'contained' : 'outlined'}
+          >
+            {each.medium_name}
+          </Button>
+        ))}
+      </ChaarvyFlex>
       <ChaarvyDataTable
         showColumnToggle={false}
         editable
@@ -146,7 +183,7 @@ const SegmentSections = ({ program_id, segments, isLoading }: ProgramViewTabProp
         defaultEntryData={defaultEntryData}
         getRowKey={row => `${row?.segment_id}`}
         onSubmit={handleSubmitClick}
-        isLoading={isLoading || isFetchingSections || isLoadingData}
+        isLoading={isLoading || isFetchingSections || isLoadingData || isFetchingSegments}
         loadingText='Fetching data...'
         isSubmitting={isSubmitting}
         emptyMessage={'No default data found. Please use default data'}

@@ -76,12 +76,12 @@ const SegmentMediums = ({ program_id, segments, languages, isLoading }: ProgramV
     if (!programSegmentMediumsResponse || isFetchingData) return []
     const obs: Record<string, any> = {}
     programSegmentMediumsResponse.forEach(each => {
-      if (!each.segment) return
+      if (!each.segment_id) return
 
-      obs[each?.segment] = {
-        ...obs[each?.segment],
-        segment_id: each.segment,
-        [`lgid__${each.medium}`]: each.status === 1
+      obs[each?.segment_id] = {
+        ...obs[each?.segment_id],
+        segment_id: each.segment_id,
+        [`lgid__${each.medium_id}`]: each.medium_status === 1
       }
     })
 

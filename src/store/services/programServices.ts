@@ -31,10 +31,14 @@ export type CreateProgramBookRequest = CascadingSelectorState & {
   status: number
 }
 
-export type CreateUpdateProgramSegmentMedium = CascadingSelectorState & {
-  program_segment_medium_id?: string
-  status?: number
-  sequence?: number
+export type CreateUpdateProgramSegmentMedium = {
+  program_section_id?: string
+  program_id: string
+  segment_id: string
+  segment_name: string
+  medium_id: string
+  medium_name: string
+  medium_status: number
 }
 
 export type CreateUpdateProgramSegmentSection = {
@@ -42,12 +46,18 @@ export type CreateUpdateProgramSegmentSection = {
   program_id: string
   section_id: string
   segment_id: string
+  medium_id: string
   seating_capacity: number
 }
 
 type ProgramSegmentMediumsListByProgramIdRequest = {
   program_id: string
   only_active: boolean
+}
+
+export type ProgramMediumRequest = {
+  program_id: string
+  medium_id?: string
 }
 
 const programServicesApi = api.injectEndpoints({
@@ -113,13 +123,13 @@ const programServicesApi = api.injectEndpoints({
         }
       }
     }),
-    getProgramSectionList: build.query<ProgramSectionResponse[], string>({
+    getProgramSectionList: build.query<ProgramSectionResponse[], ProgramMediumRequest>({
       providesTags: [CacheTag.ListProgramSegmentSections],
-      query: program_id => {
+      query: params => {
         return {
           method: HttpRequestMethods.GET,
           url: urlConstants.program.getProgramSections,
-          params: { program_id }
+          params
         }
       }
     }),
