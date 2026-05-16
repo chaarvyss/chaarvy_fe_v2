@@ -1,22 +1,35 @@
 import React, { useMemo } from 'react'
 
 import { Typography } from '@muiElements'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import ChaarvyDataTable, {
   ChaarvyTableColumn,
   EditedDataTableOnSubmitPayload
 } from 'src/reusable_components/Table/ChaarvyDataTable'
 import { useGetSectionsListQuery } from 'src/store/services/listServices'
+import {
+  useCreateUpdateProgramSegmentSectionMutation,
+  useGetProgramSectionListQuery
+} from 'src/store/services/programServices'
 
 import { ProgramViewTabProps } from '.'
 
 const SegmentSections = ({ program_id, segments, isLoading }: ProgramViewTabProps) => {
-  //   const { triggerToast } = useToast()
+  const custom_id_prefix = 'seating_capacity__'
 
-  const { data: sectionsData } = useGetSectionsListQuery()
+  const { triggerToast } = useToast()
+
+  const { data: sectionsData, isFetching: isFetchingSections } = useGetSectionsListQuery()
+
+  const { data: programSections, isFetching: isLoadingData } = useGetProgramSectionListQuery(program_id ?? '', {
+    skip: !program_id
+  })
+
+  const [createUpdateSegmentSection, { isLoading: isSubmitting }] = useCreateUpdateProgramSegmentSectionMutation()
 
   const columns: ChaarvyTableColumn[] = useMemo(() => {
     const sectionColumns: ChaarvyTableColumn[] = (sectionsData ?? []).map(each => ({
-      id: `seating_capacity`,
+      id: `${custom_id_prefix}${each.section_id}`,
       label: each.section_name,
       editable: true,
       width: 90,
@@ -36,6 +49,7 @@ const SegmentSections = ({ program_id, segments, isLoading }: ProgramViewTabProp
         inputType: 'select',
         label: 'Segments',
         editable: false,
+        uniqueOptionsOnly: true,
         options: (segments ?? []).map(segment => ({ value: segment.segment_id, label: segment.segment_name }))
       },
       ...sectionColumns
@@ -45,8 +59,8 @@ const SegmentSections = ({ program_id, segments, isLoading }: ProgramViewTabProp
   const defaultEntryData = useMemo(() => {
     if (!segments?.length || !sectionsData?.length) return []
 
-    const sectionDefaults = (sectionsData ?? []).reduce<Record<string, number>>((acc, {}) => {
-      acc[`seating_capacity`] = 0
+    const sectionDefaults = (sectionsData ?? []).reduce<Record<string, number>>((acc, { section_id }) => {
+      acc[`${custom_id_prefix}${section_id}`] = 0
 
       return acc
     }, {})
@@ -58,21 +72,45 @@ const SegmentSections = ({ program_id, segments, isLoading }: ProgramViewTabProp
     }))
   }, [segments, sectionsData])
 
-  const data = [
-    {
-      segment_id: '3d7c40f3-e26c-437f-98fd-a6aad6abe775',
-      program_id: '1d9c747a-770f-447f-8cc1-82904dadde68',
-      seating_capacity: '23'
-    }
-  ]
-
   const handleSubmitClick = (data: EditedDataTableOnSubmitPayload) => {
-    const { created, updated } = data
+    const { created, updated, deleted } = data
 
-    console.log({ created, updated })
+    const format_data_to_payload = (item: any) => {
+      return Object.entries(item)
+        .filter(([key]) => key.startsWith(custom_id_prefix))
+        .map(([key, value]) => ({
+          ...(item?.program_section_id && { program_section_id: item.program_section_id }),
+          program_id: program_id,
+          segment_id: item?.segment_id,
+          section_id: key.replace(custom_id_prefix, ''),
+          seating_capacity: value
+        }))
+    }
+
+    const payload = [
+      ...created,
+      ...updated,
+      ...deleted.map(each => ({ ...each, [`${custom_id_prefix}${each.section_id}`]: 0 }))
+    ].flatMap(each => format_data_to_payload(each))
+
+    createUpdateSegmentSection(payload)
+      .then(() => triggerToast('Details updated', { variant: ToastVariants.SUCCESS }))
+      .catch(e => triggerToast(e, { variant: ToastVariants.ERROR }))
   }
 
-  const showDefaultSetButton = useMemo(() => !isLoading, [isLoading])
+  const data = useMemo(() => {
+    if (!programSections || isLoadingData) return []
+
+    return programSections.map(each => ({
+      ...each,
+      [`${custom_id_prefix}${each.section_id}`]: each.seating_capacity
+    }))
+  }, [programSections, isLoadingData])
+
+  const showDefaultSetButton = useMemo(
+    () => !isLoading && !isFetchingSections && !isLoadingData && data.length == 0,
+    [isLoading, isFetchingSections, isLoadingData, data]
+  )
 
   return (
     <>
@@ -84,9 +122,9 @@ const SegmentSections = ({ program_id, segments, isLoading }: ProgramViewTabProp
         defaultEntryData={defaultEntryData}
         getRowKey={row => `${row?.segment_id}`}
         onSubmit={handleSubmitClick}
-        isLoading={isLoading}
+        isLoading={isLoading || isFetchingSections || isLoadingData}
         loadingText='Fetching data...'
-        isSubmitting={false}
+        isSubmitting={isSubmitting}
         emptyMessage={'No default data found. Please use default data'}
         showDefaultEntryButton={showDefaultSetButton}
       />

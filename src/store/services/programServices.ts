@@ -36,6 +36,14 @@ export type CreateUpdateProgramSegmentMedium = CascadingSelectorState & {
   sequence?: number
 }
 
+export type CreateUpdateProgramSegmentSection = {
+  program_section_id?: string
+  program_id: string
+  section_id: string
+  segment_id: string
+  seating_capacity: number
+}
+
 const programServicesApi = api.injectEndpoints({
   endpoints: build => ({
     getProgramAddonList: build.query<ProgramAddonCourseResponse[], string>({
@@ -97,6 +105,7 @@ const programServicesApi = api.injectEndpoints({
       }
     }),
     getProgramSectionList: build.query<ProgramSectionResponse[], string>({
+      providesTags: [CacheTag.ListProgramSegmentSections],
       query: program_id => {
         return {
           method: HttpRequestMethods.GET,
@@ -144,6 +153,16 @@ const programServicesApi = api.injectEndpoints({
           params: { program_id }
         }
       }
+    }),
+    createUpdateProgramSegmentSection: build.mutation<string, CreateUpdateProgramSegmentSection[]>({
+      invalidatesTags: [CacheTag.ListProgramSegmentSections],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.program.createUpdateProgramSegmentSection,
+          body
+        }
+      }
     })
   })
 })
@@ -161,5 +180,6 @@ export const {
   useUpdateProgramSectionMutation,
   useCreateUpdateProgramBookMutation,
   useCreateUpdateProgramSegmentMediumMutation,
-  useGetProgramSegmentMediumsListQuery
+  useGetProgramSegmentMediumsListQuery,
+  useCreateUpdateProgramSegmentSectionMutation
 } = programServicesApi

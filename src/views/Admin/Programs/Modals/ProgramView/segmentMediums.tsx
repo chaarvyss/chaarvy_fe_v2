@@ -46,6 +46,7 @@ const SegmentMediums = ({ program_id, segments, languages, isLoading }: ProgramV
         inputType: 'select',
         label: 'Segments',
         editable: false,
+        uniqueOptionsOnly: true,
         options: (segments ?? []).map(segment => ({ value: segment.segment_id, label: segment.segment_name }))
       },
       ...languagesColumns
@@ -72,7 +73,7 @@ const SegmentMediums = ({ program_id, segments, languages, isLoading }: ProgramV
   }, [segments, languages])
 
   const data = useMemo(() => {
-    if (!programSegmentMediumsResponse) return []
+    if (!programSegmentMediumsResponse || isFetchingData) return []
     const obs: Record<string, any> = {}
     programSegmentMediumsResponse.forEach(each => {
       if (!each.segment) return
@@ -85,7 +86,7 @@ const SegmentMediums = ({ program_id, segments, languages, isLoading }: ProgramV
     })
 
     return Object.values(obs)
-  }, [programSegmentMediumsResponse])
+  }, [programSegmentMediumsResponse, isFetchingData])
 
   const handleSubmitClick = (data: EditedDataTableOnSubmitPayload) => {
     const format_data_to_payload = (item: any) => {

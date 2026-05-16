@@ -42,14 +42,14 @@ const ProgramSegmentView = ({ segments, isLoading }: ProgramViewTabProps) => {
   }, [segments])
 
   const data = useMemo(() => {
-    if (!segments) return []
+    if (!segments || isLoading) return []
 
     return segments.map(each => ({
       program_segment_id: each.program_segment_id,
       segment_id: each.segment_id,
       status: each.status == 1
     }))
-  }, [segments])
+  }, [segments, isLoading])
 
   const handleSubmitClick = (data: EditedDataTableOnSubmitPayload) => {
     const { created, updated } = data

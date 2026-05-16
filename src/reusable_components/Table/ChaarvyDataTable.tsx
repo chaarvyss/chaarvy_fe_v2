@@ -415,6 +415,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
           <TableBody>
             {draftData.map((row, index) => {
               const isRowEditing = editingRowIndex === index
+              const firstEditableColumnId = displayedColumns.find(col => getIsEditableCell(row, col, isRowEditing))?.id
 
               return (
                 <TableRow
@@ -443,6 +444,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                             size='small'
                             fullWidth
                             disabled={getIsReadonlyEditCell(row, col, isRowEditing)}
+                            autoFocus={col.id === firstEditableColumnId}
                             sx={getIsReadonlyEditCell(row, col, isRowEditing) ? { cursor: 'not-allowed' } : undefined}
                           >
                             {getAvailableOptions(col, index).map(opt => (
@@ -459,6 +461,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                                 onChange={e => handleCellChange(index, col.id, e.target.checked)}
                                 size='small'
                                 disabled={getIsReadonlyEditCell(row, col, isRowEditing)}
+                                autoFocus={col.id === firstEditableColumnId}
                                 sx={
                                   getIsReadonlyEditCell(row, col, isRowEditing) ? { cursor: 'not-allowed' } : undefined
                                 }
@@ -473,6 +476,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                             onChange={e => handleCellChange(index, col.id, e.target.value)}
                             size='small'
                             fullWidth
+                            autoFocus={col.id === firstEditableColumnId}
                             disabled={getIsReadonlyEditCell(row, col, isRowEditing)}
                             sx={getIsReadonlyEditCell(row, col, isRowEditing) ? { cursor: 'not-allowed' } : undefined}
                           />
@@ -529,7 +533,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
 
       {editable && (
         <ChaarvyFlex className={{ flexDirection: 'column', alignItems: 'end', mt: 2 }}>
-          {canAddNewRow() && (
+          {canAddNewRow() && !isLoading && (
             <ChaarvyButton type='button' variant='text' onClick={handleAddRow}>
               Add New Row
             </ChaarvyButton>

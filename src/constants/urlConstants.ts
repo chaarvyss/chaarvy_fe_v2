@@ -130,7 +130,8 @@ export const urlConstants = {
     updateProgramMediums: `${interRoutePrefix.program}/update-program-mediums`,
     updateProgramSections: `${interRoutePrefix.program}/update-program-sections`,
     createUpdateProgramBook: `${interRoutePrefix.program}/create-update-program-book`,
-    createUpdateProgramSegmentMedium: `${interRoutePrefix.program}/create-update-program-segment-medium`
+    createUpdateProgramSegmentMedium: `${interRoutePrefix.program}/create-update-program-segment-medium`,
+    createUpdateProgramSegmentSection: `${interRoutePrefix.program}/create-update-program-segment-section`
   },
   view: {
     programSegments: `${interRoutePrefix.view}/program-segment`,
