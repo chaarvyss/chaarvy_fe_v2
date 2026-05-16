@@ -152,6 +152,16 @@ export type ProgramSecondLanguagesResponse = {
   language_name: string
 }
 
+export type ProgramSegmentMediumsListResponse = {
+  program_segment_medium_id: string
+  program_id: string
+  segment_name: string
+  segment: string
+  medium: string
+  medium_name: string
+  status: number
+}
+
 export type ProgramSectionResponse = {
   section_id: string
   section_name: string

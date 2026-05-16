@@ -123,7 +123,7 @@ export const urlConstants = {
     programAddon: `${interRoutePrefix.program}/program-addon-course`,
     programSegmentMediumBooks: `${interRoutePrefix.program}/program-segment-medium-books`,
     getProgramSecondLanguages: `${interRoutePrefix.program}/program-second-language`,
-    getProgramMediums: `${interRoutePrefix.program}/program-mediums`,
+    getProgramSegmentMediumsByProgramId: `${interRoutePrefix.program}/program-segment-mediums-list`,
     getProgramSections: `${interRoutePrefix.program}/program-sections`,
     getProgramSegmentMediums: `${interRoutePrefix.program}/program-segment-mediums`,
     updateProgramSecondLanguages: `${interRoutePrefix.program}/update-program-second-language`,

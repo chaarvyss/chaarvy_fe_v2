@@ -124,7 +124,7 @@ export interface PaymentsListResponse {
 }
 
 export interface Section {
-  section_id: string
+  section_id?: string
   section_name: string
 }
 

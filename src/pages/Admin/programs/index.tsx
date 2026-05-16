@@ -16,9 +16,9 @@ import ProgramBooksModal from 'src/views/Admin/Programs/Modals/ProgramBooks'
 import ProgramViewModal from 'src/views/Admin/Programs/Modals/ProgramView'
 
 import CreateOrUpdateProgramModal from './createUpdateProgram'
-import ProgramFeesModal from './program_fees_modal'
 import ProgramViewModalOld from './program_view_modal'
 
+// import ProgramFeesModal from './program_fees_modal'
 interface ProgramModals {
   create_program_modal: boolean
   fees_details_list_modal: boolean
@@ -65,10 +65,10 @@ const Programs = () => {
     setShowModal({ ...showModal, books_details_list_modal: false })
   }
 
-  const handleFeesModalClose = () => {
-    setSelectedProgram(undefined)
-    setShowModal({ ...showModal, fees_details_list_modal: false })
-  }
+  // const handleFeesModalClose = () => {
+  //   setSelectedProgram(undefined)
+  //   setShowModal({ ...showModal, fees_details_list_modal: false })
+  // }
 
   const handleProgramViewModalClose = () => {
     setSelectedProgram(undefined)
@@ -110,12 +110,13 @@ const Programs = () => {
         id: `${eachProgram.program_id}__book-details`,
         label: 'Books Details',
         onOptionClick: () => handleKebabOptionClick(eachProgram, 'books')
-      },
-      {
-        id: `${eachProgram.program_id}__fees-details`,
-        label: 'Fees details',
-        onOptionClick: () => handleKebabOptionClick(eachProgram, 'fees')
       }
+
+      // {
+      //   id: `${eachProgram.program_id}__fees-details`,
+      //   label: 'Fees details',
+      //   onOptionClick: () => handleKebabOptionClick(eachProgram, 'fees')
+      // }
     ]
   }
 
@@ -187,13 +188,13 @@ const Programs = () => {
           programId={selectedProgram?.program_id}
         />
       )}
-      {showModal.fees_details_list_modal && (
+      {/* {showModal.fees_details_list_modal && (
         <ProgramFeesModal
           selectedProgram={selectedProgram}
           isOpen={showModal.fees_details_list_modal}
           onClose={handleFeesModalClose}
         />
-      )}
+      )} */}
       {showModal.view_program_details_modal &&
         (!isProgramViewEnabled ? ( // TODO: need to revert when launchDarkly is added
           <ProgramViewModal

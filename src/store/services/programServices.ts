@@ -1,5 +1,6 @@
 import { urlConstants } from 'src/constants/urlConstants'
 import {
+  ProgramSegmentMediumsListResponse,
   ProgramAddonCourseResponse,
   ProgramSecondLanguagesResponse,
   ProgramSectionResponse,
@@ -44,6 +45,11 @@ export type CreateUpdateProgramSegmentSection = {
   seating_capacity: number
 }
 
+type ProgramSegmentMediumsListByProgramIdRequest = {
+  program_id: string
+  only_active: boolean
+}
+
 const programServicesApi = api.injectEndpoints({
   endpoints: build => ({
     getProgramAddonList: build.query<ProgramAddonCourseResponse[], string>({
@@ -86,12 +92,15 @@ const programServicesApi = api.injectEndpoints({
         }
       }
     }),
-    getProgramMediumsList: build.query<ProgramSecondLanguagesResponse[], string>({
-      query: program_id => {
+    getProgramSegmentMediumsListByProgramId: build.query<
+      ProgramSegmentMediumsListResponse[],
+      ProgramSegmentMediumsListByProgramIdRequest
+    >({
+      query: params => {
         return {
           method: HttpRequestMethods.GET,
-          url: urlConstants.program.getProgramMediums,
-          params: { program_id }
+          url: urlConstants.program.getProgramSegmentMediumsByProgramId,
+          params
         }
       }
     }),
@@ -172,8 +181,7 @@ export const {
   useLazyGetPrgMedSegBooksListQuery,
   useLazyGetProgramSecondLanguagesListQuery,
   useUpdateProgramSecondLanguagesListMutation,
-  useLazyGetProgramMediumsListQuery,
-  useGetProgramMediumsListQuery,
+  useGetProgramSegmentMediumsListByProgramIdQuery,
   useUpdateProgramMediumsMutation,
   useGetProgramSectionListQuery,
   useLazyGetProgramSectionListQuery,

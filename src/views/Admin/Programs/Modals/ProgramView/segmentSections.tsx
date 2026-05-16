@@ -78,19 +78,28 @@ const SegmentSections = ({ program_id, segments, isLoading }: ProgramViewTabProp
     const format_data_to_payload = (item: any) => {
       return Object.entries(item)
         .filter(([key]) => key.startsWith(custom_id_prefix))
-        .map(([key, value]) => ({
-          ...(item?.program_section_id && { program_section_id: item.program_section_id }),
-          program_id: program_id,
-          segment_id: item?.segment_id,
-          section_id: key.replace(custom_id_prefix, ''),
-          seating_capacity: value
-        }))
+        .map(([key, value]) => {
+          const section_id = key.replace(custom_id_prefix, '')
+          const program_section_id = item[`program_section_id__${section_id}`] ?? item.program_section_id
+
+          return {
+            ...(program_section_id && { program_section_id }),
+            program_id: program_id,
+            segment_id: item?.segment_id,
+            section_id,
+            seating_capacity: value
+          }
+        })
     }
 
     const payload = [
       ...created,
       ...updated,
-      ...deleted.map(each => ({ ...each, [`${custom_id_prefix}${each.section_id}`]: 0 }))
+      ...deleted.map(each => ({
+        ...each,
+        [`${custom_id_prefix}${each.section_id}`]: 0,
+        [`program_section_id__${each.section_id}`]: each.program_section_id
+      }))
     ].flatMap(each => format_data_to_payload(each))
 
     createUpdateSegmentSection(payload)
@@ -101,10 +110,25 @@ const SegmentSections = ({ program_id, segments, isLoading }: ProgramViewTabProp
   const data = useMemo(() => {
     if (!programSections || isLoadingData) return []
 
-    return programSections.map(each => ({
-      ...each,
-      [`${custom_id_prefix}${each.section_id}`]: each.seating_capacity
-    }))
+    const rowMap: Record<string, any> = {}
+
+    programSections.forEach(each => {
+      const rowKey = each.segment_id
+
+      if (!rowMap[rowKey]) {
+        rowMap[rowKey] = {
+          segment_id: each.segment_id,
+          program_id: each.program_id
+        }
+      }
+
+      rowMap[rowKey][`${custom_id_prefix}${each.section_id}`] = each.seating_capacity
+      if (each.program_section_id) {
+        rowMap[rowKey][`program_section_id__${each.section_id}`] = each.program_section_id
+      }
+    })
+
+    return Object.values(rowMap)
   }, [programSections, isLoadingData])
 
   const showDefaultSetButton = useMemo(

@@ -1,7 +1,8 @@
+import { LoadingButton } from '@mui/lab'
 import { TextField } from '@mui/material'
 import { ChangeEvent, useEffect, useState } from 'react'
 
-import { Box, Button, Grid } from '@muiElements'
+import { Box, Grid } from '@muiElements'
 import { useLoader } from 'src/@core/context/loaderContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Program } from 'src/lib/types'
@@ -44,9 +45,9 @@ const CreateOrUpdateProgramModal = ({ selectedProgram, isOpen, onClose }: Create
   const createProgramFooter = () => {
     return (
       <Box display='flex' justifyContent='center'>
-        <Button onClick={handleSubmit} variant='contained'>
+        <LoadingButton loading={creatingProgram || updatingProgram} onClick={handleSubmit} variant='contained'>
           {selectedProgram ? 'Edit' : 'Create'} Program
-        </Button>
+        </LoadingButton>
       </Box>
     )
   }

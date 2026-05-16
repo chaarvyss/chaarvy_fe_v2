@@ -214,7 +214,6 @@ const listServicesApi = api.injectEndpoints({
         }
       }
     }),
-
     getRolePermissionsList: build.query<Array<string>, string>({
       query: role_id => {
         return {
