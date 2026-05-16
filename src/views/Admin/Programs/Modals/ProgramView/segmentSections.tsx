@@ -134,7 +134,7 @@ const SegmentSections = ({ program_id, isLoading }: ProgramViewTabProps) => {
   }
 
   const data = useMemo(() => {
-    if (!programSections || isLoadingData || isFetchingSegments) return []
+    if (!programSections || isLoadingData) return []
 
     const rowMap: Record<string, any> = {}
 
