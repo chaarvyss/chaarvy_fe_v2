@@ -10,6 +10,7 @@ import { ProgramSegment, useGetProgramSegmentDetailsQuery } from 'src/store/serv
 
 import ProgramSegmentView from './programSegments'
 import SegmentMediums from './segmentMediums'
+import SegmentSections from './segmentSections'
 
 export interface ProgramView {
   selectedProgram?: Program
@@ -73,10 +74,13 @@ const ProgramViewModal = ({ selectedProgram, isOpen, onClose }: ProgramView) => 
     },
     {
       value: Tabs.SECTIONS,
-      component: <Typography>Sections</Typography>,
-      label: 'Sections'
-    },
-    { value: Tabs.LANGUAGES, component: <Typography>Languages</Typography>, label: 'Languages' }
+      component: (
+        <SegmentSections program_id={selectedProgram?.program_id} segments={programSegments} isLoading={isLoading} />
+      ),
+      label: 'Sections (capacity)'
+    }
+
+    // { value: Tabs.LANGUAGES, component: <Typography>Languages</Typography>, label: 'Languages' }
   ]
 
   const handleChange = (_: SyntheticEvent, newTab: Tabs) => {
@@ -97,7 +101,12 @@ const ProgramViewModal = ({ selectedProgram, isOpen, onClose }: ProgramView) => 
           sx={{ borderBottom: t => `1px solid ${t.palette.divider}` }}
         >
           {tabs.map(({ value, label }) => (
-            <Tab key={value} value={value} label={<Typography variant='body1'>{label}</Typography>} />
+            <Tab
+              sx={{ textTransform: 'none' }}
+              key={value}
+              value={value}
+              label={<Typography variant='body1'>{label}</Typography>}
+            />
           ))}
         </TabList>
         {tabs.map(({ value, component }) => (
