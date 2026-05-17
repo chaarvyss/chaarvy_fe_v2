@@ -1,4 +1,3 @@
-import { useFlags } from 'launchdarkly-react-client-sdk'
 import React, { useEffect, useState } from 'react'
 
 import { Typography } from '@muiElements'
@@ -16,9 +15,7 @@ import ProgramBooksModal from 'src/views/Admin/Programs/Modals/ProgramBooks'
 import ProgramViewModal from 'src/views/Admin/Programs/Modals/ProgramView'
 
 import CreateOrUpdateProgramModal from './createUpdateProgram'
-import ProgramViewModalOld from './program_view_modal'
 
-// import ProgramFeesModal from './program_fees_modal'
 interface ProgramModals {
   create_program_modal: boolean
   fees_details_list_modal: boolean
@@ -35,8 +32,6 @@ const Programs = () => {
     view_program_details_modal: false,
     program_addon_details_modal: false
   })
-
-  const { programView: isProgramViewEnabled } = useFlags()
 
   const { triggerToast } = useToast()
 
@@ -64,11 +59,6 @@ const Programs = () => {
     setSelectedProgram(undefined)
     setShowModal({ ...showModal, books_details_list_modal: false })
   }
-
-  // const handleFeesModalClose = () => {
-  //   setSelectedProgram(undefined)
-  //   setShowModal({ ...showModal, fees_details_list_modal: false })
-  // }
 
   const handleProgramViewModalClose = () => {
     setSelectedProgram(undefined)
@@ -111,12 +101,6 @@ const Programs = () => {
         label: 'Books Details',
         onOptionClick: () => handleKebabOptionClick(eachProgram, 'books')
       }
-
-      // {
-      //   id: `${eachProgram.program_id}__fees-details`,
-      //   label: 'Fees details',
-      //   onOptionClick: () => handleKebabOptionClick(eachProgram, 'fees')
-      // }
     ]
   }
 
@@ -188,27 +172,13 @@ const Programs = () => {
           programId={selectedProgram?.program_id}
         />
       )}
-      {/* {showModal.fees_details_list_modal && (
-        <ProgramFeesModal
+      {showModal.view_program_details_modal && (
+        <ProgramViewModal
+          isOpen={showModal.view_program_details_modal}
+          onClose={handleProgramViewModalClose}
           selectedProgram={selectedProgram}
-          isOpen={showModal.fees_details_list_modal}
-          onClose={handleFeesModalClose}
         />
-      )} */}
-      {showModal.view_program_details_modal &&
-        (!isProgramViewEnabled ? ( // TODO: need to revert when launchDarkly is added
-          <ProgramViewModal
-            isOpen={showModal.view_program_details_modal}
-            onClose={handleProgramViewModalClose}
-            selectedProgram={selectedProgram}
-          />
-        ) : (
-          <ProgramViewModalOld
-            isOpen={showModal.view_program_details_modal}
-            onClose={handleProgramViewModalClose}
-            selectedProgram={selectedProgram}
-          />
-        ))}
+      )}
     </>
   )
 }
