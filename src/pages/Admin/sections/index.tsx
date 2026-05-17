@@ -1,4 +1,5 @@
-import { Button, SelectChangeEvent } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { SelectChangeEvent } from '@mui/material'
 import React, { ChangeEvent, useState } from 'react'
 
 import {
@@ -24,7 +25,7 @@ import { useCreateUpdateSectionMutation } from 'src/store/services/adminServices
 import { useGetSectionsListQuery } from 'src/store/services/listServices'
 
 const defaultSectionState = {
-  section_id: '',
+  section_id: undefined,
   section_name: ''
 }
 
@@ -50,7 +51,7 @@ const Sections = () => {
     switch (option) {
       case 'Edit':
         setSelectedSection(prev => ({
-          section_id: prev?.section_id ?? '',
+          section_id: prev?.section_id,
           section_name: prev?.section_name ?? ''
         }))
         setSectionModalOpen(true)
@@ -113,9 +114,9 @@ const Sections = () => {
         </Grid>
         <Grid item xs={12}>
           <Box display='flex' flexDirection='column'>
-            <Button disabled={!selectedSection?.section_name} onClick={handleSubmit}>
+            <LoadingButton loading={isCreating} disabled={!selectedSection?.section_name} onClick={handleSubmit}>
               Submit
-            </Button>
+            </LoadingButton>
           </Box>
         </Grid>
       </Grid>
@@ -155,7 +156,7 @@ const Sections = () => {
           </TableContainer>
         ) : (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Typography>No Books Available</Typography>
+            <Typography>No Section Available</Typography>
           </Box>
         )}
       </Card>

@@ -5,11 +5,13 @@ import { HttpRequestMethods } from '..'
 import { Address } from './admisissionsService'
 import api from './api'
 import { CacheTag } from './cacheTag'
+import { ProgramMediumRequest } from './programServices'
 
-interface ProgramSegment {
+export interface ProgramSegment {
   segment_name: string
   program_segment_id: string
   segment_id: string
+  status: number
 }
 
 export interface CollegeDetailResponse {
@@ -64,13 +66,13 @@ export interface PaymentDetailResponse {
 
 const viewServiceApi = api.injectEndpoints({
   endpoints: build => ({
-    getProgramSegmentDetails: build.query<ProgramSegment[], string>({
+    getProgramSegmentDetails: build.query<ProgramSegment[], ProgramMediumRequest>({
       providesTags: [CacheTag.ListProgramSegments],
-      query: program_id => {
+      query: params => {
         return {
           method: HttpRequestMethods.GET,
           url: urlConstants.view.programSegments,
-          params: { program_id }
+          params
         }
       }
     }),
@@ -126,6 +128,7 @@ const viewServiceApi = api.injectEndpoints({
 
 export const {
   useLazyGetProgramSegmentDetailsQuery,
+  useGetProgramSegmentDetailsQuery,
   useGetCollegeDetailsQuery,
   useLazyGetCollegeDetailsQuery,
   useLazyGetPaymentDetailQuery,

@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.6.0...v1.6.1) (2026-05-17)
+
+
+### Bug Fixes
+
+* **programView:** AC-45 fe program view mediums languages segments ([#42](https://github.com/chaarvyss/chaarvy_fe_v2/issues/42)) ([aa47cf5](https://github.com/chaarvyss/chaarvy_fe_v2/commit/aa47cf5e1db1814af945c09d4b11ce6ad3398ec7))
+
 # [1.6.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.5.3...v1.6.0) (2026-05-13)
 
 

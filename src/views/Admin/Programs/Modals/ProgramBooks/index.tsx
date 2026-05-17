@@ -149,7 +149,7 @@ const ProgramBooksModal = ({ isOpen = true, onClose, programId }: ProgramBooksMo
 
   return (
     <ChaarvyModal
-      key={programId}
+      key={`${programId}__programs-list`}
       isOpen={isOpen}
       onClose={onClose}
       title='Program Books'

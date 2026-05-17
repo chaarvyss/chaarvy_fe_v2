@@ -14,10 +14,10 @@ import { useLazyGetProgramsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
 import ProgramBooksModal from 'src/views/Admin/Programs/Modals/ProgramBooks'
 import ProgramFeesModal from 'src/views/Admin/Programs/Modals/ProgramFees'
+import ProgramViewModal from 'src/views/Admin/Programs/Modals/ProgramView'
 
 import CreateOrUpdateProgramModal from './createUpdateProgram'
 import ProgramFeesModalOld from './program_fees_modal'
-import ProgramViewModal from './program_view_modal'
 
 interface ProgramModals {
   create_program_modal: boolean
@@ -63,14 +63,14 @@ const Programs = () => {
     setShowModal({ ...showModal, books_details_list_modal: false })
   }
 
-  const handleFeesModalClose = () => {
-    setSelectedProgram(undefined)
-    setShowModal({ ...showModal, fees_details_list_modal: false })
-  }
-
   const handleProgramViewModalClose = () => {
     setSelectedProgram(undefined)
     setShowModal({ ...showModal, view_program_details_modal: false })
+  }
+
+  const handleFeesModalClose = () => {
+    setSelectedProgram(undefined)
+    setShowModal({ ...showModal, fees_details_list_modal: false })
   }
 
   const handleKebabOptionClick = (program: Program, option: 'Edit' | 'view' | 'books' | 'fees') => {
@@ -80,7 +80,7 @@ const Programs = () => {
         handleCreateProgram()
         break
       case 'view':
-        fetchProgramSegment(program.program_id)
+        fetchProgramSegment({ program_id: program.program_id })
         setShowModal({ ...showModal, view_program_details_modal: true })
         break
       case 'fees':
@@ -95,17 +95,17 @@ const Programs = () => {
   const getKebabOptions = (eachProgram: Program) => {
     return [
       {
-        id: eachProgram.program_id,
+        id: `${eachProgram.program_id}__view`,
         label: 'View',
         onOptionClick: () => handleKebabOptionClick(eachProgram, 'view')
       },
       {
-        id: eachProgram.program_id,
+        id: `${eachProgram.program_id}__edit`,
         label: 'Edit',
         onOptionClick: () => handleKebabOptionClick(eachProgram, 'Edit')
       },
       {
-        id: eachProgram.program_id,
+        id: `${eachProgram.program_id}__book-details`,
         label: 'Books Details',
         onOptionClick: () => handleKebabOptionClick(eachProgram, 'books')
       },

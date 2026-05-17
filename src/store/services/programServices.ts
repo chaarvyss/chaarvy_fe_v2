@@ -1,5 +1,6 @@
 import { urlConstants } from 'src/constants/urlConstants'
 import {
+  ProgramSegmentMediumsListResponse,
   ProgramAddonCourseResponse,
   ProgramSecondLanguagesResponse,
   ProgramSectionResponse,
@@ -28,6 +29,35 @@ export type CreateProgramBookRequest = CascadingSelectorState & {
   book_id: string
   quantity: number
   status: number
+}
+
+export type CreateUpdateProgramSegmentMedium = {
+  program_section_id?: string
+  program_id: string
+  segment_id: string
+  segment_name: string
+  medium_id: string
+  medium_name: string
+  medium_status: number
+}
+
+export type CreateUpdateProgramSegmentSection = {
+  program_section_id?: string
+  program_id: string
+  section_id: string
+  segment_id: string
+  medium_id: string
+  seating_capacity: number
+}
+
+type ProgramSegmentMediumsListByProgramIdRequest = {
+  program_id: string
+  only_active: boolean
+}
+
+export type ProgramMediumRequest = {
+  program_id: string
+  medium_id?: string
 }
 
 const programServicesApi = api.injectEndpoints({
@@ -72,13 +102,15 @@ const programServicesApi = api.injectEndpoints({
         }
       }
     }),
-
-    getProgramMediumsList: build.query<ProgramSecondLanguagesResponse[], string>({
-      query: program_id => {
+    getProgramSegmentMediumsListByProgramId: build.query<
+      ProgramSegmentMediumsListResponse[],
+      ProgramSegmentMediumsListByProgramIdRequest
+    >({
+      query: params => {
         return {
           method: HttpRequestMethods.GET,
-          url: urlConstants.program.getProgramMediums,
-          params: { program_id }
+          url: urlConstants.program.getProgramSegmentMediumsByProgramId,
+          params
         }
       }
     }),
@@ -91,12 +123,13 @@ const programServicesApi = api.injectEndpoints({
         }
       }
     }),
-    getProgramSectionList: build.query<ProgramSectionResponse[], string>({
-      query: program_id => {
+    getProgramSectionList: build.query<ProgramSectionResponse[], ProgramMediumRequest>({
+      providesTags: [CacheTag.ListProgramSegmentSections],
+      query: params => {
         return {
           method: HttpRequestMethods.GET,
           url: urlConstants.program.getProgramSections,
-          params: { program_id }
+          params
         }
       }
     }),
@@ -110,13 +143,42 @@ const programServicesApi = api.injectEndpoints({
         }
       }
     }),
-
     createUpdateProgramBook: build.mutation<BulkProcessResponse, CreateProgramBookRequest[]>({
       invalidatesTags: [CacheTag.ListProgramBooks],
       query: body => {
         return {
           method: HttpRequestMethods.POST,
           url: urlConstants.program.createUpdateProgramBook,
+          body
+        }
+      }
+    }),
+    createUpdateProgramSegmentMedium: build.mutation<BulkProcessResponse, CreateUpdateProgramSegmentMedium[]>({
+      invalidatesTags: [CacheTag.ListProgramSegmentMediums],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.program.createUpdateProgramSegmentMedium,
+          body
+        }
+      }
+    }),
+    getProgramSegmentMediumsList: build.query<CreateUpdateProgramSegmentMedium[], string>({
+      providesTags: [CacheTag.ListProgramSegmentMediums],
+      query: program_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.program.getProgramSegmentMediums,
+          params: { program_id }
+        }
+      }
+    }),
+    createUpdateProgramSegmentSection: build.mutation<string, CreateUpdateProgramSegmentSection[]>({
+      invalidatesTags: [CacheTag.ListProgramSegmentSections],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.program.createUpdateProgramSegmentSection,
           body
         }
       }
@@ -129,11 +191,14 @@ export const {
   useLazyGetPrgMedSegBooksListQuery,
   useLazyGetProgramSecondLanguagesListQuery,
   useUpdateProgramSecondLanguagesListMutation,
-  useLazyGetProgramMediumsListQuery,
-  useGetProgramMediumsListQuery,
+  useGetProgramSegmentMediumsListByProgramIdQuery,
+  useLazyGetProgramSegmentMediumsListByProgramIdQuery,
   useUpdateProgramMediumsMutation,
   useGetProgramSectionListQuery,
   useLazyGetProgramSectionListQuery,
   useUpdateProgramSectionMutation,
-  useCreateUpdateProgramBookMutation
+  useCreateUpdateProgramBookMutation,
+  useCreateUpdateProgramSegmentMediumMutation,
+  useGetProgramSegmentMediumsListQuery,
+  useCreateUpdateProgramSegmentSectionMutation
 } = programServicesApi

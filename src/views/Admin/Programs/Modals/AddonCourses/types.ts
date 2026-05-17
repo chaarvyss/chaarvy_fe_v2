@@ -51,6 +51,16 @@ export interface ProgramAddonCourseModalProps {
   addon_course?: AddonCourseDetail
 }
 
+export interface SegmentMediums {
+  medium_id: string
+  medium_name: string
+}
+export interface ProgramSegments {
+  segment_id: string
+  segment_name: string
+  segment_mediums: SegmentMediums[]
+}
+
 export interface AddOnCourseProps {
   program_id: string
   program_name: string

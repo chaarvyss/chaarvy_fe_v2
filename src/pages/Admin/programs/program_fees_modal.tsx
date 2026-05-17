@@ -32,7 +32,7 @@ import {
   useLazyGetFeesTypesListQuery,
   useLazyGetProgramsListQuery
 } from 'src/store/services/listServices'
-import { useLazyGetProgramMediumsListQuery } from 'src/store/services/programServices'
+import { useLazyGetProgramSegmentMediumsListByProgramIdQuery } from 'src/store/services/programServices'
 
 export interface ProgramFeesDetailsProps {
   selectedProgram?: Program
@@ -70,7 +70,7 @@ const ProgramFeesModalOld = ({ selectedProgram, isOpen, onClose }: ProgramFeesDe
   const [fetchFeesTypesList, { data: feesTypesList, isFetching: isFeesTypesFetching }] = useLazyGetFeesTypesListQuery()
   const { data: segmentsList, isFetching: isSegmentsListFetching } = useGetSegmentsListQuery()
   const [fetchProgramMediums, { data: programMediums, isFetching: isProgramMediumFetching }] =
-    useLazyGetProgramMediumsListQuery()
+    useLazyGetProgramSegmentMediumsListByProgramIdQuery()
 
   const [updateFeeApi, { isLoading: isUpdatingFees }] = useUpdateProgramFeesMutation()
   const [createFeesApi, { isLoading: isCreatingFees }] = useCreateProgramFeesMutation()
@@ -97,11 +97,11 @@ const ProgramFeesModalOld = ({ selectedProgram, isOpen, onClose }: ProgramFeesDe
   }
 
   useEffect(() => {
-    fetchProgramMediums(selectedProgram?.program_id ?? '')
+    fetchProgramMediums({ program_id: selectedProgram?.program_id ?? '', only_active: true })
   }, [selectedProgram])
 
   useEffect(() => {
-    setCreateProgramFeesDetails({ ...createProgramFeeDetails, medium: programMediums?.[0]?.language_id ?? '' })
+    setCreateProgramFeesDetails({ ...createProgramFeeDetails, medium: programMediums?.[0]?.medium_id ?? '' })
   }, [programMediums])
 
   useEffect(() => {
@@ -310,7 +310,7 @@ const ProgramFeesModalOld = ({ selectedProgram, isOpen, onClose }: ProgramFeesDe
                 onChange={handleCreateProgramFeesDetalilsUpdate('medium')}
               >
                 {(programMediums ?? []).map(each => (
-                  <FormControlLabel value={each.language_id} control={<Radio />} label={each.language_name} />
+                  <FormControlLabel value={each.medium_id} control={<Radio />} label={each.medium_name} />
                 ))}
               </RadioGroup>
               {programMediums?.length == 0 && (
