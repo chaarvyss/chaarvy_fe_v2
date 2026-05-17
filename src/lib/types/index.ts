@@ -152,9 +152,23 @@ export type ProgramSecondLanguagesResponse = {
   language_name: string
 }
 
+export type ProgramSegmentMediumsListResponse = {
+  program_segment_medium_id: string
+  program_id: string
+  segment_name: string
+  segment_id: string
+  medium_id: string
+  medium_name: string
+  status: number
+}
+
 export type ProgramSectionResponse = {
   section_id: string
   section_name: string
+  program_section_id?: string
+  program_id: string
+  segment_id: string
+  seating_capacity: number
 }
 
 export type QualifiedExam = { qualified_exam_id: string; qualified_exam_name: string }

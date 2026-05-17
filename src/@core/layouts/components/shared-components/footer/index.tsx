@@ -13,21 +13,18 @@ import FooterContent from './FooterContent'
 
 interface Props {
   settings: Settings
-  saveSettings: (values: Settings) => void
   footerContent?: (props?: any) => ReactNode
 }
 
 const Footer = (props: Props) => {
   // ** Props
-  const { settings, footerContent: userFooterContent, saveSettings } = props
+  const { settings, footerContent: userFooterContent } = props
 
   // ** Hook
   const theme = useTheme()
 
   // ** Vars
   const { contentWidth } = settings
-
-  console.log(saveSettings)
 
   return (
     <Box

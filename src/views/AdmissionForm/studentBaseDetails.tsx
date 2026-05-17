@@ -43,9 +43,9 @@ import {
   useGetSegmentsListQuery
 } from 'src/store/services/listServices'
 import {
-  useLazyGetProgramMediumsListQuery,
   useLazyGetProgramSecondLanguagesListQuery,
-  useLazyGetProgramSectionListQuery
+  useLazyGetProgramSectionListQuery,
+  useLazyGetProgramSegmentMediumsListByProgramIdQuery
 } from 'src/store/services/programServices'
 import { convertDateStringToDate, isValidAadhar, isValidEmail, isValidPhone } from 'src/utils/helpers'
 
@@ -98,7 +98,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
   }
 
   const [fetchProgramMediums, { data: programMediums, isFetching: isProgramMediumsLoading }] =
-    useLazyGetProgramMediumsListQuery()
+    useLazyGetProgramSegmentMediumsListByProgramIdQuery()
   const [fetchProgramSecondLanguages, { data: programSecondLanguages, isFetching: isSecondLanguageLoading }] =
     useLazyGetProgramSecondLanguagesListQuery()
 
@@ -116,9 +116,9 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
   const [updateApplicationPayment] = useLazyUpdateApplicationPaymentQuery()
 
   const getDependentData = (program_id: string) => {
-    fetchProgramMediums(program_id)
+    fetchProgramMediums({ program_id, only_active: true })
     fetchProgramSecondLanguages(program_id)
-    fetchProgramSectionsData(program_id)
+    fetchProgramSectionsData({ program_id })
   }
 
   const [fetchProcessingFees, { data: processingFees }] = useLazyGetProcessingFeesQuery()
@@ -329,7 +329,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
       value: applicationDetails?.medium,
       onChange: handleChange('medium'),
       menuOptions: (programMediums ?? []).map(each => {
-        return { value: each.language_id, label: each.language_name }
+        return { value: each.medium_id, label: each.medium_name }
       })
     },
     {

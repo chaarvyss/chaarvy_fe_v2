@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
+import { ProgramSegmentMediumsListResponse } from 'src/lib/types'
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
 import { useGetProgramsListQuery } from 'src/store/services/listServices'
-import { useLazyGetProgramMediumsListQuery } from 'src/store/services/programServices'
-import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
+import { useGetProgramSegmentMediumsListByProgramIdQuery } from 'src/store/services/programServices'
 
 import ReusableSelect from './reusableSelect'
 
@@ -23,9 +23,54 @@ const CascadingSelectors = ({ onChange, defaultValues }: CascadingSelectorsProps
 
   const { data: programsData, isLoading: isProgramsLoading } = useGetProgramsListQuery(true)
 
-  const [fetchSegments, { data: segmentData, isFetching: isSegmentsLoading }] = useLazyGetProgramSegmentDetailsQuery()
+  const { data: programSegmentMediumsResponse, isFetching: isProgramSegmentMediumsLoading } =
+    useGetProgramSegmentMediumsListByProgramIdQuery(
+      {
+        program_id: values.program ?? '',
+        only_active: true
+      },
+      {
+        skip: !values.program
+      }
+    )
 
-  const [fetchMediums, { data: mediumsData, isFetching: isMediumsLoading }] = useLazyGetProgramMediumsListQuery()
+  const getUniqueLists = (data: ProgramSegmentMediumsListResponse[]) => {
+    const mediums = [
+      ...new Map(
+        data.map(item => [
+          item.medium_id,
+          {
+            medium_id: item.medium_id,
+            medium_name: item.medium_name
+          }
+        ])
+      ).values()
+    ]
+
+    const segments = [
+      ...new Map(
+        data.map(item => [
+          item.segment_id,
+          {
+            segment_id: item.segment_id,
+            segment_name: item.segment_name
+          }
+        ])
+      ).values()
+    ]
+
+    return { mediums, segments }
+  }
+
+  const { mediums: mediumsData, segments: segmentData } = useMemo(() => {
+    return getUniqueLists(programSegmentMediumsResponse || [])
+  }, [programSegmentMediumsResponse])
+
+  useEffect(() => {
+    if (defaultValues) {
+      setValues(defaultValues)
+    }
+  }, [defaultValues])
 
   const handleProgramChange = (value: string) => {
     setValues({
@@ -33,9 +78,6 @@ const CascadingSelectors = ({ onChange, defaultValues }: CascadingSelectorsProps
       segment: undefined,
       medium: undefined
     })
-
-    fetchSegments(value)
-    fetchMediums(value)
   }
 
   const handleSegmentChange = (value: string) => {
@@ -45,13 +87,6 @@ const CascadingSelectors = ({ onChange, defaultValues }: CascadingSelectorsProps
   const handleMediumChange = (value: string) => {
     setValues(prev => ({ ...prev, medium: value }))
   }
-
-  useEffect(() => {
-    if (defaultValues?.program) {
-      fetchSegments(defaultValues?.program)
-      fetchMediums(defaultValues?.program)
-    }
-  }, [])
 
   useEffect(() => {
     onChange?.(values)
@@ -74,7 +109,7 @@ const CascadingSelectors = ({ onChange, defaultValues }: CascadingSelectorsProps
       <ReusableSelect
         label='Segment'
         value={values.segment}
-        isLoading={isSegmentsLoading}
+        isLoading={isProgramSegmentMediumsLoading}
         options={(segmentData ?? []).map(s => ({
           value: s.segment_id,
           label: s.segment_name
@@ -86,10 +121,10 @@ const CascadingSelectors = ({ onChange, defaultValues }: CascadingSelectorsProps
       <ReusableSelect
         label='Medium'
         value={values.medium}
-        isLoading={isMediumsLoading}
+        isLoading={isProgramSegmentMediumsLoading}
         options={(mediumsData ?? []).map(m => ({
-          value: m.language_id,
-          label: m.language_name
+          value: m.medium_id ?? '',
+          label: m.medium_name
         }))}
         onChange={handleMediumChange}
         fullWidth={false}

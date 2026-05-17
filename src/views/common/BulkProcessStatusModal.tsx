@@ -86,8 +86,6 @@ const BulkProcessStatusModal = ({
 
   const exceptions = stats?.find(stat => stat.exceptions)?.exceptions ?? []
 
-  console.log(exceptions, stats)
-
   return (
     <ChaarvyModal title={title} isOpen={isOpen} onClose={onClose}>
       <Box sx={{ p: 4, minWidth: 350 }}>

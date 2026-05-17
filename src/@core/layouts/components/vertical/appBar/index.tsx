@@ -1,3 +1,5 @@
+/* eslint-disable unused-imports/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // ** React Imports
 
 // ** MUI Imports
@@ -10,8 +12,8 @@ import { ReactNode } from 'react'
 import { Settings } from 'src/@core/context/settingsContext'
 
 interface Props {
-  hidden: boolean
   settings: Settings
+  hidden: boolean
   toggleNavVisibility: () => void
   saveSettings: (values: Settings) => void
   verticalAppBarContent?: (props?: any) => ReactNode
@@ -56,9 +58,6 @@ const LayoutAppBar = (props: Props) => {
 
   // ** Vars
   const { contentWidth } = settings
-
-  // todo: need to use below props as well
-  console.log({ hidden, toggleNavVisibility, saveSettings })
 
   return (
     <AppBar elevation={0} color='default' className='layout-navbar' position='static'>

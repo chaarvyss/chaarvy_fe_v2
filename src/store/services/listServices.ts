@@ -35,6 +35,17 @@ import { HttpRequestMethods } from '..'
 import { AddonCourseDetails } from './adminServices'
 import api from './api'
 import { CacheTag } from './cacheTag'
+import { ProgramMediumRequest } from './programServices'
+
+type ProgramCommonMediumsResponse = {
+  medium_id: string
+  medium_name: string
+}
+
+type SegmentsByProgramMediumResponse = {
+  segment_id: string
+  segment_name: string
+}
 
 const listServicesApi = api.injectEndpoints({
   endpoints: build => ({
@@ -214,7 +225,6 @@ const listServicesApi = api.injectEndpoints({
         }
       }
     }),
-
     getRolePermissionsList: build.query<Array<string>, string>({
       query: role_id => {
         return {
@@ -246,6 +256,25 @@ const listServicesApi = api.injectEndpoints({
           method: HttpRequestMethods.GET,
           url: `${urlConstants.list.programAddonCourses}`,
           params: { addon_course_id }
+        }
+      }
+    }),
+
+    getProgramCommonMediums: build.query<ProgramCommonMediumsResponse[], string>({
+      query: program_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: `${urlConstants.list.getProgramCommonMediumsUrl}`,
+          params: { program_id }
+        }
+      }
+    }),
+    getSegmentsByProgramMedium: build.query<SegmentsByProgramMediumResponse[], ProgramMediumRequest>({
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: `${urlConstants.list.getSegementsByProgramAndMediumUrl}`,
+          params
         }
       }
     })
@@ -280,5 +309,7 @@ export const {
   useGetBooksListQuery,
   useLazyGetProgramRelatedBooksOptionsQuery,
   useGetProgramSegmentMediumSectionCombinationQuery,
-  useGetProgramAddonCoursesQuery
+  useGetProgramAddonCoursesQuery,
+  useGetProgramCommonMediumsQuery,
+  useGetSegmentsByProgramMediumQuery
 } = listServicesApi

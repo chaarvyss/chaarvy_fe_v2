@@ -51,7 +51,9 @@ export const urlConstants = {
     sectionsList: `${interRoutePrefix.list}/sections`,
     programRelatedBooksOptions: `${interRoutePrefix.list}/program-suited-books-options`,
     getProgramSegmentMediumSectionCombinationUrl: `${interRoutePrefix.list}/program-segment-medium-section-combination`,
-    programAddonCourses: `${interRoutePrefix.list}/program-addon-courses`
+    programAddonCourses: `${interRoutePrefix.list}/program-addon-courses`,
+    getProgramCommonMediumsUrl: `${interRoutePrefix.list}/get-program-common-mediums`,
+    getSegementsByProgramAndMediumUrl: `${interRoutePrefix.list}/segments-by-program-medium`
   },
   admin: {
     createUpdateUser: `${interRoutePrefix.admin}/create-update-user`,
@@ -83,7 +85,8 @@ export const urlConstants = {
       collegeProfile: `${interRoutePrefix.admin}/update-mydetails`,
       collgeLogo: `${interRoutePrefix.admin}/update-college-logo`,
       userStatus: `${interRoutePrefix.admin}/update-user-status`,
-      updateUserPermissions: `${interRoutePrefix.admin}/update-user-permission`
+      updateUserPermissions: `${interRoutePrefix.admin}/update-user-permission`,
+      programSegmentStatus: `${interRoutePrefix.admin}/update-program-segment-status`
     },
     delete: {
       programBook: `${interRoutePrefix.admin}/delete-program-book`
@@ -122,12 +125,15 @@ export const urlConstants = {
     programAddon: `${interRoutePrefix.program}/program-addon-course`,
     programSegmentMediumBooks: `${interRoutePrefix.program}/program-segment-medium-books`,
     getProgramSecondLanguages: `${interRoutePrefix.program}/program-second-language`,
-    getProgramMediums: `${interRoutePrefix.program}/program-mediums`,
+    getProgramSegmentMediumsByProgramId: `${interRoutePrefix.program}/program-segment-mediums-list`,
     getProgramSections: `${interRoutePrefix.program}/program-sections`,
+    getProgramSegmentMediums: `${interRoutePrefix.program}/program-segment-mediums`,
     updateProgramSecondLanguages: `${interRoutePrefix.program}/update-program-second-language`,
     updateProgramMediums: `${interRoutePrefix.program}/update-program-mediums`,
     updateProgramSections: `${interRoutePrefix.program}/update-program-sections`,
-    createUpdateProgramBook: `${interRoutePrefix.program}/create-update-program-book`
+    createUpdateProgramBook: `${interRoutePrefix.program}/create-update-program-book`,
+    createUpdateProgramSegmentMedium: `${interRoutePrefix.program}/create-update-program-segment-medium`,
+    createUpdateProgramSegmentSection: `${interRoutePrefix.program}/create-update-program-segment-section`
   },
   view: {
     programSegments: `${interRoutePrefix.view}/program-segment`,
