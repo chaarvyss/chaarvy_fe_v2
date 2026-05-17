@@ -46,7 +46,7 @@ const ProgramViewModalOld = ({ selectedProgram, isOpen, onClose }: ProgramView) 
   const [newSegmentName, setNewSegmentName] = useState('')
 
   useEffect(() => {
-    fetchProgramSegment(selectedProgram?.program_id ?? '')
+    fetchProgramSegment({ program_id: selectedProgram?.program_id ?? '' })
   }, [selectedProgram])
 
   const headers: TableHeaders[] = [{ label: 's#' }, { label: 'Segment Name' }]

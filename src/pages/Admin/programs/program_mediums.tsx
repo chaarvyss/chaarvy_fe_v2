@@ -4,10 +4,13 @@ import React, { ChangeEvent, useEffect, useState } from 'react'
 import { Box } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { useGetLanguagesListQuery } from 'src/store/services/listServices'
-import { useLazyGetProgramMediumsListQuery, useUpdateProgramMediumsMutation } from 'src/store/services/programServices'
+import {
+  useLazyGetProgramSegmentMediumsListByProgramIdQuery,
+  useUpdateProgramMediumsMutation
+} from 'src/store/services/programServices'
 
 const ProgramMediums = ({ program_id }: { program_id: string }) => {
-  const [fetchProgramMediums, { data: programMediums }] = useLazyGetProgramMediumsListQuery()
+  const [fetchProgramMediums, { data: programMediums }] = useLazyGetProgramSegmentMediumsListByProgramIdQuery()
   const { data: languagesList } = useGetLanguagesListQuery()
 
   const [updateProgramMediums] = useUpdateProgramMediumsMutation()
@@ -17,11 +20,11 @@ const ProgramMediums = ({ program_id }: { program_id: string }) => {
   const [isEdited, setIsEdited] = useState(false)
 
   useEffect(() => {
-    fetchProgramMediums(program_id)
+    if (program_id) fetchProgramMediums({ program_id, only_active: false })
   }, [program_id])
 
   useEffect(() => {
-    const newLangIds = new Set(programMediums?.map(each => each.language_id) ?? [])
+    const newLangIds = new Set(programMediums?.map(each => each.medium_id) ?? [])
     setPrgMediumIds(newLangIds)
     setInitialPrgMediumIds(new Set(newLangIds))
     setIsEdited(false)

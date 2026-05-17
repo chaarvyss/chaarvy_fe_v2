@@ -8,9 +8,12 @@ import { useGetProgramSectionListQuery, useUpdateProgramSectionMutation } from '
 import { areSetsEqual } from 'src/utils/helpers'
 
 const ProgramSection = ({ program_id }: { program_id: string }) => {
-  const { data: ProgramSection } = useGetProgramSectionListQuery(program_id, {
-    skip: !program_id
-  })
+  const { data: ProgramSection } = useGetProgramSectionListQuery(
+    { program_id },
+    {
+      skip: !program_id
+    }
+  )
   const { data: sectionsList } = useGetSectionsListQuery()
 
   const [updateProgramSection] = useUpdateProgramSectionMutation()

@@ -192,6 +192,7 @@ export const {
   useLazyGetProgramSecondLanguagesListQuery,
   useUpdateProgramSecondLanguagesListMutation,
   useGetProgramSegmentMediumsListByProgramIdQuery,
+  useLazyGetProgramSegmentMediumsListByProgramIdQuery,
   useUpdateProgramMediumsMutation,
   useGetProgramSectionListQuery,
   useLazyGetProgramSectionListQuery,

@@ -2,7 +2,10 @@ import { Box, Typography, Popover, Autocomplete, TextField, Card, Button } from 
 import React, { useEffect, useState } from 'react'
 
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
-import { useLazyGetProgramMediumsListQuery, useGetProgramSectionListQuery } from 'src/store/services/programServices'
+import {
+  useGetProgramSectionListQuery,
+  useLazyGetProgramSegmentMediumsListByProgramIdQuery
+} from 'src/store/services/programServices'
 
 // Data
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -39,7 +42,7 @@ interface TimeTableSchedulerBoardProps {
   readonly segmentId: string | null
 }
 
-export default function TimeTableSchedulerBoard({ programId, segmentId }: TimeTableSchedulerBoardProps) {
+export default function TimeTableSchedulerBoard({ programId: program_id, segmentId }: TimeTableSchedulerBoardProps) {
   const [data, setData] = useState<Record<string, CellData>>({})
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [activeCell, setActiveCell] = useState<string | null>(null)
@@ -49,21 +52,24 @@ export default function TimeTableSchedulerBoard({ programId, segmentId }: TimeTa
   const [selectedSection, setSelectedSection] = useState<string>()
 
   const [fetchProgramMediums, { data: mediumOptions, isLoading: isMediumsLoading }] =
-    useLazyGetProgramMediumsListQuery()
+    useLazyGetProgramSegmentMediumsListByProgramIdQuery()
 
-  const { data: sectionsData } = useGetProgramSectionListQuery(programId ?? '', {
-    skip: !programId
-  })
+  const { data: sectionsData } = useGetProgramSectionListQuery(
+    { program_id: program_id ?? '' },
+    {
+      skip: !program_id
+    }
+  )
 
   useEffect(() => {
-    if (programId && segmentId) {
-      fetchProgramMediums(programId)
+    if (program_id && segmentId) {
+      fetchProgramMediums({ program_id, only_active: true })
         .unwrap()
         .then(res => {
-          setSelectedMedium(res[0]?.language_id || null)
+          setSelectedMedium(res[0]?.medium_id || null)
         })
     }
-  }, [programId, segmentId])
+  }, [program_id, segmentId])
 
   const open = Boolean(anchorEl)
 
@@ -122,11 +128,11 @@ export default function TimeTableSchedulerBoard({ programId, segmentId }: TimeTa
               (mediumOptions ?? [])?.map(each => (
                 <Button
                   size='small'
-                  key={each.language_id}
-                  onClick={() => setSelectedMedium(each.language_id)}
-                  variant={selectedMedium === each.language_id ? 'contained' : 'outlined'}
+                  key={each.medium_id}
+                  onClick={() => setSelectedMedium(each.medium_name)}
+                  variant={selectedMedium === each.medium_id ? 'contained' : 'outlined'}
                 >
-                  {each.language_name}
+                  {each.medium_name}
                 </Button>
               ))
             )}

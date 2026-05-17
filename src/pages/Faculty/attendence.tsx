@@ -9,7 +9,7 @@ import RenderInputFields from 'src/reusable_components/renderInputFields'
 import { ImgStyled } from 'src/reusable_components/styledComponents/styledImgTag'
 import { useGetProgramsListQuery, useLazyGetStudentsListQuery } from 'src/store/services/listServices'
 import {
-  useLazyGetProgramMediumsListQuery,
+  useLazyGetProgramSegmentMediumsListByProgramIdQuery,
   useLazyGetProgramSectionListQuery
 } from 'src/store/services/programServices'
 
@@ -19,7 +19,7 @@ const GetAttendence = () => {
   const [filterProps, setFilterProps] = useState<FilterProps>()
   const [getSectionsList, { data: sections }] = useLazyGetProgramSectionListQuery()
   const { data: programsList } = useGetProgramsListQuery(true)
-  const [getMediumsList, { data: mediums }] = useLazyGetProgramMediumsListQuery()
+  const [getMediumsList, { data: mediums }] = useLazyGetProgramSegmentMediumsListByProgramIdQuery()
   const [getStudentsList, { data: studentsList, isFetching }] = useLazyGetStudentsListQuery()
 
   const [attended, setAttended] = useState<Array<string>>([])
@@ -74,7 +74,7 @@ const GetAttendence = () => {
       value: filterProps?.medium,
       onChange: handleChange('medium'),
       menuOptions: (mediums ?? []).map(each => {
-        return { value: each.language_id, label: each.language_name }
+        return { value: each.medium_id, label: each.medium_name }
       })
     },
     {

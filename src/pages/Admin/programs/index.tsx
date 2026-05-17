@@ -82,7 +82,7 @@ const Programs = () => {
         handleCreateProgram()
         break
       case 'view':
-        fetchProgramSegment(program.program_id)
+        fetchProgramSegment({ program_id: program.program_id })
         setShowModal({ ...showModal, view_program_details_modal: true })
         break
       case 'fees':
