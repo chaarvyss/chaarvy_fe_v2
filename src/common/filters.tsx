@@ -149,10 +149,15 @@ const RenderFilterOptions = ({ onSubmit, fields, statusOptions }: RenderFilterPr
             label='Section'
             value={filters?.section}
             isLoading={isFetchingSections}
-            options={(sections ?? []).map(s => ({
-              value: s.section_id,
-              label: s.section_name
-            }))}
+            options={(sections ?? [])
+              .filter(
+                (each): each is { section_id: string; section_name: string } =>
+                  typeof each.section_id === 'string' && each.section_id !== ''
+              )
+              .map(s => ({
+                value: s.section_id,
+                label: s.section_name
+              }))}
             onChange={handleChange('section')}
           />
         )}
