@@ -1,4 +1,3 @@
-import { useFlags } from 'launchdarkly-react-client-sdk'
 import React, { useEffect, useState } from 'react'
 
 import { Typography } from '@muiElements'
@@ -17,13 +16,18 @@ import ProgramFeesModal from 'src/views/Admin/Programs/Modals/ProgramFees'
 import ProgramViewModal from 'src/views/Admin/Programs/Modals/ProgramView'
 
 import CreateOrUpdateProgramModal from './createUpdateProgram'
-import ProgramFeesModalOld from './program_fees_modal'
 
 interface ProgramModals {
   create_program_modal: boolean
   fees_details_list_modal: boolean
   books_details_list_modal: boolean
   view_program_details_modal: boolean
+}
+
+export interface ProgramFeesDetailsProps {
+  selectedProgram?: Program
+  isOpen: boolean
+  onClose: () => void
 }
 
 const Programs = () => {
@@ -33,8 +37,6 @@ const Programs = () => {
     books_details_list_modal: false,
     view_program_details_modal: false
   })
-
-  const { programFees: isProgramFeesEnabled } = useFlags()
 
   const { triggerToast } = useToast()
 
@@ -185,20 +187,14 @@ const Programs = () => {
           programId={selectedProgram?.program_id}
         />
       )}
-      {showModal.fees_details_list_modal &&
-        (isProgramFeesEnabled ? (
-          <ProgramFeesModal
-            selectedProgram={selectedProgram}
-            isOpen={showModal.fees_details_list_modal}
-            onClose={handleFeesModalClose}
-          />
-        ) : (
-          <ProgramFeesModalOld
-            selectedProgram={selectedProgram}
-            isOpen={showModal.fees_details_list_modal}
-            onClose={handleFeesModalClose}
-          />
-        ))}
+      {showModal.fees_details_list_modal && (
+        <ProgramFeesModal
+          selectedProgram={selectedProgram}
+          isOpen={showModal.fees_details_list_modal}
+          onClose={handleFeesModalClose}
+        />
+      )}
+
       {showModal.view_program_details_modal && (
         <ProgramViewModal
           isOpen={showModal.view_program_details_modal}

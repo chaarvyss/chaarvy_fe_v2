@@ -25,6 +25,7 @@ import '../../styles/globals.css'
 import store, { persistor } from 'src/store'
 import 'react-datepicker/dist/react-datepicker.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import './cssmodules/programFees.module.css'
 
 type ExtendedAppProps = AppProps & {
   Component: NextPage
@@ -59,7 +60,7 @@ const App = (props: ExtendedAppProps) => {
 
   return (
     <StrictMode>
-      <LDProvider clientSideID='69f20aac969ff00ab28bbe1f' context={context}>
+      <LDProvider clientSideID='69f20aac969ff00ab28bbe1f' context={context} timeout={5}>
         <ToastProvider>
           <LoaderProvider>
             <ImageViewerProvider>

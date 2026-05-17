@@ -78,17 +78,16 @@ const VerticalNavItem = (props: VerticalNavItemProps) => {
 const VerticalNavItems = (props: Props) => {
   // ** Props
   const { verticalNavItems, depth = 0 } = props
-
   const RenderMenuItems = verticalNavItems?.map((item: NavLink | NavSectionTitle, index: number) => {
     if ((item as NavSectionTitle).sectionTitle) {
       return (
-        <Box key={`${(item as NavSectionTitle).sectionTitle}-${index}`} borderRadius='1rem'>
+        <Box key={`header_item-${index}`} borderRadius='1rem'>
           <VerticalNavSectionTitle item={item as NavSectionTitle} />
         </Box>
       )
     }
 
-    return <VerticalNavItem {...props} key={item.key} item={item as NavLink} depth={depth} />
+    return <VerticalNavItem {...props} key={item.key ?? `nav-${index}`} item={item as NavLink} depth={depth} />
   })
 
   return <>{RenderMenuItems}</>

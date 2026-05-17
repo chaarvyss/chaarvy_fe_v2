@@ -1,3 +1,5 @@
+'use client'
+
 import { LoadingButton } from '@mui/lab'
 import { TextField } from '@mui/material'
 import { ChangeEvent, useEffect, useState } from 'react'
@@ -68,7 +70,10 @@ const CreateOrUpdateProgramModal = ({ selectedProgram, isOpen, onClose }: Create
   }
 
   const showLoader = creatingProgram || updatingProgram
-  setLoading(showLoader)
+
+  useEffect(() => {
+    setLoading(showLoader)
+  }, [])
 
   return (
     <ChaarvyModal
@@ -79,7 +84,7 @@ const CreateOrUpdateProgramModal = ({ selectedProgram, isOpen, onClose }: Create
       shouldWarnOnClose
       shouldRestrictCloseOnOuterClick
     >
-      <Grid sm={12} md={8} lg={6} gap={2}>
+      <Grid item sm={12} md={8} lg={6} gap={2}>
         <TextField
           onChange={handleChange('program_name')}
           value={programDetails.program_name}

@@ -12,7 +12,7 @@ const api = createApi({
   serializeQueryArgs: serializeQueryArgsGlobal,
   endpoints: () => ({}),
   keepUnusedDataFor: baseCacheTimeInSeconds,
-  tagTypes: [...Object.keys(CacheTag), ...Object.keys(MasterCacheTag)]
+  tagTypes: [...Object.values(CacheTag), ...Object.values(MasterCacheTag)]
 })
 
 export default api
