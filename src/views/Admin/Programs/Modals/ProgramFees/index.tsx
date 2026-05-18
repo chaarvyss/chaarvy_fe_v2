@@ -10,7 +10,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { ProgramFeesDetailsProps } from 'src/pages/Admin/programs'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 
-import { createColorMap } from './colorMapper'
+// import { createColorMap } from './colorMapper'
 import HeaderCopy from './HeaderCopy'
 
 ModuleRegistry.registerModules([AllCommunityModule])
@@ -31,7 +31,7 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
 
   const validateValue = (value: any) => value !== null && value !== undefined && value !== '' && !Number.isNaN(value)
 
-  const updateCell = ({ row, sourceField, targetField, copiedChanges }: any) => {
+  const updateCell = ({ node, row, sourceField, targetField, copiedChanges }: any) => {
     if (sourceField === targetField || !(targetField in row)) {
       return
     }
@@ -42,15 +42,12 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
       return
     }
 
-    row[targetField] = value
+    // AG Grid tracked update
+    node.setDataValue(targetField, value)
 
     copiedChanges[getFieldKey(row.feeTypeId, targetField)] = {
       value
     }
-  }
-
-  const updateRows = (updates: Record<string, any>) => {
-    setRowData(prev => prev.map(row => updates[row.feeTypeId] || row))
   }
 
   const getHeaderProps = (displayName: string, type: string, meta: any) => ({
@@ -76,12 +73,20 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
   })
 
   const cellStyle = (params: any) => {
-    const key = getFieldKey(params.data.feeTypeId, params.colDef.field)
+    const field = params.colDef.field
+
+    const feeTypeId = params.data.feeTypeId
+
+    const originalValue = originalRowDataRef.current[feeTypeId]?.[field]
+
+    const currentValue = params.value
+
+    const changed = String(originalValue ?? '') !== String(currentValue ?? '')
 
     return {
       textAlign: 'center',
 
-      ...(changes[key] && {
+      ...(changed && {
         backgroundColor: '#FFF9C4'
       })
     }
@@ -96,24 +101,47 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
       segment_name: 'U.K.G',
       segment_id: 'seg-1',
       sequence: 2,
+      color: 'linear-gradient(to bottom,#FFF8E1,#FAE8AD)',
       mediums: [
         {
           medium_id: 'med-1',
           medium_name: 'Telugu',
           sequence: 1,
+          color: 'linear-gradient(to bottom,#E8FFE8,#BCFFC2)',
           sections: [
-            { section_id: 'sec-1', section_name: 'A', sequence: 1 },
-            { section_id: 'sec-2', section_name: 'B', sequence: 2 },
-            { section_id: 'sec-3', section_name: 'C', sequence: 3 }
+            {
+              section_id: 'sec-1',
+              section_name: 'A',
+              sequence: 1,
+              color: 'linear-gradient(to bottom,#FFF0F5,#FFD6E7)'
+            },
+            {
+              section_id: 'sec-2',
+              section_name: 'B',
+              sequence: 2,
+              color: 'linear-gradient(to bottom,#E3F2FD,#BBDEFB)'
+            },
+            {
+              section_id: 'sec-3',
+              section_name: 'C',
+              sequence: 3,
+              color: 'linear-gradient(to bottom, #FAF0FF 0%, #F3E5F5 70%, #E8D3EB 100%)'
+            }
           ]
         },
         {
           medium_id: 'med-2',
           medium_name: 'English',
           sequence: 2,
+          color: 'linear-gradient(to bottom, #FFF1E6 0%, #FFE6CC 70%, #F7D7B4 100%)',
           sections: [
-            { section_id: 'sec-1', section_name: 'A', sequence: 1 },
-            { section_id: 'sec-2', section_name: 'B', sequence: 2 }
+            {
+              section_id: 'sec-1',
+              section_name: 'A',
+              sequence: 1,
+              color: 'linear-gradient(to bottom,#FFF0F5,#FFD6E7)'
+            },
+            { section_id: 'sec-2', section_name: 'B', sequence: 2, color: 'linear-gradient(to bottom,#E3F2FD,#BBDEFB)' }
           ]
         }
       ]
@@ -122,21 +150,33 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
       segment_name: 'L.K.G',
       segment_id: 'seg-2',
       sequence: 1,
+      color: 'linear-gradient(to bottom, #FAF0FF 0%, #F3E5F5 70%, #E8D3EB 100%)',
+
       mediums: [
         {
           medium_id: 'med-1',
           medium_name: 'Telugu',
           sequence: 1,
+          color: 'linear-gradient(to bottom, #EBFFFD 0%, #D6F7F5 70%, #BDEDEB 100%)',
+
           sections: [
-            { section_id: 'sec-1', section_name: 'A', sequence: 1 },
-            { section_id: 'sec-2', section_name: 'B', sequence: 2 }
+            {
+              section_id: 'sec-1',
+              section_name: 'A',
+              sequence: 1,
+              color: 'linear-gradient(to bottom,#FFF0F5,#FFD6E7)'
+            },
+            { section_id: 'sec-2', section_name: 'B', sequence: 2, color: 'linear-gradient(to bottom,#E3F2FD,#BBDEFB)' }
           ]
         },
         {
           medium_id: 'med-2',
           medium_name: 'English',
           sequence: 2,
-          sections: [{ section_id: 'sec-1', section_name: 'A', sequence: 1 }]
+          color: 'linear-gradient(to bottom, #EDF7FF 0%, #D6EAF8 70%, #C5DEF2 100%)',
+          sections: [
+            { section_id: 'sec-1', section_name: 'A', sequence: 1, color: 'linear-gradient(to bottom,#FFF0F5,#FFD6E7)' }
+          ]
         }
       ]
     }
@@ -199,6 +239,8 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
 
                 sequence: medium.sequence,
 
+                color: medium.color,
+
                 segments: []
               }
             }
@@ -210,7 +252,11 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
 
               sequence: segment.sequence,
 
-              sections: [...medium.sections].sort((a, b) => a.sequence - b.sequence)
+              color: segment.color,
+
+              sections: medium.sections.map(section => ({
+                ...section
+              }))
             })
           })
       })
@@ -229,21 +275,14 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
 
     if (!api) return
 
-    const updates: Record<string, any> = {}
-
     const copiedChanges: Record<string, any> = {}
 
     api.forEachNode(node => {
-      const row = {
-        ...node.data
-      }
+      const row = node.data
 
-      const copy = (
-        sourceField: string,
-
-        targetField: string
-      ) => {
+      const copy = (sourceField: string, targetField: string) => {
         updateCell({
+          node,
           row,
           sourceField,
           targetField,
@@ -252,8 +291,8 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
       }
 
       /*******************
-MEDIUM
-********************/
+      MEDIUM
+    ********************/
 
       if (data.type === 'medium') {
         const sourceMedium = data.source.mediumId
@@ -274,8 +313,8 @@ MEDIUM
       }
 
       /*******************
-SEGMENT
-********************/
+      SEGMENT
+    ********************/
 
       if (data.type === 'segment') {
         const { segmentId, mediumId } = data.source
@@ -306,8 +345,8 @@ SEGMENT
       }
 
       /*******************
-SECTION
-********************/
+      SECTION
+    ********************/
 
       if (data.type === 'section') {
         const { sectionId, segmentId, mediumId } = data.source
@@ -332,16 +371,12 @@ SECTION
           })
         })
       }
-
-      updates[row.feeTypeId] = row
     })
 
     setChanges(prev => ({
       ...prev,
       ...copiedChanges
     }))
-
-    updateRows(updates)
   }
 
   /*****************************************
@@ -364,18 +399,27 @@ SECTION
 
       ...mediumMap.map(
         (medium: any): ColGroupDef => ({
+          headerStyle: {
+            background: medium.color,
+            textAlign: 'center',
+            fontWeight: 600,
+            border: '1px solid #ddd'
+          },
           headerName: medium.medium_name,
-
           headerClass: getHeaderClass('medium', medium.medium_id),
-
           headerGroupComponent: HeaderCopy,
-
           headerGroupComponentParams: getHeaderProps(medium.medium_name, 'medium', {
             mediumId: medium.medium_id
           }),
 
           children: medium.segments.map(
             (segment: any): ColGroupDef => ({
+              headerStyle: {
+                background: segment.color,
+                textAlign: 'center',
+                fontWeight: 600,
+                border: '1px solid #ddd'
+              },
               headerName: segment.segment_name,
 
               headerClass: getHeaderClass('segment', segment.segment_id),
@@ -385,11 +429,20 @@ SECTION
               headerGroupComponentParams: getHeaderProps(segment.segment_name, 'segment', {
                 segmentId: segment.segment_id,
 
-                mediumId: medium.medium_id
+                mediumId: medium.medium_id,
+                headerStyle: {
+                  background: segment.color
+                }
               }),
 
               children: segment.sections.map(
                 (section: any): ColDef => ({
+                  headerStyle: {
+                    background: section.color,
+                    textAlign: 'center',
+                    fontWeight: 600,
+                    border: '1px solid #ddd'
+                  },
                   headerName: section.section_name,
 
                   headerClass: getHeaderClass('section', section.section_id),
@@ -401,7 +454,10 @@ SECTION
 
                     segmentId: segment.segment_id,
 
-                    mediumId: medium.medium_id
+                    mediumId: medium.medium_id,
+                    headerStyle: {
+                      background: section.color
+                    }
                   }),
 
                   field: getField(segment.segment_id, medium.medium_id, section.section_id),
@@ -423,60 +479,6 @@ SECTION
   /*****************************************
  ROW DATA
 ******************************************/
-
-  const mediumColors = useMemo(() => {
-    return createColorMap(mediumMap, 'medium_id')
-  }, [mediumMap])
-
-  const segmentColors = useMemo(() => {
-    const segments = mediumMap.flatMap(medium => medium.segments)
-
-    return createColorMap(segments, 'segment_id')
-  }, [mediumMap])
-
-  const sectionColors = useMemo(() => {
-    const sections = mediumMap.flatMap(medium => medium.segments.flatMap(segment => segment.sections))
-
-    return createColorMap(sections, 'section_id')
-  }, [mediumMap])
-
-  useEffect(() => {
-    const style = document.createElement('style')
-
-    let css = ''
-
-    Object.entries(mediumColors).forEach(([id, color]) => {
-      css += `
-      .medium-${id}{
-          background:${color}!important;
-      }
-      `
-    })
-
-    Object.entries(segmentColors).forEach(([id, color]) => {
-      css += `
-      .segment-${id}{
-          background:${color}!important;
-      }
-      `
-    })
-
-    Object.entries(sectionColors).forEach(([id, color]) => {
-      css += `
-      .section-${id}{
-          background:${color}!important;
-      }
-      `
-    })
-
-    style.innerHTML = css
-
-    document.head.appendChild(style)
-
-    return () => {
-      document.head.removeChild(style)
-    }
-  }, [mediumColors, segmentColors, sectionColors])
 
   const initialRowData = useMemo(() => {
     return feeTypes.map(fee => {
@@ -505,6 +507,15 @@ SECTION
       return row
     })
   }, [feeTypes, segmentData, feesLookup])
+
+  const originalRowDataRef = useRef<Record<string, any>>({})
+  useEffect(() => {
+    const data: Record<string, any> = {}
+    initialRowData.forEach(row => {
+      data[row.feeTypeId] = { ...row }
+    })
+    originalRowDataRef.current = data
+  }, [initialRowData])
 
   const [rowData, setRowData] = useState(initialRowData)
 
