@@ -1,15 +1,16 @@
 'use client'
 
-import { Button, Stack } from '@mui/material'
+import { Box, Button, Chip, Stack, Typography } from '@mui/material'
 import { ModuleRegistry, AllCommunityModule, CellValueChangedEvent, ColDef, ColGroupDef } from 'ag-grid-community'
 import { AgGridReact } from 'ag-grid-react'
-import { useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 
 import { ProgramFeesDetailsProps } from 'src/pages/Admin/programs'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 
+import { createColorMap } from './colorMapper'
 import HeaderCopy from './HeaderCopy'
 
 ModuleRegistry.registerModules([AllCommunityModule])
@@ -54,18 +55,15 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
 
   const getHeaderProps = (displayName: string, type: string, meta: any) => ({
     displayName,
-
     type,
-
     meta,
-
     onCopy: handleCopy,
 
     ...(type === 'medium'
       ? {
           copyOptions: mediumMap
-            .filter((x: any) => x.medium_id !== meta.mediumId)
-            .map((x: any) => ({
+            .filter(x => x.medium_id !== meta.mediumId)
+            .map(x => ({
               id: x.medium_id,
               label: x.medium_name
             }))
@@ -350,6 +348,10 @@ SECTION
  COLUMN DEFS
 ******************************************/
 
+  const getHeaderClass = (type: 'medium' | 'segment' | 'section', id: string) => {
+    return `${type}-${id}`
+  }
+
   const columnDefs = useMemo<(ColDef | ColGroupDef)[]>(() => {
     return [
       {
@@ -364,6 +366,8 @@ SECTION
         (medium: any): ColGroupDef => ({
           headerName: medium.medium_name,
 
+          headerClass: getHeaderClass('medium', medium.medium_id),
+
           headerGroupComponent: HeaderCopy,
 
           headerGroupComponentParams: getHeaderProps(medium.medium_name, 'medium', {
@@ -373,6 +377,8 @@ SECTION
           children: medium.segments.map(
             (segment: any): ColGroupDef => ({
               headerName: segment.segment_name,
+
+              headerClass: getHeaderClass('segment', segment.segment_id),
 
               headerGroupComponent: HeaderCopy,
 
@@ -385,6 +391,8 @@ SECTION
               children: segment.sections.map(
                 (section: any): ColDef => ({
                   headerName: section.section_name,
+
+                  headerClass: getHeaderClass('section', section.section_id),
 
                   headerComponent: HeaderCopy,
 
@@ -416,11 +424,64 @@ SECTION
  ROW DATA
 ******************************************/
 
+  const mediumColors = useMemo(() => {
+    return createColorMap(mediumMap, 'medium_id')
+  }, [mediumMap])
+
+  const segmentColors = useMemo(() => {
+    const segments = mediumMap.flatMap(medium => medium.segments)
+
+    return createColorMap(segments, 'segment_id')
+  }, [mediumMap])
+
+  const sectionColors = useMemo(() => {
+    const sections = mediumMap.flatMap(medium => medium.segments.flatMap(segment => segment.sections))
+
+    return createColorMap(sections, 'section_id')
+  }, [mediumMap])
+
+  useEffect(() => {
+    const style = document.createElement('style')
+
+    let css = ''
+
+    Object.entries(mediumColors).forEach(([id, color]) => {
+      css += `
+      .medium-${id}{
+          background:${color}!important;
+      }
+      `
+    })
+
+    Object.entries(segmentColors).forEach(([id, color]) => {
+      css += `
+      .segment-${id}{
+          background:${color}!important;
+      }
+      `
+    })
+
+    Object.entries(sectionColors).forEach(([id, color]) => {
+      css += `
+      .section-${id}{
+          background:${color}!important;
+      }
+      `
+    })
+
+    style.innerHTML = css
+
+    document.head.appendChild(style)
+
+    return () => {
+      document.head.removeChild(style)
+    }
+  }, [mediumColors, segmentColors, sectionColors])
+
   const initialRowData = useMemo(() => {
     return feeTypes.map(fee => {
       const row: any = {
         feeType: fee.fees_type_name,
-
         feeTypeId: fee.fees_type_id
       }
 
@@ -521,6 +582,84 @@ SECTION
  UI
 ******************************************/
 
+  const [hiddenColumns, setHiddenColumns] = useState<
+    {
+      id: string
+      name: string
+      colIds: string[]
+    }[]
+  >([])
+
+  const syncHiddenColumns = useCallback(() => {
+    const columns = gridRef.current?.api.getColumns()
+
+    if (!columns) return
+
+    const hiddenMap = new Map<
+      string,
+      {
+        id: string
+        name: string
+        colIds: string[]
+      }
+    >()
+
+    columns
+      .filter(col => !col.isVisible())
+      .forEach(col => {
+        const groups: string[] = []
+
+        let parent = col.getParent()
+
+        while (parent) {
+          const header = parent.getColGroupDef()?.headerName
+
+          if (header) {
+            groups.unshift(header)
+          }
+
+          parent = parent.getParent()
+        }
+
+        const colId = col.getColId()
+
+        // Telugu
+        // Telugu > LKG
+        // Telugu > LKG > A
+
+        for (let level = 1; level <= groups.length + 1; level++) {
+          const path = level <= groups.length ? groups.slice(0, level) : [...groups, col.getColDef()?.headerName]
+
+          const key = path.join('__')
+
+          if (!hiddenMap.has(key)) {
+            hiddenMap.set(key, {
+              id: key,
+              name: path.join(' > '),
+              colIds: []
+            })
+          }
+
+          hiddenMap.get(key)!.colIds.push(colId)
+        }
+      })
+
+    const values = Array.from(hiddenMap.values())
+
+    // remove duplicates
+    values.forEach(item => {
+      item.colIds = [...new Set(item.colIds)]
+    })
+
+    const result = values.filter(item => {
+      return !values.some(
+        other => other !== item && other.id.startsWith(item.id + '__') && other.colIds.length === item.colIds.length
+      )
+    })
+
+    setHiddenColumns(result)
+  }, [])
+
   return (
     <ChaarvyModal isOpen={isOpen} onClose={onClose} modalSize='col-11'>
       <>
@@ -537,9 +676,36 @@ SECTION
         <div
           className='ag-theme-alpine'
           style={{
-            height: '80vh'
+            height: '70vh'
           }}
         >
+          {hiddenColumns.length > 0 && (
+            <Box
+              display='flex'
+              gap={1}
+              mb={2}
+              flexWrap='wrap'
+              sx={{
+                p: 1,
+                border: '1px solid #eee',
+                borderRadius: 2,
+                background: '#fafafa'
+              }}
+            >
+              <Typography fontWeight={600}>Hidden:</Typography>
+
+              {hiddenColumns.map(column => (
+                <Chip
+                  key={column.id}
+                  label={column.name}
+                  onDelete={() => {
+                    gridRef.current?.api?.setColumnsVisible(column?.colIds, true)
+                  }}
+                />
+              ))}
+            </Box>
+          )}
+
           <AgGridReact
             ref={gridRef}
             rowData={rowData}
@@ -547,8 +713,15 @@ SECTION
             getRowId={p => String(p.data.feeTypeId)}
             onCellValueChanged={onCellValueChanged}
             defaultColDef={{
-              resizable: true
+              resizable: true,
+              sortable: false,
+              filter: false
             }}
+            undoRedoCellEditing
+            undoRedoCellEditingLimit={100}
+            onColumnVisible={syncHiddenColumns}
+            onColumnMoved={syncHiddenColumns}
+            suppressDragLeaveHidesColumns={false}
           />
         </div>
       </>

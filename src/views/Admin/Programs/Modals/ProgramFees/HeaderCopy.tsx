@@ -1,5 +1,4 @@
-import { Box, Button, Checkbox, FormControlLabel, IconButton, Popover, Typography } from '@mui/material'
-import { ContentCopy } from 'mdi-material-ui'
+import { Box, Button, Checkbox, FormControlLabel, Popover, Typography } from '@mui/material'
 import { useMemo, useState } from 'react'
 
 interface Props {
@@ -59,36 +58,51 @@ HELPERS
     setter((prev: string[]) => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]))
   }
 
-  const uniqueBy = (items: any[], key: string) => {
-    return Array.from(new Map(items.map(item => [item[key], item])).values())
-  }
-
   /********************************
 DERIVED DATA
 *********************************/
 
   const availableSegments = useMemo(() => {
-    const result = normalizedCopyData
+    const segmentMap = new Map()
 
+    normalizedCopyData
       .filter(medium => mediums.includes(medium.medium_id))
+      .forEach((medium: any) => {
+        ;(medium.segments || []).forEach((segment: any) => {
+          if (!segmentMap.has(segment.segment_id)) {
+            segmentMap.set(segment.segment_id, {
+              ...segment,
+              sections: [...(segment.sections || [])]
+            })
+          } else {
+            const existing = segmentMap.get(segment.segment_id)
 
-      .flatMap(medium => medium.segments || [])
+            existing.sections = Array.from(
+              new Map(
+                [...existing.sections, ...(segment.sections || [])].map((section: any) => [section.section_id, section])
+              ).values()
+            )
+          }
+        })
+      })
 
-      .filter(Boolean)
-
-    return uniqueBy(result, 'segment_id')
+    return Array.from(segmentMap.values()).sort((a: any, b: any) => a.sequence - b.sequence)
   }, [normalizedCopyData, mediums])
 
   const availableSections = useMemo(() => {
-    const result = availableSegments
+    const sectionMap = new Map()
 
+    availableSegments
       .filter(segment => segments.includes(segment.segment_id))
+      .forEach(segment => {
+        ;(segment.sections || []).forEach((section: any) => {
+          if (!sectionMap.has(section.section_id)) {
+            sectionMap.set(section.section_id, section)
+          }
+        })
+      })
 
-      .flatMap(segment => segment.sections || [])
-
-      .filter(Boolean)
-
-    return uniqueBy(result, 'section_id')
+    return Array.from(sectionMap.values()).sort((a: any, b: any) => a.sequence - b.sequence)
   }, [availableSegments, segments])
 
   /********************************
@@ -134,15 +148,41 @@ COMMON UI
 
   return (
     <>
-      <Box display='flex' alignItems='center' width='100%' justifyContent='center' gap={1}>
-        {displayName}
+      <Box display='flex' alignItems='center' justifyContent='center' gap={0.5}>
+        <Box
+          onClick={e => setAnchorEl(e.currentTarget)}
+          sx={{
+            cursor: 'pointer',
+            px: 1,
+            py: 0.5,
+            borderRadius: 2,
 
-        <IconButton size='small' onClick={e => setAnchorEl(e.currentTarget)}>
-          <ContentCopy fontSize='inherit' />
-        </IconButton>
+            '&:hover': {
+              background: '#f5f5f5'
+            }
+          }}
+        >
+          {displayName}
+        </Box>
       </Box>
 
-      <Popover open={Boolean(anchorEl)} anchorEl={anchorEl} onClose={reset}>
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={reset}
+        disableRestoreFocus
+        slotProps={{
+          paper: {
+            className: 'copy-popover',
+            sx: {
+              borderRadius: 3,
+              boxShadow: 4,
+              background: '#FAFAFA',
+              border: '1px solid #E0E0E0'
+            }
+          }
+        }}
+      >
         <Box p={2} width={300}>
           {type === 'medium' && (
             <>

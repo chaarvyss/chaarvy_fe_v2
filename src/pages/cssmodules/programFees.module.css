@@ -12,19 +12,19 @@
 }
 
 :global(.fee-header) {
-  background: #eceff1 !important;
+  /* background: #eceff1 !important; */
   font-weight: 700;
   border: 1px solid #ddd;
 }
 
 :global(.medium-header) {
-  background: #e8f5e9 !important;
+  /* background: #e8f5e9 !important; */
   font-weight: 700;
   border: 1px solid #ddd;
 }
 
 :global(.segment-header) {
-  background: #e3f2fd !important;
+  /* background: red !important; */
   font-weight: 700;
   border: 1px solid #ddd;
 }
