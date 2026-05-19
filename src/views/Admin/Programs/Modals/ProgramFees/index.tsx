@@ -171,6 +171,22 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
     return Number.isFinite(parsed) ? parsed : null
   }
 
+  const parseNumericValue = (newValue: any, oldValue: any) => {
+    if (newValue === null || newValue === undefined || newValue === '') {
+      return null
+    }
+
+    const value = typeof newValue === 'string' ? newValue.trim() : newValue
+
+    if (typeof value === 'string' && !/^-?\d+(\.\d+)?$/.test(value)) {
+      return oldValue ?? null
+    }
+
+    const parsed = normalizeFeeValue(value)
+
+    return parsed === null ? (oldValue ?? null) : parsed
+  }
+
   const formatFeeValue = (value: any) => {
     if (value === null || value === undefined || value === '') {
       return ''
@@ -546,8 +562,9 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
                   field: getField(segment.segment_id, medium.medium_id, section.section_id),
 
                   editable: params => params.data?.feeTypeId !== 'TOTAL',
+                  cellEditor: 'agNumberCellEditor',
 
-                  valueParser: params => normalizeFeeValue(params.newValue),
+                  valueParser: params => parseNumericValue(params.newValue, params.oldValue),
 
                   valueFormatter: params => formatFeeValue(params.value),
 
