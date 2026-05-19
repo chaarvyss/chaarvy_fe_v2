@@ -10,7 +10,6 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { ProgramFeesDetailsProps } from 'src/pages/Admin/programs'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 
-// import { createColorMap } from './colorMapper'
 import HeaderCopy from './HeaderCopy'
 
 ModuleRegistry.registerModules([AllCommunityModule])
@@ -20,34 +19,162 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
 
   const [changes, setChanges] = useState<Record<string, any>>({})
 
-  /*****************************************
- HELPERS
-******************************************/
-
   const getField = (segmentId: string, mediumId: string, sectionId: string) =>
     `sg_${segmentId}_mid_${mediumId}_sc_${sectionId}`
 
   const getFieldKey = (feeTypeId: string, field: string) => `${feeTypeId}_${field}`
 
+  const getLookupKey = (segmentId: string, mediumId: string, sectionId: string, feeTypeId: string) =>
+    `${segmentId}_${mediumId}_${sectionId}_${feeTypeId}`
+
+  const isFeeField = (key: string) => key.startsWith('sg_') && !key.endsWith('_id')
+
   const validateValue = (value: any) => value !== null && value !== undefined && value !== '' && !Number.isNaN(value)
 
-  const updateCell = ({ node, row, sourceField, targetField, copiedChanges }: any) => {
-    if (sourceField === targetField || !(targetField in row)) {
+  const normalizeFeeValue = (value: any) => {
+    if (value === null || value === undefined || value === '') {
+      return null
+    }
+
+    const parsed = Number(value)
+
+    return Number.isFinite(parsed) ? parsed : null
+  }
+
+  const formatFeeValue = (value: any) => {
+    if (value === null || value === undefined || value === '') {
+      return ''
+    }
+
+    return String(value)
+  }
+
+  const hasColumn = (field: string) => {
+    const columns = gridRef.current?.api.getColumns() || []
+
+    return columns.some(col => col.getColId() === field)
+  }
+
+  const updateCell = ({ node, sourceField, targetField, copiedChanges, copiedRows }: any) => {
+    if (sourceField === targetField) {
       return
     }
 
-    const value = row[sourceField]
+    const value = node.data[sourceField]
 
     if (!validateValue(value)) {
       return
     }
 
-    // AG Grid tracked update
     node.setDataValue(targetField, value)
 
-    copiedChanges[getFieldKey(row.feeTypeId, targetField)] = {
+    copiedChanges[getFieldKey(node.data.feeTypeId, targetField)] = {
       value
     }
+
+    if (!copiedRows[node.data.feeTypeId]) {
+      copiedRows[node.data.feeTypeId] = {}
+    }
+
+    copiedRows[node.data.feeTypeId][targetField] = value
+  }
+
+  const copyMediumValues = ({ node, source, targets, copiedChanges, copiedRows }: any) => {
+    const sourceMedium = source.mediumId
+
+    const sourceMediumConfig = mediumMap.find((medium: any) => medium.medium_id === sourceMedium)
+
+    if (!sourceMediumConfig) {
+      return
+    }
+
+    targets.forEach((targetMedium: string) => {
+      sourceMediumConfig.segments.forEach((segment: any) => {
+        segment.sections.forEach((section: any) => {
+          const sourceField = getField(segment.segment_id, sourceMedium, section.section_id)
+
+          const targetField = getField(segment.segment_id, targetMedium, section.section_id)
+
+          if (!hasColumn(targetField)) {
+            return
+          }
+
+          updateCell({
+            node,
+            sourceField,
+            targetField,
+            copiedChanges,
+            copiedRows
+          })
+        })
+      })
+    })
+  }
+
+  const copySegmentValues = ({ node, source, targets, copiedChanges, copiedRows }: any) => {
+    const { segmentId, mediumId } = source
+
+    const { mediums, segments } = targets
+
+    Object.keys(node.data)
+      .filter(key => key.startsWith(`sg_${segmentId}_mid_${mediumId}`) && !key.endsWith('_id'))
+      .forEach(sourceField => {
+        const sectionId = sourceField.split('_sc_')[1]
+
+        mediums.forEach((targetMedium: string) => {
+          segments.forEach((targetSegment: string) => {
+            if (targetMedium === mediumId && targetSegment === segmentId) {
+              return
+            }
+
+            const targetField = getField(targetSegment, targetMedium, sectionId)
+
+            if (!hasColumn(targetField)) {
+              return
+            }
+
+            updateCell({
+              node,
+              sourceField,
+              targetField,
+              copiedChanges,
+              copiedRows
+            })
+          })
+        })
+      })
+  }
+
+  const copySectionValues = ({ node, source, targets, copiedChanges, copiedRows }: any) => {
+    const { sectionId, segmentId, mediumId } = source
+
+    const { mediums, segments, sections } = targets
+
+    const sourceField = getField(segmentId, mediumId, sectionId)
+
+    mediums.forEach((targetMedium: string) => {
+      segments.forEach((targetSegment: string) => {
+        sections.forEach((targetSection: string) => {
+          if (targetMedium === mediumId && targetSegment === segmentId && targetSection === sectionId) {
+            return
+          }
+
+          const targetField = getField(targetSegment, targetMedium, targetSection)
+
+          if (!hasColumn(targetField)) {
+            return
+          }
+
+          updateCell({
+            node,
+            sourceField,
+            targetField,
+            copiedChanges,
+            copiedRows
+          })
+        })
+      })
+    })
   }
 
   const getHeaderProps = (displayName: string, type: string, meta: any) => ({
@@ -59,8 +186,8 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
     ...(type === 'medium'
       ? {
           copyOptions: mediumMap
-            .filter(x => x.medium_id !== meta.mediumId)
-            .map(x => ({
+            .filter((x: any) => x.medium_id !== meta.mediumId)
+            .map((x: any) => ({
               id: x.medium_id,
               label: x.medium_name
             }))
@@ -91,10 +218,6 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
       })
     }
   }
-
-  /*****************************************
- API DATA
-******************************************/
 
   const segmentData = [
     {
@@ -206,15 +329,11 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
     }
   ]
 
-  /*****************************************
- LOOKUPS
-******************************************/
-
   const feesLookup = useMemo(() => {
     const map: Record<string, any> = {}
 
     feesData.forEach(item => {
-      const key = `${item.segment_id}` + `_${item.medium_id}` + `_${item.section_id}` + `_${item.fees_type_id}`
+      const key = getLookupKey(item.segment_id, item.medium_id, item.section_id, item.fees_type_id)
 
       map[key] = item
     })
@@ -266,122 +385,66 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
       .sort((a: any, b: any) => a.sequence - b.sequence)
   }, [segmentData])
 
-  /*****************************************
- COPY
-******************************************/
-
   const handleCopy = (data: any) => {
     const api = gridRef.current?.api
 
     if (!api) return
 
     const copiedChanges: Record<string, any> = {}
+    const copiedRows: Record<string, Record<string, any>> = {}
 
     api.forEachNode(node => {
-      const row = node.data
-
-      const copy = (sourceField: string, targetField: string) => {
-        updateCell({
-          node,
-          row,
-          sourceField,
-          targetField,
-          copiedChanges
-        })
-      }
-
-      /*******************
-      MEDIUM
-    ********************/
-
       if (data.type === 'medium') {
-        const sourceMedium = data.source.mediumId
-
-        data.targets.forEach((targetMedium: string) => {
-          mediumMap.forEach((medium: any) => {
-            medium.segments.forEach((segment: any) => {
-              segment.sections.forEach((section: any) => {
-                copy(
-                  getField(segment.segment_id, sourceMedium, section.section_id),
-
-                  getField(segment.segment_id, targetMedium, section.section_id)
-                )
-              })
-            })
-          })
+        copyMediumValues({
+          node,
+          source: data.source,
+          targets: data.targets,
+          copiedChanges,
+          copiedRows
         })
       }
-
-      /*******************
-      SEGMENT
-    ********************/
 
       if (data.type === 'segment') {
-        const { segmentId, mediumId } = data.source
-
-        const { mediums, segments } = data.targets
-
-        Object.keys(row)
-
-          .filter(key => key.startsWith(`sg_${segmentId}_mid_${mediumId}`) && !key.endsWith('_id'))
-
-          .forEach(sourceField => {
-            const sectionId = sourceField.split('_sc_')[1]
-
-            mediums.forEach((targetMedium: string) => {
-              segments.forEach((targetSegment: string) => {
-                if (targetMedium === mediumId && targetSegment === segmentId) {
-                  return
-                }
-
-                copy(
-                  sourceField,
-
-                  getField(targetSegment, targetMedium, sectionId)
-                )
-              })
-            })
-          })
+        copySegmentValues({
+          node,
+          source: data.source,
+          targets: data.targets,
+          copiedChanges,
+          copiedRows
+        })
       }
 
-      /*******************
-      SECTION
-    ********************/
-
       if (data.type === 'section') {
-        const { sectionId, segmentId, mediumId } = data.source
-
-        const { mediums, segments, sections } = data.targets
-
-        const sourceField = getField(segmentId, mediumId, sectionId)
-
-        mediums.forEach((targetMedium: string) => {
-          segments.forEach((targetSegment: string) => {
-            sections.forEach((targetSection: string) => {
-              if (targetMedium === mediumId && targetSegment === segmentId && targetSection === sectionId) {
-                return
-              }
-
-              copy(
-                sourceField,
-
-                getField(targetSegment, targetMedium, targetSection)
-              )
-            })
-          })
+        copySectionValues({
+          node,
+          source: data.source,
+          targets: data.targets,
+          copiedChanges,
+          copiedRows
         })
       }
     })
+
+    setRowData(prev =>
+      prev.map(row => {
+        const rowUpdates = copiedRows[row.feeTypeId]
+
+        if (!rowUpdates) {
+          return row
+        }
+
+        return {
+          ...row,
+          ...rowUpdates
+        }
+      })
+    )
 
     setChanges(prev => ({
       ...prev,
       ...copiedChanges
     }))
   }
-
-  /*****************************************
- COLUMN DEFS
-******************************************/
 
   const getHeaderClass = (type: 'medium' | 'segment' | 'section', id: string) => {
     return `${type}-${id}`
@@ -462,7 +525,11 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
 
                   field: getField(segment.segment_id, medium.medium_id, section.section_id),
 
-                  editable: true,
+                  editable: params => params.data?.feeTypeId !== 'TOTAL',
+
+                  valueParser: params => normalizeFeeValue(params.newValue),
+
+                  valueFormatter: params => formatFeeValue(params.value),
 
                   width: 120,
 
@@ -474,11 +541,7 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
         })
       )
     ]
-  }, [mediumMap, changes])
-
-  /*****************************************
- ROW DATA
-******************************************/
+  }, [mediumMap])
 
   const initialRowData = useMemo(() => {
     return feeTypes.map(fee => {
@@ -490,14 +553,12 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
       segmentData.forEach(segment => {
         segment.mediums.forEach(medium => {
           medium.sections.forEach(section => {
-            const field = `sg_${segment.segment_id}` + `_mid_${medium.medium_id}` + `_sc_${section.section_id}`
+            const field = getField(segment.segment_id, medium.medium_id, section.section_id)
 
             const existing =
-              feesLookup[
-                `${segment.segment_id}` + `_${medium.medium_id}` + `_${section.section_id}` + `_${fee.fees_type_id}`
-              ]
+              feesLookup[getLookupKey(segment.segment_id, medium.medium_id, section.section_id, fee.fees_type_id)]
 
-            row[field] = existing?.fees ?? ''
+            row[field] = normalizeFeeValue(existing?.fees)
 
             row[`${field}_id`] = existing?.program_fees_id
           })
@@ -519,34 +580,49 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
 
   const [rowData, setRowData] = useState(initialRowData)
 
-  /*****************************************
- CHANGE
-******************************************/
+  const totalRow = useMemo(() => {
+    const row: Record<string, any> = {
+      feeType: 'TOTAL',
+      feeTypeId: 'TOTAL'
+    }
+
+    const fields = Object.keys(rowData[0] || {}).filter(isFeeField)
+
+    fields.forEach(field => {
+      row[field] = rowData.reduce((sum, item) => {
+        const value = normalizeFeeValue(item[field]) ?? 0
+
+        return sum + value
+      }, 0)
+    })
+
+    return [row]
+  }, [rowData])
 
   const onCellValueChanged = (params: CellValueChangedEvent) => {
     const field = params.colDef.field as string
 
     const feeTypeId = params.data.feeTypeId
 
+    const normalizedValue = normalizeFeeValue(params.newValue)
+
     const key = `${feeTypeId}_${field}`
 
-    // track changed cells
     setChanges(prev => ({
       ...prev,
 
       [key]: {
-        value: params.newValue
+        value: normalizedValue
       }
     }))
 
-    // sync actual row data
     setRowData(prev =>
       prev.map(row => {
         if (row.feeTypeId === feeTypeId) {
           return {
             ...row,
 
-            [field]: params.newValue
+            [field]: normalizedValue
           }
         }
 
@@ -555,17 +631,13 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
     )
   }
 
-  /*****************************************
- SAVE
-******************************************/
-
   const saveChanges = () => {
     const payload = Object.entries(changes)
 
       .map(([key, value]: any) => {
         const [feeTypeId, , segmentId, , mediumId, , sectionId] = key.split('_')
 
-        const field = `sg_${segmentId}` + `_mid_${mediumId}` + `_sc_${sectionId}`
+        const field = getField(segmentId, mediumId, sectionId)
 
         const row = rowData.find(x => x.feeTypeId === feeTypeId)
 
@@ -588,10 +660,6 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
 
     console.log(payload)
   }
-
-  /*****************************************
- UI
-******************************************/
 
   const [hiddenColumns, setHiddenColumns] = useState<
     {
@@ -634,10 +702,6 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
 
         const colId = col.getColId()
 
-        // Telugu
-        // Telugu > LKG
-        // Telugu > LKG > A
-
         for (let level = 1; level <= groups.length + 1; level++) {
           const path = level <= groups.length ? groups.slice(0, level) : [...groups, col.getColDef()?.headerName]
 
@@ -657,7 +721,6 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
 
     const values = Array.from(hiddenMap.values())
 
-    // remove duplicates
     values.forEach(item => {
       item.colIds = [...new Set(item.colIds)]
     })
@@ -728,6 +791,7 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
               sortable: false,
               filter: false
             }}
+            pinnedBottomRowData={totalRow}
             undoRedoCellEditing
             undoRedoCellEditingLimit={100}
             onColumnVisible={syncHiddenColumns}

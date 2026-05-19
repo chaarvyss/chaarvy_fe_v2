@@ -5,18 +5,16 @@ import { sessionStorageKeys } from 'src/lib/enums'
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_URL,
   prepareHeaders: headers => {
-    if (typeof window !== 'undefined') {
-      const accessToken = sessionStorage.getItem(sessionStorageKeys.accessToken)
+    const accessToken = sessionStorage.getItem(sessionStorageKeys.accessToken)
 
-      const clcode = sessionStorage.getItem(sessionStorageKeys.clientCode)
+    const clcode = sessionStorage.getItem(sessionStorageKeys.clientCode)
 
-      if (accessToken) {
-        headers.set('Authorization', `Bearer ${accessToken}`)
-      }
+    if (accessToken) {
+      headers.set('Authorization', `Bearer ${accessToken}`)
+    }
 
-      if (clcode) {
-        headers.set('clcode', clcode)
-      }
+    if (clcode) {
+      headers.set('clcode', clcode)
     }
 
     return headers

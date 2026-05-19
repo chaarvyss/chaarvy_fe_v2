@@ -148,7 +148,7 @@ COMMON UI
 
   return (
     <>
-      <Box display='flex' alignItems='center' justifyContent='center' gap={0.5}>
+      <Box display='flex' alignItems='center' width='100%' justifyContent='center' gap={0.5}>
         <Box
           onClick={e => setAnchorEl(e.currentTarget)}
           sx={{
