@@ -391,7 +391,9 @@ const CollectPayment = () => {
 
   const showLoader = fetchingReciept || fetchingRecords
 
-  setLoading(showLoader)
+  useEffect(() => {
+    setLoading(showLoader)
+  }, [showLoader])
 
   const getDueDate = (feesDetail: StudentPendingFeesDetails) => {
     if ([null, 3].includes(feesDetail.payment_aggrement)) {

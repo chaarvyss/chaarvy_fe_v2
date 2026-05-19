@@ -125,7 +125,9 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
 
   const showLoader = isApplicationLoading
 
-  setLoading(showLoader)
+  useEffect(() => {
+    setLoading(showLoader)
+  }, [showLoader])
 
   useEffect(() => {
     fetchProcessingFees()

@@ -60,6 +60,25 @@ export type ProgramMediumRequest = {
   medium_id?: string
 }
 
+export type ProgramFeesSegmentHeaderDataResponse = {
+  segment_id: string
+  segment_name: string
+  sequence: number
+  color: string
+  mediums: {
+    medium_id: string
+    medium_name: string
+    sequence: number
+    color: string
+    sections: {
+      section_id: string
+      section_name: string
+      sequence: number
+      color: string
+    }[]
+  }[]
+}
+
 const programServicesApi = api.injectEndpoints({
   endpoints: build => ({
     getProgramAddonList: build.query<ProgramAddonCourseResponse[], string>({
@@ -182,6 +201,15 @@ const programServicesApi = api.injectEndpoints({
           body
         }
       }
+    }),
+    getProgramFeesHeaderData: build.query<ProgramFeesSegmentHeaderDataResponse[], string>({
+      query: program_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.program.getProgramFeesHeaderDataUrl,
+          params: { program_id }
+        }
+      }
     })
   })
 })
@@ -200,5 +228,6 @@ export const {
   useCreateUpdateProgramBookMutation,
   useCreateUpdateProgramSegmentMediumMutation,
   useGetProgramSegmentMediumsListQuery,
-  useCreateUpdateProgramSegmentSectionMutation
+  useCreateUpdateProgramSegmentSectionMutation,
+  useGetProgramFeesHeaderDataQuery
 } = programServicesApi

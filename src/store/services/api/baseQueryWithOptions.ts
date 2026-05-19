@@ -5,19 +5,21 @@ import { sessionStorageKeys } from 'src/lib/enums'
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_URL,
   prepareHeaders: headers => {
-    const accessToken = sessionStorage.getItem(sessionStorageKeys.accessToken)
+    if (window !== undefined) {
+      const accessToken = sessionStorage.getItem(sessionStorageKeys.accessToken)
 
-    const clcode = sessionStorage.getItem(sessionStorageKeys.clientCode)
+      const clcode = sessionStorage.getItem(sessionStorageKeys.clientCode)
 
-    if (accessToken) {
-      headers.set('Authorization', `Bearer ${accessToken}`)
+      if (accessToken) {
+        headers.set('Authorization', `Bearer ${accessToken}`)
+      }
+
+      if (clcode) {
+        headers.set('clcode', clcode)
+      }
+
+      return headers
     }
-
-    if (clcode) {
-      headers.set('clcode', clcode)
-    }
-
-    return headers
   },
   timeout: 30000
 })
@@ -61,6 +63,7 @@ const baseQueryWithErrorHandling = async (args: any, api: any, extraOptions: any
     }
 
     if (error.status === 401) {
+      sessionStorage.removeItem(sessionStorageKeys.accessToken)
       window.location.replace('/login')
 
       return result

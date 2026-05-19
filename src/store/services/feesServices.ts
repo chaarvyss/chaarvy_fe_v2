@@ -1,28 +1,23 @@
 import { urlConstants } from 'src/constants/urlConstants'
-import { ProgramFeesDetailsResponse } from 'src/lib/types'
+import { ProgramFeesDataResponse } from 'src/lib/types'
 
 import { HttpRequestMethods } from '..'
 
 import api from './api'
 import { CacheTag } from './cacheTag'
 
-interface ProgramFeesRequest {
-  program_id: string
-  segment_id?: string
-  medium: string
-}
-
-interface UpdateProgramFeesRequest {
-  fees?: number
-  program_fees_id: string
+export interface CreateProgramFeesPayload {
+  program_fees_id?: string
+  segment_id: string
+  medium_id: string
+  section_id: string
+  fees_type: string
+  fees: number
 }
 
 export interface CreateProgramFeesRequest {
+  body: CreateProgramFeesPayload[]
   program_id: string
-  fees_type: string
-  fees: number
-  segment_id: string
-  medium: string
 }
 
 export interface CreateProgramAddonCourseRequest {
@@ -136,33 +131,24 @@ export interface UpdateApplicationPaymentRequest {
 
 const feeServiceApi = api.injectEndpoints({
   endpoints: build => ({
-    getProgramFeesDetails: build.query<ProgramFeesDetailsResponse, ProgramFeesRequest>({
+    getProgramFeesDetails: build.query<ProgramFeesDataResponse[], string>({
       providesTags: [CacheTag.ProgramFees],
-      query: params => {
+      query: program_id => {
         return {
           method: HttpRequestMethods.GET,
           url: urlConstants.fees.getprogramFees,
-          params
+          params: { program_id }
         }
       }
     }),
-    updateProgramFees: build.mutation<string, UpdateProgramFeesRequest>({
+    createUpdateProgramFees: build.mutation<string, CreateProgramFeesRequest>({
       invalidatesTags: [CacheTag.ProgramFees],
-      query: params => {
-        return {
-          method: HttpRequestMethods.PATCH,
-          url: urlConstants.fees.updateprogramFees,
-          params
-        }
-      }
-    }),
-    createProgramFees: build.mutation<string, CreateProgramFeesRequest>({
-      invalidatesTags: [CacheTag.ProgramFees],
-      query: details => {
+      query: ({ body, program_id }) => {
         return {
           method: HttpRequestMethods.POST,
-          url: urlConstants.fees.createProgramFees,
-          body: details
+          url: urlConstants.fees.createUpdateProgramFees,
+          body,
+          params: { program_id }
         }
       }
     }),
@@ -237,9 +223,8 @@ const feeServiceApi = api.injectEndpoints({
 })
 
 export const {
-  useLazyGetProgramFeesDetailsQuery,
-  useUpdateProgramFeesMutation,
-  useCreateProgramFeesMutation,
+  useGetProgramFeesDetailsQuery,
+  useCreateUpdateProgramFeesMutation,
   useLazyGetStudentAdmissionFeesDetailsQuery,
   useCreateStudentPayableFeesMutation,
   useLazyGetStudentPayableFeesDetailsQuery,

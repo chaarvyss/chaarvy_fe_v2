@@ -73,7 +73,7 @@ const CreateOrUpdateProgramModal = ({ selectedProgram, isOpen, onClose }: Create
 
   useEffect(() => {
     setLoading(showLoader)
-  }, [])
+  }, [showLoader])
 
   return (
     <ChaarvyModal

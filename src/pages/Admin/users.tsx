@@ -108,7 +108,9 @@ const Users = () => {
 
   const isLoading = isStatusUpdating || isFetchingUsers
 
-  setLoading(isLoading)
+  useEffect(() => {
+    setLoading(isLoading)
+  }, [isLoading])
 
   const handleViewUserProfileModalClose = () => {
     setSelectedUser(undefined)

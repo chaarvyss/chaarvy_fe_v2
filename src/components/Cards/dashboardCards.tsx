@@ -15,7 +15,7 @@ interface Card1Props {
   details?: { key: string; value: string | number }[]
 }
 
-const Spinner = () => (
+export const Spinner = () => (
   <ClipLoader color={'#1976d2'} loading={true} size={50} aria-label='Loading Spinner' data-testid='loader' />
 )
 

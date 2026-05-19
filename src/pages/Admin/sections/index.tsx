@@ -1,6 +1,6 @@
 import { LoadingButton } from '@mui/lab'
 import { SelectChangeEvent } from '@mui/material'
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 
 import {
   Box,
@@ -40,7 +40,11 @@ const Sections = () => {
 
   const { triggerToast } = useToast()
 
-  setLoading(isLoading || isCreating)
+  const showLoader = isLoading || isCreating
+
+  useEffect(() => {
+    setLoading(showLoader)
+  }, [showLoader])
 
   const handleAddSection = () => {
     setSectionModalOpen(true)

@@ -61,7 +61,10 @@ const AddonCourseDetails = ({ application_id, programId, handleNext }: AddonCour
   }
 
   const isLoading = isLoadingCourses
-  setLoading(isLoading)
+
+  useEffect(() => {
+    setLoading(isLoading)
+  }, [isLoading])
 
   return (
     <Box padding='1rem'>

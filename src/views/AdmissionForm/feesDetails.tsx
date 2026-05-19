@@ -43,7 +43,9 @@ const FeesDetails = ({ application_id, segment_id }: FeesDetailsProps) => {
 
   const loading = isFetchingStudentFeesDetails || isFetchingStudentPayableFees
 
-  setLoading(loading)
+  useEffect(() => {
+    setLoading(loading)
+  }, [loading])
 
   const getActualPayableFees = () => {
     application_id &&
