@@ -57,6 +57,7 @@ export type Fees = {
 export type FeesTypesResponse = {
   fees_type: string
   fees_type_id: string
+  status: number
 }
 
 export type RolesListResponse = {

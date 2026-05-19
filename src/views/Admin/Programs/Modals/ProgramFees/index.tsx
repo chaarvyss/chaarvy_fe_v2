@@ -9,15 +9,145 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'
 
 import { ProgramFeesDetailsProps } from 'src/pages/Admin/programs'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
+import { useGetFeesTypesListQuery } from 'src/store/services/listServices'
 
 import HeaderCopy from './HeaderCopy'
+
+type ProgramFeesSegmentHeaderDataResponse = {
+  segment_id: string
+  segment_name: string
+  sequence: number
+  color: string
+  mediums: {
+    medium_id: string
+    medium_name: string
+    sequence: number
+    color: string
+    sections: {
+      section_id: string
+      section_name: string
+      sequence: number
+      color: string
+    }[]
+  }[]
+}
+
+type ProgramFeesDataResponse = {
+  program_fees_id: string
+  program_id: string
+  segment_id: string
+  medium_id: string
+  section_id: string
+  fees_type_id: string
+  fees: number
+}
 
 ModuleRegistry.registerModules([AllCommunityModule])
 
 const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetailsProps) => {
   const gridRef = useRef<AgGridReact>(null)
 
+  const { data: feesTypes } = useGetFeesTypesListQuery()
+
   const [changes, setChanges] = useState<Record<string, any>>({})
+
+  const segmentData: ProgramFeesSegmentHeaderDataResponse[] = [
+    {
+      segment_name: 'U.K.G',
+      segment_id: 'seg-1',
+      sequence: 2,
+      color: 'linear-gradient(to bottom,#FFF8E1,#FAE8AD)',
+      mediums: [
+        {
+          medium_id: 'med-1',
+          medium_name: 'Telugu',
+          sequence: 1,
+          color: 'linear-gradient(to bottom,#E8FFE8,#BCFFC2)',
+          sections: [
+            {
+              section_id: 'sec-1',
+              section_name: 'A',
+              sequence: 1,
+              color: 'linear-gradient(to bottom,#FFF0F5,#FFD6E7)'
+            },
+            {
+              section_id: 'sec-2',
+              section_name: 'B',
+              sequence: 2,
+              color: 'linear-gradient(to bottom,#E3F2FD,#BBDEFB)'
+            },
+            {
+              section_id: 'sec-3',
+              section_name: 'C',
+              sequence: 3,
+              color: 'linear-gradient(to bottom, #FAF0FF 0%, #F3E5F5 70%, #E8D3EB 100%)'
+            }
+          ]
+        },
+        {
+          medium_id: 'med-2',
+          medium_name: 'English',
+          sequence: 2,
+          color: 'linear-gradient(to bottom, #FFF1E6 0%, #FFE6CC 70%, #F7D7B4 100%)',
+          sections: [
+            {
+              section_id: 'sec-1',
+              section_name: 'A',
+              sequence: 1,
+              color: 'linear-gradient(to bottom,#FFF0F5,#FFD6E7)'
+            },
+            { section_id: 'sec-2', section_name: 'B', sequence: 2, color: 'linear-gradient(to bottom,#E3F2FD,#BBDEFB)' }
+          ]
+        }
+      ]
+    },
+    {
+      segment_name: 'L.K.G',
+      segment_id: 'seg-2',
+      sequence: 1,
+      color: 'linear-gradient(to bottom, #FAF0FF 0%, #F3E5F5 70%, #E8D3EB 100%)',
+
+      mediums: [
+        {
+          medium_id: 'med-1',
+          medium_name: 'Telugu',
+          sequence: 1,
+          color: 'linear-gradient(to bottom, #EBFFFD 0%, #D6F7F5 70%, #BDEDEB 100%)',
+
+          sections: [
+            {
+              section_id: 'sec-1',
+              section_name: 'A',
+              sequence: 1,
+              color: 'linear-gradient(to bottom,#FFF0F5,#FFD6E7)'
+            },
+            { section_id: 'sec-2', section_name: 'B', sequence: 2, color: 'linear-gradient(to bottom,#E3F2FD,#BBDEFB)' }
+          ]
+        },
+        {
+          medium_id: 'med-2',
+          medium_name: 'English',
+          sequence: 2,
+          color: 'linear-gradient(to bottom, #EDF7FF 0%, #D6EAF8 70%, #C5DEF2 100%)',
+          sections: [
+            { section_id: 'sec-1', section_name: 'A', sequence: 1, color: 'linear-gradient(to bottom,#FFF0F5,#FFD6E7)' }
+          ]
+        }
+      ]
+    }
+  ]
+
+  const feesData: ProgramFeesDataResponse[] = [
+    {
+      program_fees_id: 'pfid-1',
+      program_id: 'pid-1',
+      segment_id: 'seg-1',
+      medium_id: 'med-1',
+      section_id: 'sec-1',
+      fees_type_id: 'ftid-1',
+      fees: 2000
+    }
+  ]
 
   const getField = (segmentId: string, mediumId: string, sectionId: string) =>
     `sg_${segmentId}_mid_${mediumId}_sc_${sectionId}`
@@ -218,116 +348,6 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
       })
     }
   }
-
-  const segmentData = [
-    {
-      segment_name: 'U.K.G',
-      segment_id: 'seg-1',
-      sequence: 2,
-      color: 'linear-gradient(to bottom,#FFF8E1,#FAE8AD)',
-      mediums: [
-        {
-          medium_id: 'med-1',
-          medium_name: 'Telugu',
-          sequence: 1,
-          color: 'linear-gradient(to bottom,#E8FFE8,#BCFFC2)',
-          sections: [
-            {
-              section_id: 'sec-1',
-              section_name: 'A',
-              sequence: 1,
-              color: 'linear-gradient(to bottom,#FFF0F5,#FFD6E7)'
-            },
-            {
-              section_id: 'sec-2',
-              section_name: 'B',
-              sequence: 2,
-              color: 'linear-gradient(to bottom,#E3F2FD,#BBDEFB)'
-            },
-            {
-              section_id: 'sec-3',
-              section_name: 'C',
-              sequence: 3,
-              color: 'linear-gradient(to bottom, #FAF0FF 0%, #F3E5F5 70%, #E8D3EB 100%)'
-            }
-          ]
-        },
-        {
-          medium_id: 'med-2',
-          medium_name: 'English',
-          sequence: 2,
-          color: 'linear-gradient(to bottom, #FFF1E6 0%, #FFE6CC 70%, #F7D7B4 100%)',
-          sections: [
-            {
-              section_id: 'sec-1',
-              section_name: 'A',
-              sequence: 1,
-              color: 'linear-gradient(to bottom,#FFF0F5,#FFD6E7)'
-            },
-            { section_id: 'sec-2', section_name: 'B', sequence: 2, color: 'linear-gradient(to bottom,#E3F2FD,#BBDEFB)' }
-          ]
-        }
-      ]
-    },
-    {
-      segment_name: 'L.K.G',
-      segment_id: 'seg-2',
-      sequence: 1,
-      color: 'linear-gradient(to bottom, #FAF0FF 0%, #F3E5F5 70%, #E8D3EB 100%)',
-
-      mediums: [
-        {
-          medium_id: 'med-1',
-          medium_name: 'Telugu',
-          sequence: 1,
-          color: 'linear-gradient(to bottom, #EBFFFD 0%, #D6F7F5 70%, #BDEDEB 100%)',
-
-          sections: [
-            {
-              section_id: 'sec-1',
-              section_name: 'A',
-              sequence: 1,
-              color: 'linear-gradient(to bottom,#FFF0F5,#FFD6E7)'
-            },
-            { section_id: 'sec-2', section_name: 'B', sequence: 2, color: 'linear-gradient(to bottom,#E3F2FD,#BBDEFB)' }
-          ]
-        },
-        {
-          medium_id: 'med-2',
-          medium_name: 'English',
-          sequence: 2,
-          color: 'linear-gradient(to bottom, #EDF7FF 0%, #D6EAF8 70%, #C5DEF2 100%)',
-          sections: [
-            { section_id: 'sec-1', section_name: 'A', sequence: 1, color: 'linear-gradient(to bottom,#FFF0F5,#FFD6E7)' }
-          ]
-        }
-      ]
-    }
-  ]
-  const feesData = [
-    {
-      id: 'altha-w',
-      program_fees_id: 'pfid-1',
-      program_id: 'pid-1',
-      segment_id: 'seg-1',
-      medium_id: 'med-1',
-      section_id: 'sec-1',
-      fees_type_id: 'ftid-1',
-      fees: 2000
-    }
-  ]
-
-  const feeTypes = [
-    {
-      fees_type_id: 'ftid-1',
-      fees_type_name: 'Admission Fee'
-    },
-
-    {
-      fees_type_id: 'ftid-2',
-      fees_type_name: 'Tuition Fee'
-    }
-  ]
 
   const feesLookup = useMemo(() => {
     const map: Record<string, any> = {}
@@ -544,30 +564,32 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
   }, [mediumMap])
 
   const initialRowData = useMemo(() => {
-    return feeTypes.map(fee => {
-      const row: any = {
-        feeType: fee.fees_type_name,
-        feeTypeId: fee.fees_type_id
-      }
+    return (feesTypes ?? [])
+      .filter(each => each.status == 1)
+      .map(fee => {
+        const row: any = {
+          feeType: fee.fees_type,
+          feeTypeId: fee.fees_type_id
+        }
 
-      segmentData.forEach(segment => {
-        segment.mediums.forEach(medium => {
-          medium.sections.forEach(section => {
-            const field = getField(segment.segment_id, medium.medium_id, section.section_id)
+        segmentData.forEach(segment => {
+          segment.mediums.forEach(medium => {
+            medium.sections.forEach(section => {
+              const field = getField(segment.segment_id, medium.medium_id, section.section_id)
 
-            const existing =
-              feesLookup[getLookupKey(segment.segment_id, medium.medium_id, section.section_id, fee.fees_type_id)]
+              const existing =
+                feesLookup[getLookupKey(segment.segment_id, medium.medium_id, section.section_id, fee.fees_type_id)]
 
-            row[field] = normalizeFeeValue(existing?.fees)
+              row[field] = normalizeFeeValue(existing?.fees)
 
-            row[`${field}_id`] = existing?.program_fees_id
+              row[`${field}_id`] = existing?.program_fees_id
+            })
           })
         })
-      })
 
-      return row
-    })
-  }, [feeTypes, segmentData, feesLookup])
+        return row
+      })
+  }, [feesTypes, segmentData, feesLookup])
 
   const originalRowDataRef = useRef<Record<string, any>>({})
   useEffect(() => {
@@ -788,7 +810,7 @@ const ProgramFeesModal = ({ isOpen, onClose, selectedProgram }: ProgramFeesDetai
             onCellValueChanged={onCellValueChanged}
             defaultColDef={{
               resizable: true,
-              sortable: false,
+              sortable: true,
               filter: false
             }}
             pinnedBottomRowData={totalRow}
