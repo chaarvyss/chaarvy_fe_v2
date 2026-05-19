@@ -5,7 +5,7 @@ import { sessionStorageKeys } from 'src/lib/enums'
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_URL,
   prepareHeaders: headers => {
-    if (window !== undefined) {
+    if (typeof globalThis !== 'undefined') {
       const accessToken = sessionStorage.getItem(sessionStorageKeys.accessToken)
 
       const clcode = sessionStorage.getItem(sessionStorageKeys.clientCode)
@@ -79,7 +79,10 @@ const baseQueryWithErrorHandling = async (args: any, api: any, extraOptions: any
 }
 
 export const serializeQueryArgsGlobal = ({ endpointName, queryArgs }) => {
-  return `${endpointName}_${JSON.stringify(queryArgs, Object.keys(queryArgs || {}).sort())}`
+  return `${endpointName}_${JSON.stringify(
+    queryArgs,
+    Object.keys(queryArgs || {}).sort((a, b) => a.localeCompare(b))
+  )}`
 }
 
 export default baseQueryWithErrorHandling
