@@ -1,22 +1,17 @@
-/* eslint-disable unused-imports/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // ** React Imports
 
 // ** MUI Imports
 import MuiAppBar, { AppBarProps } from '@mui/material/AppBar'
-import { styled, useTheme } from '@mui/material/styles'
+import { styled } from '@mui/material/styles'
 import MuiToolbar, { ToolbarProps } from '@mui/material/Toolbar'
 import { ReactNode } from 'react'
 
 // ** Type Import
-import { Settings } from 'src/@core/context/settingsContext'
 
 interface Props {
-  settings: Settings
-  hidden: boolean
-  toggleNavVisibility: () => void
-  saveSettings: (values: Settings) => void
   verticalAppBarContent?: (props?: any) => ReactNode
+  // eslint-disable-next-line react/no-unused-prop-types
+  toggleNavVisibility: () => void
 }
 
 const AppBar = styled(MuiAppBar)<AppBarProps>(({ theme }) => ({
@@ -45,30 +40,11 @@ const Toolbar = styled(MuiToolbar)<ToolbarProps>(({ theme }) => ({
 
 const LayoutAppBar = (props: Props) => {
   // ** Props
-  const {
-    settings,
-    verticalAppBarContent: userVerticalAppBarContent,
-    hidden,
-    toggleNavVisibility,
-    saveSettings
-  } = props
-
-  // ** Hooks
-  const theme = useTheme()
-
-  // ** Vars
-  const { contentWidth } = settings
+  const { verticalAppBarContent: userVerticalAppBarContent } = props
 
   return (
     <AppBar elevation={0} color='default' className='layout-navbar' position='static'>
-      <Toolbar
-        className='navbar-content-container'
-        sx={{
-          ...(contentWidth === 'boxed' && {
-            '@media (min-width:1440px)': { maxWidth: `calc(1440px - ${theme.spacing(6)} * 2)` }
-          })
-        }}
-      >
+      <Toolbar className='navbar-content-container'>
         {(userVerticalAppBarContent && userVerticalAppBarContent(props)) || null}
       </Toolbar>
     </AppBar>

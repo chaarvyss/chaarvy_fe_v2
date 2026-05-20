@@ -379,8 +379,9 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
       <TableContainer
         sx={{
           overflow: 'auto',
-          borderRadius: 1,
-          maxHeight: screen.availHeight - 370
+          borderRadius: 1
+
+          // maxHeight: screen.availHeight - 490
         }}
       >
         <Table>
