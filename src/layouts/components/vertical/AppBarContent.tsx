@@ -4,7 +4,7 @@ import { Settings } from 'src/@core/context/settingsContext'
 import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
 import UserDropdown from 'src/@core/layouts/components/shared-components/UserDropdown'
 import { MenuIcon } from 'src/utils/mdiElements'
-import { useMediaQuery, Box, IconButton } from 'src/utils/muiElements'
+import { useMediaQuery, Box, IconButton, Card } from 'src/utils/muiElements'
 
 interface Props {
   hidden: boolean
@@ -21,7 +21,7 @@ const AppBarContent = (props: Props) => {
   const hiddenSm = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
 
   return (
-    <Box sx={{ position: 'fixed', top: '10px', width: hiddenSm ? '92%' : '79%' }}>
+    <Card sx={{ width: '100%', p: 1, px: 5 }}>
       <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Box className='actions-left' sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
           {hidden ? (
@@ -40,7 +40,7 @@ const AppBarContent = (props: Props) => {
           <UserDropdown />
         </Box>
       </Box>
-    </Box>
+    </Card>
   )
 }
 

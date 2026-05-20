@@ -207,20 +207,3 @@ const Programs = () => {
 }
 
 export default Programs
-
-/*  TODO:
-programs:
-  ** Need to update all features with permission management
-  need to add an option for adding segments ie, year, semester ...
-
-fees details:
-  ** Need to update all features with permission management
-  Need to integrate apis
-  need to create modal design for displaying fees details.
-  Need to add validation and error messages while creating and updating Program Fee details.
-  
-books details:
-  ** Need to update all features with permission management
-  need to integrate apis
-  need to add remove book functionality with warning message
-*/
