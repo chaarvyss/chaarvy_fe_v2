@@ -1,11 +1,12 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react'
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 
 import { Box, Card } from '@muiElements'
+
+const BOTTOM_PADDING = 16
 
 interface DynamicHeightTableContainerProps {
   children: ReactNode
   pagination?: ReactNode
-  maxHeight?: number
   headerRef?: React.RefObject<HTMLElement>
   header?: ReactNode
 }
@@ -13,53 +14,61 @@ interface DynamicHeightTableContainerProps {
 const DynamicHeightTableContainer = ({
   children,
   pagination,
-  maxHeight = screen.availHeight,
   headerRef: externalHeaderRef,
   header
 }: DynamicHeightTableContainerProps) => {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
   const internalHeaderRef = useRef<HTMLDivElement>(null)
-  const [tableHeight, setTableHeight] = useState(maxHeight)
+  const paginationRef = useRef<HTMLDivElement>(null)
+  const [cardHeight, setCardHeight] = useState<number>(400)
 
-  const headerHeight = (document.getElementById('table-title-header')?.offsetHeight || 0) + 20
-  const viewportHeight = window.outerHeight
-  const paginationHeight = document.getElementById('pagination-container')?.offsetHeight || 0
+  const recalculate = useCallback(() => {
+    const wrapper = wrapperRef.current
+    if (!wrapper) return
+
+    const top = wrapper.getBoundingClientRect().top
+    const viewportHeight = window.innerHeight
+
+    const headerEl = externalHeaderRef?.current ?? internalHeaderRef.current
+    const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0
+
+    const paginationH = paginationRef.current ? paginationRef.current.getBoundingClientRect().height + 16 : 0 // 16 = mt:2
+
+    const available = viewportHeight - top - headerH - paginationH - BOTTOM_PADDING
+    setCardHeight(Math.max(available, 220))
+  }, [externalHeaderRef])
 
   useEffect(() => {
-    const calculateHeight = () => {
-      if (!containerRef.current) return
+    recalculate()
 
-      const availableHeight = viewportHeight - headerHeight - 250 // buffer for padding, margins, etc.
-      // if (pagination) {
-      //   availableHeight -= paginationHeight
-      // }
+    const observer = new ResizeObserver(recalculate)
 
-      const computed = Math.max(availableHeight, 200)
-      setTableHeight(Math.min(computed, maxHeight))
+    if (wrapperRef.current) observer.observe(wrapperRef.current)
+    if (internalHeaderRef.current) observer.observe(internalHeaderRef.current)
+    if (externalHeaderRef?.current) observer.observe(externalHeaderRef.current)
+
+    window.addEventListener('resize', recalculate)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', recalculate)
     }
-
-    calculateHeight()
-    window.addEventListener('resize', calculateHeight)
-
-    return () => window.removeEventListener('resize', calculateHeight)
-  }, [maxHeight, externalHeaderRef, paginationHeight, headerHeight, pagination])
+  }, [recalculate, pagination])
 
   return (
-    <div>
-      {externalHeaderRef ? null : header ? (
-        <div ref={internalHeaderRef}>{header}</div>
-      ) : (
-        <div ref={internalHeaderRef} style={{ display: 'none' }} />
-      )}
+    <Box ref={wrapperRef} sx={{ display: 'flex', flexDirection: 'column' }}>
+      {externalHeaderRef ? null : header ? <div ref={internalHeaderRef}>{header}</div> : null}
 
-      <Card ref={containerRef} sx={{ display: 'flex', flexDirection: 'column', height: tableHeight }}>
+      <Card sx={{ display: 'flex', flexDirection: 'column', height: cardHeight, overflow: 'hidden' }}>
         <Box sx={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>{children}</Box>
       </Card>
 
       {pagination && (
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>{pagination}</Box>
+        <Box ref={paginationRef} sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {pagination}
+        </Box>
       )}
-    </div>
+    </Box>
   )
 }
 

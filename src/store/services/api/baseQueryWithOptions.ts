@@ -5,55 +5,84 @@ import { sessionStorageKeys } from 'src/lib/enums'
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_URL,
   prepareHeaders: headers => {
-    const accessToken = sessionStorage.getItem(sessionStorageKeys.accessToken)
-    const clcode = sessionStorage.getItem(sessionStorageKeys.clientCode)
-    if (accessToken) {
-      headers.set('Authorization', `Bearer ${accessToken}`)
-    }
-    if (clcode) {
-      headers.set('clcode', clcode)
-    }
+    if (typeof globalThis !== 'undefined') {
+      const accessToken = sessionStorage.getItem(sessionStorageKeys.accessToken)
 
-    return headers
+      const clcode = sessionStorage.getItem(sessionStorageKeys.clientCode)
+
+      if (accessToken) {
+        headers.set('Authorization', `Bearer ${accessToken}`)
+      }
+
+      if (clcode) {
+        headers.set('clcode', clcode)
+      }
+
+      return headers
+    }
   },
   timeout: 30000
 })
 
 const baseQueryWithRetry = retry(
   async (args, api, extraOptions) => {
-    const { url, params, ...rest } = args
+    const request = typeof args === 'string' ? { url: args } : args
+
+    const { url, params, ...rest } = request
+
     const filteredParams = Object.fromEntries(
       Object.entries(params ?? {})
         .filter(([, value]) => value !== undefined && value !== null && value !== '')
         .map(([key, value]) => [key, typeof value === 'object' ? JSON.stringify(value) : String(value)])
     )
 
-    const extUrl = Object.keys(filteredParams).length > 0 ? `?${new URLSearchParams(filteredParams).toString()}` : ''
+    const queryString = Object.keys(filteredParams).length > 0 ? `?${new URLSearchParams(filteredParams)}` : ''
 
-    const custUrl = `${url}${extUrl}`
-
-    return baseQuery({ url: custUrl, ...rest }, api, extraOptions)
+    return baseQuery(
+      {
+        url: `${url}${queryString}`,
+        ...rest
+      },
+      api,
+      extraOptions
+    )
   },
   { maxRetries: 0 }
 )
 
-const baseQueryWithErrorHandling: typeof baseQueryWithRetry = async (args, api, extraOptions) => {
+const baseQueryWithErrorHandling = async (args: any, api: any, extraOptions: any) => {
   const result = await baseQueryWithRetry(args, api, extraOptions)
+
   if (result.error) {
-    const status = result.error?.status
-    if (status == 401) {
-      sessionStorage.clear()
-      window.location.replace('/login')
-    } else {
-      console.error('API Error:', status, result.error.data)
+    const error = result.error
+
+    const isAborted = error.status === 'FETCH_ERROR' && error.error?.includes('AbortError')
+
+    if (isAborted) {
+      return result
     }
+
+    if (error.status === 401) {
+      sessionStorage.removeItem(sessionStorageKeys.accessToken)
+      window.location.replace('/login')
+
+      return result
+    }
+
+    console.group('API Error')
+    console.log('Request:', args)
+    console.log('Error:', error)
+    console.groupEnd()
   }
 
   return result
 }
 
 export const serializeQueryArgsGlobal = ({ endpointName, queryArgs }) => {
-  return `${endpointName}_${JSON.stringify(queryArgs ?? {})}`
+  return `${endpointName}_${JSON.stringify(
+    queryArgs,
+    Object.keys(queryArgs || {}).sort((a, b) => a.localeCompare(b))
+  )}`
 }
 
 export default baseQueryWithErrorHandling

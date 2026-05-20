@@ -57,6 +57,7 @@ export type Fees = {
 export type FeesTypesResponse = {
   fees_type: string
   fees_type_id: string
+  status: number
 }
 
 export type RolesListResponse = {
@@ -142,9 +143,14 @@ export type ProgramDetails = {
   segment_name: string
 }
 
-export type ProgramFeesDetailsResponse = {
-  program_name: string
-  segments: FeesSegment[]
+export type ProgramFeesDataResponse = {
+  program_fees_id: string
+  program_id: string
+  segment_id: string
+  medium_id: string
+  section_id: string
+  fees_type_id: string
+  fees: number
 }
 
 export type ProgramSecondLanguagesResponse = {

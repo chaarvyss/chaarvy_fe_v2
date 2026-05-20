@@ -70,7 +70,11 @@ const LoginPage = () => {
 
   const [login, { isLoading }] = useLoginMutation()
   const { triggerToast } = useToast()
-  setLoading(isLoading)
+
+  useEffect(() => {
+    setLoading(isLoading)
+  }, [isLoading])
+
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const emptyKeys = getEmptyKeysList(values)

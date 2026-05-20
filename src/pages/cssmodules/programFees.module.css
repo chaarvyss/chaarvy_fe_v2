@@ -1,0 +1,41 @@
+:global(.ag-theme-alpine) {
+  --ag-borders: solid 1px;
+  --ag-border-color: #ddd;
+}
+
+:global(.ag-header-cell-label) {
+  justify-content: center;
+}
+
+:global(.ag-header-group-cell-label) {
+  justify-content: center;
+}
+
+:global(.fee-header) {
+  font-weight: 700;
+  border: 1px solid #ddd;
+}
+
+:global(.medium-header) {
+  font-weight: 700;
+  border: 1px solid #ddd;
+}
+
+:global(.segment-header) {
+  font-weight: 700;
+  border: 1px solid #ddd;
+}
+
+:global(.section-header) {
+  background: #fff8e1 !important;
+  font-weight: 600;
+  border: 1px solid #ddd;
+}
+
+:global(.ag-cell) {
+  border-right: 1px solid #eee;
+}
+
+:global(.ag-row) {
+  border-bottom: 1px solid #eee;
+}

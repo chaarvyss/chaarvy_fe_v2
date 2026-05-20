@@ -83,18 +83,20 @@ const ChaarvyButton = ({
 
   return (
     <Tooltip title={typeof label === 'string' ? label : ''} placement='top'>
-      <Button
-        {...props}
-        variant={variant}
-        color={color ?? 'primary'} // fallback if custom
-        sx={mergedSx}
-      >
-        <ChaarvyFlex className={{ gap: 2 }}>
-          {leftIcon && <GetChaarvyIcons fontSize='1.25rem' iconName={leftIcon} />}
-          {(label || children) && <Box>{label ?? children}</Box>}
-          {rightIcon && <GetChaarvyIcons fontSize='1.25rem' iconName={rightIcon} />}
-        </ChaarvyFlex>
-      </Button>
+      <span style={{ display: 'inline-flex' }}>
+        <Button
+          {...props}
+          variant={variant}
+          color={color ?? 'primary'} // fallback if custom
+          sx={mergedSx}
+        >
+          <ChaarvyFlex className={{ gap: 2 }}>
+            {leftIcon && <GetChaarvyIcons fontSize='1.25rem' iconName={leftIcon} />}
+            {(label || children) && <Box>{label ?? children}</Box>}
+            {rightIcon && <GetChaarvyIcons fontSize='1.25rem' iconName={rightIcon} />}
+          </ChaarvyFlex>
+        </Button>
+      </span>
     </Tooltip>
   )
 }

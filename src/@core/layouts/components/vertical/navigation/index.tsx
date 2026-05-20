@@ -73,7 +73,7 @@ const Navigation = (props: Props) => {
           '&::-webkit-scrollbar-thumb': {
             background: 'transparent'
           },
-          '-ms-overflow-style': 'none'
+          msOverflowStyle: 'none'
         }}
       >
         <VerticalNavHeader {...props} />

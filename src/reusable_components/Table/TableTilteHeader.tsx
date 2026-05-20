@@ -177,15 +177,17 @@ const TableTilteHeader = ({
                   label={buttonTitle}
                 />
                 <Tooltip title={buttonTitle} placement='top'>
-                  <IconButton
-                    color={buttonColor ?? 'primary'}
-                    disabled={isButtonDisabled}
-                    onClick={onButtonClick}
-                    className={iconName ? 'd-md-none' : ''}
-                    size='small'
-                  >
-                    {iconName && <GetChaarvyIcons iconName={iconName} fontSize='1.25rem' />}
-                  </IconButton>
+                  <span style={{ display: 'inline-flex' }}>
+                    <IconButton
+                      color={buttonColor ?? 'primary'}
+                      disabled={isButtonDisabled}
+                      onClick={onButtonClick}
+                      className={iconName ? 'd-md-none' : ''}
+                      size='small'
+                    >
+                      {iconName && <GetChaarvyIcons iconName={iconName} fontSize='1.25rem' />}
+                    </IconButton>
+                  </span>
                 </Tooltip>
               </>
             )}

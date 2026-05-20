@@ -53,7 +53,9 @@ const Payments = () => {
     fetchPaymentsList(params)
   }
 
-  setLoading(isFetchingPaymentDetail || isFetchingPayments || isFetchingPaymentReciept)
+  useEffect(() => {
+    setLoading(isFetchingPaymentDetail || isFetchingPayments || isFetchingPaymentReciept)
+  }, [isFetchingPaymentDetail, isFetchingPayments, isFetchingPaymentReciept])
 
   const handleRecieptDownload = (payment: StudentPayment) => {
     fetchPaymentReciept(payment.payment_id)

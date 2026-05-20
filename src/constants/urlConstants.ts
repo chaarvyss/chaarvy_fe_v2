@@ -110,8 +110,7 @@ export const urlConstants = {
   },
   fees: {
     getprogramFees: `${interRoutePrefix.fees}/program-fee-detail`,
-    updateprogramFees: `${interRoutePrefix.fees}/update_program_fees`,
-    createProgramFees: `${interRoutePrefix.fees}/add-program-fees`,
+    createUpdateProgramFees: `${interRoutePrefix.fees}/create-update-program-fees`,
     getStudentAdmissionFees: `${interRoutePrefix.fees}/actual-overall-payable-fees`,
     createStudentPayableFees: `${interRoutePrefix.fees}/add-student-payable-fees`,
     getStudentPayableFees: `${interRoutePrefix.fees}/student-payable-fees`,
@@ -133,7 +132,8 @@ export const urlConstants = {
     updateProgramSections: `${interRoutePrefix.program}/update-program-sections`,
     createUpdateProgramBook: `${interRoutePrefix.program}/create-update-program-book`,
     createUpdateProgramSegmentMedium: `${interRoutePrefix.program}/create-update-program-segment-medium`,
-    createUpdateProgramSegmentSection: `${interRoutePrefix.program}/create-update-program-segment-section`
+    createUpdateProgramSegmentSection: `${interRoutePrefix.program}/create-update-program-segment-section`,
+    getProgramFeesHeaderDataUrl: `${interRoutePrefix.program}/program-fees-header-data`
   },
   view: {
     programSegments: `${interRoutePrefix.view}/program-segment`,

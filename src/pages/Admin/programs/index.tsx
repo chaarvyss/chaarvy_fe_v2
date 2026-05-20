@@ -12,6 +12,7 @@ import { useUpdateProgramStatusMutation } from 'src/store/services/adminServices
 import { useLazyGetProgramsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
 import ProgramBooksModal from 'src/views/Admin/Programs/Modals/ProgramBooks'
+import ProgramFeesModal from 'src/views/Admin/Programs/Modals/ProgramFees'
 import ProgramViewModal from 'src/views/Admin/Programs/Modals/ProgramView'
 
 import CreateOrUpdateProgramModal from './createUpdateProgram'
@@ -21,7 +22,12 @@ interface ProgramModals {
   fees_details_list_modal: boolean
   books_details_list_modal: boolean
   view_program_details_modal: boolean
-  program_addon_details_modal: boolean
+}
+
+export interface ProgramFeesDetailsProps {
+  selectedProgram?: Program
+  isOpen: boolean
+  onClose: () => void
 }
 
 const Programs = () => {
@@ -29,8 +35,7 @@ const Programs = () => {
     create_program_modal: false,
     fees_details_list_modal: false,
     books_details_list_modal: false,
-    view_program_details_modal: false,
-    program_addon_details_modal: false
+    view_program_details_modal: false
   })
 
   const { triggerToast } = useToast()
@@ -65,7 +70,12 @@ const Programs = () => {
     setShowModal({ ...showModal, view_program_details_modal: false })
   }
 
-  const handleKebabOptionClick = (program: Program, option: 'addon' | 'Edit' | 'view' | 'books' | 'fees') => {
+  const handleFeesModalClose = () => {
+    setSelectedProgram(undefined)
+    setShowModal({ ...showModal, fees_details_list_modal: false })
+  }
+
+  const handleKebabOptionClick = (program: Program, option: 'Edit' | 'view' | 'books' | 'fees') => {
     setSelectedProgram(program)
     switch (option) {
       case 'Edit':
@@ -100,6 +110,11 @@ const Programs = () => {
         id: `${eachProgram.program_id}__book-details`,
         label: 'Books Details',
         onOptionClick: () => handleKebabOptionClick(eachProgram, 'books')
+      },
+      {
+        id: eachProgram.program_id,
+        label: 'Fees details',
+        onOptionClick: () => handleKebabOptionClick(eachProgram, 'fees')
       }
     ]
   }
@@ -172,6 +187,14 @@ const Programs = () => {
           programId={selectedProgram?.program_id}
         />
       )}
+      {showModal.fees_details_list_modal && (
+        <ProgramFeesModal
+          selectedProgram={selectedProgram}
+          isOpen={showModal.fees_details_list_modal}
+          onClose={handleFeesModalClose}
+        />
+      )}
+
       {showModal.view_program_details_modal && (
         <ProgramViewModal
           isOpen={showModal.view_program_details_modal}

@@ -67,7 +67,9 @@ const StudentDetails = ({ application_id, handleNext, onAdmissionCreation }: stu
 
   const showLoader = isApplicationLoading
 
-  setLoading(showLoader)
+  useEffect(() => {
+    setLoading(showLoader)
+  }, [showLoader])
 
   const handleChange =
     (prop: keyof CreateStudentAdmissionRequest) =>

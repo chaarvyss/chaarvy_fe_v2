@@ -328,14 +328,18 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
               </ChaarvyButton>
             )}
             <Tooltip title='Undo' placement='top'>
-              <IconButton type='button' onClick={handleUndo} disabled={!history.length}>
-                <GetChaarvyIcons iconName='Undo' fontSize='1.25rem' />
-              </IconButton>
+              <span style={{ display: 'inline-flex' }}>
+                <IconButton type='button' onClick={handleUndo} disabled={!history.length}>
+                  <GetChaarvyIcons iconName='Undo' fontSize='1.25rem' />
+                </IconButton>
+              </span>
             </Tooltip>
             <Tooltip title='Redo' placement='top'>
-              <IconButton type='button' onClick={handleRedo} disabled={!future.length}>
-                <GetChaarvyIcons iconName='Redo' fontSize='1.25rem' />
-              </IconButton>
+              <span style={{ display: 'inline-flex' }}>
+                <IconButton type='button' onClick={handleRedo} disabled={!future.length}>
+                  <GetChaarvyIcons iconName='Redo' fontSize='1.25rem' />
+                </IconButton>
+              </span>
             </Tooltip>
           </ChaarvyFlex>
         </ChaarvyFlex>
