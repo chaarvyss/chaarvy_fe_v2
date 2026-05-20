@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.6.1...v1.7.0) (2026-05-20)
+
+
+### Features
+
+* **program-fees:** AC-43: program fees  ([#41](https://github.com/chaarvyss/chaarvy_fe_v2/issues/41)) ([56176f1](https://github.com/chaarvyss/chaarvy_fe_v2/commit/56176f1e2409eec9c9802d1eae57f026d6a8898a))
+
 ## [1.6.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.6.0...v1.6.1) (2026-05-17)
 
 
