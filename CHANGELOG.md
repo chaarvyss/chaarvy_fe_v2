@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.7.0...v1.7.1) (2026-05-20)
+
+
+### Bug Fixes
+
+* **UIEnhancement:** AC-47: ui updated  -- ui work ([#43](https://github.com/chaarvyss/chaarvy_fe_v2/issues/43)) ([37d0a2f](https://github.com/chaarvyss/chaarvy_fe_v2/commit/37d0a2f3883c14cfaf00495f89c1d08b63ffa386))
+
 # [1.7.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.6.1...v1.7.0) (2026-05-20)
 
 
