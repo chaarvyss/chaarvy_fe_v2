@@ -1,8 +1,7 @@
 import { useRouter } from 'next/router'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Box, Chip, Typography } from '@muiElements'
-import { useLoader } from 'src/@core/context/loaderContext'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import RenderFilterOptions from 'src/common/filters'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
@@ -18,17 +17,12 @@ import GetChaarvyIcons from 'src/utils/icons'
 const Admissions = () => {
   const router = useRouter()
   const { openDrawer } = useSideDrawer()
-  const { setLoading } = useLoader()
   const [fetchAdmissions, { data: admissionResponse, isLoading }] = useLazyGetAdmissionsListQuery()
   const [filterProps, setFilterProps] = useState<FilterProps>({ limit: 20, offset: 0 })
 
   useEffect(() => {
     fetchAdmissions(filterProps)
   }, [filterProps])
-
-  useEffect(() => {
-    setLoading(isLoading)
-  }, [isLoading])
 
   const handleCreateAdmissionClick = () => {
     router.push(PagePath.CREATE_ADMISSION)
@@ -130,7 +124,7 @@ const Admissions = () => {
       label: 'Actions',
       width: '10px',
       hideable: false, // Keep actions always visible
-      render: row => <DropDownMenu dropDownMenuOptions={getKebabOptions(row.application_id)} />
+      render: row => <DropDownMenu dropDownMenuOptions={getKebabOptions(row.student_id)} />
     }
   ]
 

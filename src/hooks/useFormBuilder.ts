@@ -6,7 +6,9 @@ export type ValidationRule =
   | 'required'
   | 'number'
   | 'email'
+  | 'mobile'
   | 'pincode'
+  | 'aadhar'
   | { type: 'minLength'; value: number; message?: string }
   | { type: 'maxLength'; value: number; message?: string }
 
@@ -151,6 +153,49 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
   const validateEmail = (value: any, isEmpty: boolean, keyStr: string) =>
     !isEmpty && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? { errorkey: keyStr, error: 'Invalid email' } : null
 
+  const validateMobile = (value: any, isEmpty: boolean, keyStr: string) => {
+    if (isEmpty) return null
+
+    const val = String(value).trim()
+
+    if (val.length != 10) {
+      return {
+        errorkey: keyStr,
+        error: 'Mobile number must be 10 digits'
+      }
+    }
+
+    return null
+  }
+
+  const validatePincode = (value: any, isEmpty: boolean, keyStr: string) => {
+    if (isEmpty) return null
+
+    if (!/^\d{6}$/.test(String(value))) {
+      return {
+        errorkey: keyStr,
+        error: 'Pincode must be 6 digits'
+      }
+    }
+
+    return null
+  }
+
+  const validateAadhar = (value: any, isEmpty: boolean, keyStr: string) => {
+    if (isEmpty) return null
+
+    const val = String(value).trim()
+
+    if (val.length !== 12) {
+      return {
+        errorkey: keyStr,
+        error: 'Aadhar must be 12 digits'
+      }
+    }
+
+    return null
+  }
+
   const validateLength = (rule: any, value: any, keyStr: string) => {
     if (rule.type === 'minLength' && value?.length < rule.value) {
       return {
@@ -174,7 +219,13 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
 
     number: (value, isEmpty, keyStr) => validateNumber(value, isEmpty, keyStr),
 
-    email: (value, isEmpty, keyStr) => validateEmail(value, isEmpty, keyStr)
+    email: (value, isEmpty, keyStr) => validateEmail(value, isEmpty, keyStr),
+
+    mobile: (value, isEmpty, keyStr) => validateMobile(value, isEmpty, keyStr),
+
+    pincode: (value, isEmpty, keyStr) => validatePincode(value, isEmpty, keyStr),
+
+    aadhar: (value, isEmpty, keyStr) => validateAadhar(value, isEmpty, keyStr)
   }
 
   const validateField = (key: keyof T, value: any) => {
@@ -187,7 +238,10 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
     for (const rule of field.rules) {
       let error: ValidationError = null
 
-      if (typeof rule === 'string') {
+      if (typeof rule == 'number') {
+        const handler = ruleHandlers[rule]
+        error = handler?.(value, isEmpty, keyStr) ?? null
+      } else if (typeof rule === 'string') {
         const handler = ruleHandlers[rule]
         error = handler?.(value, isEmpty, keyStr) ?? null
       } else {

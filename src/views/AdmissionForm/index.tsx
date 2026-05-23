@@ -1,12 +1,11 @@
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Box, styled, TabProps } from '@mui/material'
 import { BookOutline, Cash, GoogleMaps } from 'mdi-material-ui'
-import React, { SyntheticEvent, useEffect, useState } from 'react'
+import { SyntheticEvent, useEffect, useState } from 'react'
 
 import { AccountOutline } from '@mdiElements'
 import { Card, MuiTab } from '@muiElements'
 import { TabName } from 'src/reusable_components/styledComponents/TabName'
-import { useLazyGetAdmissionDetailQuery } from 'src/store/services/admisissionsService'
 
 import AddonCourseDetails from './addonCourseDetails'
 import StudentAddress from './address'
@@ -36,11 +35,9 @@ const AdmissionForm = () => {
   const handleChange = (_: SyntheticEvent, newValue: AdmissionFormType) => setValue(newValue)
   const [application_id, setApplication] = useState<string>()
 
-  const [fetchStudentDetails, { data: studentDetail }] = useLazyGetAdmissionDetailQuery()
-
+  const [shouldDisableTabs, setShouldDisableTabs] = useState<boolean>(true)
   const handleAdmissionCreation = (admission_id: string) => {
     setApplication(admission_id)
-    fetchStudentDetails(admission_id)
   }
 
   useEffect(() => {
@@ -58,10 +55,6 @@ const AdmissionForm = () => {
     setValue(step)
   }
 
-  useEffect(() => {
-    if (application_id) fetchStudentDetails(application_id)
-  }, [application_id])
-
   const tabs = [
     {
       value: AdmissionFormType.BASE_DETAIL,
@@ -69,9 +62,10 @@ const AdmissionForm = () => {
       icon: <AccountOutline />,
       component: (
         <StudentBaseDetails
-          application_id={application_id}
+          student_id={application_id}
           onAdmissionCreation={handleAdmissionCreation}
           handleNext={handleNext}
+          handleTabDisable={setShouldDisableTabs}
         />
       )
     },
@@ -81,7 +75,7 @@ const AdmissionForm = () => {
       icon: <AccountOutline />,
       component: (
         <StudentDetails
-          application_id={application_id}
+          student_id={application_id}
           onAdmissionCreation={handleAdmissionCreation}
           handleNext={handleNext}
         />
@@ -91,13 +85,7 @@ const AdmissionForm = () => {
       value: AdmissionFormType.ADDON_COURSE,
       label: 'ADDON Courses',
       icon: <BookOutline />,
-      component: (
-        <AddonCourseDetails
-          application_id={application_id}
-          programId={studentDetail?.program_id}
-          handleNext={handleNext}
-        />
-      )
+      component: <AddonCourseDetails application_id={application_id} programId={''} handleNext={handleNext} />
     },
     {
       value: AdmissionFormType.ADDRESS,
@@ -109,15 +97,13 @@ const AdmissionForm = () => {
       value: AdmissionFormType.FEES,
       label: 'Fees Details',
       icon: <Cash />,
-      component: <FeesDetails application_id={application_id} segment_id={studentDetail?.segment} />
+      component: <FeesDetails application_id={application_id} segment_id={''} />
     }
   ]
 
   const shouldDisableTab = ({ value }: { value: AdmissionFormType }): boolean => {
-    if (!application_id) return value !== AdmissionFormType.BASE_DETAIL
-    if (studentDetail?.application_fees_status == '1') return false
-
-    return true
+    if (shouldDisableTabs) return value !== AdmissionFormType.BASE_DETAIL
+    return false
   }
 
   return (

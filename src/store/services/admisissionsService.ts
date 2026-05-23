@@ -82,7 +82,7 @@ export type StudentAddonCourseResponse = {
 }
 
 export type StudentPhotoRequest = {
-  application_id: string
+  student_id: string
   photo: File
 }
 
@@ -95,6 +95,32 @@ interface EnrollAddonCourseRequest {
   application_id: string
   addon_courses: string[]
 }
+
+interface Segment {
+  segment_id: string
+  segment_name: string
+}
+
+interface ActiveProgramMediumRequest {
+  program_id: string
+  segment_id: string
+}
+
+interface ActiveProgramSegmentSectionRequest extends ActiveProgramMediumRequest {
+  medium_id: string
+}
+
+interface Medium {
+  medium_id: string
+  medium_name: string
+}
+
+interface Section {
+  section_id: string
+  section_name: string
+  seating_capacity: number
+}
+
 const admissionServiceApi = api.injectEndpoints({
   endpoints: build => ({
     createUpdateAdmission: build.mutation<CreateApplicationResponse, CreateStudentAdmissionRequest>({
@@ -121,15 +147,6 @@ const admissionServiceApi = api.injectEndpoints({
           method: HttpRequestMethods.GET,
           url: urlConstants.admissions.admissionsList,
           params
-        }
-      }
-    }),
-    getAdmissionDetail: build.query<CreateStudentAdmissionRequest, string>({
-      query: application_id => {
-        return {
-          method: HttpRequestMethods.GET,
-          url: urlConstants.admissions.admissionDetail,
-          params: { application_id }
         }
       }
     }),
@@ -164,15 +181,88 @@ const admissionServiceApi = api.injectEndpoints({
       }
     }),
     uploadStudentPhoto: build.mutation<void, StudentPhotoRequest>({
-      query: body => {
+      query: ({ student_id, photo }) => {
         const formData = new FormData()
-        formData.append('file', body.photo)
+        formData.append('file', photo)
 
         return {
           method: HttpRequestMethods.POST,
           url: urlConstants.admissions.uploadStudentPhoto,
           body: formData,
-          params: { application_id: body.application_id }
+          params: { student_id }
+        }
+      }
+    }),
+    getActiveProgramSegments: build.query<Segment[], string>({
+      query: program_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.getActiveProgramSegmentsUrl,
+          params: { program_id }
+        }
+      }
+    }),
+    getActiveSegmentMediums: build.query<Medium[], ActiveProgramMediumRequest>({
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.getActiveSegmentMediumsUrl,
+          params
+        }
+      }
+    }),
+
+    getActiveMediumSections: build.query<Section[], ActiveProgramSegmentSectionRequest>({
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.getActiveMediumSectionsUrl,
+          params
+        }
+      }
+    }),
+
+    // new apis for new students enrollment
+
+    createUpdateAdmissionFormOne: build.mutation<
+      { student_id: string; message: string; student_course_enrollment_id: string; application_fees_status: number },
+      CreateUpdateAdmissionFormOneRequest
+    >({
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admissions.createUpdateAdmissionFormOneUrl,
+          body: body
+        }
+      }
+    }),
+
+    updateStudentDetailsF2: build.mutation<string, StudentDetailsRequest>({
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admissions.updateStudentDetailsF2Url,
+          body: body
+        }
+      }
+    }),
+
+    getAdmissionFormOneDetail: build.query<AdmissionFormOneDetailsResponse, string>({
+      query: student_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.admissionFormOneDetail,
+          params: { student_id }
+        }
+      }
+    }),
+
+    getStudentDetailsFormTwo: build.query<StudentDetails, string>({
+      query: student_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.getStudentDetailsF2Url,
+          params: { student_id }
         }
       }
     })
@@ -183,9 +273,15 @@ export const {
   useCreateUpdateAdmissionMutation,
   useUploadStudentPhotoMutation,
   useLazyGetAdmissionsListQuery,
-  useLazyGetAdmissionDetailQuery,
   useLazyGetStudentEnrollendAddonCoursesQuery,
   useEnrollAddonCourseMutation,
   useGetStudentAddressQuery,
-  useLazyGetProcessingFeesQuery
+  useGetProcessingFeesQuery,
+  useGetActiveProgramSegmentsQuery,
+  useGetActiveSegmentMediumsQuery,
+  useGetActiveMediumSectionsQuery,
+  useCreateUpdateAdmissionFormOneMutation,
+  useGetAdmissionFormOneDetailQuery,
+  useUpdateStudentDetailsF2Mutation,
+  useGetStudentDetailsFormTwoQuery
 } = admissionServiceApi

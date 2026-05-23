@@ -96,11 +96,17 @@ export const urlConstants = {
     createAdmission: `${interRoutePrefix.admisions}/create-update-admission`,
     uploadStudentPhoto: `${interRoutePrefix.admisions}/upload-student-photo`,
     admissionsList: `${interRoutePrefix.admisions}/admissions-list`,
-    admissionDetail: `${interRoutePrefix.admisions}/admission-details`,
+    admissionFormOneDetail: `${interRoutePrefix.admisions}/admission-form-one-details`,
+    getStudentDetailsF2Url: `${interRoutePrefix.admisions}/get-student-details-f2`,
     studentAddress: `${interRoutePrefix.admisions}/student-address`,
     studentEnrolledAddonCourse: `${interRoutePrefix.admisions}/student-enrolled-addon-courses`,
     enrollAddonCourse: `${interRoutePrefix.admisions}/enroll-addon-courses`,
-    getProcessingFees: `${interRoutePrefix.admisions}/get-processing-fees`
+    getProcessingFees: `${interRoutePrefix.admisions}/get-processing-fees`,
+    getActiveProgramSegmentsUrl: `${interRoutePrefix.admisions}/program-segments`,
+    getActiveSegmentMediumsUrl: `${interRoutePrefix.admisions}/segment-mediums`,
+    getActiveMediumSectionsUrl: `${interRoutePrefix.admisions}/medium-sections`,
+    createUpdateAdmissionFormOneUrl: `${interRoutePrefix.admisions}/create-update-admission-form-one`,
+    updateStudentDetailsF2Url: `${interRoutePrefix.admisions}/update-student-details-f2`
   },
   dashboard: {
     studentsCount: `${interRoutePrefix.dashboard}/students_count`,

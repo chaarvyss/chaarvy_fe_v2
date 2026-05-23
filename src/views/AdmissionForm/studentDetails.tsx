@@ -1,42 +1,27 @@
 import { LoadingButton } from '@mui/lab'
-import {
-  Box,
-  CardContent,
-  CircularProgress,
-  FormControlLabel,
-  FormLabel,
-  MenuItem,
-  Radio,
-  RadioGroup,
-  Select,
-  SelectChangeEvent
-} from '@mui/material'
-import React, { ChangeEvent, useState, useEffect } from 'react'
-import DatePicker from 'react-datepicker'
+import { Box, Card, Stack } from '@mui/material'
+import { FieldConfig, getMandatoryFieldsList, mapToFields, useFormBuilder } from 'src/hooks/useFormBuilder'
 
 import 'react-datepicker/dist/react-datepicker.css'
-import { FormControl, Grid, TextField } from '@muiElements'
-import { useLoader } from 'src/@core/context/loaderContext'
-import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { DateFormats, InputTypes, InputVariants } from 'src/lib/enums'
-import { dateToString } from 'src/lib/helpers'
-import { InputFields } from 'src/lib/types'
-import {
-  CreateStudentAdmissionRequest,
-  useCreateUpdateAdmissionMutation,
-  useLazyGetAdmissionDetailQuery
-} from 'src/store/services/admisissionsService'
-import {
-  useGetQualifiedExamsListQuery,
-  useGetOccupationsListQuery,
-  useGetCommunitiesListQuery,
-  useGetReligionsListQuery
-} from 'src/store/services/listServices'
-import { convertDateStringToDate } from 'src/utils/helpers'
 
 import { AdmissionFormType } from '.'
+import { useEffect, useMemo, useState } from 'react'
+import { InputTypes, InputVariants } from 'src/lib/enums'
+import {
+  useGetCommunitiesListQuery,
+  useGetOccupationsListQuery,
+  useGetQualifiedExamsListQuery,
+  useGetReligionsListQuery
+} from 'src/store/services/listServices'
+import FormGenerator from 'src/reusable_components/formGenerator'
+import { DataMatrixEdit } from 'mdi-material-ui'
+import {
+  useGetStudentDetailsFormTwoQuery,
+  useUpdateStudentDetailsF2Mutation
+} from 'src/store/services/admisissionsService'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 
-const TOP_LEVEL_ID = 'student-application-form'
+// const TOP_LEVEL_ID = 'student-application-form'
 
 const getLast10Years = (): number[] => {
   const currentYear = new Date().getFullYear()
@@ -45,310 +30,201 @@ const getLast10Years = (): number[] => {
 }
 
 interface studentBaseDetailsProps {
-  application_id?: string
+  student_id?: string
   handleNext: (step: AdmissionFormType) => void
   onAdmissionCreation: (application_id: string) => void
 }
 
-const StudentDetails = ({ application_id, handleNext, onAdmissionCreation }: studentBaseDetailsProps) => {
-  const [applicationDetails, setApplicationDetails] = useState<CreateStudentAdmissionRequest>()
-  const [dob, setDob] = useState<Date>()
-
+const StudentDetails = ({ student_id, handleNext, onAdmissionCreation }: studentBaseDetailsProps) => {
   const { triggerToast } = useToast()
-  const { setLoading } = useLoader()
 
   const { data: occupationsList } = useGetOccupationsListQuery()
   const { data: communities } = useGetCommunitiesListQuery()
   const { data: religions } = useGetReligionsListQuery()
   const { data: qualifiedExams } = useGetQualifiedExamsListQuery()
+  const { data: applicationDetails } = useGetStudentDetailsFormTwoQuery(student_id ?? '', {
+    skip: !student_id
+  })
 
-  const [createUpdateAdmission, { isLoading: IsupdatingAdmission }] = useCreateUpdateAdmissionMutation()
-  const [fetchApplicationDetail, { isLoading: isApplicationLoading }] = useLazyGetAdmissionDetailQuery()
+  const [updateStudentDetails, { isLoading: isSavingDetails }] = useUpdateStudentDetailsF2Mutation()
 
-  const showLoader = isApplicationLoading
+  const studentDetailConfig: FieldConfig<StudentDetailsRequest>[] = useMemo(
+    () => [
+      {
+        key: 'qualified_exam',
+        label: 'Qualified Exam',
+        type: InputTypes.SELECT,
+        rules: [],
+        staticOptions: qualifiedExams,
+
+        mapOptions: (data: any[]) =>
+          data?.map(s => ({
+            label: s.qualified_exam_name,
+            value: s.qualified_exam_id
+          })) ?? []
+      },
+      { key: 'qualified_exam_hallticket_no', label: 'Hall ticket number', type: InputTypes.INPUT, rules: [] },
+      {
+        key: 'qualified_exam_year_of_pass',
+        label: 'Year of pass',
+        type: InputTypes.SELECT,
+        rules: [],
+        staticOptions: getLast10Years(),
+
+        mapOptions: (data: any[]) =>
+          data?.map(s => ({
+            label: `${s}`,
+            value: `${s}`
+          })) ?? []
+      },
+      { key: 'father_name', label: 'Father Name', type: InputTypes.INPUT, rules: [] },
+      {
+        key: 'father_occupation',
+        label: 'Father Occupation',
+        type: InputTypes.SELECT,
+        rules: [],
+        staticOptions: occupationsList,
+
+        mapOptions: (data: any[]) =>
+          data?.map(s => ({
+            label: s.occupation_name,
+            value: s.occupation_id
+          })) ?? []
+      },
+
+      { key: 'mother_name', label: 'Mother Name', type: InputTypes.INPUT, rules: [] },
+      {
+        key: 'mother_occupation',
+        label: 'Mother Occupation',
+        type: InputTypes.SELECT,
+        rules: [],
+        staticOptions: occupationsList,
+
+        mapOptions: (data: any[]) =>
+          data?.map(s => ({
+            label: s.occupation_name,
+            value: s.occupation_id
+          })) ?? []
+      },
+
+      {
+        key: 'contact_no_2',
+        variant: InputVariants.NUMBER,
+        label: 'Alternative number',
+        type: InputTypes.INPUT,
+        rules: ['mobile']
+      },
+
+      {
+        key: 'father_aadhar',
+        label: 'Father Aadhar',
+        type: InputTypes.INPUT,
+        variant: InputVariants.NUMBER,
+        rules: ['aadhar']
+      },
+      {
+        key: 'mother_aadhar',
+        label: 'Mother Aadhar',
+        type: InputTypes.INPUT,
+        variant: InputVariants.NUMBER,
+        rules: ['aadhar']
+      },
+      {
+        key: 'religion',
+        label: 'Religion',
+        type: InputTypes.SELECT,
+        rules: [],
+        staticOptions: religions,
+
+        mapOptions: (data: any[]) =>
+          data?.map(s => ({
+            label: s.religion_name,
+            value: s.religion_id
+          })) ?? []
+      },
+      {
+        key: 'community',
+        label: 'Caste / Community',
+        type: InputTypes.SELECT,
+        rules: [],
+        staticOptions: communities,
+
+        mapOptions: (data: any[]) =>
+          data?.map(s => ({
+            label: s.community_name,
+            value: s.community_id
+          })) ?? []
+      },
+
+      { key: 'subcaste', label: 'Sub caste', type: InputTypes.INPUT, rules: [] }
+    ],
+    [occupationsList, qualifiedExams, communities, religions]
+  )
+
+  const { values, errors, handleChange, handleSubmit, optionsMap, loadingMap, setValues } =
+    useFormBuilder<StudentDetailsRequest>({
+      fields: studentDetailConfig,
+      initialValues: {
+        student_id: student_id,
+        qualified_exam: '',
+        qualified_exam_year_of_pass: '',
+        father_occupation: '',
+        mother_occupation: '',
+        contact_no_2: '',
+        father_aadhar: '',
+        mother_aadhar: '',
+        religion: '',
+        community: '',
+        subcaste: ''
+      }
+    })
 
   useEffect(() => {
-    setLoading(showLoader)
-  }, [showLoader])
-
-  const handleChange =
-    (prop: keyof CreateStudentAdmissionRequest) =>
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
-      const value = event?.target?.value ?? event
-      setApplicationDetails(prev => ({ ...prev, [prop]: value }))
-    }
-
-  useEffect(() => {
-    let apl_id
-    if (typeof window !== 'undefined') {
-      const queryParams = new URLSearchParams(window.location.search)
-      apl_id = queryParams.get('id') ?? application_id
-    }
-    if (apl_id) {
-      fetchApplicationDetail(apl_id).then(({ data: res }) => {
-        setApplicationDetails(res)
-        setDob(convertDateStringToDate(res?.dob))
-      })
-    }
-  }, [])
-
-  const handleSubmit = () => {
-    const finalData = { ...applicationDetails }
-
     if (applicationDetails) {
-      if (application_id) finalData.application_id = application_id
-      createUpdateAdmission({
-        ...finalData,
-        dob: dateToString(dob, DateFormats.YearMonthDate) ?? ''
-      })
-        .unwrap()
-        .then(({ application_id, message }) => {
-          if (application_id) {
-            onAdmissionCreation(application_id)
-            handleNext(AdmissionFormType.ADDON_COURSE)
-          }
-          triggerToast(message ?? 'New application created', { variant: ToastVariants.SUCCESS })
-        })
-        .catch(res => triggerToast(res.data, { variant: ToastVariants.ERROR }))
+      setValues(applicationDetails)
     }
+  }, [applicationDetails])
+
+  const fields = mapToFields({
+    config: studentDetailConfig,
+    values,
+    handleChange,
+    optionsMap,
+    loadingMap
+  })
+
+  const onSubmit = async (data: StudentDetailsRequest) => {
+    updateStudentDetails({ ...data, student_id })
+      .unwrap()
+      .then(() => {
+        handleNext(AdmissionFormType.ADDON_COURSE)
+        triggerToast('Student details Updated', { variant: ToastVariants.SUCCESS })
+      })
+      .catch(res => triggerToast(res.data, { variant: ToastVariants.ERROR }))
   }
 
-  const fields: InputFields[] = [
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__qualified-exam`,
-      label: 'Qualified Exam',
-      key: 'qualified_exam',
-      value: applicationDetails?.qualified_exam,
-      onChange: handleChange('qualified_exam'),
-      menuOptions: (qualifiedExams ?? []).map(each => {
-        return { value: each.qualified_exam_id, label: each.qualified_exam_name }
-      })
-    },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.STRING,
-      key: 'qualified_exam_hallticket_no',
-      id: `${TOP_LEVEL_ID}__qualified_exam_hallticket_no`,
-      label: 'Hall ticket number',
-      value: applicationDetails?.qualified_exam_hallticket_no,
-      onChange: handleChange('qualified_exam_hallticket_no')
-    },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__qualified_exam_year_of_pass`,
-      label: 'Year of pass',
-      key: 'qualified_exam_year_of_pass',
-      value: applicationDetails?.qualified_exam_year_of_pass,
-      onChange: handleChange('qualified_exam_year_of_pass'),
-      menuOptions: getLast10Years().map(each => {
-        return { value: `${each}`, label: `${each}` }
-      })
-    },
-
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.STRING,
-      id: `${TOP_LEVEL_ID}__father-name`,
-      key: 'father_name',
-      label: 'Father Name',
-      value: applicationDetails?.father_name,
-      onChange: handleChange('father_name')
-    },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__father-occupation`,
-      label: 'Father Occupation',
-      key: 'father_occupation',
-      value: applicationDetails?.father_occupation,
-      onChange: handleChange('father_occupation'),
-      menuOptions: (occupationsList ?? []).map(each => {
-        return { value: each.occupation_id, label: each.occupation_name }
-      })
-    },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.STRING,
-      id: `${TOP_LEVEL_ID}__mother-name`,
-      key: 'mother_name',
-      label: 'Mother Name',
-      value: applicationDetails?.mother_name,
-      onChange: handleChange('mother_name')
-    },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__mother-occupation`,
-      label: 'Mother Occupation',
-      key: 'mother_occupation',
-      value: applicationDetails?.mother_occupation,
-      onChange: handleChange('mother_occupation'),
-      menuOptions: (occupationsList ?? []).map(each => {
-        return { value: each.occupation_id, label: each.occupation_name }
-      })
-    },
-
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.NUMBER,
-      id: `${TOP_LEVEL_ID}__alt-phone`,
-      key: 'contact_no_2',
-      label: 'Alternative number',
-      value: applicationDetails?.contact_no_2,
-      onChange: handleChange('contact_no_2')
-    },
-
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.NUMBER,
-      id: `${TOP_LEVEL_ID}__father-aadhar-number`,
-      key: 'father_aadhar',
-      label: 'Father Aadhar',
-      value: applicationDetails?.father_aadhar,
-      onChange: handleChange('father_aadhar')
-    },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.NUMBER,
-      id: `${TOP_LEVEL_ID}__mother-aadhar-number`,
-      key: 'mother_aadhar',
-      label: 'Mother Aadhar',
-      value: applicationDetails?.mother_aadhar,
-      onChange: handleChange('mother_aadhar')
-    },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__religion`,
-      label: 'Religion',
-      key: 'religion',
-      value: applicationDetails?.religion,
-      onChange: handleChange('religion'),
-      menuOptions: (religions ?? []).map(each => {
-        return { value: each.religion_id, label: each.religion_name }
-      })
-    },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__caste`,
-      label: 'Caste / Community',
-      key: 'community',
-      value: applicationDetails?.community,
-      onChange: handleChange('community'),
-      menuOptions: (communities ?? []).map(each => {
-        return { value: each.community_id, label: each.community_name }
-      })
-    },
-    {
-      type: InputTypes.INPUT,
-      variant: InputVariants.STRING,
-      id: `${TOP_LEVEL_ID}__mother-aadhar-number`,
-      key: 'subcaste',
-      label: 'Sub Caste',
-      value: applicationDetails?.subcaste,
-      onChange: handleChange('subcaste')
-    }
-  ]
-
-  const renderInputFields = () =>
-    fields.map(
-      ({
-        type,
-        id,
-        customInput,
-        label,
-        placeholder,
-        onChange,
-        key,
-        caption,
-        value,
-        variant,
-        menuOptions,
-        isLoading
-      }) => (
-        <Grid item xs={12} sm={6} key={id}>
-          {type === InputTypes.INPUT ? (
-            <>
-              <small>{label}</small>
-              <TextField
-                fullWidth
-                id={id}
-                value={value}
-                defaultValue={value}
-                type={variant}
-                placeholder={placeholder ?? ''}
-                onChange={onChange}
-              />
-              {caption && <small>{caption}</small>}
-            </>
-          ) : type === InputTypes.SELECT ? (
-            <FormControl fullWidth>
-              <small>{label}</small>
-              <Select id={id} value={value ?? ''} onChange={onChange}>
-                {isLoading ? (
-                  <MenuItem disabled>
-                    <CircularProgress size={24} />
-                  </MenuItem>
-                ) : (
-                  (menuOptions ?? []).map(({ value, label }) => (
-                    <MenuItem key={value} value={value}>
-                      {label}
-                    </MenuItem>
-                  ))
-                )}
-              </Select>
-            </FormControl>
-          ) : type === InputTypes.RADIO ? (
-            <Grid item xs={12}>
-              <FormControl required>
-                <FormLabel id={id}>{label}</FormLabel>
-                <RadioGroup
-                  row
-                  aria-labelledby={id}
-                  name={id}
-                  id={id}
-                  value={value ?? ''}
-                  onChange={(_, val) =>
-                    handleChange(key as keyof CreateStudentAdmissionRequest)({
-                      target: { value: val }
-                    } as ChangeEvent<HTMLInputElement>)
-                  }
-                >
-                  {(menuOptions ?? []).map(each => (
-                    <FormControlLabel key={each.value} value={each.value} control={<Radio />} label={each.label} />
-                  ))}
-                </RadioGroup>
-              </FormControl>
-            </Grid>
-          ) : type === InputTypes.DATE ? (
-            <Grid item xs={12}>
-              <Box display='flex' flexDirection='column'>
-                <small>Date of Birth</small>
-                <DatePicker selected={dob} customInput={customInput} id={id} onChange={onChange} />
-              </Box>
-            </Grid>
-          ) : null}
-        </Grid>
-      )
-    )
+  const isLoading = false
 
   return (
-    <CardContent>
-      <form>
-        <Grid container spacing={7}>
-          {renderInputFields()}
-
-          <Grid item xs={12}>
-            <LoadingButton
-              loading={IsupdatingAdmission}
-              variant='contained'
-              sx={{ marginRight: 3.5 }}
-              onClick={handleSubmit}
-            >
-              Save and continue
-            </LoadingButton>
-          </Grid>
-        </Grid>
-      </form>
-    </CardContent>
+    <Card sx={{ p: 5 }}>
+      <FormGenerator
+        fields={fields}
+        errors={errors}
+        mandatoryFields={getMandatoryFieldsList(studentDetailConfig)}
+        isLoading={isLoading}
+      />
+      <Box display='flex' justifyContent='flex-end' alignContent='end'>
+        <LoadingButton
+          disabled={errors.length > 0}
+          fullWidth={false}
+          variant='outlined'
+          loading={isSavingDetails}
+          onClick={handleSubmit(onSubmit)}
+        >
+          Save and continue
+        </LoadingButton>
+      </Box>
+    </Card>
   )
 }
 
