@@ -82,17 +82,18 @@ const AdmissionForm = () => {
       )
     },
     {
-      value: AdmissionFormType.ADDON_COURSE,
-      label: 'ADDON Courses',
-      icon: <BookOutline />,
-      component: <AddonCourseDetails application_id={application_id} programId={''} handleNext={handleNext} />
-    },
-    {
       value: AdmissionFormType.ADDRESS,
       label: 'Student Address',
       icon: <GoogleMaps />,
-      component: <StudentAddress application_id={application_id} handleNext={handleNext} />
+      component: <StudentAddress student_id={application_id} handleNext={handleNext} />
     },
+    {
+      value: AdmissionFormType.ADDON_COURSE,
+      label: 'ADDON Courses',
+      icon: <BookOutline />,
+      component: <AddonCourseDetails student_id={application_id} handleNext={handleNext} />
+    },
+
     {
       value: AdmissionFormType.FEES,
       label: 'Fees Details',

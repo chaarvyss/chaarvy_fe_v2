@@ -7,7 +7,7 @@ import { FilterProps } from 'src/lib/interfaces'
 import { InputFields } from 'src/lib/types'
 import RenderInputFields from 'src/reusable_components/renderInputFields'
 import { ImgStyled } from 'src/reusable_components/styledComponents/styledImgTag'
-import { useGetProgramsListQuery, useLazyGetStudentsListQuery } from 'src/store/services/listServices'
+import { useGetProgramsListQuery } from 'src/store/services/listServices'
 import {
   useLazyGetProgramSegmentMediumsListByProgramIdQuery,
   useLazyGetProgramSectionListQuery
@@ -20,7 +20,8 @@ const GetAttendence = () => {
   const [getSectionsList, { data: sections }] = useLazyGetProgramSectionListQuery()
   const { data: programsList } = useGetProgramsListQuery(true)
   const [getMediumsList, { data: mediums }] = useLazyGetProgramSegmentMediumsListByProgramIdQuery()
-  const [getStudentsList, { data: studentsList, isFetching }] = useLazyGetStudentsListQuery()
+
+  const studentsList = []
 
   const [attended, setAttended] = useState<Array<string>>([])
 
@@ -46,12 +47,6 @@ const GetAttendence = () => {
     }
 
     return ['program', 'medium', 'section'].some(key => filterProps[key] === undefined || filterProps[key] === '')
-  }
-
-  const getStudents = () => {
-    if (filterProps) {
-      getStudentsList(filterProps)
-    }
   }
 
   const fields: InputFields[] = [
@@ -95,31 +90,32 @@ const GetAttendence = () => {
       key: 'getStudents',
       isDisabled: shouldDisableGetStudents(),
       value: '',
-      onChange: () => getStudents()
+      onChange: () => {}
     }
   ]
 
   const handleAttendance = (id: string) => setAttended(a => (a.includes(id) ? a.filter(x => x !== id) : [...a, id]))
 
   const studentCardTile = () => {
-    if (isFetching) return <Typography>Loading</Typography>
+    // if (isFetching) return <Typography>Loading</Typography>
 
-    return (studentsList ?? []).map(each => (
-      <Grid key={each.application_id} item xs={12} md={3} xl={2}>
-        <Card
-          onClick={() => handleAttendance(each.application_id)}
-          sx={{
-            cursor: 'pointer',
-            bgcolor: attended.includes(each.application_id) ? '#a8f89c' : ''
-          }}
-        >
-          <Box display='flex' justifyContent='center' alignItems='center' gap={3} flexDirection='column' padding={3}>
-            <ImgStyled src={each.photo_url ?? '/images/avatars/1.png'} alt='add photo' style={{ cursor: 'pointer' }} />
-            <Typography variant='body1'>{each.student_name}</Typography>
-          </Box>
-        </Card>
-      </Grid>
-    ))
+    // return (studentsList ?? []).map(each => (
+    //   <Grid key={each.application_id} item xs={12} md={3} xl={2}>
+    //     <Card
+    //       onClick={() => handleAttendance(each.application_id)}
+    //       sx={{
+    //         cursor: 'pointer',
+    //         bgcolor: attended.includes(each.application_id) ? '#a8f89c' : ''
+    //       }}
+    //     >
+    //       <Box display='flex' justifyContent='center' alignItems='center' gap={3} flexDirection='column' padding={3}>
+    //         <ImgStyled src={each.photo_url ?? '/images/avatars/1.png'} alt='add photo' style={{ cursor: 'pointer' }} />
+    //         <Typography variant='body1'>{each.student_name}</Typography>
+    //       </Box>
+    //     </Card>
+    //   </Grid>
+    // ))
+    return <Typography>Student card tile</Typography>
   }
 
   const handleRecordAttendence = () => {

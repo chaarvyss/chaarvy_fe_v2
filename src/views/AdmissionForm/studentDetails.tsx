@@ -197,7 +197,7 @@ const StudentDetails = ({ student_id, handleNext, onAdmissionCreation }: student
     updateStudentDetails({ ...data, student_id })
       .unwrap()
       .then(() => {
-        handleNext(AdmissionFormType.ADDON_COURSE)
+        handleNext(AdmissionFormType.ADDRESS)
         triggerToast('Student details Updated', { variant: ToastVariants.SUCCESS })
       })
       .catch(res => triggerToast(res.data, { variant: ToastVariants.ERROR }))

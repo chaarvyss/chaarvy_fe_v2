@@ -6,9 +6,10 @@ import { Typography } from '@muiElements'
 interface TagProps {
   status?: number
   onClick?: () => void
+  text?: string
 }
 
-export const Tag = ({ status, onClick }: TagProps) => {
+export const Tag = ({ status, onClick, text }: TagProps) => {
   const baseProps = {
     display: 'inline-block',
     padding: '0px 8px',
@@ -29,7 +30,7 @@ export const Tag = ({ status, onClick }: TagProps) => {
       color={bgColor.A700}
       {...baseProps}
     >
-      {status === 0 ? 'Inactive' : 'Active'}
+      {text ?? (status === 0 ? 'Inactive' : 'Active')}
     </Typography>
   )
 }

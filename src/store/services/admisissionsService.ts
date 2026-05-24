@@ -7,7 +7,7 @@ import api from './api'
 import { CacheTag } from './cacheTag'
 
 export type Address = {
-  application_id?: string
+  student_id?: string
   address_id?: string
   door_no?: string
   house_apartment_name?: string // new
@@ -76,11 +76,6 @@ export type CreateStudentAdmissionRequest = {
   application_fees_status?: string
 }
 
-export type StudentAddonCourseResponse = {
-  student_addon_program_id: string
-  program_addon_course_id: string
-}
-
 export type StudentPhotoRequest = {
   student_id: string
   photo: File
@@ -89,11 +84,6 @@ export type StudentPhotoRequest = {
 interface CreateApplicationResponse {
   application_id?: string
   message?: string
-}
-
-interface EnrollAddonCourseRequest {
-  application_id: string
-  addon_courses: string[]
 }
 
 interface Segment {
@@ -133,10 +123,11 @@ const admissionServiceApi = api.injectEndpoints({
       }
     }),
     enrollAddonCourse: build.mutation<string, EnrollAddonCourseRequest>({
+      invalidatesTags: [CacheTag.ListStudentAddonPrograms],
       query: body => {
         return {
           method: HttpRequestMethods.POST,
-          url: urlConstants.admissions.enrollAddonCourse,
+          url: urlConstants.admissions.enrollAddonCourseUrl,
           body
         }
       }
@@ -162,21 +153,22 @@ const admissionServiceApi = api.injectEndpoints({
 
     getStudentAddress: build.query<Address, string>({
       providesTags: [CacheTag.StudentAddress],
-      query: application_id => {
+      query: student_id => {
         return {
           method: HttpRequestMethods.GET,
           url: urlConstants.admissions.studentAddress,
-          params: { application_id }
+          params: { student_id }
         }
       }
     }),
 
-    getStudentEnrollendAddonCourses: build.query<StudentAddonCourseResponse[], string>({
-      query: application_id => {
+    getStudentEnrolledAddonCourses: build.query<StudentAddonCourseResponse[], string>({
+      providesTags: [CacheTag.ListStudentAddonPrograms],
+      query: student_course_enrollment_id => {
         return {
           method: HttpRequestMethods.GET,
-          url: urlConstants.admissions.studentEnrolledAddonCourse,
-          params: { application_id }
+          url: urlConstants.admissions.studentEnrolledAddonCourseUrl,
+          params: { student_course_enrollment_id }
         }
       }
     }),
@@ -265,6 +257,27 @@ const admissionServiceApi = api.injectEndpoints({
           params: { student_id }
         }
       }
+    }),
+
+    getAddonCoursesAvailableForStudent: build.query<AvailableAddonCourseForStudentResponse[], string>({
+      providesTags: [CacheTag.ListStudentAddonPrograms],
+      query: student_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.getAddonCoursesAvailableForStudentUrl,
+          params: { student_id }
+        }
+      }
+    }),
+
+    getStudentActiveCourseEnrollmentId: build.query<string, string>({
+      query: student_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.getStudentActiveCourseEnrollmentIdUrl,
+          params: { student_id }
+        }
+      }
     })
   })
 })
@@ -273,7 +286,6 @@ export const {
   useCreateUpdateAdmissionMutation,
   useUploadStudentPhotoMutation,
   useLazyGetAdmissionsListQuery,
-  useLazyGetStudentEnrollendAddonCoursesQuery,
   useEnrollAddonCourseMutation,
   useGetStudentAddressQuery,
   useGetProcessingFeesQuery,
@@ -283,5 +295,8 @@ export const {
   useCreateUpdateAdmissionFormOneMutation,
   useGetAdmissionFormOneDetailQuery,
   useUpdateStudentDetailsF2Mutation,
-  useGetStudentDetailsFormTwoQuery
+  useGetStudentDetailsFormTwoQuery,
+  useGetAddonCoursesAvailableForStudentQuery,
+  useGetStudentActiveCourseEnrollmentIdQuery,
+  useGetStudentEnrolledAddonCoursesQuery
 } = admissionServiceApi

@@ -43,3 +43,27 @@ type StudentDetails = {
 type StudentDetailsRequest = StudentDetails & {
   student_id?: string
 }
+
+type AvailableAddonCourseForStudentResponse = {
+  program_addon_course_id: string
+  addon_course_id: string
+  addon_course_name: string
+  addon_course_fees: number
+  seating_capacity: number
+  enrolled_count: number
+  available: number
+}
+
+type StudentAddonCourseResponse = {
+  student_addon_course_enrollment_id: string
+  program_addon_course_id: string
+  fees: number
+}
+
+type EnrollAddonCourseRequest = {
+  student_addon_course_enrollment_id?: string
+  student_course_enrollment_id: string
+  program_addon_course_id: string
+  status: number
+  fees: number
+}

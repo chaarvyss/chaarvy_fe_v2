@@ -164,15 +164,6 @@ const listServicesApi = api.injectEndpoints({
         }
       }
     }),
-    getStudentsList: build.query<Students[], FilterProps>({
-      query: params => {
-        return {
-          method: HttpRequestMethods.GET,
-          url: urlConstants.list.students,
-          params
-        }
-      }
-    }),
     getStateList: build.query<State[], void>({
       query: () => {
         return {
@@ -304,7 +295,6 @@ export const {
   useLazyGetRolesListQuery,
   useGetPaymentAggrementsQuery,
   useGetSectionsListQuery,
-  useLazyGetStudentsListQuery,
   useLazyGetRolePermissionsListQuery,
   useGetBooksListQuery,
   useLazyGetProgramRelatedBooksOptionsQuery,
