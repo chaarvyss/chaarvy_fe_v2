@@ -67,3 +67,17 @@ type EnrollAddonCourseRequest = {
   status: number
   fees: number
 }
+
+// Raw fees response types
+
+type CourseFees = {
+  program_fees_id: string
+  fees: string
+  fees_type_id: string
+  fees_type_name: string
+  final_fees?: number
+}
+
+type RawFeesDetailsResponse = {
+  course_fees: CourseFees[]
+}

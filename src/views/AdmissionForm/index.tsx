@@ -9,9 +9,9 @@ import { TabName } from 'src/reusable_components/styledComponents/TabName'
 
 import AddonCourseDetails from './addonCourseDetails'
 import StudentAddress from './address'
-import FeesDetails from './feesDetails'
 import StudentBaseDetails from './studentBaseDetails'
 import StudentDetails from './studentDetails'
+import FeesDetails from './FeesDetails'
 
 const Tab = styled(MuiTab)<TabProps>(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
@@ -98,7 +98,7 @@ const AdmissionForm = () => {
       value: AdmissionFormType.FEES,
       label: 'Fees Details',
       icon: <Cash />,
-      component: <FeesDetails application_id={application_id} segment_id={''} />
+      component: <FeesDetails student_id={application_id} />
     }
   ]
 

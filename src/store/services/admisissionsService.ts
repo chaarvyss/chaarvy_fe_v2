@@ -278,7 +278,19 @@ const admissionServiceApi = api.injectEndpoints({
           params: { student_id }
         }
       }
+    }),
+
+    getRawFeesDetails: build.query<RawFeesDetailsResponse, string>({
+      query: student_course_enrollment_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.getRawFeesDetailsUrl,
+          params: { student_course_enrollment_id }
+        }
+      }
     })
+
+    // /get-raw-fees
   })
 })
 
@@ -298,5 +310,6 @@ export const {
   useGetStudentDetailsFormTwoQuery,
   useGetAddonCoursesAvailableForStudentQuery,
   useGetStudentActiveCourseEnrollmentIdQuery,
-  useGetStudentEnrolledAddonCoursesQuery
+  useGetStudentEnrolledAddonCoursesQuery,
+  useGetRawFeesDetailsQuery
 } = admissionServiceApi
