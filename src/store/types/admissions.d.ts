@@ -70,7 +70,7 @@ type EnrollAddonCourseRequest = {
 
 // Raw fees response types
 
-type CourseFees = {
+type CourseFee = {
   program_fees_id: string
   fees: string
   fees_type_id: string
@@ -78,6 +78,23 @@ type CourseFees = {
   final_fees?: number
 }
 
+type Book = {
+  book_id: string
+  book_name: string
+  price: number
+  quantity: number
+  is_required: boolean
+}
+
+type AddonCourse = {
+  addon_course_id: string
+  addon_course_name: string
+  fees: number
+  final_fees?: number
+}
+
 type RawFeesDetailsResponse = {
-  course_fees: CourseFees[]
+  course_fees: CourseFee[]
+  books_fees: Book[]
+  addon_course_fees: AddonCourse[]
 }

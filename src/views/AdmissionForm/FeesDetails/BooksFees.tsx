@@ -1,53 +1,48 @@
-import { TextField, Typography } from '@muiElements'
+import { Checkbox, FormControlLabel } from '@mui/material'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
-import { InputVariants } from 'src/lib/enums'
 import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
 
-interface CourseFeesProps {
-  courseFees: CourseFees[]
-  handleCourseFeesChange: (row: CourseFees, value: number) => void
+interface BooksFeeProps {
+  books: Book[]
+  handleBooksChange: (row: Book) => void
 }
 
-const BooksFees = ({ courseFees, handleCourseFeesChange }: CourseFeesProps) => {
+const BooksFees = ({ books, handleBooksChange }: BooksFeeProps) => {
   const columns: ChaarvyTableColumn[] = [
     {
       id: 'index',
-      label: '#',
-      render: (row, index) => <Typography>{index + 1}</Typography>
-    },
-    {
-      id: 'fees_type_name',
-      label: 'Fees Type'
-    },
-    {
-      id: 'fees',
-      label: 'Actual fees'
-    },
-
-    {
-      id: 'final_fees',
-      label: 'Final Payable',
+      label: 'Selected',
       render: row => (
-        <TextField
-          size='small'
-          type={InputVariants.NUMBER}
-          value={row.final_fees}
-          onChange={e => handleCourseFeesChange(row, Number(e.target.value))}
+        <FormControlLabel
+          control={<Checkbox checked={row.is_required} onChange={() => handleBooksChange(row)} />}
+          label={''}
         />
       )
+    },
+    {
+      id: 'book_name',
+      label: 'Books'
+    },
+    {
+      id: 'quantity',
+      label: 'Quantity'
+    },
+    {
+      id: 'price',
+      label: 'Price'
     }
   ]
 
   return (
     <ChaarvyTable
       tableTitleHeaderProps={{
-        title: 'Course fees',
-        iconName: 'AccountCheck'
+        title: 'Books Fees',
+        iconName: 'Book'
       }}
       tableDataProps={{
         columns,
-        data: courseFees ?? [],
-        getRowKey: row => row.application_id,
+        data: books,
+        getRowKey: row => row.book_id,
         emptyMessage: 'No Admissions',
         isLoading: false,
         shouldHideActions: true

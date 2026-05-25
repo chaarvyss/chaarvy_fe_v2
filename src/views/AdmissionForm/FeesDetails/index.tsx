@@ -8,6 +8,7 @@ import {
 
 import CourseFees from './CourseFees'
 import BooksFees from './BooksFees'
+import AddonCoursesFees from './AddonCoursesFees'
 
 interface FeesDetailsProps {
   student_id?: string
@@ -18,7 +19,9 @@ const FeesDetails = ({ student_id }: FeesDetailsProps) => {
     skip: !student_id
   })
 
-  const [courseFees, setCourseFees] = useState<CourseFees[]>([])
+  const [courseFees, setCourseFees] = useState<CourseFee[]>([])
+  const [booksDetails, setBooksDetails] = useState<Book[]>([])
+  const [addonCourseDetails, setAddonCourseDetails] = useState<AddonCourse[]>([])
 
   const { data: feesDetails } = useGetRawFeesDetailsQuery(student_course_enrollment_id ?? '', {
     skip: !student_course_enrollment_id
@@ -27,10 +30,12 @@ const FeesDetails = ({ student_id }: FeesDetailsProps) => {
   useEffect(() => {
     if (feesDetails?.course_fees) {
       setCourseFees(feesDetails.course_fees)
+      setBooksDetails(feesDetails.books_fees ?? [])
+      setAddonCourseDetails(feesDetails.addon_course_fees ?? [])
     }
   }, [feesDetails])
 
-  const handleCourseFeesChange = useCallback((row: CourseFees, value: number) => {
+  const handleCourseFeesChange = useCallback((row: CourseFee, value: number) => {
     setCourseFees(prev =>
       prev.map(item =>
         item.program_fees_id === row.program_fees_id
@@ -43,8 +48,27 @@ const FeesDetails = ({ student_id }: FeesDetailsProps) => {
     )
   }, [])
 
+  const handleAddonCourseFeesChange = useCallback((row: AddonCourse, value: number) => {
+    setAddonCourseDetails(prev =>
+      prev.map(item =>
+        item.addon_course_id === row.addon_course_id
+          ? {
+              ...item,
+              final_fees: value
+            }
+          : item
+      )
+    )
+  }, [])
+
+  const handleBooksChange = useCallback((row: Book) => {
+    setBooksDetails(prev =>
+      prev.map(item => (item.book_id === row.book_id ? { ...item, is_required: !item.is_required } : item))
+    )
+  }, [])
+
   const stats = useMemo(() => {
-    return courseFees.reduce(
+    const courseStats = courseFees.reduce(
       (acc, each) => {
         const actual = Number(each.fees || 0)
         const payable = Number(each.final_fees || 0)
@@ -61,7 +85,18 @@ const FeesDetails = ({ student_id }: FeesDetailsProps) => {
         discount: 0
       }
     )
-  }, [courseFees])
+
+    booksDetails.forEach(book => {
+      if (book.is_required) {
+        const price = Number(book.price || 0)
+
+        courseStats.actual += price
+        courseStats.payable += price
+      }
+    })
+
+    return courseStats
+  }, [courseFees, booksDetails])
 
   const discountPercent = stats.actual > 0 ? ((stats.discount / stats.actual) * 100).toFixed(2) : '0'
 
@@ -94,8 +129,8 @@ const FeesDetails = ({ student_id }: FeesDetailsProps) => {
         overflow='auto'
       >
         <CourseFees courseFees={courseFees} handleCourseFeesChange={handleCourseFeesChange} />
-
-        <BooksFees courseFees={courseFees} handleCourseFeesChange={handleCourseFeesChange} />
+        <BooksFees books={booksDetails} handleBooksChange={handleBooksChange} />
+        <AddonCoursesFees addonCourses={addonCourseDetails} handleAddonCourseFeesChange={handleAddonCourseFeesChange} />
       </Box>
     </Box>
   )

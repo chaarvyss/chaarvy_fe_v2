@@ -1,14 +1,14 @@
-import { TextField, Typography } from '@muiElements'
+import { Checkbox, FormControlLabel, TextField, Typography } from '@mui/material'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import { InputVariants } from 'src/lib/enums'
 import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
 
-interface CourseFeesProps {
-  courseFees: CourseFee[]
-  handleCourseFeesChange: (row: CourseFee, value: number) => void
+interface AddonCoursesProps {
+  addonCourses: AddonCourse[]
+  handleAddonCourseFeesChange: (row: AddonCourse, value: number) => void
 }
 
-const CourseFees = ({ courseFees, handleCourseFeesChange }: CourseFeesProps) => {
+const AddonCoursesFees = ({ addonCourses, handleAddonCourseFeesChange }: AddonCoursesProps) => {
   const columns: ChaarvyTableColumn[] = [
     {
       id: 'index',
@@ -16,8 +16,8 @@ const CourseFees = ({ courseFees, handleCourseFeesChange }: CourseFeesProps) => 
       render: (row, index) => <Typography>{index + 1}</Typography>
     },
     {
-      id: 'fees_type_name',
-      label: 'Fees Type'
+      id: 'addon_course_name',
+      label: 'Addon course'
     },
     {
       id: 'fees',
@@ -32,7 +32,7 @@ const CourseFees = ({ courseFees, handleCourseFeesChange }: CourseFeesProps) => 
           size='small'
           type={InputVariants.NUMBER}
           value={row.final_fees}
-          onChange={e => handleCourseFeesChange(row, Number(e.target.value))}
+          onChange={e => handleAddonCourseFeesChange(row, Number(e.target.value))}
         />
       )
     }
@@ -41,13 +41,12 @@ const CourseFees = ({ courseFees, handleCourseFeesChange }: CourseFeesProps) => 
   return (
     <ChaarvyTable
       tableTitleHeaderProps={{
-        title: 'Course fees',
-        iconName: 'AccountCheck'
+        title: 'Addon Courses Fees'
       }}
       tableDataProps={{
         columns,
-        data: courseFees ?? [],
-        getRowKey: row => row.application_id,
+        data: addonCourses,
+        getRowKey: row => row.book_id,
         emptyMessage: 'No Admissions',
         isLoading: false,
         shouldHideActions: true
@@ -56,4 +55,4 @@ const CourseFees = ({ courseFees, handleCourseFeesChange }: CourseFeesProps) => 
   )
 }
 
-export default CourseFees
+export default AddonCoursesFees
