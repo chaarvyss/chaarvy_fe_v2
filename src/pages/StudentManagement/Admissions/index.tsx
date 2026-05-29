@@ -98,6 +98,18 @@ const Admissions = () => {
       hideable: true
     },
     {
+      id: 'segment_name',
+      label: 'Class',
+      hideable: true
+    },
+
+    {
+      id: 'section_name',
+      label: 'Section',
+      hideable: true
+    },
+
+    {
       id: 'status',
       label: 'Status',
       hideable: true,
@@ -117,7 +129,8 @@ const Admissions = () => {
     {
       id: 'contact_no_1',
       label: 'Phone',
-      hideable: true
+      hideable: true,
+      defaultHidden: true
     },
     {
       id: 'actions',

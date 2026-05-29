@@ -98,3 +98,23 @@ type RawFeesDetailsResponse = {
   books_fees: Book[]
   addon_course_fees: AddonCourse[]
 }
+
+type SavedFeesJson = {
+  courseFees?: Record<string, number>
+  booksDetails?: Record<string, boolean>
+  addonCourseDetails?: Record<string, number>
+}
+
+type FeesState = {
+  courseFees: CourseFee[]
+  booksDetails: Book[]
+  addonCourseDetails: AddonCourse[]
+}
+
+type SetFeesDetailsRequest = {
+  fees_details: SavedFeesJson
+  student_course_enrollment_id: string
+  payable_fees: number
+  payment_aggrement?: number
+  no_of_terms?: number
+}

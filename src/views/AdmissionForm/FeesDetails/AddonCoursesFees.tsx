@@ -32,6 +32,9 @@ const AddonCoursesFees = ({ addonCourses, handleAddonCourseFeesChange }: AddonCo
           size='small'
           type={InputVariants.NUMBER}
           value={row.final_fees}
+          inputProps={{
+            min: 0
+          }}
           onChange={e => handleAddonCourseFeesChange(row, Number(e.target.value))}
         />
       )

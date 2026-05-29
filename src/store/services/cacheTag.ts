@@ -23,7 +23,8 @@ export enum CacheTag {
   RolesList = 'roles_list',
   ListProgramSegmentMediums = 'prgSegMed',
   ListProgramSegmentSections = 'prgSegSec',
-  ListStudentAddonPrograms = 'stdAdprgs'
+  ListStudentAddonPrograms = 'stdAdprgs',
+  StudentPayableFees = 'studPayFees'
 }
 
 export enum MasterCacheTag {

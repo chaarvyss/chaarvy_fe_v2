@@ -109,7 +109,9 @@ export const urlConstants = {
     getActiveMediumSectionsUrl: `${interRoutePrefix.admisions}/medium-sections`,
     createUpdateAdmissionFormOneUrl: `${interRoutePrefix.admisions}/create-update-admission-form-one`,
     updateStudentDetailsF2Url: `${interRoutePrefix.admisions}/update-student-details-f2`,
-    getRawFeesDetailsUrl: `${interRoutePrefix.admisions}/get-raw-fees`
+    getRawFeesDetailsUrl: `${interRoutePrefix.admisions}/get-raw-fees`,
+    setStudentPayableFeesUrl: `${interRoutePrefix.admisions}/set-student-payable-fees`,
+    getStudentPayableFeesDetailsUrl: `${interRoutePrefix.admisions}/student-payable-fees`
   },
   dashboard: {
     studentsCount: `${interRoutePrefix.dashboard}/students_count`,

@@ -32,6 +32,9 @@ const CourseFees = ({ courseFees, handleCourseFeesChange }: CourseFeesProps) => 
           size='small'
           type={InputVariants.NUMBER}
           value={row.final_fees}
+          inputProps={{
+            min: 0
+          }}
           onChange={e => handleCourseFeesChange(row, Number(e.target.value))}
         />
       )

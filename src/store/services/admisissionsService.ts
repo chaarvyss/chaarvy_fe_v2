@@ -288,9 +288,29 @@ const admissionServiceApi = api.injectEndpoints({
           params: { student_course_enrollment_id }
         }
       }
-    })
+    }),
 
-    // /get-raw-fees
+    setStudentPayableFees: build.mutation<string, SetFeesDetailsRequest>({
+      invalidatesTags: [CacheTag.StudentPayableFees],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admissions.setStudentPayableFeesUrl,
+          body
+        }
+      }
+    }),
+
+    getStudentPayableFeesDetails: build.query<SavedFeesJson, string>({
+      providesTags: [CacheTag.StudentPayableFees],
+      query: student_course_enrollment_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.getStudentPayableFeesDetailsUrl,
+          params: { student_course_enrollment_id }
+        }
+      }
+    })
   })
 })
 
@@ -311,5 +331,7 @@ export const {
   useGetAddonCoursesAvailableForStudentQuery,
   useGetStudentActiveCourseEnrollmentIdQuery,
   useGetStudentEnrolledAddonCoursesQuery,
-  useGetRawFeesDetailsQuery
+  useGetRawFeesDetailsQuery,
+  useSetStudentPayableFeesMutation,
+  useGetStudentPayableFeesDetailsQuery
 } = admissionServiceApi
