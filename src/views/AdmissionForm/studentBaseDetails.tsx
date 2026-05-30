@@ -296,7 +296,7 @@ const StudentBaseDetails = ({
           }
           triggerToast(message, { variant: ToastVariants.SUCCESS })
         })
-        .catch(res => triggerToast(res.data?.message, { variant: ToastVariants.ERROR }))
+        .catch(error_ => triggerToast(error_.data?.message, { variant: ToastVariants.ERROR }))
     }
   }
 

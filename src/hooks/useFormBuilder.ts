@@ -238,10 +238,7 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
     for (const rule of field.rules) {
       let error: ValidationError = null
 
-      if (typeof rule == 'number') {
-        const handler = ruleHandlers[rule]
-        error = handler?.(value, isEmpty, keyStr) ?? null
-      } else if (typeof rule === 'string') {
+      if (typeof rule == 'number' || typeof rule === 'string') {
         const handler = ruleHandlers[rule]
         error = handler?.(value, isEmpty, keyStr) ?? null
       } else {
