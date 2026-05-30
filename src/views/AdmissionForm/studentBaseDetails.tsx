@@ -10,7 +10,6 @@ import {
   RadioGroup,
   Select,
   SelectChangeEvent,
-  Stack,
   Typography
 } from '@mui/material'
 import { useRouter } from 'next/router'
@@ -21,11 +20,11 @@ import 'react-datepicker/dist/react-datepicker.css'
 import { Button, FormControl, Grid, TextField } from '@muiElements'
 import { useImageViewer } from 'src/@core/context/imageViewerContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { Spinner } from 'src/components/Cards/dashboardCards'
 import { DateFormats, InputTypes, InputVariants } from 'src/lib/enums'
 import { dateToString } from 'src/lib/helpers'
 import { ErrorObject, InputFields } from 'src/lib/types'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
+import LoadingSpinner from 'src/reusable_components/LoadingSpinner'
 import { ImgStyled } from 'src/reusable_components/styledComponents/styledImgTag'
 import {
   useUploadStudentPhotoMutation,
@@ -43,7 +42,6 @@ import { convertDateStringToDate, isValidAadhar, isValidEmail, isValidPhone } fr
 import ApplicationFeesModal from './application_fees_modal'
 
 import { AdmissionFormType } from '.'
-import LoadingSpinner from 'src/reusable_components/LoadingSpinner'
 
 const TOP_LEVEL_ID = 'student-application-form'
 

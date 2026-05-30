@@ -9,9 +9,9 @@ import { TabName } from 'src/reusable_components/styledComponents/TabName'
 
 import AddonCourseDetails from './addonCourseDetails'
 import StudentAddress from './address'
+import FeesDetails from './FeesDetails'
 import StudentBaseDetails from './studentBaseDetails'
 import StudentDetails from './studentDetails'
-import FeesDetails from './FeesDetails'
 
 const Tab = styled(MuiTab)<TabProps>(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
@@ -73,13 +73,7 @@ const AdmissionForm = () => {
       value: AdmissionFormType.STUDENT_DETAIL,
       label: 'Student Details',
       icon: <AccountOutline />,
-      component: (
-        <StudentDetails
-          student_id={application_id}
-          onAdmissionCreation={handleAdmissionCreation}
-          handleNext={handleNext}
-        />
-      )
+      component: <StudentDetails student_id={application_id} handleNext={handleNext} />
     },
     {
       value: AdmissionFormType.ADDRESS,
@@ -91,7 +85,7 @@ const AdmissionForm = () => {
       value: AdmissionFormType.ADDON_COURSE,
       label: 'ADDON Courses',
       icon: <BookOutline />,
-      component: <AddonCourseDetails student_id={application_id} handleNext={handleNext} />
+      component: <AddonCourseDetails student_id={application_id} />
     },
 
     {
@@ -104,6 +98,7 @@ const AdmissionForm = () => {
 
   const shouldDisableTab = ({ value }: { value: AdmissionFormType }): boolean => {
     if (shouldDisableTabs) return value !== AdmissionFormType.BASE_DETAIL
+
     return false
   }
 

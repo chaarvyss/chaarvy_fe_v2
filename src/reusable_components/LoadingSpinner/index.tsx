@@ -1,5 +1,4 @@
 import { Stack, Typography } from '@mui/material'
-import { Card } from '@muiElements'
 import { ClipLoader } from 'react-spinners'
 
 const LoadingSpinner = () => {

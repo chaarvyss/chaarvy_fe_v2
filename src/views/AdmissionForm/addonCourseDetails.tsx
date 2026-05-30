@@ -1,7 +1,12 @@
-import { Input, TextField, Typography } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
+import ChaarvyModal from 'src/reusable_components/chaarvyModal'
+import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
+import Tag from 'src/reusable_components/tag'
 import {
   useEnrollAddonCourseMutation,
   useGetAddonCoursesAvailableForStudentQuery,
@@ -9,19 +14,11 @@ import {
   useGetStudentEnrolledAddonCoursesQuery
 } from 'src/store/services/admisissionsService'
 
-import { AdmissionFormType } from '.'
-import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
-import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
-import { LoadingButton } from '@mui/lab'
-import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import Tag from 'src/reusable_components/tag'
-
 interface AddonCourseDetailsProps {
   student_id?: string
-  handleNext: (step: AdmissionFormType) => void
 }
 
-const AddonCourseDetails = ({ student_id = '', handleNext }: AddonCourseDetailsProps) => {
+const AddonCourseDetails = ({ student_id = '' }: AddonCourseDetailsProps) => {
   const { data: student_course_enrollment_id } = useGetStudentActiveCourseEnrollmentIdQuery(student_id, {
     skip: !student_id
   })
@@ -105,6 +102,7 @@ const AddonCourseDetails = ({ student_id = '', handleNext }: AddonCourseDetailsP
       label: '',
       render: row => {
         const old_data = getOldData(row.program_addon_course_id)
+
         return old_data ? (
           <Tag status={old_data ? 1 : 0} text={old_data ? 'Enrolled' : 'Enroll'} />
         ) : (

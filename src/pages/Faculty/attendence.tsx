@@ -1,12 +1,11 @@
 import { Button, SelectChangeEvent } from '@mui/material'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 
 import { Box, Card, Grid, Typography } from '@muiElements'
 import { InputTypes } from 'src/lib/enums'
 import { FilterProps } from 'src/lib/interfaces'
 import { InputFields } from 'src/lib/types'
 import RenderInputFields from 'src/reusable_components/renderInputFields'
-import { ImgStyled } from 'src/reusable_components/styledComponents/styledImgTag'
 import { useGetProgramsListQuery } from 'src/store/services/listServices'
 import {
   useLazyGetProgramSegmentMediumsListByProgramIdQuery,
@@ -29,6 +28,10 @@ const GetAttendence = () => {
     getSectionsList(value)
     getMediumsList(value)
   }
+
+  useEffect(() => {
+    setAttended([])
+  }, [])
 
   const handleChange =
     (prop: keyof FilterProps) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
@@ -90,11 +93,11 @@ const GetAttendence = () => {
       key: 'getStudents',
       isDisabled: shouldDisableGetStudents(),
       value: '',
-      onChange: () => {}
+      onChange: () => console.log('get students')
     }
   ]
 
-  const handleAttendance = (id: string) => setAttended(a => (a.includes(id) ? a.filter(x => x !== id) : [...a, id]))
+  // const handleAttendance = (id: string) => setAttended(a => (a.includes(id) ? a.filter(x => x !== id) : [...a, id]))
 
   const studentCardTile = () => {
     // if (isFetching) return <Typography>Loading</Typography>

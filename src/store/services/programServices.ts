@@ -1,7 +1,6 @@
 import { urlConstants } from 'src/constants/urlConstants'
 import {
   ProgramSegmentMediumsListResponse,
-  ProgramAddonCourseResponse,
   ProgramSecondLanguagesResponse,
   ProgramSectionResponse,
   ProgramSegmentMediumBook

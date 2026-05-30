@@ -1,6 +1,7 @@
-import { Box, Button, Typography } from '@muiElements'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { Box, Button, Typography } from '@muiElements'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import {
   useGetRawFeesDetailsQuery,
   useGetStudentActiveCourseEnrollmentIdQuery,
@@ -8,10 +9,9 @@ import {
   useSetStudentPayableFeesMutation
 } from 'src/store/services/admisissionsService'
 
-import CourseFees from './CourseFees'
-import BooksFees from './BooksFees'
 import AddonCoursesFees from './AddonCoursesFees'
-import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import BooksFees from './BooksFees'
+import CourseFees from './CourseFees'
 
 interface FeesDetailsProps {
   student_id?: string

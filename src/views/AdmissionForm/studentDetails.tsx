@@ -1,27 +1,24 @@
 import { LoadingButton } from '@mui/lab'
-import { Box, Card, Stack } from '@mui/material'
+import { Box, Card } from '@mui/material'
+import { useEffect, useMemo } from 'react'
+
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { FieldConfig, getMandatoryFieldsList, mapToFields, useFormBuilder } from 'src/hooks/useFormBuilder'
-
-import 'react-datepicker/dist/react-datepicker.css'
-
-import { AdmissionFormType } from '.'
-import { useEffect, useMemo, useState } from 'react'
 import { InputTypes, InputVariants } from 'src/lib/enums'
+import FormGenerator from 'src/reusable_components/formGenerator'
+import 'react-datepicker/dist/react-datepicker.css'
+import {
+  useGetStudentDetailsFormTwoQuery,
+  useUpdateStudentDetailsF2Mutation
+} from 'src/store/services/admisissionsService'
 import {
   useGetCommunitiesListQuery,
   useGetOccupationsListQuery,
   useGetQualifiedExamsListQuery,
   useGetReligionsListQuery
 } from 'src/store/services/listServices'
-import FormGenerator from 'src/reusable_components/formGenerator'
-import { DataMatrixEdit } from 'mdi-material-ui'
-import {
-  useGetStudentDetailsFormTwoQuery,
-  useUpdateStudentDetailsF2Mutation
-} from 'src/store/services/admisissionsService'
-import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 
-// const TOP_LEVEL_ID = 'student-application-form'
+import { AdmissionFormType } from '.'
 
 const getLast10Years = (): number[] => {
   const currentYear = new Date().getFullYear()
@@ -32,10 +29,9 @@ const getLast10Years = (): number[] => {
 interface studentBaseDetailsProps {
   student_id?: string
   handleNext: (step: AdmissionFormType) => void
-  onAdmissionCreation: (application_id: string) => void
 }
 
-const StudentDetails = ({ student_id, handleNext, onAdmissionCreation }: studentBaseDetailsProps) => {
+const StudentDetails = ({ student_id, handleNext }: studentBaseDetailsProps) => {
   const { triggerToast } = useToast()
 
   const { data: occupationsList } = useGetOccupationsListQuery()

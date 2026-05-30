@@ -1,6 +1,5 @@
 import { urlConstants } from 'src/constants/urlConstants'
 import {
-  FilterProps,
   PaymentAggrement,
   PaymentModes,
   PaymentsListRequest,
@@ -24,8 +23,7 @@ import {
   Religions,
   RolesListResponse,
   Segment,
-  State,
-  Students
+  State
 } from 'src/lib/types'
 import { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
 import { AddOnCourseProps } from 'src/views/Admin/Programs/Modals/AddonCourses/types'
