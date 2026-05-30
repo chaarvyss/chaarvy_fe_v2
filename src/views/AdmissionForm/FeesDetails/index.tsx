@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { Box, Button, Typography } from '@muiElements'
+import { Box, Button, TextField, Typography } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import { InputVariants } from 'src/lib/enums'
+import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
 import {
   useGetRawFeesDetailsQuery,
   useGetStudentActiveCourseEnrollmentIdQuery,
@@ -21,6 +23,51 @@ const initialState: FeesState = {
   courseFees: [],
   booksDetails: [],
   addonCourseDetails: []
+}
+
+export const getColumns = (i: 'addon' | 'course', onChange: (row: any, value: number) => void) => {
+  const baseColumns: ChaarvyTableColumn[] = [
+    {
+      id: 'index',
+      label: '#',
+      render: (row, index) => <Typography>{index + 1}</Typography>
+    },
+    { id: '', label: '' },
+    {
+      id: 'fees',
+      label: 'Actual fees'
+    },
+
+    {
+      id: 'final_fees',
+      label: 'Final Payable',
+      render: row => (
+        <TextField
+          size='small'
+          type={InputVariants.NUMBER}
+          value={row.final_fees}
+          inputProps={{
+            min: 0
+          }}
+          onChange={e => onChange(row, Number(e.target.value))}
+        />
+      )
+    }
+  ]
+
+  if (i === 'course') {
+    baseColumns[1] = {
+      id: 'fees_type_name',
+      label: 'Fees Particular'
+    }
+  } else {
+    baseColumns[1] = {
+      id: 'addon_course_name',
+      label: 'Addon course'
+    }
+  }
+
+  return baseColumns
 }
 
 const FeesDetails = ({ student_id }: FeesDetailsProps) => {
