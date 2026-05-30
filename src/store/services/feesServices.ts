@@ -117,9 +117,9 @@ export interface RecordPaymentResponse {
 }
 
 export interface ApplicationPaymentRequest {
-  student_course_enrollment_id: string
-  email: string
+  student_course_enrollment_id: string[]
   source: 'web' | 'app'
+  email: string
 }
 
 export interface UpdateApplicationPaymentRequest {
@@ -208,10 +208,11 @@ const feeServiceApi = api.injectEndpoints({
         }
       }
     }),
-    getApplicationFeesPayment: build.query<any, ApplicationPaymentRequest>({
-      query: params => ({
+    getApplicationFeesPayment: build.mutation<any, ApplicationPaymentRequest>({
+      query: body => ({
+        method: HttpRequestMethods.POST,
         url: urlConstants.fees.getApplicationFeesPaymentLink,
-        params
+        body
       })
     }),
 
@@ -231,5 +232,5 @@ export const {
   useRecordPaymentTransactionMutation,
   useLazyGetPaymentRecieptByPaymentIdQuery,
   useLazyUpdateApplicationPaymentQuery,
-  useLazyGetApplicationFeesPaymentQuery
+  useGetApplicationFeesPaymentMutation
 } = feeServiceApi
