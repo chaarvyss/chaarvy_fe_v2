@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.7.1...v1.8.0) (2026-05-28)
+
+
+### Features
+
+* **circleCiconfig:**  AC-000 Add deploy markers configuration ([#44](https://github.com/chaarvyss/chaarvy_fe_v2/issues/44)) ([1152697](https://github.com/chaarvyss/chaarvy_fe_v2/commit/115269738f9dec4ca15064e67f388e95eb9e765e))
+
 ## [1.7.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.7.0...v1.7.1) (2026-05-20)
 
 
