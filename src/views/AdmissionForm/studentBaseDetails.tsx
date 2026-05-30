@@ -148,8 +148,6 @@ const StudentBaseDetails = ({
   const [createUpdateAdmission, { isLoading: IsupdatingAdmission }] = useCreateUpdateAdmissionFormOneMutation()
   const [uploadStudentPhoto, { isLoading: isUploadingPhoto }] = useUploadStudentPhotoMutation()
   const [createPayment, { isLoading }] = useGetApplicationFeesPaymentMutation()
-
-  // const [updateApplicationPayment] = useLazyUpdateApplicationPaymentQuery()
   const { data: processingFees } = useGetProcessingFeesQuery()
 
   useEffect(() => {
