@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import React from 'react'
+import { Stack } from '@mui/material'
 
 import { Box, Typography, Button } from '@muiElements'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
@@ -9,11 +9,16 @@ interface ApplicationFeesModalProps {
   isLoading: boolean
   onCollectClick: () => void
   processingFees: number
+  onClose: () => void
 }
 
-const ApplicationFeesModal = (data: ApplicationFeesModalProps) => {
-  const { isOpen, isLoading, onCollectClick, processingFees } = data
-
+const ApplicationFeesModal = ({
+  isOpen,
+  isLoading,
+  onCollectClick,
+  processingFees,
+  onClose
+}: ApplicationFeesModalProps) => {
   return (
     <ChaarvyModal isOpen={isOpen} title='Application Processing Fees' shouldRestrictCloseOnOuterClick>
       <Box padding={2} gap={3}>
@@ -25,9 +30,15 @@ const ApplicationFeesModal = (data: ApplicationFeesModalProps) => {
             Page will redirect in a moment. Please wait...
           </Typography>
         )}
-        <Box display='flex' justifyContent='center' alignItems='center' marginTop={4}>
-          {isLoading ? <LoadingButton loading disabled /> : <Button onClick={onCollectClick}>Proceed to Pay</Button>}
-        </Box>
+        <Stack direction='row' gap={3} justifyContent='center' alignItems='center' marginTop={4}>
+          <Button variant='outlined' color='error' onClick={onClose}>
+            Skip now
+          </Button>
+
+          <LoadingButton loading={isLoading} variant='outlined' onClick={onCollectClick}>
+            Proceed to Pay
+          </LoadingButton>
+        </Stack>
       </Box>
     </ChaarvyModal>
   )

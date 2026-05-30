@@ -117,8 +117,7 @@ export interface RecordPaymentResponse {
 }
 
 export interface ApplicationPaymentRequest {
-  application_id: string
-  segment_id: string
+  student_course_enrollment_id: string
   email: string
   source: 'web' | 'app'
 }

@@ -39,9 +39,9 @@ const navigation = (): VerticalNavItemsType => {
           path: PagePath.SECTIONS,
           icon: 'ArrangeBringToFront' as const
         },
+        { key: Permissions.NAV.PROGRAMS, title: 'Programs', path: PagePath.PROGRAMS, icon: 'BullseyeArrow' as const },
         { key: Permissions.NAV.BOOKS, title: 'Books & Stationary', path: PagePath.BOOKS, icon: 'Bookshelf' as const },
         { key: Permissions.NAV.ADDON, title: 'Addon Courses', path: PagePath.ADDON_COURSE, icon: 'Offer' as const },
-        { key: Permissions.NAV.PROGRAMS, title: 'Programs', path: PagePath.PROGRAMS, icon: 'BullseyeArrow' as const },
         {
           key: Permissions.NAV.PAYMENTS,
           title: 'Payments',
