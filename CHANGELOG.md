@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.8.0...v1.9.0) (2026-05-30)
+
+
+### Features
+
+* **admissionForm:** AC-49 Complete admission form work ([#45](https://github.com/chaarvyss/chaarvy_fe_v2/issues/45)) ([09482fd](https://github.com/chaarvyss/chaarvy_fe_v2/commit/09482fd21efcc3ad7634c8304d14106693d2ff42))
+
 # [1.8.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.7.1...v1.8.0) (2026-05-28)
 
 
