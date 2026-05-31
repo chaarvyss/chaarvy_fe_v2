@@ -50,18 +50,19 @@ const navigation = (): VerticalNavItemsType => {
         }
       ]
     },
-    {
-      title: 'Academics',
-      icon: 'ChairSchool' as const,
-      children: [
-        {
-          key: Permissions.NAV.TIME_TABLE,
-          title: 'Time Table',
-          path: PagePath.TIME_TABLE,
-          icon: 'Timetable' as const
-        }
-      ]
-    },
+
+    // {
+    //   title: 'Academics',
+    //   icon: 'ChairSchool' as const,
+    //   children: [
+    //     {
+    //       key: Permissions.NAV.TIME_TABLE,
+    //       title: 'Time Table',
+    //       path: PagePath.TIME_TABLE,
+    //       icon: 'Timetable' as const
+    //     }
+    //   ]
+    // },
     {
       title: 'Student Management',
       icon: 'School' as const,
@@ -85,43 +86,44 @@ const navigation = (): VerticalNavItemsType => {
           icon: 'BankTransferIn' as const
         }
       ]
-    },
-    {
-      title: 'Transport Management',
-      icon: 'BusSchool' as const,
-      children: [
-        {
-          key: Permissions.NAV.TRANSPORTATION_DASHBOARD,
-          title: 'Dashboard',
-          path: PagePath.TRANSPORTATION,
-          icon: 'MonitorDashboard' as const
-        },
-        {
-          key: Permissions.NAV.VEHICLE_LIVE_TRACKING,
-          title: 'Live Tracking',
-          path: PagePath.VEHICLE_LIVE_TRACKING,
-          icon: 'MapMarkerRadius' as const
-        },
-        {
-          key: Permissions.NAV.VEHICLE_VENDORS,
-          title: 'Vehicle Vendors',
-          path: PagePath.VEHICLE_VENDORS,
-          icon: 'Handshake' as const
-        }
-      ]
-    },
-    {
-      title: 'Faculty Corner',
-      icon: 'AccountTie' as const,
-      children: [
-        {
-          key: Permissions.NAV.ATTENDENCE_REGISTER,
-          title: 'Attendence Register',
-          path: PagePath.ATTENDENCE_REGISTER,
-          icon: 'AccountCheck' as const
-        }
-      ]
     }
+
+    // {
+    //   title: 'Transport Management',
+    //   icon: 'BusSchool' as const,
+    //   children: [
+    //     {
+    //       key: Permissions.NAV.TRANSPORTATION_DASHBOARD,
+    //       title: 'Dashboard',
+    //       path: PagePath.TRANSPORTATION,
+    //       icon: 'MonitorDashboard' as const
+    //     },
+    //     {
+    //       key: Permissions.NAV.VEHICLE_LIVE_TRACKING,
+    //       title: 'Live Tracking',
+    //       path: PagePath.VEHICLE_LIVE_TRACKING,
+    //       icon: 'MapMarkerRadius' as const
+    //     },
+    //     {
+    //       key: Permissions.NAV.VEHICLE_VENDORS,
+    //       title: 'Vehicle Vendors',
+    //       path: PagePath.VEHICLE_VENDORS,
+    //       icon: 'Handshake' as const
+    //     }
+    //   ]
+    // },
+    // {
+    //   title: 'Faculty Corner',
+    //   icon: 'AccountTie' as const,
+    //   children: [
+    //     {
+    //       key: Permissions.NAV.ATTENDENCE_REGISTER,
+    //       title: 'Attendence Register',
+    //       path: PagePath.ATTENDENCE_REGISTER,
+    //       icon: 'AccountCheck' as const
+    //     }
+    //   ]
+    // }
   ]
 
   const master_navs = [
