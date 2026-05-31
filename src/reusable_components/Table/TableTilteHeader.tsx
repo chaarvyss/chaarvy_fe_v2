@@ -19,7 +19,7 @@ export interface TableTitleHeaderProps {
   handleFilterButtonClick?: () => void
 }
 
-const renderStats = (statData: TableHeaderStatCardProps[]) => {
+export const renderStats = (statData: TableHeaderStatCardProps[]) => {
   return statData.map((item: TableHeaderStatCardProps, index: number) => (
     <Grid item xs={12} sm={3} key={index} data-stat-item>
       <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>

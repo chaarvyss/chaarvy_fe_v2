@@ -1,6 +1,7 @@
-import { Box, Card, Typography } from '@muiElements'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+
+import { Typography } from '@muiElements'
 import { useToast, ToastVariants } from 'src/@core/context/toastContext'
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
 import LoadingSpinner from 'src/reusable_components/LoadingSpinner'

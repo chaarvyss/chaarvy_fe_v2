@@ -240,9 +240,9 @@ const StudentBaseDetails = ({
         dob: dateToString(dob, DateFormats.YearMonthDate) ?? ''
       })
         .unwrap()
-        .then(({ student_id, message, application_fees_status }) => {
+        .then(({ student_id, student_course_enrollment_id, message, application_fees_status }) => {
           if (student_id) {
-            setStudentCourseEnrollmentId(student_id)
+            setStudentCourseEnrollmentId(student_course_enrollment_id)
             if (application_fees_status == 0) {
               setIsPaymentModalOpen(true)
             } else {

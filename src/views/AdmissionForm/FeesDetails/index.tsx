@@ -3,13 +3,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Box, Button, TextField, Typography } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { InputVariants } from 'src/lib/enums'
+import LoadingSpinner from 'src/reusable_components/LoadingSpinner'
 import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
+import { renderStats } from 'src/reusable_components/Table/TableTilteHeader'
 import {
   useGetRawFeesDetailsQuery,
   useGetStudentActiveCourseEnrollmentIdQuery,
   useGetStudentPayableFeesDetailsQuery,
   useSetStudentPayableFeesMutation
 } from 'src/store/services/admisissionsService'
+import GetChaarvyIcons from 'src/utils/icons'
 
 import AddonCoursesFees from './AddonCoursesFees'
 import BooksFees from './BooksFees'
@@ -47,8 +50,10 @@ export const getColumns = (i: 'addon' | 'course', onChange: (row: any, value: nu
           type={InputVariants.NUMBER}
           value={row.final_fees}
           inputProps={{
-            min: 0
+            min: 0,
+            max: row.fees
           }}
+          error={Number(row.final_fees) > Number(row.fees)}
           onChange={e => onChange(row, Number(e.target.value))}
         />
       )
@@ -81,9 +86,12 @@ const FeesDetails = ({ student_id }: FeesDetailsProps) => {
 
   const [submitPayableFees] = useSetStudentPayableFeesMutation()
 
-  const { data: feesDetails } = useGetRawFeesDetailsQuery(student_course_enrollment_id ?? '', {
-    skip: !student_course_enrollment_id
-  })
+  const { data: feesDetails, isFetching: isFeesDetailsFetching } = useGetRawFeesDetailsQuery(
+    student_course_enrollment_id ?? '',
+    {
+      skip: !student_course_enrollment_id
+    }
+  )
 
   const { data: savedFeesJson } = useGetStudentPayableFeesDetailsQuery(student_course_enrollment_id ?? '', {
     skip: !student_course_enrollment_id
@@ -235,18 +243,40 @@ const FeesDetails = ({ student_id }: FeesDetailsProps) => {
           display: 'flex',
           gap: 4,
           justifyContent: 'space-around',
+          alignItems: 'center',
           p: 2
         }}
       >
-        <Typography>Actual : {stats.actual}</Typography>
+        {renderStats([
+          {
+            title: 'Actual fees',
+            value: stats.actual,
+            color: 'primary',
+            icon: <GetChaarvyIcons iconName='CurrencyInr' />
+          },
+          {
+            title: 'Payable fees',
+            value: stats.payable,
+            color: 'success',
+            icon: <GetChaarvyIcons iconName='CurrencyInr' />
+          },
+          {
+            title: 'Discount',
+            value: stats.discount,
+            color: 'error',
+            icon: <GetChaarvyIcons iconName='CurrencyInr' />
+          },
+          {
+            title: 'Discount%',
+            value: stats.discountPercent,
+            color: 'error',
+            icon: <GetChaarvyIcons iconName='CurrencyInr' />
+          }
+        ])}
 
-        <Typography>Payable : {stats.payable}</Typography>
-
-        <Typography>Discount : {stats.discount}</Typography>
-
-        <Typography>Discount :{stats.discountPercent}%</Typography>
-
-        <Button onClick={handleSubmit}>Finalize</Button>
+        <Button color='success' size='small' variant='contained' disabled={stats.discount < 0} onClick={handleSubmit}>
+          Finalize
+        </Button>
       </Box>
 
       <Box
@@ -255,17 +285,23 @@ const FeesDetails = ({ student_id }: FeesDetailsProps) => {
           flexDirection: 'column'
         }}
         gap={3}
-        height='68vh'
+        height='65vh'
         overflow='auto'
       >
-        <CourseFees courseFees={data.courseFees} handleCourseFeesChange={handleCourseFeesChange} />
+        {isFeesDetailsFetching ? (
+          <LoadingSpinner />
+        ) : (
+          <>
+            <CourseFees courseFees={data.courseFees} handleCourseFeesChange={handleCourseFeesChange} />
 
-        <BooksFees books={data.booksDetails} handleBooksChange={handleBooksChange} />
+            <BooksFees books={data.booksDetails} handleBooksChange={handleBooksChange} />
 
-        <AddonCoursesFees
-          addonCourses={data.addonCourseDetails}
-          handleAddonCourseFeesChange={handleAddonCourseFeesChange}
-        />
+            <AddonCoursesFees
+              addonCourses={data.addonCourseDetails}
+              handleAddonCourseFeesChange={handleAddonCourseFeesChange}
+            />
+          </>
+        )}
       </Box>
     </Box>
   )

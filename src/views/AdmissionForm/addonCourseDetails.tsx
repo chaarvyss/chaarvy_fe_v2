@@ -1,10 +1,8 @@
 import { LoadingButton } from '@mui/lab'
-import { TextField, Typography } from '@mui/material'
-import { useState } from 'react'
+import { Typography } from '@mui/material'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
-import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
 import Tag from 'src/reusable_components/tag'
 import {
@@ -26,12 +24,10 @@ const AddonCourseDetails = ({ student_id = '' }: AddonCourseDetailsProps) => {
   const [enrollAddonCourse, { isLoading: isEnrollingCourse }] = useEnrollAddonCourseMutation()
   const { triggerToast } = useToast()
 
-  const { data: studentEnrolledAddonCourses } = useGetStudentEnrolledAddonCoursesQuery(
-    student_course_enrollment_id ?? '',
-    {
+  const { data: studentEnrolledAddonCourses, isFetching: isFetchingEnrolledAddonCourses } =
+    useGetStudentEnrolledAddonCoursesQuery(student_course_enrollment_id ?? '', {
       skip: !student_course_enrollment_id
-    }
-  )
+    })
 
   const { data: addonCourses, isFetching: isFetchingAddonCourses } = useGetAddonCoursesAvailableForStudentQuery(
     student_id,
@@ -40,26 +36,6 @@ const AddonCourseDetails = ({ student_id = '' }: AddonCourseDetailsProps) => {
     }
   )
 
-  const [selectedCourse, setSelectedCourse] = useState<EnrollAddonCourseRequest>()
-
-  const [showModal, setShowModal] = useState<boolean>(false)
-
-  const handleSubmit = () => {
-    if (selectedCourse) {
-      enrollAddonCourse(selectedCourse)
-        .then(({ data: res }) => {
-          if (res) {
-            triggerToast(res, { variant: ToastVariants.SUCCESS })
-            setSelectedCourse(undefined)
-            setShowModal(false)
-          }
-        })
-        .catch(e => {
-          triggerToast(e.data, { variant: ToastVariants.ERROR })
-        })
-    }
-  }
-
   const getOldData = (program_addon_course_id: string) => {
     return (studentEnrolledAddonCourses ?? []).find(each => each.program_addon_course_id == program_addon_course_id)
   }
@@ -67,14 +43,22 @@ const AddonCourseDetails = ({ student_id = '' }: AddonCourseDetailsProps) => {
   const handleEnrollClick = (row: AvailableAddonCourseForStudentResponse) => {
     const old_data = getOldData(row.program_addon_course_id)
     if (student_course_enrollment_id) {
-      setSelectedCourse({
+      const payload = {
         student_course_enrollment_id,
         fees: row.addon_course_fees,
         program_addon_course_id: row.program_addon_course_id,
         status: old_data ? 0 : 1,
         student_addon_course_enrollment_id: old_data?.student_addon_course_enrollment_id
-      })
-      setShowModal(true)
+      }
+      enrollAddonCourse(payload)
+        .then(({ data: res }) => {
+          if (res) {
+            triggerToast(res, { variant: ToastVariants.SUCCESS })
+          }
+        })
+        .catch(e => {
+          triggerToast(e.data, { variant: ToastVariants.ERROR })
+        })
     }
   }
 
@@ -104,13 +88,19 @@ const AddonCourseDetails = ({ student_id = '' }: AddonCourseDetailsProps) => {
         const old_data = getOldData(row.program_addon_course_id)
 
         return old_data ? (
-          <Tag status={old_data ? 1 : 0} text={old_data ? 'Enrolled' : 'Enroll'} />
+          <Tag
+            onClick={() => handleEnrollClick(row)}
+            status={old_data ? 1 : 0}
+            text={old_data ? 'Enrolled' : 'Enroll'}
+          />
         ) : (
           <LoadingButton
             onClick={() => handleEnrollClick(row)}
             variant={old_data ? 'contained' : 'outlined'}
             color={old_data ? 'warning' : 'success'}
             size='small'
+            loading={isEnrollingCourse}
+            disabled={row.available === 0}
           >
             {old_data ? 'Revoke' : 'Enroll'}
           </LoadingButton>
@@ -118,17 +108,6 @@ const AddonCourseDetails = ({ student_id = '' }: AddonCourseDetailsProps) => {
       }
     }
   ]
-
-  const handleFeesChange = e => {
-    setSelectedCourse(prev => {
-      if (!prev) return prev
-
-      return {
-        ...prev,
-        fees: e.target.value
-      }
-    })
-  }
 
   return (
     <>
@@ -141,24 +120,9 @@ const AddonCourseDetails = ({ student_id = '' }: AddonCourseDetailsProps) => {
           data: addonCourses ?? [],
           getRowKey: row => row.program_addon_course_id,
           emptyMessage: 'No Addon courses available for this student',
-          isLoading: isFetchingAddonCourses
+          isLoading: isFetchingAddonCourses || isFetchingEnrolledAddonCourses
         }}
       />
-      <ChaarvyModal title='Course Fees' isOpen={showModal} onClose={() => setShowModal(false)}>
-        <>
-          <TextField
-            onChange={handleFeesChange}
-            value={selectedCourse?.fees}
-            fullWidth
-            id='add_on_course_fess'
-            label='Fees'
-            sx={{ marginBottom: 4 }}
-          />
-          <LoadingButton loading={isEnrollingCourse} onClick={handleSubmit}>
-            Confirm Enroll
-          </LoadingButton>
-        </>
-      </ChaarvyModal>
     </>
   )
 }

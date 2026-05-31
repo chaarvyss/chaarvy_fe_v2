@@ -58,6 +58,7 @@ type StudentAddonCourseResponse = {
   student_addon_course_enrollment_id: string
   program_addon_course_id: string
   fees: number
+  status: number
 }
 
 type EnrollAddonCourseRequest = {
