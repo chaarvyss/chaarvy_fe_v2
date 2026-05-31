@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.9.0...v1.10.0) (2026-05-31)
+
+
+### Features
+
+* **processingFees:** AC-50: completed processing fee collection and re-routing ([#46](https://github.com/chaarvyss/chaarvy_fe_v2/issues/46)) ([47cb256](https://github.com/chaarvyss/chaarvy_fe_v2/commit/47cb2569a3991f531c04af4f42a08a100387fcdf))
+
 # [1.9.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.8.0...v1.9.0) (2026-05-30)
 
 
