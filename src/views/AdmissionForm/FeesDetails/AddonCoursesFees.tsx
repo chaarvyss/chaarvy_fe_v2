@@ -16,8 +16,8 @@ const AddonCoursesFees = ({ addonCourses, handleAddonCourseFeesChange }: AddonCo
       tableDataProps={{
         columns: getColumns('addon', handleAddonCourseFeesChange),
         data: addonCourses,
-        getRowKey: row => row.book_id,
-        emptyMessage: 'No Admissions',
+        getRowKey: row => row.addon_course_id,
+        emptyMessage: 'No Addon courses enrolled',
         isLoading: false,
         shouldHideActions: true
       }}

@@ -35,7 +35,7 @@ import {
   useGetProcessingFeesQuery,
   useGetAdmissionFormOneDetailQuery
 } from 'src/store/services/admisissionsService'
-import { useLazyGetApplicationFeesPaymentQuery } from 'src/store/services/feesServices'
+import { useGetApplicationFeesPaymentMutation } from 'src/store/services/feesServices'
 import { useGetProgramsListQuery, useGetGendersListQuery } from 'src/store/services/listServices'
 import { convertDateStringToDate, isValidAadhar, isValidEmail, isValidPhone } from 'src/utils/helpers'
 
@@ -147,9 +147,7 @@ const StudentBaseDetails = ({
 
   const [createUpdateAdmission, { isLoading: IsupdatingAdmission }] = useCreateUpdateAdmissionFormOneMutation()
   const [uploadStudentPhoto, { isLoading: isUploadingPhoto }] = useUploadStudentPhotoMutation()
-  const [createPayment, { isLoading }] = useLazyGetApplicationFeesPaymentQuery()
-
-  // const [updateApplicationPayment] = useLazyUpdateApplicationPaymentQuery()
+  const [createPayment, { isLoading }] = useGetApplicationFeesPaymentMutation()
   const { data: processingFees } = useGetProcessingFeesQuery()
 
   useEffect(() => {
@@ -166,40 +164,6 @@ const StudentBaseDetails = ({
   }, [admissionFormOneDetail])
 
   // const showLoader = false
-
-  // useEffect(() => {
-  //   let apl_id
-  //   let razorpay_payment_link_status
-  //   let segment_id
-  //   let transaction_id
-  //   if (typeof window !== 'undefined') {
-  //     const queryParams = new URLSearchParams(window.location.search)
-  //     apl_id = queryParams.get('id') ?? student_id
-  //     razorpay_payment_link_status = queryParams.get('razorpay_payment_link_status')
-  //     segment_id = queryParams.get('segment_id')
-  //     transaction_id = queryParams.get('razorpay_payment_id')
-  //   }
-  //   if (apl_id) {
-  //     setIsNew(false)
-  //     fetchApplicationDetail(apl_id).then(({ data: res }) => {
-  //       // setApplicationDetails(res)
-
-  //       if (res?.application_fees_status == null) {
-  //         setIsPaymentModalOpen(true)
-  //       }
-  //     })
-  //   }
-
-  //   if (razorpay_payment_link_status == 'paid') {
-  //     updateApplicationPayment({ application_id: apl_id, segment_id, transaction_id })
-  //       .unwrap()
-  //       .then(() => {
-  //         const url = window.location.origin + window.location.pathname
-  //         window.history.replaceState({}, document.title, url)
-  //         handleNext(AdmissionFormType.STUDENT_DETAIL)
-  //       })
-  //   }
-  // }, [])
 
   const handleChange =
     (prop: keyof CreateUpdateAdmissionFormOneRequest) =>
@@ -251,14 +215,13 @@ const StudentBaseDetails = ({
     if (!studentCourseEnrollmentId || !email) return
     try {
       const response = await createPayment({
-        student_course_enrollment_id: studentCourseEnrollmentId,
+        student_course_enrollment_id: [studentCourseEnrollmentId],
         email,
         source: 'app'
       }).unwrap()
       router.push(response.short_url)
     } catch (error) {
       console.error('Error creating payment:', error)
-      alert('Failed to create payment link.')
     }
   }
 
@@ -277,16 +240,16 @@ const StudentBaseDetails = ({
         dob: dateToString(dob, DateFormats.YearMonthDate) ?? ''
       })
         .unwrap()
-        .then(({ student_id, message, student_course_enrollment_id, application_fees_status }) => {
+        .then(({ student_id, student_course_enrollment_id, message, application_fees_status }) => {
           if (student_id) {
-            setStudentCourseEnrollmentId(student_id)
+            setStudentCourseEnrollmentId(student_course_enrollment_id)
             if (application_fees_status == 0) {
               setIsPaymentModalOpen(true)
             } else {
               handleNext(AdmissionFormType.STUDENT_DETAIL)
             }
 
-            onAdmissionCreation(student_course_enrollment_id)
+            onAdmissionCreation(student_id)
             if (studentImg) {
               uploadStudentPhoto({
                 student_id,

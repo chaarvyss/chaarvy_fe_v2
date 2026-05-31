@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { Box, Chip, Typography } from '@muiElements'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
@@ -10,7 +10,11 @@ import { FilterProps } from 'src/lib/interfaces'
 import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
-import { useLazyGetAdmissionsListQuery } from 'src/store/services/admisissionsService'
+import {
+  useGetProcessingFeesPendingEnrollmentsQuery,
+  useLazyGetAdmissionsListQuery
+} from 'src/store/services/admisissionsService'
+import { useGetApplicationFeesPaymentMutation } from 'src/store/services/feesServices'
 import { statusColors } from 'src/utils/constants'
 import GetChaarvyIcons from 'src/utils/icons'
 
@@ -20,12 +24,31 @@ const Admissions = () => {
   const [fetchAdmissions, { data: admissionResponse, isLoading }] = useLazyGetAdmissionsListQuery()
   const [filterProps, setFilterProps] = useState<FilterProps>({ limit: 20, offset: 0 })
 
+  const [createPayment, { isLoading: isCreatingPaymentLink }] = useGetApplicationFeesPaymentMutation()
+  const { data: processingFeesPendingEnrollments } = useGetProcessingFeesPendingEnrollmentsQuery()
+
   useEffect(() => {
     fetchAdmissions(filterProps)
   }, [filterProps])
 
   const handleCreateAdmissionClick = () => {
     router.push(PagePath.CREATE_ADMISSION)
+  }
+
+  const handleCreatePayment = async () => {
+    try {
+      if (!processingFeesPendingEnrollments || processingFeesPendingEnrollments.length === 0) {
+        return
+      }
+      const response = await createPayment({
+        student_course_enrollment_id: processingFeesPendingEnrollments,
+        email: '',
+        source: 'app'
+      }).unwrap()
+      router.push(response.short_url)
+    } catch (error) {
+      console.error('Error creating payment:', error)
+    }
   }
 
   const getKebabOptions = (application_id: string) => {
@@ -141,6 +164,10 @@ const Admissions = () => {
     }
   ]
 
+  const showLoader = useMemo(() => {
+    return isLoading || processingFeesPendingEnrollments === undefined
+  }, [isLoading, processingFeesPendingEnrollments])
+
   return (
     <ChaarvyTable
       tableTitleHeaderProps={{
@@ -150,7 +177,15 @@ const Admissions = () => {
         showFilterIcon: true,
         stats: admission_stats,
         handleFilterButtonClick: onFilterButtonClick,
-        iconName: 'FilePlus'
+        iconName: 'FilePlus',
+        optionalButtonColor: 'warning',
+        optionalButtonText:
+          (processingFeesPendingEnrollments?.length ?? 0) > 0
+            ? isCreatingPaymentLink
+              ? 'Generating Payment Link...'
+              : 'Pay processing fees'
+            : undefined,
+        onOptionalButtonClick: handleCreatePayment
       }}
       paginationProps={{
         total: admissionResponse?.counts?.filtered ?? 0,
@@ -161,7 +196,7 @@ const Admissions = () => {
         data: admissionResponse?.admissions ?? [],
         getRowKey: row => row.application_id,
         emptyMessage: 'No Admissions',
-        isLoading
+        isLoading: showLoader
       }}
     />
   )

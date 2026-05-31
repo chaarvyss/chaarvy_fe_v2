@@ -111,7 +111,8 @@ export const urlConstants = {
     updateStudentDetailsF2Url: `${interRoutePrefix.admisions}/update-student-details-f2`,
     getRawFeesDetailsUrl: `${interRoutePrefix.admisions}/get-raw-fees`,
     setStudentPayableFeesUrl: `${interRoutePrefix.admisions}/set-student-payable-fees`,
-    getStudentPayableFeesDetailsUrl: `${interRoutePrefix.admisions}/student-payable-fees`
+    getStudentPayableFeesDetailsUrl: `${interRoutePrefix.admisions}/student-payable-fees`,
+    getProcessingFeesPendingEnrollmentsUrl: `${interRoutePrefix.admisions}/processing-fees-pending-enrollments`
   },
   dashboard: {
     studentsCount: `${interRoutePrefix.dashboard}/students_count`,
@@ -129,7 +130,7 @@ export const urlConstants = {
     recordPaymentTransaction: `${interRoutePrefix.fees}/record-transaction`,
     paymentRecieptByPaymentId: `${interRoutePrefix.fees}/payment_reciept`,
     getApplicationFeesPaymentLink: `${interRoutePrefix.fees}/get-payment-link`,
-    updateApplicationFeesPayment: `${interRoutePrefix.fees}/update-application-payment`
+    updateProcessingFeesStatusUrl: `${interRoutePrefix.fees}/update-processing-fees-status`
   },
   program: {
     programAddon: `${interRoutePrefix.program}/program-addon-course`,

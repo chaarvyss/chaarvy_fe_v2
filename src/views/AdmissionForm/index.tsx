@@ -1,6 +1,7 @@
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Box, styled, TabProps } from '@mui/material'
 import { BookOutline, Cash, GoogleMaps } from 'mdi-material-ui'
+import { usePathname, useRouter } from 'next/navigation'
 import { SyntheticEvent, useEffect, useState } from 'react'
 
 import { AccountOutline } from '@mdiElements'
@@ -31,6 +32,8 @@ export enum AdmissionFormType {
 }
 
 const AdmissionForm = () => {
+  const router = useRouter()
+  const pathname = usePathname()
   const [value, setValue] = useState<AdmissionFormType>(AdmissionFormType.BASE_DETAIL)
   const handleChange = (_: SyntheticEvent, newValue: AdmissionFormType) => setValue(newValue)
   const [application_id, setApplication] = useState<string>()
@@ -46,7 +49,9 @@ const AdmissionForm = () => {
       setApplication(queryParams.get('id') ?? undefined)
 
       if (queryParams.get('step') == '2') {
-        handleNext(AdmissionFormType.ADDON_COURSE)
+        setShouldDisableTabs(false)
+        handleNext(AdmissionFormType.STUDENT_DETAIL)
+        router.replace(pathname)
       }
     }
   }, [])
