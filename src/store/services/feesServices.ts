@@ -216,7 +216,10 @@ const feeServiceApi = api.injectEndpoints({
       })
     }),
 
-    updateProcessingFeesStatus: build.mutation<string, UpdateProcessingFeesStatusRequest>({
+    updateProcessingFeesStatus: build.mutation<
+      { is_bulk: boolean; student_id: string; message: string },
+      UpdateProcessingFeesStatusRequest
+    >({
       query: body => ({
         method: HttpRequestMethods.POST,
         url: urlConstants.fees.updateProcessingFeesStatusUrl,

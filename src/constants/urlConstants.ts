@@ -111,7 +111,8 @@ export const urlConstants = {
     updateStudentDetailsF2Url: `${interRoutePrefix.admisions}/update-student-details-f2`,
     getRawFeesDetailsUrl: `${interRoutePrefix.admisions}/get-raw-fees`,
     setStudentPayableFeesUrl: `${interRoutePrefix.admisions}/set-student-payable-fees`,
-    getStudentPayableFeesDetailsUrl: `${interRoutePrefix.admisions}/student-payable-fees`
+    getStudentPayableFeesDetailsUrl: `${interRoutePrefix.admisions}/student-payable-fees`,
+    getProcessingFeesPendingEnrollmentsUrl: `${interRoutePrefix.admisions}/processing-fees-pending-enrollments`
   },
   dashboard: {
     studentsCount: `${interRoutePrefix.dashboard}/students_count`,

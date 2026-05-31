@@ -17,6 +17,9 @@ export interface TableTitleHeaderProps {
   showFilterIcon?: boolean
   iconName?: GetChaarvyIconsProps['iconName']
   handleFilterButtonClick?: () => void
+  optionalButtonText?: string
+  onOptionalButtonClick?: () => void
+  optionalButtonColor?: 'primary' | 'success' | 'error' | 'info' | 'warning'
 }
 
 export const renderStats = (statData: TableHeaderStatCardProps[]) => {
@@ -55,7 +58,10 @@ const TableTilteHeader = ({
   isButtonDisabled,
   showFilterIcon,
   iconName,
-  handleFilterButtonClick
+  handleFilterButtonClick,
+  optionalButtonText,
+  onOptionalButtonClick,
+  optionalButtonColor
 }: TableTitleHeaderProps) => {
   const titleRef = useRef<HTMLElement | null>(null)
   const [isTruncated, setIsTruncated] = useState(false)
@@ -163,7 +169,16 @@ const TableTilteHeader = ({
           </Tooltip>
         }
         action={
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
+            {optionalButtonText && (
+              <ChaarvyButton
+                fillType='gradient'
+                color={optionalButtonColor ?? 'primary'}
+                onClick={onOptionalButtonClick}
+                size='small'
+                label={optionalButtonText}
+              />
+            )}
             {buttonTitle && (
               <>
                 <ChaarvyButton
@@ -191,6 +206,7 @@ const TableTilteHeader = ({
                 </Tooltip>
               </>
             )}
+
             {showFilterIcon && (
               <Tooltip title='Filter' placement='top'>
                 <IconButton onClick={handleFilterButtonClick} color={buttonColor ?? 'secondary'}>

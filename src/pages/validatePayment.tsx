@@ -19,16 +19,13 @@ const ValidatePayment = () => {
     let payment_key_id
     let razorpay_payment_link_status
     let transaction_id
-    let is_bulk
-    let student_id
     if (typeof window !== 'undefined') {
       const queryParams = new URLSearchParams(window.location.search)
       payment_key_id = queryParams.get('id')
-      student_id = queryParams.get('student_id')
       razorpay_payment_link_status = queryParams.get('razorpay_payment_link_status')
       transaction_id = queryParams.get('razorpay_payment_id')
-      is_bulk = queryParams.get('is_bulk')
     }
+
     router.replace(pathname)
     if (payment_key_id) {
       updateProcessingFeesStatus({
@@ -37,11 +34,11 @@ const ValidatePayment = () => {
         transaction_status: razorpay_payment_link_status === 'paid' ? 1 : 0
       })
         .unwrap()
-        .then(() => {
-          if (is_bulk === 'true') {
+        .then(({ is_bulk, student_id }) => {
+          if (is_bulk) {
             router.push('/StudentManagement/Admissions')
           } else {
-            router.push(`/AdmissionForm?id=${student_id}&step=2`)
+            router.push(`/StudentManagement/AdmissionForm?id=${student_id}&step=2`)
           }
         })
         .catch(e => {

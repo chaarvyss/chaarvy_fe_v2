@@ -310,6 +310,15 @@ const admissionServiceApi = api.injectEndpoints({
           params: { student_course_enrollment_id }
         }
       }
+    }),
+
+    getProcessingFeesPendingEnrollments: build.query<string[], void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.getProcessingFeesPendingEnrollmentsUrl
+        }
+      }
     })
   })
 })
@@ -333,5 +342,6 @@ export const {
   useGetStudentEnrolledAddonCoursesQuery,
   useGetRawFeesDetailsQuery,
   useSetStudentPayableFeesMutation,
-  useGetStudentPayableFeesDetailsQuery
+  useGetStudentPayableFeesDetailsQuery,
+  useGetProcessingFeesPendingEnrollmentsQuery
 } = admissionServiceApi
