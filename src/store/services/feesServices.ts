@@ -66,30 +66,28 @@ export interface StudentProgramFeesDetailsResponse {
 
 export interface PaymentDetailRequest {
   payment_id?: string
-  segment_id?: string
-  application_id?: string
-  amount?: number
-  payment_mode?: string
+  student_course_enrollment_id: string
+  amount: number
+  payment_mode: string
   transaction_number?: string
   payment_date?: Date
 }
 
 export interface StudentPendingFeesDetails {
-  segment_id: string
+  student_course_enrollment_id: string
+  program_name: string
   segment_name: string
-  payable: number
+  medium_name: string
+  section_name: string
+  total: number
   paid: number
-  payment_id: string
-  status: number
-  due_date: string
-  payment_aggrement: number
+  pending: number
 }
 
 export interface StudentPendingFeesDetailsResponse {
-  admission_id: string
-  application_id: string
+  admission_number: string
   student_name: string
-  program: string
+  father_name: string
   fees_details: StudentPendingFeesDetails[]
 }
 
@@ -138,7 +136,7 @@ const feeServiceApi = api.injectEndpoints({
       query: admission_number => {
         return {
           method: HttpRequestMethods.GET,
-          url: urlConstants.fees.getStudentPendingFees,
+          url: urlConstants.fees.getStudentPendingFeesDetailsUrl,
           params: { admission_number }
         }
       }
