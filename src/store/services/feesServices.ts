@@ -71,6 +71,7 @@ export interface PaymentDetailRequest {
   payment_mode: string
   transaction_number?: string
   payment_date?: Date
+  notes?: string
 }
 
 export interface StudentPendingFeesDetails {

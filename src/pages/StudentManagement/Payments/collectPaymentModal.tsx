@@ -21,6 +21,7 @@ const CollectPaymentModal = ({ isOpen, onClose, details }: CollectPaymentModalPr
   const [paymentMethod, setPaymentMethod] = useState('')
   const [amount, setAmount] = useState<number>()
   const [paymentDate, setPaymentDate] = useState<Date | null>(new Date())
+  const [notes, setNotes] = useState('')
 
   const { triggerToast } = useToast()
   const [recordTransaction, { isLoading: isRecordingTxn }] = useRecordPaymentTransactionMutation()
@@ -37,6 +38,10 @@ const CollectPaymentModal = ({ isOpen, onClose, details }: CollectPaymentModalPr
     setAmount(Number(event.target.value))
   }
 
+  const handleNotesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNotes(event.target.value)
+  }
+
   const handleSubmit = async () => {
     if (!amount || !paymentMethod) return
 
@@ -44,7 +49,8 @@ const CollectPaymentModal = ({ isOpen, onClose, details }: CollectPaymentModalPr
       amount,
       payment_mode: paymentMethod,
       student_course_enrollment_id: details.student_course_enrollment_id,
-      payment_date: paymentDate ?? undefined
+      payment_date: paymentDate ?? undefined,
+      notes: notes || undefined
     })
       .unwrap()
       .then(({ payment_id }) => {
@@ -100,6 +106,19 @@ const CollectPaymentModal = ({ isOpen, onClose, details }: CollectPaymentModalPr
             customInput={<CustomDateElement size='small' label='' />}
             selected={paymentDate}
             onChange={setPaymentDate}
+          />
+        </Box>
+        <Box>
+          <small>Notes</small>
+          <TextField
+            inputProps={{ min: 0, max: details.pending }}
+            fullWidth
+            size='small'
+            value={notes}
+            multiline
+            rows={4}
+            error={notes.length > 500}
+            onChange={handleNotesChange}
           />
         </Box>
         <Box display='flex' justifyContent='center' gap={2} mt={2}>
