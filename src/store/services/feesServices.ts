@@ -64,16 +64,6 @@ export interface StudentProgramFeesDetailsResponse {
   books: BookFeesDetail[]
 }
 
-export interface StudentPayableFeesRequest {
-  application_id?: string
-  fees_details?: string
-  segment_id?: string
-  payable_fees?: number
-  paymentAggrement?: string
-  no_of_terms?: number
-  term_details?: string
-}
-
 export interface PaymentDetailRequest {
   payment_id?: string
   segment_id?: string
@@ -82,14 +72,6 @@ export interface PaymentDetailRequest {
   payment_mode?: string
   transaction_number?: string
   payment_date?: Date
-}
-
-export interface StudentPayableFeesResponse {
-  student_payable_id: string
-  application_id: string
-  fees_details: StudentProgramFeesDetailsResponse
-  segment_id: string
-  payable_fees: number
 }
 
 export interface StudentPendingFeesDetails {
@@ -151,33 +133,6 @@ const feeServiceApi = api.injectEndpoints({
         }
       }
     }),
-    getStudentAdmissionFeesDetails: build.query<StudentProgramFeesDetailsResponse, string>({
-      query: application_id => {
-        return {
-          method: HttpRequestMethods.GET,
-          url: urlConstants.fees.getStudentAdmissionFees,
-          params: { application_id }
-        }
-      }
-    }),
-    createStudentPayableFees: build.mutation<string, StudentPayableFeesRequest>({
-      query: details => {
-        return {
-          method: HttpRequestMethods.POST,
-          url: urlConstants.fees.createStudentPayableFees,
-          body: details
-        }
-      }
-    }),
-    getStudentPayableFeesDetails: build.query<StudentPayableFeesResponse, StudentPayableFeesRequest>({
-      query: params => {
-        return {
-          method: HttpRequestMethods.GET,
-          url: urlConstants.fees.getStudentPayableFees,
-          params
-        }
-      }
-    }),
     getStudentPendingFeesDetails: build.query<StudentPendingFeesDetailsResponse, string>({
       providesTags: [CacheTag.StudentPayment],
       query: admission_number => {
@@ -232,9 +187,6 @@ const feeServiceApi = api.injectEndpoints({
 export const {
   useGetProgramFeesDetailsQuery,
   useCreateUpdateProgramFeesMutation,
-  useLazyGetStudentAdmissionFeesDetailsQuery,
-  useCreateStudentPayableFeesMutation,
-  useLazyGetStudentPayableFeesDetailsQuery,
   useLazyGetStudentPendingFeesDetailsQuery,
   useRecordPaymentTransactionMutation,
   useLazyGetPaymentRecieptByPaymentIdQuery,
