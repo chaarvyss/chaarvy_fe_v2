@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.10.0...v1.11.0) (2026-06-02)
+
+
+### Features
+
+* **paymentCollection:** FE-53: collect payment, dashboard bugs ([#47](https://github.com/chaarvyss/chaarvy_fe_v2/issues/47)) ([e0557b9](https://github.com/chaarvyss/chaarvy_fe_v2/commit/e0557b964b649a6818c2dddc6a7f0da8b6770d48))
+
 # [1.10.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.9.0...v1.10.0) (2026-05-31)
 
 
