@@ -6,7 +6,7 @@ import DynamicHeightTableContainer from 'src/reusable_components/Table/DynamicHe
 import TableTilteHeader, { TableTitleHeaderProps } from 'src/reusable_components/Table/TableTilteHeader'
 
 interface ChaarvyTableProps {
-  tableTitleHeaderProps: TableTitleHeaderProps
+  tableTitleHeaderProps?: TableTitleHeaderProps
   paginationProps?: PaginationProps
   tableDataProps: ChaarvyDataTableProps
 }
@@ -14,7 +14,7 @@ interface ChaarvyTableProps {
 const ChaarvyTable = ({ tableTitleHeaderProps, paginationProps, tableDataProps }: ChaarvyTableProps) => {
   return (
     <DynamicHeightTableContainer
-      header={<TableTilteHeader {...tableTitleHeaderProps} />}
+      header={tableTitleHeaderProps && <TableTilteHeader {...tableTitleHeaderProps} />}
       pagination={paginationProps && <ChaarvyPagination {...paginationProps} />}
     >
       <ChaarvyDataTable {...tableDataProps} />

@@ -1,7 +1,6 @@
 import { urlConstants } from 'src/constants/urlConstants'
 import {
   ProgramSegmentMediumsListResponse,
-  ProgramAddonCourseResponse,
   ProgramSecondLanguagesResponse,
   ProgramSectionResponse,
   ProgramSegmentMediumBook
@@ -81,16 +80,6 @@ export type ProgramFeesSegmentHeaderDataResponse = {
 
 const programServicesApi = api.injectEndpoints({
   endpoints: build => ({
-    getProgramAddonList: build.query<ProgramAddonCourseResponse[], string>({
-      providesTags: [CacheTag.ListProgramAddon],
-      query: program_id => {
-        return {
-          method: HttpRequestMethods.GET,
-          url: urlConstants.program.programAddon,
-          params: { program_id }
-        }
-      }
-    }),
     getPrgMedSegBooksList: build.query<ProgramSegmentMediumBook[], CascadingSelectorState>({
       providesTags: [CacheTag.ListProgramBooks],
       query: params => {
@@ -215,7 +204,6 @@ const programServicesApi = api.injectEndpoints({
 })
 
 export const {
-  useLazyGetProgramAddonListQuery,
   useLazyGetPrgMedSegBooksListQuery,
   useLazyGetProgramSecondLanguagesListQuery,
   useUpdateProgramSecondLanguagesListMutation,

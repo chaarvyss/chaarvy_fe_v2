@@ -1,3 +1,45 @@
+# [1.12.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.11.0...v1.12.0) (2026-06-02)
+
+
+### Features
+
+* **templateDesigner:** AC-54 Template designer  ([#48](https://github.com/chaarvyss/chaarvy_fe_v2/issues/48)) ([287dad5](https://github.com/chaarvyss/chaarvy_fe_v2/commit/287dad5b51b62056fc18248af4e8f54253f8e5d3))
+
+# [1.11.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.10.0...v1.11.0) (2026-06-02)
+
+
+### Features
+
+* **paymentCollection:** FE-53: collect payment, dashboard bugs ([#47](https://github.com/chaarvyss/chaarvy_fe_v2/issues/47)) ([e0557b9](https://github.com/chaarvyss/chaarvy_fe_v2/commit/e0557b964b649a6818c2dddc6a7f0da8b6770d48))
+
+# [1.10.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.9.0...v1.10.0) (2026-05-31)
+
+
+### Features
+
+* **processingFees:** AC-50: completed processing fee collection and re-routing ([#46](https://github.com/chaarvyss/chaarvy_fe_v2/issues/46)) ([47cb256](https://github.com/chaarvyss/chaarvy_fe_v2/commit/47cb2569a3991f531c04af4f42a08a100387fcdf))
+
+# [1.9.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.8.0...v1.9.0) (2026-05-30)
+
+
+### Features
+
+* **admissionForm:** AC-49 Complete admission form work ([#45](https://github.com/chaarvyss/chaarvy_fe_v2/issues/45)) ([09482fd](https://github.com/chaarvyss/chaarvy_fe_v2/commit/09482fd21efcc3ad7634c8304d14106693d2ff42))
+
+# [1.8.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.7.1...v1.8.0) (2026-05-28)
+
+
+### Features
+
+* **circleCiconfig:**  AC-000 Add deploy markers configuration ([#44](https://github.com/chaarvyss/chaarvy_fe_v2/issues/44)) ([1152697](https://github.com/chaarvyss/chaarvy_fe_v2/commit/115269738f9dec4ca15064e67f388e95eb9e765e))
+
+## [1.7.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.7.0...v1.7.1) (2026-05-20)
+
+
+### Bug Fixes
+
+* **UIEnhancement:** AC-47: ui updated  -- ui work ([#43](https://github.com/chaarvyss/chaarvy_fe_v2/issues/43)) ([37d0a2f](https://github.com/chaarvyss/chaarvy_fe_v2/commit/37d0a2f3883c14cfaf00495f89c1d08b63ffa386))
+
 # [1.7.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.6.1...v1.7.0) (2026-05-20)
 
 

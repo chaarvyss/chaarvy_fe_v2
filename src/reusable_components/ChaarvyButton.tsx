@@ -7,7 +7,7 @@ import GetChaarvyIcons, { GetChaarvyIconsProps } from 'src/utils/icons'
 
 import ChaarvyFlex from './chaarvyFlex'
 
-type ColorKey = 'primary' | 'success' | 'error' | 'info' | 'secondary'
+type ColorKey = 'primary' | 'success' | 'error' | 'info' | 'secondary' | 'warning'
 
 export interface ChaarvyButtonProps extends ButtonProps {
   color?: ColorKey

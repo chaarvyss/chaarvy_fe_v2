@@ -19,7 +19,7 @@ export enum AddressType {
 }
 
 interface AddressProps {
-  application_id?: string
+  student_id?: string
   user_type: AddressType
   address_id?: string
   user_id?: string
@@ -27,7 +27,7 @@ interface AddressProps {
   handleNext?: () => void
 }
 
-const AddressForm = ({ application_id, address_id, user_id, user_type, isLoading, handleNext }: AddressProps) => {
+const AddressForm = ({ student_id, address_id, user_id, user_type, isLoading, handleNext }: AddressProps) => {
   const { data: address, isFetching } = useGetAddressQuery(address_id ?? '', {
     skip: !address_id
   })
@@ -124,7 +124,7 @@ const AddressForm = ({ application_id, address_id, user_id, user_type, isLoading
   })
 
   const onSubmit = async (data: Address) => {
-    const address_payload = { ...data, application_id, address_id }
+    const address_payload = { ...data, student_id, address_id }
 
     try {
       const res = await createUpdateAddress({
