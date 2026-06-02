@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.11.0...v1.12.0) (2026-06-02)
+
+
+### Features
+
+* **templateDesigner:** AC-54 Template designer  ([#48](https://github.com/chaarvyss/chaarvy_fe_v2/issues/48)) ([287dad5](https://github.com/chaarvyss/chaarvy_fe_v2/commit/287dad5b51b62056fc18248af4e8f54253f8e5d3))
+
 # [1.11.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.10.0...v1.11.0) (2026-06-02)
 
 
