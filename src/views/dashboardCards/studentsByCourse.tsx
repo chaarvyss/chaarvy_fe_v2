@@ -48,8 +48,8 @@ const StudentEnrollmentChart: React.FC = () => {
 
     const options: ApexCharts.ApexOptions = {
       chart: { type: 'bar', stacked: false, toolbar: { show: false } },
-      xaxis: { categories, labels: { rotate: -45 } },
-      plotOptions: { bar: { horizontal: false, columnWidth: '50%' } },
+      xaxis: { categories, labels: { rotate: -45, trim: true, maxHeight: 80 } },
+      plotOptions: { bar: { horizontal: false, columnWidth: '10%' } },
       colors: ['#008FFB', '#FF4560'], // Boys: Blue, Girls: Red
       annotations: {
         points: totalData.map(({ x, y }) => ({
@@ -59,7 +59,7 @@ const StudentEnrollmentChart: React.FC = () => {
           label: {
             text: y.toString(),
             position: 'bottom',
-            style: { fontSize: '12px', fontWeight: 'bold', colors: ['#000'] }
+            style: { fontSize: '10px', fontWeight: 'bold', colors: ['#000'] }
           }
         }))
       }

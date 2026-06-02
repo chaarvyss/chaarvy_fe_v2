@@ -96,11 +96,23 @@ export const urlConstants = {
     createAdmission: `${interRoutePrefix.admisions}/create-update-admission`,
     uploadStudentPhoto: `${interRoutePrefix.admisions}/upload-student-photo`,
     admissionsList: `${interRoutePrefix.admisions}/admissions-list`,
-    admissionDetail: `${interRoutePrefix.admisions}/admission-details`,
+    admissionFormOneDetail: `${interRoutePrefix.admisions}/admission-form-one-details`,
+    getStudentDetailsF2Url: `${interRoutePrefix.admisions}/get-student-details-f2`,
+    getAddonCoursesAvailableForStudentUrl: `${interRoutePrefix.admisions}/addon-courses-available-for-student`,
+    getStudentActiveCourseEnrollmentIdUrl: `${interRoutePrefix.admisions}/student-active-course-enrollment-id`,
     studentAddress: `${interRoutePrefix.admisions}/student-address`,
-    studentEnrolledAddonCourse: `${interRoutePrefix.admisions}/student-enrolled-addon-courses`,
-    enrollAddonCourse: `${interRoutePrefix.admisions}/enroll-addon-courses`,
-    getProcessingFees: `${interRoutePrefix.admisions}/get-processing-fees`
+    studentEnrolledAddonCourseUrl: `${interRoutePrefix.admisions}/student-enrolled-addon-courses`,
+    enrollAddonCourseUrl: `${interRoutePrefix.admisions}/enroll-addon-courses`,
+    getProcessingFees: `${interRoutePrefix.admisions}/get-processing-fees`,
+    getActiveProgramSegmentsUrl: `${interRoutePrefix.admisions}/program-segments`,
+    getActiveSegmentMediumsUrl: `${interRoutePrefix.admisions}/segment-mediums`,
+    getActiveMediumSectionsUrl: `${interRoutePrefix.admisions}/medium-sections`,
+    createUpdateAdmissionFormOneUrl: `${interRoutePrefix.admisions}/create-update-admission-form-one`,
+    updateStudentDetailsF2Url: `${interRoutePrefix.admisions}/update-student-details-f2`,
+    getRawFeesDetailsUrl: `${interRoutePrefix.admisions}/get-raw-fees`,
+    setStudentPayableFeesUrl: `${interRoutePrefix.admisions}/set-student-payable-fees`,
+    getStudentPayableFeesDetailsUrl: `${interRoutePrefix.admisions}/student-payable-fees`,
+    getProcessingFeesPendingEnrollmentsUrl: `${interRoutePrefix.admisions}/processing-fees-pending-enrollments`
   },
   dashboard: {
     studentsCount: `${interRoutePrefix.dashboard}/students_count`,
@@ -111,14 +123,12 @@ export const urlConstants = {
   fees: {
     getprogramFees: `${interRoutePrefix.fees}/program-fee-detail`,
     createUpdateProgramFees: `${interRoutePrefix.fees}/create-update-program-fees`,
-    getStudentAdmissionFees: `${interRoutePrefix.fees}/actual-overall-payable-fees`,
-    createStudentPayableFees: `${interRoutePrefix.fees}/add-student-payable-fees`,
     getStudentPayableFees: `${interRoutePrefix.fees}/student-payable-fees`,
-    getStudentPendingFees: `${interRoutePrefix.fees}/student-pending-payment`,
     recordPaymentTransaction: `${interRoutePrefix.fees}/record-transaction`,
     paymentRecieptByPaymentId: `${interRoutePrefix.fees}/payment_reciept`,
     getApplicationFeesPaymentLink: `${interRoutePrefix.fees}/get-payment-link`,
-    updateApplicationFeesPayment: `${interRoutePrefix.fees}/update-application-payment`
+    updateProcessingFeesStatusUrl: `${interRoutePrefix.fees}/update-processing-fees-status`,
+    getStudentPendingFeesDetailsUrl: `${interRoutePrefix.fees}/get-student-pending-fees-details`
   },
   program: {
     programAddon: `${interRoutePrefix.program}/program-addon-course`,

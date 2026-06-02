@@ -1,16 +1,16 @@
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Box, styled, TabProps } from '@mui/material'
 import { BookOutline, Cash, GoogleMaps } from 'mdi-material-ui'
-import React, { SyntheticEvent, useEffect, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { SyntheticEvent, useEffect, useState } from 'react'
 
 import { AccountOutline } from '@mdiElements'
 import { Card, MuiTab } from '@muiElements'
 import { TabName } from 'src/reusable_components/styledComponents/TabName'
-import { useLazyGetAdmissionDetailQuery } from 'src/store/services/admisissionsService'
 
 import AddonCourseDetails from './addonCourseDetails'
 import StudentAddress from './address'
-import FeesDetails from './feesDetails'
+import FeesDetails from './FeesDetails'
 import StudentBaseDetails from './studentBaseDetails'
 import StudentDetails from './studentDetails'
 
@@ -32,15 +32,15 @@ export enum AdmissionFormType {
 }
 
 const AdmissionForm = () => {
+  const router = useRouter()
+  const pathname = usePathname()
   const [value, setValue] = useState<AdmissionFormType>(AdmissionFormType.BASE_DETAIL)
   const handleChange = (_: SyntheticEvent, newValue: AdmissionFormType) => setValue(newValue)
   const [application_id, setApplication] = useState<string>()
 
-  const [fetchStudentDetails, { data: studentDetail }] = useLazyGetAdmissionDetailQuery()
-
+  const [shouldDisableTabs, setShouldDisableTabs] = useState<boolean>(true)
   const handleAdmissionCreation = (admission_id: string) => {
     setApplication(admission_id)
-    fetchStudentDetails(admission_id)
   }
 
   useEffect(() => {
@@ -49,7 +49,9 @@ const AdmissionForm = () => {
       setApplication(queryParams.get('id') ?? undefined)
 
       if (queryParams.get('step') == '2') {
-        handleNext(AdmissionFormType.ADDON_COURSE)
+        setShouldDisableTabs(false)
+        handleNext(AdmissionFormType.STUDENT_DETAIL)
+        router.replace(pathname)
       }
     }
   }, [])
@@ -58,10 +60,6 @@ const AdmissionForm = () => {
     setValue(step)
   }
 
-  useEffect(() => {
-    if (application_id) fetchStudentDetails(application_id)
-  }, [application_id])
-
   const tabs = [
     {
       value: AdmissionFormType.BASE_DETAIL,
@@ -69,9 +67,10 @@ const AdmissionForm = () => {
       icon: <AccountOutline />,
       component: (
         <StudentBaseDetails
-          application_id={application_id}
+          student_id={application_id}
           onAdmissionCreation={handleAdmissionCreation}
           handleNext={handleNext}
+          handleTabDisable={setShouldDisableTabs}
         />
       )
     },
@@ -79,45 +78,33 @@ const AdmissionForm = () => {
       value: AdmissionFormType.STUDENT_DETAIL,
       label: 'Student Details',
       icon: <AccountOutline />,
-      component: (
-        <StudentDetails
-          application_id={application_id}
-          onAdmissionCreation={handleAdmissionCreation}
-          handleNext={handleNext}
-        />
-      )
-    },
-    {
-      value: AdmissionFormType.ADDON_COURSE,
-      label: 'ADDON Courses',
-      icon: <BookOutline />,
-      component: (
-        <AddonCourseDetails
-          application_id={application_id}
-          programId={studentDetail?.program_id}
-          handleNext={handleNext}
-        />
-      )
+      component: <StudentDetails student_id={application_id} handleNext={handleNext} />
     },
     {
       value: AdmissionFormType.ADDRESS,
       label: 'Student Address',
       icon: <GoogleMaps />,
-      component: <StudentAddress application_id={application_id} handleNext={handleNext} />
+      component: <StudentAddress student_id={application_id} handleNext={handleNext} />
     },
+    {
+      value: AdmissionFormType.ADDON_COURSE,
+      label: 'ADDON Courses',
+      icon: <BookOutline />,
+      component: <AddonCourseDetails student_id={application_id} />
+    },
+
     {
       value: AdmissionFormType.FEES,
       label: 'Fees Details',
       icon: <Cash />,
-      component: <FeesDetails application_id={application_id} segment_id={studentDetail?.segment} />
+      component: <FeesDetails student_id={application_id} />
     }
   ]
 
   const shouldDisableTab = ({ value }: { value: AdmissionFormType }): boolean => {
-    if (!application_id) return value !== AdmissionFormType.BASE_DETAIL
-    if (studentDetail?.application_fees_status == '1') return false
+    if (shouldDisableTabs) return value !== AdmissionFormType.BASE_DETAIL
 
-    return true
+    return false
   }
 
   return (

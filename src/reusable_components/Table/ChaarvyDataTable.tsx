@@ -257,9 +257,9 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
     return { created, updated, deleted }
   }
 
-  const newRowBg = '#c3ffc8'
-  const updatedRowBg = '#ffefaa'
-  const deletedRowBg = '#ffebee'
+  const newRowBg = editable ? '#c3ffc8' : 'fff'
+  const updatedRowBg = editable ? '#ffefaa' : 'fff'
+  const deletedRowBg = editable ? '#ffebee' : 'fff'
 
   const getIsEditableCell = (row: T, col: ChaarvyTableColumn, isRowEditing: boolean) => {
     if (col.readonly) return false

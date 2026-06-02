@@ -1,6 +1,5 @@
 import { urlConstants } from 'src/constants/urlConstants'
 import {
-  FilterProps,
   PaymentAggrement,
   PaymentModes,
   PaymentsListRequest,
@@ -24,8 +23,7 @@ import {
   Religions,
   RolesListResponse,
   Segment,
-  State,
-  Students
+  State
 } from 'src/lib/types'
 import { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
 import { AddOnCourseProps } from 'src/views/Admin/Programs/Modals/AddonCourses/types'
@@ -164,15 +162,6 @@ const listServicesApi = api.injectEndpoints({
         }
       }
     }),
-    getStudentsList: build.query<Students[], FilterProps>({
-      query: params => {
-        return {
-          method: HttpRequestMethods.GET,
-          url: urlConstants.list.students,
-          params
-        }
-      }
-    }),
     getStateList: build.query<State[], void>({
       query: () => {
         return {
@@ -304,7 +293,6 @@ export const {
   useLazyGetRolesListQuery,
   useGetPaymentAggrementsQuery,
   useGetSectionsListQuery,
-  useLazyGetStudentsListQuery,
   useLazyGetRolePermissionsListQuery,
   useGetBooksListQuery,
   useLazyGetProgramRelatedBooksOptionsQuery,

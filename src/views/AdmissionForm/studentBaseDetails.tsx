@@ -19,34 +19,24 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { Button, FormControl, Grid, TextField } from '@muiElements'
 import { useImageViewer } from 'src/@core/context/imageViewerContext'
-import { useLoader } from 'src/@core/context/loaderContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { DateFormats, InputTypes, InputVariants } from 'src/lib/enums'
 import { dateToString } from 'src/lib/helpers'
 import { ErrorObject, InputFields } from 'src/lib/types'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
+import LoadingSpinner from 'src/reusable_components/LoadingSpinner'
 import { ImgStyled } from 'src/reusable_components/styledComponents/styledImgTag'
 import {
-  CreateStudentAdmissionRequest,
-  useCreateUpdateAdmissionMutation,
-  useLazyGetProcessingFeesQuery,
-  useLazyGetAdmissionDetailQuery,
-  useUploadStudentPhotoMutation
+  useUploadStudentPhotoMutation,
+  useGetActiveProgramSegmentsQuery,
+  useGetActiveSegmentMediumsQuery,
+  useGetActiveMediumSectionsQuery,
+  useCreateUpdateAdmissionFormOneMutation,
+  useGetProcessingFeesQuery,
+  useGetAdmissionFormOneDetailQuery
 } from 'src/store/services/admisissionsService'
-import {
-  useLazyGetApplicationFeesPaymentQuery,
-  useLazyUpdateApplicationPaymentQuery
-} from 'src/store/services/feesServices'
-import {
-  useGetProgramsListQuery,
-  useGetGendersListQuery,
-  useGetSegmentsListQuery
-} from 'src/store/services/listServices'
-import {
-  useLazyGetProgramSecondLanguagesListQuery,
-  useLazyGetProgramSectionListQuery,
-  useLazyGetProgramSegmentMediumsListByProgramIdQuery
-} from 'src/store/services/programServices'
+import { useGetApplicationFeesPaymentMutation } from 'src/store/services/feesServices'
+import { useGetProgramsListQuery, useGetGendersListQuery } from 'src/store/services/listServices'
 import { convertDateStringToDate, isValidAadhar, isValidEmail, isValidPhone } from 'src/utils/helpers'
 
 import ApplicationFeesModal from './application_fees_modal'
@@ -56,37 +46,60 @@ import { AdmissionFormType } from '.'
 const TOP_LEVEL_ID = 'student-application-form'
 
 interface studentBaseDetailsProps {
-  application_id?: string
+  student_id?: string
   onAdmissionCreation: (application_id: string) => void
   handleNext: (step: AdmissionFormType) => void
+  handleTabDisable: (status: boolean) => void
 }
 
 const mandatoryFields = [
   'admission_number',
   'contact_no_1',
-  'medium',
+  'medium_id',
   'program_id',
-  'segment',
-  'second_language',
+  'segment_id',
+  'pen_number',
+  'apaar_number',
   'student_email',
   'student_aadhar',
   'student_name',
   'dob',
-  'section',
-  'gender'
+  'section_id',
+  'gender_id'
 ]
 
-const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }: studentBaseDetailsProps) => {
+const defaultFormData = {
+  admission_number: '',
+  contact_no_1: '',
+  medium_id: '',
+  program_id: '',
+  segment_id: '',
+  pen_number: '',
+  apaar_number: '',
+  student_email: '',
+  student_aadhar: '',
+  student_name: '',
+  dob: '',
+  section_id: '',
+  gender_id: ''
+}
+
+const StudentBaseDetails = ({
+  student_id,
+  onAdmissionCreation,
+  handleNext,
+  handleTabDisable
+}: studentBaseDetailsProps) => {
   const [errors, setErrors] = useState<Array<ErrorObject>>([])
-  const [image, setImage] = useState<string | null>(null)
+  const [image, setImage] = useState<string>()
   const [studentImg, setStudentImg] = useState<File>()
-  const [applicationDetails, setApplicationDetails] = useState<CreateStudentAdmissionRequest>()
+  const [applicationDetails, setApplicationDetails] = useState<CreateUpdateAdmissionFormOneRequest>(defaultFormData)
   const [dob, setDob] = useState<Date>()
-  const [isNew, setIsNew] = useState<boolean>(true)
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false)
 
+  const [studentCourseEnrollmentId, setStudentCourseEnrollmentId] = useState<string>()
+
   const { triggerToast } = useToast()
-  const { setLoading } = useLoader()
   const router = useRouter()
 
   const { setShowImage } = useImageViewer()
@@ -97,94 +110,72 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
     }
   }
 
-  const [fetchProgramMediums, { data: programMediums, isFetching: isProgramMediumsLoading }] =
-    useLazyGetProgramSegmentMediumsListByProgramIdQuery()
-  const [fetchProgramSecondLanguages, { data: programSecondLanguages, isFetching: isSecondLanguageLoading }] =
-    useLazyGetProgramSecondLanguagesListQuery()
+  const { data: programsList, isFetching: isProgramsLoading } = useGetProgramsListQuery(true)
+  const { data: gendersList, isFetching: isGendersLoading } = useGetGendersListQuery()
 
-  const [fetchProgramSectionsData, { data: programSections }] = useLazyGetProgramSectionListQuery()
+  const { data: segmentsList, isFetching: isSegmentsLoading } = useGetActiveProgramSegmentsQuery(
+    applicationDetails?.program_id,
+    {
+      skip: !applicationDetails?.program_id
+    }
+  )
 
-  const { data: gendersList } = useGetGendersListQuery()
-  const { data: segmentsList } = useGetSegmentsListQuery()
-  const { data: programsList } = useGetProgramsListQuery(true)
+  const { data: programMediums, isFetching: isProgramMediumsLoading } = useGetActiveSegmentMediumsQuery(
+    { program_id: applicationDetails?.program_id, segment_id: applicationDetails?.segment_id },
+    {
+      skip: !applicationDetails?.program_id || !applicationDetails.segment_id
+    }
+  )
 
-  const [createUpdateAdmission, { isLoading: IsupdatingAdmission }] = useCreateUpdateAdmissionMutation()
+  const { data: programSections, isFetching: isSectionsLoading } = useGetActiveMediumSectionsQuery(
+    {
+      program_id: applicationDetails?.program_id,
+      segment_id: applicationDetails?.segment_id,
+      medium_id: applicationDetails?.medium_id
+    },
+    {
+      skip: !applicationDetails?.program_id || !applicationDetails.segment_id || !applicationDetails.medium_id
+    }
+  )
+
+  const { data: admissionFormOneDetail, isFetching: isLoadingOldDetails } = useGetAdmissionFormOneDetailQuery(
+    student_id ?? '',
+    {
+      skip: !student_id
+    }
+  )
+
+  const [createUpdateAdmission, { isLoading: IsupdatingAdmission }] = useCreateUpdateAdmissionFormOneMutation()
   const [uploadStudentPhoto, { isLoading: isUploadingPhoto }] = useUploadStudentPhotoMutation()
-  const [fetchApplicationDetail, { isLoading: isApplicationLoading }] = useLazyGetAdmissionDetailQuery()
-  const [createPayment, { isLoading }] = useLazyGetApplicationFeesPaymentQuery()
-
-  const [updateApplicationPayment] = useLazyUpdateApplicationPaymentQuery()
-
-  const getDependentData = (program_id: string) => {
-    fetchProgramMediums({ program_id, only_active: true })
-    fetchProgramSecondLanguages(program_id)
-    fetchProgramSectionsData({ program_id })
-  }
-
-  const [fetchProcessingFees, { data: processingFees }] = useLazyGetProcessingFeesQuery()
-
-  const showLoader = isApplicationLoading
+  const [createPayment, { isLoading }] = useGetApplicationFeesPaymentMutation()
+  const { data: processingFees } = useGetProcessingFeesQuery()
 
   useEffect(() => {
-    setLoading(showLoader)
-  }, [showLoader])
+    if (!admissionFormOneDetail) return
 
-  useEffect(() => {
-    fetchProcessingFees()
-    let apl_id
-    let razorpay_payment_link_status
-    let segment_id
-    let transaction_id
-    if (typeof window !== 'undefined') {
-      const queryParams = new URLSearchParams(window.location.search)
-      apl_id = queryParams.get('id') ?? application_id
-      razorpay_payment_link_status = queryParams.get('razorpay_payment_link_status')
-      segment_id = queryParams.get('segment_id')
-      transaction_id = queryParams.get('razorpay_payment_id')
-    }
-    if (apl_id) {
-      setIsNew(false)
-      fetchApplicationDetail(apl_id).then(({ data: res }) => {
-        if (res?.program_id) {
-          getDependentData(res?.program_id)
-        }
-        setApplicationDetails(res)
-        setDob(convertDateStringToDate(res?.dob))
-        setImage(res?.photo_url ?? null)
-        if (res?.application_fees_status == null) {
-          setIsPaymentModalOpen(true)
-        }
-      })
-    }
+    const { photo_url, dob, application_fees_status } = admissionFormOneDetail
+    setDob(() => convertDateStringToDate(dob))
+    setImage(photo_url)
 
-    if (razorpay_payment_link_status == 'paid') {
-      updateApplicationPayment({ application_id: apl_id, segment_id, transaction_id })
-        .unwrap()
-        .then(() => {
-          const url = window.location.origin + window.location.pathname
-          window.history.replaceState({}, document.title, url)
-          handleNext(AdmissionFormType.STUDENT_DETAIL)
-        })
+    if (application_fees_status == 1) {
+      handleTabDisable(false)
     }
-  }, [])
+    setApplicationDetails(admissionFormOneDetail)
+  }, [admissionFormOneDetail])
+
+  // const showLoader = false
 
   const handleChange =
-    (prop: keyof CreateStudentAdmissionRequest) =>
+    (prop: keyof CreateUpdateAdmissionFormOneRequest) =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
       const value = event?.target?.value ?? event
-
       const error = validateField(prop, value)
       setErrors(error ? [...errors, error] : errors.filter(({ errorkey }) => errorkey !== prop))
-
       setApplicationDetails(prev => ({ ...prev, [prop]: value }))
-
-      if (prop === 'program_id') {
-        getDependentData(value)
-      }
     }
 
   const validateField = (
-    key: keyof CreateStudentAdmissionRequest,
+    key: keyof CreateUpdateAdmissionFormOneRequest,
     value: any
   ): { errorkey: string; error: string } | null => {
     if (key == 'dob') return dob ? null : { errorkey: key, error: '* Required.' }
@@ -195,11 +186,8 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
       case 'student_email':
         return isValidEmail(value) ? null : { errorkey: key, error: 'Invalid email format.' }
       case 'contact_no_1':
-      case 'contact_no_2':
         return isValidPhone(value) ? null : { errorkey: key, error: 'Invalid phone number.' }
       case 'student_aadhar':
-      case 'father_aadhar':
-      case 'mother_aadhar':
         return isValidAadhar(value) ? null : { errorkey: key, error: 'Invalid Aadhar number. It must be 12 digits.' }
       default:
         return null
@@ -212,7 +200,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
     if (!studentImg && !image) newErrors.push({ errorkey: 'student_image', error: '* Required' })
 
     mandatoryFields.forEach(field => {
-      const key = field as keyof CreateStudentAdmissionRequest
+      const key = field as keyof CreateUpdateAdmissionFormOneRequest
       const error = validateField(key, applicationDetails?.[key])
       if (error) newErrors.push(error)
     })
@@ -222,13 +210,18 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
     return newErrors.length === 0
   }
 
-  const handleCreatePayment = async (application_id, segment_id, email, source: 'web' | 'app') => {
+  const handleCreatePayment = async () => {
+    const email = applicationDetails.student_email
+    if (!studentCourseEnrollmentId || !email) return
     try {
-      const response = await createPayment({ application_id, segment_id, email, source }).unwrap()
+      const response = await createPayment({
+        student_course_enrollment_id: [studentCourseEnrollmentId],
+        email,
+        source: 'app'
+      }).unwrap()
       router.push(response.short_url)
     } catch (error) {
       console.error('Error creating payment:', error)
-      alert('Failed to create payment link.')
     }
   }
 
@@ -241,30 +234,32 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
 
     const finalData = { ...applicationDetails }
     if (applicationDetails) {
-      if (application_id) finalData.application_id = application_id
+      if (student_id) finalData.student_id = student_id
       createUpdateAdmission({
         ...finalData,
         dob: dateToString(dob, DateFormats.YearMonthDate) ?? ''
       })
         .unwrap()
-        .then(({ application_id, message }) => {
-          if (application_id) {
-            if (applicationDetails.application_fees_status != '1') {
+        .then(({ student_id, student_course_enrollment_id, message, application_fees_status }) => {
+          if (student_id) {
+            setStudentCourseEnrollmentId(student_course_enrollment_id)
+            if (application_fees_status == 0) {
               setIsPaymentModalOpen(true)
             } else {
               handleNext(AdmissionFormType.STUDENT_DETAIL)
             }
-            onAdmissionCreation(application_id)
+
+            onAdmissionCreation(student_id)
             if (studentImg) {
               uploadStudentPhoto({
-                application_id: application_id,
+                student_id,
                 photo: studentImg
               })
             }
           }
-          triggerToast(message ?? 'New application created', { variant: ToastVariants.SUCCESS })
+          triggerToast(message, { variant: ToastVariants.SUCCESS })
         })
-        .catch(res => triggerToast(res.data, { variant: ToastVariants.ERROR }))
+        .catch(error_ => triggerToast(error_.data?.message, { variant: ToastVariants.ERROR }))
     }
   }
 
@@ -290,10 +285,29 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
       caption: 'As per SSC Records'
     },
     {
+      type: InputTypes.INPUT,
+      variant: InputVariants.STRING,
+      id: `${TOP_LEVEL_ID}__student-pen-number`,
+      label: 'Student PEN number',
+      key: 'pen_number',
+      value: applicationDetails?.pen_number,
+      onChange: handleChange('pen_number')
+    },
+    {
+      type: InputTypes.INPUT,
+      variant: InputVariants.STRING,
+      id: `${TOP_LEVEL_ID}__student-aapaar-number`,
+      label: 'Student Aapaar Number',
+      key: 'aapaar-number',
+      value: applicationDetails?.apaar_number,
+      onChange: handleChange('apaar_number')
+    },
+    {
       type: InputTypes.SELECT,
       id: `${TOP_LEVEL_ID}__joining-group`,
-      label: 'Group',
+      label: 'Program / Group',
       key: 'program_id',
+      isLoading: isProgramsLoading,
       value: applicationDetails?.program_id,
       onChange: handleChange('program_id'),
       menuOptions: (programsList ?? []).map(each => {
@@ -303,12 +317,25 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
     {
       type: InputTypes.SELECT,
       id: `${TOP_LEVEL_ID}__joining-segment`,
-      label: 'Year',
+      label: 'Class',
       key: 'segment',
-      value: applicationDetails?.segment,
-      onChange: handleChange('segment'),
+      isLoading: isSegmentsLoading,
+      value: applicationDetails?.segment_id,
+      onChange: handleChange('segment_id'),
       menuOptions: (segmentsList ?? []).map(each => {
         return { value: each.segment_id, label: each.segment_name }
+      })
+    },
+    {
+      type: InputTypes.SELECT,
+      id: `${TOP_LEVEL_ID}__medium`,
+      label: 'Medium',
+      key: 'medium_id',
+      isLoading: isProgramMediumsLoading,
+      value: applicationDetails?.medium_id,
+      onChange: handleChange('medium_id'),
+      menuOptions: (programMediums ?? []).map(each => {
+        return { value: each.medium_id, label: each.medium_name }
       })
     },
     {
@@ -316,43 +343,22 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
       id: `${TOP_LEVEL_ID}__section`,
       label: 'Section',
       key: 'section',
-      value: applicationDetails?.section,
-      onChange: handleChange('section'),
+      isLoading: isSectionsLoading,
+      value: applicationDetails?.section_id,
+      onChange: handleChange('section_id'),
       menuOptions: (programSections ?? []).map(each => {
         return { value: each.section_id, label: each.section_name }
       })
     },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__medium`,
-      label: 'Medium',
-      key: 'medium',
-      isLoading: isProgramMediumsLoading,
-      value: applicationDetails?.medium,
-      onChange: handleChange('medium'),
-      menuOptions: (programMediums ?? []).map(each => {
-        return { value: each.medium_id, label: each.medium_name }
-      })
-    },
-    {
-      type: InputTypes.SELECT,
-      id: `${TOP_LEVEL_ID}__second-language`,
-      label: 'Second Language',
-      key: 'second_language',
-      isLoading: isSecondLanguageLoading,
-      value: applicationDetails?.second_language,
-      onChange: handleChange('second_language'),
-      menuOptions: (programSecondLanguages ?? []).map(each => {
-        return { value: each.language_id, label: each.language_name }
-      })
-    },
+
     {
       type: InputTypes.RADIO,
       id: `${TOP_LEVEL_ID}__gender`,
       label: 'Gender',
-      key: 'gender',
-      value: applicationDetails?.gender,
-      onChange: handleChange('gender'),
+      key: 'gender_id',
+      value: applicationDetails?.gender_id,
+      isLoading: isGendersLoading,
+      onChange: handleChange('gender_id'),
       menuOptions: (gendersList ?? []).map(each => {
         return { value: each.gender_id, label: each.gender_name }
       })
@@ -429,7 +435,8 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
                 value={value}
                 defaultValue={value}
                 type={variant}
-                placeholder={placeholder ?? ''}
+                size='small'
+                placeholder={placeholder}
                 onChange={onChange}
               />
               {caption && <small>{caption}</small>}
@@ -438,7 +445,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
           ) : type === InputTypes.SELECT ? (
             <FormControl fullWidth required={mandatoryFields.includes(key)}>
               <small>{label}</small>
-              <Select id={id} value={value ?? ''} onChange={onChange} error={!!getHadError(key)}>
+              <Select size='small' id={id} value={value} onChange={onChange} error={!!getHadError(key)}>
                 {isLoading ? (
                   <MenuItem disabled>
                     <CircularProgress size={24} />
@@ -462,9 +469,9 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
                   aria-labelledby={id}
                   name={id}
                   id={id}
-                  value={value ?? ''}
+                  value={value}
                   onChange={(_, val) =>
-                    handleChange(key as keyof CreateStudentAdmissionRequest)({
+                    handleChange(key as keyof CreateUpdateAdmissionFormOneRequest)({
                       target: { value: val }
                     } as ChangeEvent<HTMLInputElement>)
                   }
@@ -514,10 +521,13 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
     }
   }
 
-  const handleCollectButtonClick = () => {
-    if (applicationDetails) {
-      handleCreatePayment(application_id, applicationDetails.segment, applicationDetails.student_email, 'app')
-    }
+  const handleOnclose = () => {
+    setIsPaymentModalOpen(false)
+    router.push('/StudentManagement/Admissions')
+  }
+
+  if (isProgramsLoading || isGendersLoading || isLoadingOldDetails) {
+    return <LoadingSpinner />
   }
 
   return (
@@ -525,8 +535,9 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
       <ApplicationFeesModal
         isOpen={isPaymentModalOpen}
         isLoading={isLoading}
-        onCollectClick={handleCollectButtonClick}
+        onCollectClick={handleCreatePayment}
         processingFees={processingFees ?? 0}
+        onClose={handleOnclose}
       />
       <form>
         <Grid container spacing={7}>
@@ -557,7 +568,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
             </Box>
           </Grid>
           {renderInputFields()}
-          {isNew && (
+          {!student_id && (
             <Box marginTop={4} marginLeft={8}>
               <Typography variant='h6'>Processing Fees: {processingFees ?? 0}.00/-</Typography>
             </Box>
@@ -569,7 +580,7 @@ const StudentBaseDetails = ({ application_id, onAdmissionCreation, handleNext }:
               sx={{ marginRight: 3.5 }}
               onClick={handleSubmit}
             >
-              {isNew ? 'Enroll' : 'Save'} and Continue
+              {student_id ? 'Save' : 'Enroll'} and Continue
             </LoadingButton>
           </Grid>
         </Grid>
