@@ -15,7 +15,7 @@ export const PagePath = {
   PAYMENTS: '/Admin/payments',
   ADMISSION_FORM: '/StudentManagement/AdmissionForm',
   ADMISSIONS: '/StudentManagement/Admissions',
-  COLLECT_PAYMENT: '/StudentManagement/Payments/collectPayment',
+  COLLECT_PAYMENT: '/StudentManagement/Payments/pendingPayments',
   ATTENDENCE_REGISTER: '/Faculty/attendence',
   TIME_TABLE: '/Academics/timeTable',
   TRANSPORTATION: '/Transportation',
