@@ -1,5 +1,4 @@
-
-export type ChaarvyTableColumn<T = any> {
+export type ChaarvyTableColumn<T = any> = {
   id: string
   label: string
   width?: string | number
@@ -23,7 +22,7 @@ export type EditedDataTableOnSubmitPayload<T = any> = {
   deleted: T[]
 }
 
-export type ChaarvyDataTableProps<T = any> {
+export type ChaarvyDataTableProps<T = any> = {
   columns: ChaarvyTableColumn<T>[]
   data: T[]
   getRowKey: (row: T, index: number) => string | number
