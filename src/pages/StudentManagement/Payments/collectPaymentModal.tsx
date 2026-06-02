@@ -9,7 +9,12 @@ import { FormControl } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { ChaarvyModal } from 'src/reusable_components'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
-import { StudentPendingFeesDetails, useRecordPaymentTransactionMutation } from 'src/store/services/feesServices'
+import {
+  StudentPendingFeesDetails,
+  useLazyGetPaymentRecieptByPaymentIdQuery,
+  useRecordPaymentTransactionMutation
+} from 'src/store/services/feesServices'
+import { printDocument } from 'src/utils/helpers'
 
 interface CollectPaymentModalProps {
   isOpen: boolean
@@ -26,9 +31,25 @@ const CollectPaymentModal = ({ isOpen, onClose, details }: CollectPaymentModalPr
   const { triggerToast } = useToast()
   const [recordTransaction, { isLoading: isRecordingTxn }] = useRecordPaymentTransactionMutation()
 
+  const [fetchPaymentReciept, { isFetching: isFetchingPaymentReciept }] = useLazyGetPaymentRecieptByPaymentIdQuery()
+
+  const handleRecieptDownload = (payment_id: string) => {
+    fetchPaymentReciept(payment_id)
+      .unwrap()
+      .then(pdfBlob => {
+        if (!pdfBlob) return
+
+        const url = globalThis.window.URL.createObjectURL(pdfBlob)
+        printDocument(url)
+      })
+      .catch(e => {
+        console.log(e)
+      })
+  }
+
   const menuOptions = [{ value: 1, label: 'Cash' }]
 
-  const isLoading = false
+  const isLoading = isFetchingPaymentReciept || isRecordingTxn
 
   const handlePaymentMethodChange = (event: SelectChangeEvent<string>) => {
     setPaymentMethod(event.target.value as string)
@@ -57,7 +78,7 @@ const CollectPaymentModal = ({ isOpen, onClose, details }: CollectPaymentModalPr
         triggerToast('Payment recorded successfully', {
           variant: ToastVariants.SUCCESS
         })
-        console.log(payment_id)
+        handleRecieptDownload(payment_id)
         onClose()
       })
       .catch(err => {
