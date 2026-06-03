@@ -3,15 +3,13 @@ import { CircularProgress, MenuItem, Select, SelectChangeEvent, TextField, Typog
 import { useState } from 'react'
 import { DatePicker } from 'react-datepicker'
 
-// import DatePicker from 'react-datepicker'
-
 import { FormControl } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { ChaarvyModal } from 'src/reusable_components'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
 import {
   StudentPendingFeesDetails,
-  useLazyGetPaymentRecieptByPaymentIdQuery,
+  useGetPaymentRecieptByPaymentIdMutation,
   useRecordPaymentTransactionMutation
 } from 'src/store/services/feesServices'
 import { printDocument } from 'src/utils/helpers'
@@ -31,9 +29,9 @@ const CollectPaymentModal = ({ isOpen, onClose, details }: CollectPaymentModalPr
   const { triggerToast } = useToast()
   const [recordTransaction, { isLoading: isRecordingTxn }] = useRecordPaymentTransactionMutation()
 
-  const [fetchPaymentReciept, { isFetching: isFetchingPaymentReciept }] = useLazyGetPaymentRecieptByPaymentIdQuery()
+  const [fetchPaymentReciept, { isLoading: isFetchingPaymentReciept }] = useGetPaymentRecieptByPaymentIdMutation()
 
-  const handleRecieptDownload = (payment_id: string) => {
+  const handleRecieptDownload = async (payment_id: string) => {
     fetchPaymentReciept(payment_id)
       .unwrap()
       .then(pdfBlob => {
@@ -41,9 +39,12 @@ const CollectPaymentModal = ({ isOpen, onClose, details }: CollectPaymentModalPr
 
         const url = globalThis.window.URL.createObjectURL(pdfBlob)
         printDocument(url)
+        onClose()
       })
-      .catch(e => {
-        console.log(e)
+      .catch(() => {
+        triggerToast('Failed to generate reciept', {
+          variant: ToastVariants.ERROR
+        })
       })
   }
 
@@ -79,7 +80,6 @@ const CollectPaymentModal = ({ isOpen, onClose, details }: CollectPaymentModalPr
           variant: ToastVariants.SUCCESS
         })
         handleRecieptDownload(payment_id)
-        onClose()
       })
       .catch(err => {
         triggerToast(err, {
@@ -91,67 +91,76 @@ const CollectPaymentModal = ({ isOpen, onClose, details }: CollectPaymentModalPr
   return (
     <ChaarvyModal title='Collect Fees' onClose={onClose} isOpen={isOpen} shouldRestrictCloseOnOuterClick>
       <Box gap={2} display='flex' flexDirection='column' justifyContent='center' padding={2}>
-        <Typography>Pending Fees: {details.pending}</Typography>
-        <Box>
-          <small>Amount</small>
-          <TextField
-            inputProps={{ min: 0, max: details.pending }}
-            fullWidth
-            size='small'
-            value={amount}
-            type='number'
-            error={!!amount && (amount < 0 || amount > details.pending)}
-            onChange={handleAmountChange}
-          />
-        </Box>
+        {isFetchingPaymentReciept ? (
+          <Box display='flex' flexDirection='column' alignItems='center' justifyContent='center'>
+            <CircularProgress />
+            <Typography ml={2}>Generating reciept...</Typography>
+          </Box>
+        ) : (
+          <>
+            <Typography>Pending Fees: {details.pending}</Typography>
+            <Box>
+              <small>Amount</small>
+              <TextField
+                inputProps={{ min: 0, max: details.pending }}
+                fullWidth
+                size='small'
+                value={amount}
+                type='number'
+                error={!!amount && (amount < 0 || amount > details.pending)}
+                onChange={handleAmountChange}
+              />
+            </Box>
 
-        <FormControl fullWidth>
-          <small>Payment Method</small>
-          <Select value={paymentMethod} size='small' onChange={handlePaymentMethodChange}>
-            {isLoading ? (
-              <MenuItem disabled>
-                <CircularProgress size={24} />
-              </MenuItem>
-            ) : (
-              (menuOptions ?? []).map(({ value, label }) => (
-                <MenuItem key={value} value={value}>
-                  {label}
-                </MenuItem>
-              ))
-            )}
-          </Select>
-        </FormControl>
-        <Box display='flex' flexDirection='column'>
-          <small>Payment date</small>
-          <DatePicker
-            customInput={<CustomDateElement size='small' label='' />}
-            selected={paymentDate}
-            onChange={setPaymentDate}
-          />
-        </Box>
-        <Box>
-          <small>Notes</small>
-          <TextField
-            inputProps={{ min: 0, max: details.pending }}
-            fullWidth
-            size='small'
-            value={notes}
-            multiline
-            rows={4}
-            error={notes.length > 500}
-            onChange={handleNotesChange}
-          />
-        </Box>
-        <Box display='flex' justifyContent='center' gap={2} mt={2}>
-          <LoadingButton
-            disabled={!paymentMethod || !amount || amount <= 0 || amount > details.pending}
-            variant='contained'
-            loading={isRecordingTxn}
-            onClick={handleSubmit}
-          >
-            Collect Payment
-          </LoadingButton>
-        </Box>
+            <FormControl fullWidth>
+              <small>Payment Method</small>
+              <Select value={paymentMethod} size='small' onChange={handlePaymentMethodChange}>
+                {isLoading ? (
+                  <MenuItem disabled>
+                    <CircularProgress size={24} />
+                  </MenuItem>
+                ) : (
+                  (menuOptions ?? []).map(({ value, label }) => (
+                    <MenuItem key={value} value={value}>
+                      {label}
+                    </MenuItem>
+                  ))
+                )}
+              </Select>
+            </FormControl>
+            <Box display='flex' flexDirection='column'>
+              <small>Payment date</small>
+              <DatePicker
+                customInput={<CustomDateElement size='small' label='' />}
+                selected={paymentDate}
+                onChange={setPaymentDate}
+              />
+            </Box>
+            <Box>
+              <small>Notes</small>
+              <TextField
+                inputProps={{ min: 0, max: details.pending }}
+                fullWidth
+                size='small'
+                value={notes}
+                multiline
+                rows={4}
+                error={notes.length > 500}
+                onChange={handleNotesChange}
+              />
+            </Box>
+            <Box display='flex' justifyContent='center' gap={2} mt={2}>
+              <LoadingButton
+                disabled={!paymentMethod || !amount || amount <= 0 || amount > details.pending}
+                variant='contained'
+                loading={isRecordingTxn}
+                onClick={handleSubmit}
+              >
+                Collect Payment
+              </LoadingButton>
+            </Box>
+          </>
+        )}
       </Box>
     </ChaarvyModal>
   )

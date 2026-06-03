@@ -9,11 +9,15 @@ import { ChaarvyTableColumn } from 'src/reusable_components/Table/type'
 import { StudentPendingFeesDetails, useLazyGetStudentPendingFeesDetailsQuery } from 'src/store/services/feesServices'
 
 import CollectPaymentModal from './collectPaymentModal'
+import StudentPaymentsList from './studentPaymentsList'
 
 const CollectPayment = () => {
   const [admissionNumber, setAdmissionNumber] = useState('')
 
   const [selectedFeesDetail, setSelectedFeesDetail] = useState<StudentPendingFeesDetails>()
+
+  const [showPaymentListModal, setShowPaymentListModal] = useState(false)
+  const [showCollectPaymentModal, setShowCollectPaymentModal] = useState(false)
 
   const { triggerToast } = useToast()
 
@@ -30,6 +34,21 @@ const CollectPayment = () => {
     }
   }
 
+  const handleModalOpen = (feesDetail: StudentPendingFeesDetails, modal: 'list' | 'collect') => {
+    setSelectedFeesDetail(feesDetail)
+    if (modal === 'list') {
+      setShowPaymentListModal(true)
+    } else {
+      setShowCollectPaymentModal(true)
+    }
+  }
+
+  const handleModalClose = () => {
+    setSelectedFeesDetail(undefined)
+    setShowPaymentListModal(false)
+    setShowCollectPaymentModal(false)
+  }
+
   const columns: ChaarvyTableColumn[] = [
     { label: 'Course Name', id: 'program_name' },
     { label: 'Segment', id: 'segment_name' },
@@ -40,7 +59,11 @@ const CollectPayment = () => {
       label: 'Paid',
       id: 'paid',
       render: rowData => (
-        <Typography sx={{ cursor: 'pointer' }} color={rowData.paid > 0 ? 'success.main' : 'error'}>
+        <Typography
+          sx={{ cursor: 'pointer' }}
+          onClick={() => handleModalOpen(rowData, 'list')}
+          color={rowData.paid > 0 ? 'success.main' : 'error'}
+        >
           {rowData.paid}
         </Typography>
       )
@@ -51,7 +74,7 @@ const CollectPayment = () => {
       render: rowData => (
         <Typography
           sx={{ cursor: 'pointer' }}
-          onClick={() => setSelectedFeesDetail(rowData)}
+          onClick={() => handleModalOpen(rowData, 'collect')}
           color={rowData.pending > 0 ? 'error' : 'success.main'}
         >
           {rowData.pending}
@@ -129,11 +152,19 @@ const CollectPayment = () => {
           </Box>
         )}
         {selectedFeesDetail && (
-          <CollectPaymentModal
-            isOpen={!!selectedFeesDetail}
-            onClose={() => setSelectedFeesDetail(undefined)}
-            details={selectedFeesDetail}
-          />
+          <>
+            <CollectPaymentModal
+              isOpen={showCollectPaymentModal}
+              onClose={handleModalClose}
+              details={selectedFeesDetail}
+            />
+            <StudentPaymentsList
+              isOpen={showPaymentListModal}
+              onClose={handleModalClose}
+              studentEnrollmentId={selectedFeesDetail.student_course_enrollment_id}
+              studentName={studentPendingFeesDetails?.admission_number || ''}
+            />
+          </>
         )}
       </>
     </Card>

@@ -128,7 +128,8 @@ export const urlConstants = {
     paymentRecieptByPaymentId: `${interRoutePrefix.fees}/payment_reciept`,
     getApplicationFeesPaymentLink: `${interRoutePrefix.fees}/get-payment-link`,
     updateProcessingFeesStatusUrl: `${interRoutePrefix.fees}/update-processing-fees-status`,
-    getStudentPendingFeesDetailsUrl: `${interRoutePrefix.fees}/get-student-pending-fees-details`
+    getStudentPendingFeesDetailsUrl: `${interRoutePrefix.fees}/get-student-pending-fees-details`,
+    getPaymentHistoryUrl: `${interRoutePrefix.fees}/get_payment_history`
   },
   program: {
     programAddon: `${interRoutePrefix.program}/program-addon-course`,
