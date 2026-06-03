@@ -17,10 +17,10 @@ export const GRID_SIZE = 20
 export const DEFAULT_SIZES = {
   rectangle: { width: 120, height: 60 },
   circle: { width: 80, height: 80 },
-  line: { width: 100, height: 2 },
+  line: { width: 100, height: 1 },
   image: { width: 100, height: 100 },
   dynamic_table: { width: 600, height: 200 },
-  fontSize: 16
+  fontSize: 12
 }
 
 export const FONT_FAMILIES = [

@@ -18,13 +18,54 @@ import {
 } from './designerConstants'
 import PropertiesPanel from './PropertiesPanel'
 
+// --- NEW: AUTO-FORMATTER UTILITY ---
+// This safely scans text nodes and wraps any {{ variable }} in an interactive span
+const formatHtmlVariables = (html: string) => {
+  const temp = document.createElement('div')
+  temp.innerHTML = html
+
+  // TreeWalker safely grabs only text, ignoring existing HTML/Spans
+  const walk = document.createTreeWalker(temp, NodeFilter.SHOW_TEXT, null)
+  let node
+  const textNodes: Node[] = []
+  while ((node = walk.nextNode())) {
+    textNodes.push(node)
+  }
+
+  textNodes.forEach(textNode => {
+    const text = textNode.nodeValue || ''
+    const regex = /\{\{(.*?)\}\}/g
+
+    // If we find raw brackets in pure text, replace them with our interactive span
+    if (regex.test(text)) {
+      const spanWrap = document.createElement('span')
+      spanWrap.innerHTML = text.replace(regex, match => {
+        const uniqueId = `span_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+        // We add data-dynamic="true" so our click handlers know this is a variable
+        return `<span id="${uniqueId}" data-dynamic="true" style="color: #e91e63; font-weight: bold; cursor: pointer; padding: 0 2px;">${match}</span>`
+      })
+      textNode.parentNode?.replaceChild(spanWrap, textNode)
+    }
+  })
+
+  return temp.innerHTML
+}
+
 const DesignerPage = () => {
   const availableItems: Field[] = useMemo(
     () => [
       { key: 'studentName', label: 'Student Name', type: 'field' },
       { key: 'fatherName', label: 'Father Name', type: 'field' },
+      { key: 'admission_number', label: 'Admission Number', type: 'field' },
+      { key: 'collegeName', label: 'College Name', type: 'field' },
+      { key: 'campus_name', label: 'Campus Name', type: 'field' },
+      { key: 'gender', label: 'Gender', type: 'field' },
+      { key: 'group', label: 'Group', type: 'field' },
+      { key: 'segment', label: 'Segment', type: 'field' },
+      { key: 'medium', label: 'Medium', type: 'field' },
+      { key: 'section', label: 'Section', type: 'field' },
       { key: 'dob', label: 'Date of Birth', type: 'field' },
-      { key: 'course', label: 'Course', type: 'field' },
       { key: 'admissionDate', label: 'Admission Date', type: 'field' },
       { key: 'receipt_number', label: 'Receipt Number', type: 'field' },
       { key: 'transaction_id', label: 'Transaction ID', type: 'field' },
@@ -93,6 +134,9 @@ const DesignerPage = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const [editingItem, setEditingItem] = useState<string | null>(null)
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
+
+  const [editingSpan, setEditingSpan] = useState<{ itemId: string; spanId: string } | null>(null)
+
   const [guides, setGuides] = useState<{ x?: number; y?: number; type?: string }[]>([])
   const [history, setHistory] = useState<PlacedField[][]>([[]])
   const [historyIndex, setHistoryIndex] = useState(0)
@@ -117,6 +161,7 @@ const DesignerPage = () => {
       setPlaced(history[historyIndex - 1])
     }
   }, [history, historyIndex])
+
   const redo = useCallback(() => {
     if (historyIndex < history.length - 1) {
       setHistoryIndex(prev => prev + 1)
@@ -130,6 +175,7 @@ const DesignerPage = () => {
       if (item) setClipboard(item)
     }
   }, [selectedItem, editingItem, placed])
+
   const handlePaste = useCallback(() => {
     if (clipboard && !editingItem) {
       const newItem = { ...clipboard, id: `${clipboard.type}_${Date.now()}`, x: clipboard.x + 20, y: clipboard.y + 20 }
@@ -193,8 +239,9 @@ const DesignerPage = () => {
         newItem.fieldKey = itemData.key
       } else if (itemData.type === 'shape') {
         if (itemData.key === 'text') {
-          newItem.content = 'Enter text here'
+          newItem.content = 'Double click to edit text'
           newItem.type = 'text'
+          newItem.width = 250
         } else if (itemData.key === 'dynamic_table') {
           newItem.shapeType = 'dynamic_table'
           newItem.width = DEFAULT_SIZES.dynamic_table.width
@@ -227,6 +274,78 @@ const DesignerPage = () => {
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
   }, [])
+
+  const updateTextContent = useCallback((id: string, content: string) => {
+    setPlaced(p => p.map(item => (item.id === id ? { ...item, content } : item)))
+  }, [])
+
+  // --- NEW: INLINE SPAN INSERTION & CLICK HANDLER ---
+  const insertDynamicSpan = (itemId: string, fieldKey: string) => {
+    const selection = window.getSelection()
+    if (!selection || selection.rangeCount === 0) return
+    const range = selection.getRangeAt(0)
+
+    let container = range.commonAncestorContainer
+    let isInsideEditor = false
+    while (container && container !== document.body) {
+      if (container.nodeType === Node.ELEMENT_NODE && (container as HTMLElement).id === `text-edit-${itemId}`) {
+        isInsideEditor = true
+        break
+      }
+      container = container.parentNode as Node
+    }
+    if (!isInsideEditor) return
+
+    const span = document.createElement('span')
+    span.id = `span_${Date.now()}`
+    span.setAttribute('data-dynamic', 'true') // Tag it for click detection
+    span.style.color = '#e91e63'
+    span.style.fontWeight = 'bold'
+    span.style.cursor = 'pointer'
+    span.style.padding = '0 2px'
+    span.innerText = `{{ dynamic.${fieldKey} }}`
+
+    range.deleteContents()
+    range.insertNode(span)
+
+    range.setStartAfter(span)
+    range.setEndAfter(span)
+    selection.removeAllRanges()
+    selection.addRange(range)
+
+    const el = document.getElementById(`text-edit-${itemId}`)
+    if (el) updateTextContent(itemId, el.innerHTML)
+  }
+
+  const handleSpanClick = (e: React.MouseEvent, itemId: string) => {
+    const target = e.target as HTMLElement
+
+    // Check if the user clicked exactly on our dynamically generated span
+    if (target.tagName === 'SPAN' && target.dataset.dynamic === 'true') {
+      e.stopPropagation()
+      setEditingSpan({ itemId, spanId: target.id })
+    }
+  }
+
+  const updateSpanStyle = (styleProp: keyof CSSStyleDeclaration, value: string) => {
+    if (!editingSpan) return
+    setPlaced(prev =>
+      prev.map(item => {
+        if (item.id === editingSpan.itemId) {
+          const tempDiv = document.createElement('div')
+          tempDiv.innerHTML = item.content || ''
+          const targetSpan = tempDiv.querySelector(`#${editingSpan.spanId}`) as HTMLElement
+          if (targetSpan) {
+            ;(targetSpan.style as any)[styleProp] = value
+
+            return { ...item, content: tempDiv.innerHTML }
+          }
+        }
+
+        return item
+      })
+    )
+  }
 
   const handleImageUpload = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -371,7 +490,6 @@ const DesignerPage = () => {
       const currentItem = placed.find(p => p.id === dragState.itemId)
       if (!currentItem) return
 
-      // --- ALIGNMENT GUIDE CALCULATIONS ---
       const newGuides: { x?: number; y?: number; type?: string }[] = []
       const itemWidth = currentItem.width || 100
       const itemHeight = currentItem.height || 30
@@ -381,23 +499,21 @@ const DesignerPage = () => {
       let itemCenterX = newX + itemWidth / 2
       let itemCenterY = newY + itemHeight / 2
 
-      // 1. Check canvas center snapping
       if (Math.abs(itemCenterX - canvasCenterX) < ALIGNMENT_THRESHOLD) {
         newGuides.push({ x: canvasCenterX, type: 'center' })
         if (Math.abs(itemCenterX - canvasCenterX) < SNAP_THRESHOLD) {
           newX = canvasCenterX - itemWidth / 2
-          itemCenterX = newX + itemWidth / 2 // Recalculate after snapping
+          itemCenterX = newX + itemWidth / 2
         }
       }
       if (Math.abs(itemCenterY - canvasCenterY) < ALIGNMENT_THRESHOLD) {
         newGuides.push({ y: canvasCenterY, type: 'center' })
         if (Math.abs(itemCenterY - canvasCenterY) < SNAP_THRESHOLD) {
           newY = canvasCenterY - itemHeight / 2
-          itemCenterY = newY + itemHeight / 2 // Recalculate after snapping
+          itemCenterY = newY + itemHeight / 2
         }
       }
 
-      // 2. Check element-to-element snapping (Left, Right, Top, Bottom, and Center)
       placed.forEach(otherItem => {
         if (otherItem.id === dragState.itemId) return
 
@@ -406,24 +522,21 @@ const DesignerPage = () => {
         const otherCenterX = otherItem.x + otherWidth / 2
         const otherCenterY = otherItem.y + otherHeight / 2
 
-        // Define all the points we want to check for alignment
         const alignments = [
-          { pos: newX, ref: otherItem.x, axis: 'x' as const }, // Left to Left
-          { pos: newX + itemWidth, ref: otherItem.x + otherWidth, axis: 'x' as const }, // Right to Right
-          { pos: itemCenterX, ref: otherCenterX, axis: 'x' as const }, // Center X to Center X
-          { pos: newY, ref: otherItem.y, axis: 'y' as const }, // Top to Top
-          { pos: newY + itemHeight, ref: otherItem.y + otherHeight, axis: 'y' as const }, // Bottom to Bottom
-          { pos: itemCenterY, ref: otherCenterY, axis: 'y' as const } // Center Y to Center Y
+          { pos: newX, ref: otherItem.x, axis: 'x' as const },
+          { pos: newX + itemWidth, ref: otherItem.x + otherWidth, axis: 'x' as const },
+          { pos: itemCenterX, ref: otherCenterX, axis: 'x' as const },
+          { pos: newY, ref: otherItem.y, axis: 'y' as const },
+          { pos: newY + itemHeight, ref: otherItem.y + otherHeight, axis: 'y' as const },
+          { pos: itemCenterY, ref: otherCenterY, axis: 'y' as const }
         ]
 
-        // Loop through all points and check if they are close enough to snap
         alignments.forEach(({ pos, ref, axis }) => {
           const diff = Math.abs(pos - ref)
 
           if (diff < ALIGNMENT_THRESHOLD) {
-            newGuides.push({ [axis]: ref, type: 'align' }) // Draw the blue line
+            newGuides.push({ [axis]: ref, type: 'align' })
 
-            // If it's really close, snap the position!
             if (diff < SNAP_THRESHOLD) {
               if (axis === 'x') {
                 if (pos === newX) newX = ref
@@ -440,8 +553,6 @@ const DesignerPage = () => {
       })
 
       setGuides(newGuides)
-
-      // ----------------------------------
 
       setPlaced(p =>
         p.map(item => {
@@ -544,8 +655,6 @@ const DesignerPage = () => {
       startWidth: 0,
       startHeight: 0
     })
-
-    // Hide guides when dragging stops
     setGuides([])
   }, [dragState.isDragging, resizeState.isResizing, placed, saveToHistory])
 
@@ -601,9 +710,6 @@ const DesignerPage = () => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [selectedItem, editingItem, handleCopy, handlePaste, handleArrowMovement, undo, redo])
 
-  const updateTextContent = useCallback((id: string, content: string) => {
-    setPlaced(p => p.map(item => (item.id === id ? { ...item, content } : item)))
-  }, [])
   const updateItemProperty = useCallback((id: string, property: keyof PlacedField, value: any) => {
     setPlaced(p => p.map(item => (item.id === id ? { ...item, [property]: value } : item)))
   }, [])
@@ -690,28 +796,87 @@ const DesignerPage = () => {
     return null
   }, [])
 
-  const getItemContent = useCallback(
-    (p: PlacedField) => {
-      if (p.type === 'field')
-        return <span style={{ textAlign: p.textAlign || 'left' }}>{'{{ dynamic.' + p.fieldKey + ' }}'}</span>
-      if (p.type === 'text') return <span style={{ textAlign: p.textAlign || 'left' }}>{p.content || 'Text'}</span>
-      if (p.type === 'shape') {
-        const borderStyle = p.borderWidth
-          ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
-          : '2px solid #333'
-
-        return renderShape(p, borderStyle)
-      }
-      if (p.type === 'image')
-        return <img src={p.imageUrl} alt='Placed' style={{ width: p.width, height: p.height, objectFit: 'contain' }} />
-
-      return null
-    },
-    [renderShape]
-  )
-
   return (
     <div style={{ display: 'flex', gap: 20, padding: 20, position: 'relative' }}>
+      {/* --- EXPANDED FLOATING SPAN PROPERTIES EDITOR --- */}
+      {editingSpan && (
+        <div
+          style={{
+            position: 'absolute',
+            right: 280,
+            top: 20,
+            width: 240,
+            background: 'white',
+            padding: 16,
+            border: '1px solid #ccc',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            zIndex: 2000,
+            borderRadius: 8
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <h4 style={{ margin: 0, fontSize: 14, color: '#333' }}>Variable Settings</h4>
+            <button
+              onClick={() => setEditingSpan(null)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#999' }}
+            >
+              ×
+            </button>
+          </div>
+
+          <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Text Color</label>
+          <input
+            type='color'
+            style={{ width: '100%', marginBottom: 12, cursor: 'pointer' }}
+            onChange={e => updateSpanStyle('color', e.target.value)}
+          />
+
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Size (px)</label>
+              <input
+                type='number'
+                placeholder='e.g. 14'
+                style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+                onChange={e => updateSpanStyle('fontSize', `${e.target.value}px`)}
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Weight</label>
+              <select
+                style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+                onChange={e => updateSpanStyle('fontWeight', e.target.value)}
+              >
+                <option value='normal'>Normal</option>
+                <option value='bold'>Bold</option>
+                <option value='600'>Semi-Bold</option>
+              </select>
+            </div>
+          </div>
+
+          <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Font Family</label>
+          <select
+            style={{ width: '100%', padding: 6, marginBottom: 12, border: '1px solid #ddd', borderRadius: 4 }}
+            onChange={e => updateSpanStyle('fontFamily', e.target.value)}
+          >
+            <option value='inherit'>Inherit from Box</option>
+            <option value='Arial, sans-serif'>Arial</option>
+            <option value="'Times New Roman', serif">Times New Roman</option>
+            <option value="'Courier New', monospace">Courier</option>
+            <option value='Georgia, serif'>Georgia</option>
+          </select>
+
+          <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Font Style</label>
+          <select
+            style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+            onChange={e => updateSpanStyle('fontStyle', e.target.value)}
+          >
+            <option value='normal'>Normal</option>
+            <option value='italic'>Italic</option>
+          </select>
+        </div>
+      )}
+
       {/* Left Sidebar */}
       <div
         style={{
@@ -1180,7 +1345,11 @@ const DesignerPage = () => {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            onClick={() => setSelectedItem(null)}
+            onClick={() => {
+              setSelectedItem(null)
+              setEditingItem(null)
+              setEditingSpan(null)
+            }}
             style={{
               position: 'relative',
               width: canvasWidth,
@@ -1245,6 +1414,8 @@ const DesignerPage = () => {
                   draggable={false}
                   onMouseDown={e => {
                     e.stopPropagation()
+                    if (editingItem === p.id) return
+
                     setDragState({
                       isDragging: true,
                       itemId: p.id,
@@ -1258,6 +1429,12 @@ const DesignerPage = () => {
                     e.stopPropagation()
                     setSelectedItem(p.id)
                   }}
+                  onDoubleClick={e => {
+                    e.stopPropagation()
+
+                    // Allow double clicking to start editing even if we hit a child span
+                    setEditingItem(p.id)
+                  }}
                   onMouseEnter={() => setHoveredItem(p.id)}
                   onMouseLeave={() => setHoveredItem(null)}
                   onDragStart={e => e.preventDefault()}
@@ -1266,8 +1443,8 @@ const DesignerPage = () => {
                     left: p.x,
                     top: p.y,
                     fontSize: p.fontSize,
-                    cursor: 'grab',
-                    userSelect: 'none',
+                    cursor: editingItem === p.id ? 'text' : 'grab',
+                    userSelect: editingItem === p.id ? 'auto' : 'none',
                     padding: '4px 8px',
                     border:
                       dragState.itemId === p.id
@@ -1292,42 +1469,100 @@ const DesignerPage = () => {
                     zIndex: p.zIndex || 10
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {p.type === 'text' && editingItem === p.id ? (
-                      <input
-                        autoFocus
-                        value={p.content || ''}
-                        onChange={e => updateTextContent(p.id, e.target.value)}
-                        onBlur={() => setEditingItem(null)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') setEditingItem(null)
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
+                    {p.type === 'text' && editingItem === p.id && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: -35,
+                          left: 0,
+                          background: '#fff',
+                          border: '1px solid #ccc',
+                          display: 'flex',
+                          gap: 4,
+                          padding: '4px 8px',
+                          borderRadius: 4,
+                          zIndex: 100,
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
                         }}
+                        onMouseDown={e => e.preventDefault()}
+                      >
+                        <select
+                          style={{
+                            border: 'none',
+                            outline: 'none',
+                            background: 'transparent',
+                            fontSize: 12,
+                            cursor: 'pointer'
+                          }}
+                          onChange={e => {
+                            if (e.target.value) insertDynamicSpan(p.id, e.target.value)
+                            e.target.value = ''
+                          }}
+                        >
+                          <option value=''>+ Insert Variable Field</option>
+                          {availableItems
+                            .filter(f => f.type === 'field')
+                            .map(f => (
+                              <option key={f.key} value={f.key}>
+                                {f.label}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {p.type === 'text' && editingItem === p.id ? (
+                      <div
+                        id={`text-edit-${p.id}`}
+                        contentEditable
+                        suppressContentEditableWarning
+                        ref={el => {
+                          if (el && document.activeElement !== el) {
+                            setTimeout(() => el.focus(), 0)
+                          }
+                        }}
+                        onClick={e => handleSpanClick(e, p.id)}
+                        onBlur={e => {
+                          // Pass through the Auto-Formatter when user finishes typing
+                          const cleanHtml = formatHtmlVariables(e.currentTarget.innerHTML)
+                          updateTextContent(p.id, cleanHtml)
+                          setTimeout(() => setEditingItem(null), 150)
+                        }}
+                        onKeyDown={e => e.stopPropagation()}
                         style={{
                           border: 'none',
-                          outline: 'none',
-                          background: 'transparent',
+                          outline: '2px solid #2196F3',
+                          background: 'white',
                           fontSize: p.fontSize,
                           fontFamily: p.fontFamily,
                           fontWeight: p.fontWeight,
                           color: p.color,
                           letterSpacing: p.letterSpacing,
-                          padding: 0,
-                          width: '100%'
+                          padding: 4,
+                          width: p.width ? `${p.width}px` : '200px',
+                          minHeight: '20px',
+                          wordWrap: 'break-word',
+                          whiteSpace: 'pre-wrap',
+                          cursor: 'text'
                         }}
-                        onClick={e => e.stopPropagation()}
+                        dangerouslySetInnerHTML={{ __html: p.content || '' }}
                       />
                     ) : p.type === 'text' ? (
-                      <span
-                        onDoubleClick={() => setEditingItem(p.id)}
+                      <div
+                        onClick={e => handleSpanClick(e, p.id)}
                         style={{
                           fontFamily: p.fontFamily,
                           fontWeight: p.fontWeight,
                           color: p.color,
-                          letterSpacing: p.letterSpacing
+                          letterSpacing: p.letterSpacing,
+                          width: p.width ? `${p.width}px` : 'max-content',
+                          wordWrap: 'break-word',
+                          whiteSpace: 'pre-wrap',
+                          padding: 4
                         }}
-                      >
-                        {getItemContent(p)}
-                      </span>
+                        dangerouslySetInnerHTML={{ __html: p.content || 'Text' }}
+                      />
                     ) : p.type !== 'shape' && p.type !== 'image' ? (
                       <span
                         style={{
@@ -1337,10 +1572,26 @@ const DesignerPage = () => {
                           letterSpacing: p.letterSpacing
                         }}
                       >
-                        {getItemContent(p)}
+                        {p.type === 'field' ? (
+                          <span style={{ textAlign: p.textAlign || 'left' }}>{'{{ dynamic.' + p.fieldKey + ' }}'}</span>
+                        ) : null}
                       </span>
                     ) : null}
-                    {(p.type === 'shape' || p.type === 'image') && getItemContent(p)}
+
+                    {(p.type === 'shape' || p.type === 'image') &&
+                      renderShape(
+                        p,
+                        p.borderWidth
+                          ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
+                          : '2px solid #333'
+                      )}
+                    {p.type === 'image' && (
+                      <img
+                        src={p.imageUrl}
+                        alt='Placed'
+                        style={{ width: p.width, height: p.height, objectFit: 'contain' }}
+                      />
+                    )}
                   </div>
 
                   {hoveredItem === p.id && (
@@ -1385,7 +1636,7 @@ const DesignerPage = () => {
                             handle: 'se',
                             startX: e.clientX,
                             startY: e.clientY,
-                            startWidth: p.width || 100,
+                            startWidth: p.width || 200,
                             startHeight: p.height || 100
                           })
                         }}
@@ -1410,7 +1661,7 @@ const DesignerPage = () => {
                             handle: 'sw',
                             startX: e.clientX,
                             startY: e.clientY,
-                            startWidth: p.width || 100,
+                            startWidth: p.width || 200,
                             startHeight: p.height || 100
                           })
                         }}
@@ -1435,7 +1686,7 @@ const DesignerPage = () => {
                             handle: 'ne',
                             startX: e.clientX,
                             startY: e.clientY,
-                            startWidth: p.width || 100,
+                            startWidth: p.width || 200,
                             startHeight: p.height || 100
                           })
                         }}
@@ -1460,7 +1711,7 @@ const DesignerPage = () => {
                             handle: 'nw',
                             startX: e.clientX,
                             startY: e.clientY,
-                            startWidth: p.width || 100,
+                            startWidth: p.width || 200,
                             startHeight: p.height || 100
                           })
                         }}
@@ -1485,7 +1736,7 @@ const DesignerPage = () => {
                             handle: 'n',
                             startX: e.clientX,
                             startY: e.clientY,
-                            startWidth: p.width || 100,
+                            startWidth: p.width || 200,
                             startHeight: p.height || 100
                           })
                         }}
@@ -1511,7 +1762,7 @@ const DesignerPage = () => {
                             handle: 's',
                             startX: e.clientX,
                             startY: e.clientY,
-                            startWidth: p.width || 100,
+                            startWidth: p.width || 200,
                             startHeight: p.height || 100
                           })
                         }}
@@ -1537,7 +1788,7 @@ const DesignerPage = () => {
                             handle: 'e',
                             startX: e.clientX,
                             startY: e.clientY,
-                            startWidth: p.width || 100,
+                            startWidth: p.width || 200,
                             startHeight: p.height || 100
                           })
                         }}
@@ -1563,7 +1814,7 @@ const DesignerPage = () => {
                             handle: 'w',
                             startX: e.clientX,
                             startY: e.clientY,
-                            startWidth: p.width || 100,
+                            startWidth: p.width || 200,
                             startHeight: p.height || 100
                           })
                         }}
