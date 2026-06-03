@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 
-import { PlacedField, FONT_FAMILIES, FONT_WEIGHTS } from './designerConstants'
+import { FONT_FAMILIES, FONT_WEIGHTS } from './designerConstants'
 
 interface PropertiesPanelProps {
   item: PlacedField

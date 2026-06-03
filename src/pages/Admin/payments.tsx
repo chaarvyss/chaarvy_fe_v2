@@ -1,5 +1,4 @@
 import {
-  Button,
   Card,
   Grid,
   IconButton,
@@ -16,7 +15,6 @@ import {
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
-import { useLoader } from 'src/@core/context/loaderContext'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import RenderFilterOptions from 'src/common/filters'
@@ -24,26 +22,21 @@ import { FilterProps, StudentPayment, TableHeaderStatCardProps } from 'src/lib/i
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import ChaarvyPagination from 'src/reusable_components/Pagination'
 import TableTilteHeader, { TableTitleHeaderProps } from 'src/reusable_components/Table/TableTilteHeader'
-import { useLazyGetPaymentRecieptByPaymentIdQuery } from 'src/store/services/feesServices'
 import { useLazyGetPaymentsListQuery } from 'src/store/services/listServices'
 import { useLazyGetPaymentDetailQuery } from 'src/store/services/viewServices'
 import { ChaarvyIconFontSize, ThemeColorEnum } from 'src/utils/enums'
-import { printDocument } from 'src/utils/helpers'
 import GetChaarvyIcons from 'src/utils/icons'
 import { Box } from 'src/utils/muiElements'
 
 const Payments = () => {
   const { triggerToast } = useToast()
   const { openDrawer } = useSideDrawer()
-  const { setLoading } = useLoader()
 
   const router = useRouter()
 
-  const [fetchPaymentsList, { data: PaymentsList, isFetching: isFetchingPayments }] = useLazyGetPaymentsListQuery()
-  const [fetchPaymentReciept, { isFetching: isFetchingPaymentReciept }] = useLazyGetPaymentRecieptByPaymentIdQuery()
+  const [fetchPaymentsList, { data: PaymentsList }] = useLazyGetPaymentsListQuery()
 
-  const [fetchPaymentDetail, { data: paymentDetailResponse, reset, isFetching: isFetchingPaymentDetail }] =
-    useLazyGetPaymentDetailQuery()
+  const [fetchPaymentDetail, { data: paymentDetailResponse }] = useLazyGetPaymentDetailQuery()
 
   const [selectedPayment, setSelectedPayment] = useState<StudentPayment>()
 
@@ -51,23 +44,6 @@ const Payments = () => {
 
   const onSubmit = (params?: FilterProps) => {
     fetchPaymentsList(params)
-  }
-
-  useEffect(() => {
-    setLoading(isFetchingPaymentDetail || isFetchingPayments || isFetchingPaymentReciept)
-  }, [isFetchingPaymentDetail, isFetchingPayments, isFetchingPaymentReciept])
-
-  const handleRecieptDownload = (payment: StudentPayment) => {
-    fetchPaymentReciept(payment.payment_id)
-      .unwrap()
-      .then(pdfBlob => {
-        if (!pdfBlob) return
-        const url = window.URL.createObjectURL(pdfBlob)
-        printDocument(url)
-      })
-      .catch(e => {
-        console.log(e)
-      })
   }
 
   const statusOptions = [
@@ -144,7 +120,6 @@ const Payments = () => {
 
   const handleModalClose = () => {
     setSelectedPayment(undefined)
-    reset()
   }
 
   const PaymentDetail = () => {
@@ -202,11 +177,6 @@ const Payments = () => {
               )
             })}
           </Grid>
-          <Box display='flex' justifyContent='center' alignItems='center' marginTop='1rem' padding='1rem'>
-            <Button onClick={() => handleRecieptDownload(selectedPayment)} variant='contained'>
-              Print Reciept
-            </Button>
-          </Box>
         </>
       </ChaarvyModal>
     )
@@ -256,7 +226,7 @@ const Payments = () => {
                           </IconButton>
                         </Tooltip>
                         <Tooltip title='Fees Reciept' placement='top'>
-                          <IconButton onClick={() => handleRecieptDownload(payment)}>
+                          <IconButton onClick={() => console.log(payment)}>
                             <GetChaarvyIcons iconName='Download' fontSize='1.25rem' />
                           </IconButton>
                         </Tooltip>
