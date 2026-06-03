@@ -9,7 +9,8 @@ const interRoutePrefix = {
   list: `${interPrefix}/list`,
   program: `${interPrefix}/program`,
   view: `${interPrefix}/view`,
-  dashboard: `${interPrefix}/dash_board`
+  dashboard: `${interPrefix}/dash_board`,
+  template: `${interPrefix}/template`
 }
 
 const masterRoutePrefix = {
@@ -128,7 +129,8 @@ export const urlConstants = {
     paymentRecieptByPaymentId: `${interRoutePrefix.fees}/payment_reciept`,
     getApplicationFeesPaymentLink: `${interRoutePrefix.fees}/get-payment-link`,
     updateProcessingFeesStatusUrl: `${interRoutePrefix.fees}/update-processing-fees-status`,
-    getStudentPendingFeesDetailsUrl: `${interRoutePrefix.fees}/get-student-pending-fees-details`
+    getStudentPendingFeesDetailsUrl: `${interRoutePrefix.fees}/get-student-pending-fees-details`,
+    getPaymentHistoryUrl: `${interRoutePrefix.fees}/get_payment_history`
   },
   program: {
     programAddon: `${interRoutePrefix.program}/program-addon-course`,
@@ -155,7 +157,10 @@ export const urlConstants = {
     viewVehicleDetails: `${interRoutePrefix.view}/vehicle-details`,
     viewRouteDetails: `${interRoutePrefix.view}/route-details`
   },
-
+  template: {
+    pdfTemplates: `${interRoutePrefix.template}/get_pdf_templates`,
+    addUpdatePdfTemplateUrl: `${interRoutePrefix.template}/add_update_pdf_template`
+  },
   master: {
     admin: {
       clientsList: `${masterRoutePrefix.admin}/clients-list`,

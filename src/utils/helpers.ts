@@ -40,14 +40,25 @@ export const areSetsEqual = (set1: Set<string>, set2: Set<string>) => {
 }
 
 export const printDocument = (url: string) => {
-  const newTab = window.open(url, '_blank')
-  if (newTab) {
-    newTab.onload = () => {
-      newTab.focus()
-      newTab.print()
-    }
-  } else {
-    alert('Popup blocked! Allow popups for this site.')
+  const iframe = document.createElement('iframe')
+
+  iframe.style.display = 'none'
+  iframe.src = url
+
+  document.body.appendChild(iframe)
+
+  // Wait for the PDF to load inside the iframe
+  iframe.onload = () => {
+    setTimeout(() => {
+      try {
+        if (iframe.contentWindow) {
+          iframe.contentWindow.focus()
+          iframe.contentWindow.print()
+        }
+      } catch (e) {
+        console.error('Iframe print blocked:', e)
+      }
+    }, 500)
   }
 }
 

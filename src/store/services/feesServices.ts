@@ -152,15 +152,13 @@ const feeServiceApi = api.injectEndpoints({
         }
       }
     }),
-    getPaymentRecieptByPaymentId: build.query<Blob, string>({
-      query: payment_id => {
-        return {
-          method: HttpRequestMethods.GET,
-          url: urlConstants.fees.paymentRecieptByPaymentId,
-          responseHandler: response => response.blob(),
-          params: { payment_id }
-        }
-      }
+    getPaymentRecieptByPaymentId: build.mutation<Blob, string>({
+      query: payment_id => ({
+        url: urlConstants.fees.paymentRecieptByPaymentId,
+        method: 'GET',
+        params: { payment_id },
+        responseHandler: async response => response.blob()
+      })
     }),
     getApplicationFeesPayment: build.mutation<any, ApplicationPaymentRequest>({
       query: body => ({
@@ -179,6 +177,14 @@ const feeServiceApi = api.injectEndpoints({
         url: urlConstants.fees.updateProcessingFeesStatusUrl,
         body
       })
+    }),
+
+    getPaymentHistory: build.query<any, string>({
+      query: student_course_enrollment_id => ({
+        method: HttpRequestMethods.GET,
+        url: urlConstants.fees.getPaymentHistoryUrl,
+        params: { student_course_enrollment_id }
+      })
     })
   })
 })
@@ -188,7 +194,8 @@ export const {
   useCreateUpdateProgramFeesMutation,
   useLazyGetStudentPendingFeesDetailsQuery,
   useRecordPaymentTransactionMutation,
-  useLazyGetPaymentRecieptByPaymentIdQuery,
+  useGetPaymentRecieptByPaymentIdMutation,
   useGetApplicationFeesPaymentMutation,
-  useUpdateProcessingFeesStatusMutation
+  useUpdateProcessingFeesStatusMutation,
+  useGetPaymentHistoryQuery
 } = feeServiceApi

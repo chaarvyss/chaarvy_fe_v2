@@ -7,7 +7,7 @@ import api from '../services/api'
 export const persistConfig = {
   key: 'root',
   storage,
-  whitelist: [api.reducerPath, 'permission']
+  whitelist: ['permission']
 }
 
 export const rootReducer = combineReducers({
