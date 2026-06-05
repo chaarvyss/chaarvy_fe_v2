@@ -96,22 +96,6 @@ const Roles = () => {
               type={InputVariants.STRING}
             />
           </div>
-          {/* <div className='mt-3'>
-            <Typography variant='subtitle1'>Default Permissions</Typography>
-          </div>
-          <FormGroup>
-            <Grid container spacing={2}>
-              {Object.entries(Permissions.NAV).map(([key, value]) => (
-                <Grid item sm={12} md={4}>
-                  <FormControlLabel
-                    key={value}
-                    control={<Checkbox id={value} onChange={handleChange} checked={allowedPermissions.has(value)} />}
-                    label={key}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </FormGroup> */}
           <div className='d-flex justify-content-center mt-5 '>
             <Button onClick={handleSubmit}>Save Changes</Button>
           </div>

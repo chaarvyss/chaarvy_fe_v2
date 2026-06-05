@@ -1,9 +1,8 @@
 // ** Types Imports
-import { Button, Checkbox, FormControlLabel, FormGroup, Grid, IconButton, TextField, Typography } from '@mui/material'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { Button, FormGroup, IconButton, TextField, Typography } from '@mui/material'
+import { useEffect, useState } from 'react'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { Permissions } from 'src/constants/permissions'
 import { InputVariants } from 'src/lib/enums'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import TableTilteHeader from 'src/reusable_components/Table/TableTilteHeader'
@@ -12,6 +11,7 @@ import { useLazyGetRolesListQuery, useLazyGetRolePermissionsListQuery } from 'sr
 import GetChaarvyIcons from 'src/utils/icons'
 import { Card, Paper, TableContainer, Table, TableBody, TableCell, TableHead, TableRow } from 'src/utils/muiElements'
 
+// import { Permissions } from 'src/constants/permissions'
 interface RowType {
   role_name: string
   role_id: string
@@ -59,14 +59,14 @@ const Roles = () => {
         .catch(e => triggerToast(e, { variant: ToastVariants.ERROR }))
   }
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setAllowedPermissions(prevIds => {
-      const newIds = new Set(prevIds)
-      e.target.checked ? newIds.add(e.target.id) : newIds.delete(e.target.id)
+  // const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  //   setAllowedPermissions(prevIds => {
+  //     const newIds = new Set(prevIds)
+  //     e.target.checked ? newIds.add(e.target.id) : newIds.delete(e.target.id)
 
-      return new Set(newIds)
-    })
-  }
+  //     return new Set(newIds)
+  //   })
+  // }
 
   const handleEditRole = role => {
     fetchRolePermissions(role.role_id)
@@ -101,7 +101,7 @@ const Roles = () => {
             <Typography variant='subtitle1'>Default Permissions</Typography>
           </div>
           <FormGroup>
-            <Grid container spacing={2}>
+            {/* <Grid container spacing={2}>
               {Object.entries(Permissions.NAV).map(([key, value]) => (
                 <Grid item sm={12} md={4}>
                   <FormControlLabel
@@ -111,7 +111,7 @@ const Roles = () => {
                   />
                 </Grid>
               ))}
-            </Grid>
+            </Grid> */}
           </FormGroup>
           <div className='d-flex justify-content-center mt-5 '>
             <Button onClick={handleSubmit}>Save Changes</Button>

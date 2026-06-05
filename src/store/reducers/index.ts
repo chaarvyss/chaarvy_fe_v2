@@ -1,8 +1,8 @@
 import { combineReducers } from '@reduxjs/toolkit'
-import storage from 'redux-persist/lib/storage/session'
 
 import permission from '../permissionSlice'
 import api from '../services/api'
+import storage from '../storage'
 
 export const persistConfig = {
   key: 'root',

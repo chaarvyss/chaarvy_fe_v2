@@ -1,22 +1,22 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface PermissionSlice {
-  data: Array<string>
+  data: string
 }
 
 const initialState: PermissionSlice = {
-  data: []
+  data: ''
 }
 
 const PermissionSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setAvailablePermissionsData: (state, action: PayloadAction<Array<string>>) => {
+    setAvailablePermissionsData: (state, action: PayloadAction<string>) => {
       state.data = action.payload
     },
     resetAvailablePermissions: state => {
-      state.data = []
+      state.data = ''
     }
   }
 })

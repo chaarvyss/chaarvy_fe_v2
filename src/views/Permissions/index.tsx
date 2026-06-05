@@ -1,5 +1,5 @@
+import { LoadingButton } from '@mui/lab'
 import {
-  Card,
   CardContent,
   Typography,
   Checkbox,
@@ -7,7 +7,8 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Grid
+  Grid,
+  Box
 } from '@mui/material'
 import { ArrowUpDropCircleOutline } from 'mdi-material-ui'
 import { useState } from 'react'
@@ -18,8 +19,13 @@ import PermissionNode from './permissionNode'
 import { extractAllPermissions, getFormattedName } from './utils'
 
 const permissionsData = PermissionLabels
+interface PermissionEditorProps {
+  initialSelected: string[]
+  isSubmitting: boolean
+  onSubmit: (selectedPerms: string[]) => void
+}
 
-const RolePermissionsEditor = ({ initialSelected = [] }) => {
+const PermissionsEditor = ({ initialSelected, onSubmit, isSubmitting }: PermissionEditorProps) => {
   const [selectedPerms, setSelectedPerms] = useState<string[]>(initialSelected)
 
   const handleToggle = (permissionsToToggle: string | string[], isChecked: boolean) => {
@@ -41,16 +47,8 @@ const RolePermissionsEditor = ({ initialSelected = [] }) => {
   }
 
   return (
-    <Card elevation={2} sx={{ maxWidth: 800, margin: 'auto', mt: 4 }}>
+    <Box>
       <CardContent>
-        <Typography variant='h5' gutterBottom sx={{ fontWeight: 'bold' }}>
-          Assign Role Permissions
-        </Typography>
-        <Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
-          Select the modules and actions this role can access. Checking a category automatically grants access to all
-          its sub-features.
-        </Typography>
-
         {Object.entries(permissionsData).map(([topLevelKey, topLevelNode]) => {
           const allTopLevelPerms = extractAllPermissions(topLevelNode)
           const checkedCount = allTopLevelPerms.filter(p => selectedPerms.includes(p)).length
@@ -58,7 +56,6 @@ const RolePermissionsEditor = ({ initialSelected = [] }) => {
           const isAllChecked = checkedCount === allTopLevelPerms.length && allTopLevelPerms.length > 0
           const isIndeterminate = checkedCount > 0 && checkedCount < allTopLevelPerms.length
 
-          // 2. Handle the Accordion checkbox toggle
           const handleAccordionToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
             handleToggle(allTopLevelPerms, e.target.checked)
           }
@@ -66,7 +63,6 @@ const RolePermissionsEditor = ({ initialSelected = [] }) => {
           return (
             <Accordion key={topLevelKey} disableGutters variant='outlined' sx={{ mb: 1 }}>
               <AccordionSummary expandIcon={<ArrowUpDropCircleOutline />}>
-                {/* 3. The Accordion Master Checkbox */}
                 <FormControlLabel
                   onClick={e => e.stopPropagation()} // Prevents accordion from opening/closing when clicking checkbox
                   onFocus={e => e.stopPropagation()}
@@ -98,9 +94,19 @@ const RolePermissionsEditor = ({ initialSelected = [] }) => {
             </Accordion>
           )
         })}
+        <Box display='flex' justifyContent='end'>
+          <LoadingButton
+            loading={isSubmitting}
+            variant='contained'
+            size='small'
+            onClick={() => onSubmit(selectedPerms)}
+          >
+            Submit
+          </LoadingButton>
+        </Box>
       </CardContent>
-    </Card>
+    </Box>
   )
 }
 
-export default RolePermissionsEditor
+export default PermissionsEditor

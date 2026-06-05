@@ -22,7 +22,8 @@ export interface LoginResponse {
   mobile: string
   email: string
   urs: string
-  permission: Array<string>
+  permission: string[]
+  uid: string
 }
 
 export interface TableHeaderStatCardProps {

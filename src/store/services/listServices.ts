@@ -265,6 +265,14 @@ const listServicesApi = api.injectEndpoints({
           params
         }
       }
+    }),
+    getAllPermissionNames: build.query<string[], void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: `${urlConstants.list.getAllPermissionNamesUrl}`
+        }
+      }
     })
   })
 })
@@ -298,5 +306,6 @@ export const {
   useGetProgramSegmentMediumSectionCombinationQuery,
   useGetProgramAddonCoursesQuery,
   useGetProgramCommonMediumsQuery,
-  useGetSegmentsByProgramMediumQuery
+  useGetSegmentsByProgramMediumQuery,
+  useGetAllPermissionNamesQuery
 } = listServicesApi

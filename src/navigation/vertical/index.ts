@@ -1,49 +1,68 @@
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
 import { MasterPagePath, PagePath } from 'src/constants/pagePathConstants'
-import { Permissions } from 'src/constants/permissions'
-import store from 'src/store'
+import { PermissionLabels, Permissions } from 'src/constants/permissions'
+import { isAuthorised } from 'src/lib/util/permissionCheck'
 
 const navigation = (): VerticalNavItemsType => {
-  const allowedPermissions = store.getState().permission.data
-
   const navItems: VerticalNavItemsType = []
 
-  const hadPermission = (key: string) => {
-    return (allowedPermissions ?? []).includes(key)
-  }
-
   const client_navs = [
-    { key: Permissions.NAV.DASHBOARD, title: 'Dashboard', path: PagePath.DASHBOARD, icon: 'ViewDashboard' as const },
+    {
+      key: PermissionLabels.nav.dashboard,
+      title: 'Dashboard',
+      path: PagePath.DASHBOARD,
+      icon: 'ViewDashboard' as const
+    },
     {
       title: 'Administration',
       icon: 'Cog' as const,
       children: [
         {
-          key: Permissions.NAV.COLLEGE_PROFILE,
+          key: PermissionLabels.nav.collegeProfile,
           title: 'College Profile',
           path: PagePath.COLLEGE_PROFILE,
           icon: 'TownHall' as const
         },
-        { key: Permissions.NAV.USERS, title: 'Users', path: PagePath.USERS_LIST, icon: 'AccountGroup' as const },
-        { key: Permissions.NAV.ROLES, title: 'Roles', path: PagePath.ROLES_LIST, icon: 'ArrangeBringToFront' as const },
+        { key: PermissionLabels.nav.users, title: 'Users', path: PagePath.USERS_LIST, icon: 'AccountGroup' as const },
         {
-          key: Permissions.NAV.FEES_TYPES,
+          key: PermissionLabels.nav.roles,
+          title: 'Roles',
+          path: PagePath.ROLES_LIST,
+          icon: 'ArrangeBringToFront' as const
+        },
+        {
+          key: PermissionLabels.nav.feesTypes,
           title: 'Fees types',
           path: PagePath.FEES_TYPES,
           icon: 'FormatListGroup' as const
         },
         {
-          key: Permissions.NAV.SECTIONS,
+          key: PermissionLabels.nav.sections,
           title: 'Sections',
           path: PagePath.SECTIONS,
           icon: 'ArrangeBringToFront' as const
         },
-        { key: Permissions.NAV.PROGRAMS, title: 'Programs', path: PagePath.PROGRAMS, icon: 'BullseyeArrow' as const },
-        { key: Permissions.NAV.BOOKS, title: 'Books & Stationary', path: PagePath.BOOKS, icon: 'Bookshelf' as const },
-        { key: Permissions.NAV.ADDON, title: 'Addon Courses', path: PagePath.ADDON_COURSE, icon: 'Offer' as const },
         {
-          key: Permissions.NAV.PAYMENTS,
+          key: PermissionLabels.nav.programs,
+          title: 'Programs',
+          path: PagePath.PROGRAMS,
+          icon: 'BullseyeArrow' as const
+        },
+        {
+          key: PermissionLabels.nav.booksAndStationary,
+          title: 'Books & Stationary',
+          path: PagePath.BOOKS,
+          icon: 'Bookshelf' as const
+        },
+        {
+          key: PermissionLabels.nav.addonCourses,
+          title: 'Addon Courses',
+          path: PagePath.ADDON_COURSE,
+          icon: 'Offer' as const
+        },
+        {
+          key: PermissionLabels.nav.payments,
           title: 'Payments',
           path: PagePath.PAYMENTS,
           icon: 'AccountCreditCardOutline' as const
@@ -56,7 +75,7 @@ const navigation = (): VerticalNavItemsType => {
     //   icon: 'ChairSchool' as const,
     //   children: [
     //     {
-    //       key: Permissions.NAV.TIME_TABLE,
+    //       key: PermissionLabels.nav.TIME_TABLE,
     //       title: 'Time Table',
     //       path: PagePath.TIME_TABLE,
     //       icon: 'Timetable' as const
@@ -68,19 +87,19 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'School' as const,
       children: [
         {
-          key: Permissions.NAV.ADMISSION_FORM,
+          key: PermissionLabels.nav.admissionForm,
           title: 'Admission form',
           path: PagePath.ADMISSION_FORM,
           icon: 'FormSelect' as const
         },
         {
-          key: Permissions.NAV.ADMISSIONS,
+          key: PermissionLabels.nav.admissions,
           title: 'Admissions',
           path: PagePath.ADMISSIONS,
           icon: 'AccountSchoolOutline' as const
         },
         {
-          key: Permissions.NAV.COLLECT_PAYMENT,
+          key: PermissionLabels.nav.collectPayment,
           title: 'Collect Payment',
           path: PagePath.COLLECT_PAYMENT,
           icon: 'BankTransferIn' as const
@@ -93,19 +112,19 @@ const navigation = (): VerticalNavItemsType => {
     //   icon: 'BusSchool' as const,
     //   children: [
     //     {
-    //       key: Permissions.NAV.TRANSPORTATION_DASHBOARD,
+    //       key: PermissionLabels.nav.TRANSPORTATION_DASHBOARD,
     //       title: 'Dashboard',
     //       path: PagePath.TRANSPORTATION,
     //       icon: 'MonitorDashboard' as const
     //     },
     //     {
-    //       key: Permissions.NAV.VEHICLE_LIVE_TRACKING,
+    //       key: PermissionLabels.nav.VEHICLE_LIVE_TRACKING,
     //       title: 'Live Tracking',
     //       path: PagePath.VEHICLE_LIVE_TRACKING,
     //       icon: 'MapMarkerRadius' as const
     //     },
     //     {
-    //       key: Permissions.NAV.VEHICLE_VENDORS,
+    //       key: PermissionLabels.nav.VEHICLE_VENDORS,
     //       title: 'Vehicle Vendors',
     //       path: PagePath.VEHICLE_VENDORS,
     //       icon: 'Handshake' as const
@@ -117,7 +136,7 @@ const navigation = (): VerticalNavItemsType => {
     //   icon: 'AccountTie' as const,
     //   children: [
     //     {
-    //       key: Permissions.NAV.ATTENDENCE_REGISTER,
+    //       key: PermissionLabels.nav.ATTENDENCE_REGISTER,
     //       title: 'Attendence Register',
     //       path: PagePath.ATTENDENCE_REGISTER,
     //       icon: 'AccountCheck' as const
@@ -149,7 +168,7 @@ const navigation = (): VerticalNavItemsType => {
         current.children = filterNavItems(current.children)
       }
 
-      const hasPermission = (current.key && hadPermission(current.key)) || current.children?.length > 0
+      const hasPermission = (current.key && isAuthorised(current.key)) || current.children?.length > 0
 
       if (hasPermission) {
         filtered.push(current)
