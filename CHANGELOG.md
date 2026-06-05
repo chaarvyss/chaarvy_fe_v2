@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.12.0...v1.13.0) (2026-06-03)
+
+
+### Features
+
+* **pdfTemplateGenerator:** AC-55  ([#49](https://github.com/chaarvyss/chaarvy_fe_v2/issues/49)) ([f4390d0](https://github.com/chaarvyss/chaarvy_fe_v2/commit/f4390d050a787f46e1fce70a0354b7d87363766f))
+
 # [1.12.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.11.0...v1.12.0) (2026-06-02)
 
 

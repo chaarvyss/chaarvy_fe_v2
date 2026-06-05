@@ -1,93 +1,40 @@
-import React, { useState, useEffect, useRef, ReactNode, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useRef, ReactNode, useCallback } from 'react'
 
 import BlankLayout from 'src/@core/layouts/BlankLayout'
+import { useAddUpdatePdfTemplateMutation, useGetPdfTemplatesQuery } from 'src/store/services/pdfTemplateServices'
 
+import { LeftSidebar } from './components/LeftSidebar'
 import {
   PAGE_SIZES,
-  RESIZE_HANDLE_SIZE,
-  DELETE_BUTTON_SIZE,
-  MIN_SIZE,
+  DEFAULT_AVAILABLE_ITEMS,
   GRID_SIZE,
   DEFAULT_SIZES,
-  Field,
-  PlacedField,
-  DragState,
-  ResizeState,
   ALIGNMENT_THRESHOLD,
-  SNAP_THRESHOLD
+  SNAP_THRESHOLD,
+  RESIZE_HANDLE_SIZE,
+  DELETE_BUTTON_SIZE,
+  MIN_SIZE
 } from './designerConstants'
-import PropertiesPanel from './PropertiesPanel'
-
-// --- NEW: AUTO-FORMATTER UTILITY ---
-// This safely scans text nodes and wraps any {{ variable }} in an interactive span
-const formatHtmlVariables = (html: string) => {
-  const temp = document.createElement('div')
-  temp.innerHTML = html
-
-  // TreeWalker safely grabs only text, ignoring existing HTML/Spans
-  const walk = document.createTreeWalker(temp, NodeFilter.SHOW_TEXT, null)
-  let node
-  const textNodes: Node[] = []
-  while ((node = walk.nextNode())) {
-    textNodes.push(node)
-  }
-
-  textNodes.forEach(textNode => {
-    const text = textNode.nodeValue || ''
-    const regex = /\{\{(.*?)\}\}/g
-
-    // If we find raw brackets in pure text, replace them with our interactive span
-    if (regex.test(text)) {
-      const spanWrap = document.createElement('span')
-      spanWrap.innerHTML = text.replace(regex, match => {
-        const uniqueId = `span_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
-        // We add data-dynamic="true" so our click handlers know this is a variable
-        return `<span id="${uniqueId}" data-dynamic="true" style="color: #e91e63; font-weight: bold; cursor: pointer; padding: 0 2px;">${match}</span>`
-      })
-      textNode.parentNode?.replaceChild(spanWrap, textNode)
-    }
-  })
-
-  return temp.innerHTML
-}
+import { formatHtmlVariables } from './designerUtils'
+import { useTemplateHistory } from './hooks/useTemplateHistory'
+import PropertiesPanel from './PropertiesPanel' // Assuming this already exists in your folder
 
 const DesignerPage = () => {
-  const availableItems: Field[] = useMemo(
-    () => [
-      { key: 'studentName', label: 'Student Name', type: 'field' },
-      { key: 'fatherName', label: 'Father Name', type: 'field' },
-      { key: 'admission_number', label: 'Admission Number', type: 'field' },
-      { key: 'collegeName', label: 'College Name', type: 'field' },
-      { key: 'campus_name', label: 'Campus Name', type: 'field' },
-      { key: 'gender', label: 'Gender', type: 'field' },
-      { key: 'group', label: 'Group', type: 'field' },
-      { key: 'segment', label: 'Segment', type: 'field' },
-      { key: 'medium', label: 'Medium', type: 'field' },
-      { key: 'section', label: 'Section', type: 'field' },
-      { key: 'dob', label: 'Date of Birth', type: 'field' },
-      { key: 'admissionDate', label: 'Admission Date', type: 'field' },
-      { key: 'receipt_number', label: 'Receipt Number', type: 'field' },
-      { key: 'transaction_id', label: 'Transaction ID', type: 'field' },
-      { key: 'date_of_payment', label: 'Date of Payment', type: 'field' },
-      { key: 'prepared_by', label: 'Prepared By', type: 'field' },
-      { key: 'printed_on', label: 'Printed On', type: 'field' },
-      { key: 'text', label: 'Text Label', type: 'shape' },
-      { key: 'rectangle', label: 'Rectangle', type: 'shape' },
-      { key: 'circle', label: 'Circle', type: 'shape' },
-      { key: 'line', label: 'Line', type: 'shape' },
-      { key: 'dynamic_table', label: 'Dynamic Table Area', type: 'shape' },
-      { key: 'logo', label: 'Logo/Image', type: 'image' }
-    ],
-    []
-  )
+  // FUTURE API CALL (uncomment when ready):
+  // const { data: apiAvailableItems } = useGetAvailableItemsQuery();
+  // const availableItems = apiAvailableItems || DEFAULT_AVAILABLE_ITEMS;
+  const availableItems: Field[] = DEFAULT_AVAILABLE_ITEMS
 
-  const [placed, setPlaced] = useState<PlacedField[]>([])
+  const { data: pdfTemplates, refetch } = useGetPdfTemplatesQuery(undefined, { refetchOnMountOrArgChange: 30 })
+  const [savePdfTemplate] = useAddUpdatePdfTemplateMutation()
+  const { placed, setPlaced, historyIndex, historyLength, saveToHistory, undo, redo, clearHistory } =
+    useTemplateHistory()
+
   const canvasRef = useRef<HTMLDivElement | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const bgInputRef = useRef<HTMLInputElement>(null)
+  const isInitialLoad = useRef(true)
 
   const [templateName, setTemplateName] = useState('My Template')
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | undefined>()
   const [pageSize, setPageSize] = useState<keyof typeof PAGE_SIZES | 'Custom'>('A4')
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait')
   const [customWidth, setCustomWidth] = useState(794)
@@ -99,20 +46,6 @@ const DesignerPage = () => {
   const [backgroundOpacity, setBackgroundOpacity] = useState<number>(0.15)
   const [snapToGrid, setSnapToGrid] = useState(false)
   const [showSafeMargins, setShowSafeMargins] = useState(true)
-
-  const clientId = 'CLIENT_ABC'
-
-  const getCanvasDimensions = useCallback(() => {
-    const isCustom = pageSize === 'Custom'
-    const isPortrait = orientation === 'portrait'
-    if (isCustom)
-      return { width: isPortrait ? customWidth : customHeight, height: isPortrait ? customHeight : customWidth }
-    const sizes = PAGE_SIZES[pageSize as keyof typeof PAGE_SIZES]
-
-    return { width: isPortrait ? sizes.width : sizes.height, height: isPortrait ? sizes.height : sizes.width }
-  }, [pageSize, orientation, customWidth, customHeight])
-
-  const { width: canvasWidth, height: canvasHeight } = getCanvasDimensions()
 
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
@@ -134,40 +67,77 @@ const DesignerPage = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const [editingItem, setEditingItem] = useState<string | null>(null)
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
-
   const [editingSpan, setEditingSpan] = useState<{ itemId: string; spanId: string } | null>(null)
-
-  const [guides, setGuides] = useState<{ x?: number; y?: number; type?: string }[]>([])
-  const [history, setHistory] = useState<PlacedField[][]>([[]])
-  const [historyIndex, setHistoryIndex] = useState(0)
   const [clipboard, setClipboard] = useState<PlacedField | null>(null)
+  const [guides, setGuides] = useState<{ x?: number; y?: number; type?: string }[]>([])
 
-  const saveToHistory = useCallback(
-    (newPlaced: PlacedField[]) => {
-      setHistory(prev => {
-        const newHistory = prev.slice(0, historyIndex + 1)
-        newHistory.push(newPlaced)
+  const getCanvasDimensions = useCallback(() => {
+    const isCustom = pageSize === 'Custom'
+    const isPortrait = orientation === 'portrait'
+    if (isCustom)
+      return { width: isPortrait ? customWidth : customHeight, height: isPortrait ? customHeight : customWidth }
+    const sizes = PAGE_SIZES[pageSize as keyof typeof PAGE_SIZES]
 
-        return newHistory
-      })
-      setHistoryIndex(prev => prev + 1)
+    return { width: isPortrait ? sizes.width : sizes.height, height: isPortrait ? sizes.height : sizes.width }
+  }, [pageSize, orientation, customWidth, customHeight])
+
+  const { width: canvasWidth, height: canvasHeight } = getCanvasDimensions()
+
+  const handleSetData = useCallback(
+    (data: any) => {
+      if (!data) return
+      if (data.placed && Array.isArray(data.placed)) {
+        setPlaced(data.placed)
+        saveToHistory(data.placed)
+        if (data.name) setTemplateName(data.name)
+        if (data.config) {
+          if (data.config.pageSize) setPageSize(data.config.pageSize)
+          if (data.config.orientation) setOrientation(data.config.orientation)
+          if (data.config.backgroundImage !== undefined) setBackgroundImage(data.config.backgroundImage)
+          if (data.config.backgroundOpacity !== undefined) setBackgroundOpacity(data.config.backgroundOpacity)
+        }
+      }
     },
-    [historyIndex]
+    [setPlaced, saveToHistory]
   )
 
-  const undo = useCallback(() => {
-    if (historyIndex > 0) {
-      setHistoryIndex(prev => prev - 1)
-      setPlaced(history[historyIndex - 1])
+  useEffect(() => {
+    if (pdfTemplates && pdfTemplates.length > 0 && isInitialLoad.current) {
+      isInitialLoad.current = false
+      setSelectedTemplateId(pdfTemplates[0].template_id)
+      setTemplateName(pdfTemplates[0].template_name)
+      const templateHtml =
+        typeof pdfTemplates[0].template_html === 'string'
+          ? JSON.parse(pdfTemplates[0].template_html)
+          : pdfTemplates[0].template_html
+      handleSetData(templateHtml)
     }
-  }, [history, historyIndex])
+  }, [pdfTemplates, handleSetData])
 
-  const redo = useCallback(() => {
-    if (historyIndex < history.length - 1) {
-      setHistoryIndex(prev => prev + 1)
-      setPlaced(history[historyIndex + 1])
+  const handleCreateNew = () => {
+    setSelectedTemplateId(undefined)
+    setTemplateName('New Template')
+    clearHistory()
+    setPageSize('A4')
+    setOrientation('portrait')
+    setBackgroundImage(null)
+    setBackgroundOpacity(0.15)
+    setSelectedItem(null)
+    setEditingItem(null)
+  }
+
+  const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const id = e.target.value
+    if (!id) return handleCreateNew()
+    const selected = pdfTemplates?.find((t: any) => t.template_id === id)
+    if (selected) {
+      setSelectedTemplateId(selected.template_id)
+      setTemplateName(selected.template_name)
+      const templateHtml =
+        typeof selected.template_html === 'string' ? JSON.parse(selected.template_html) : selected.template_html
+      handleSetData(templateHtml)
     }
-  }, [history, historyIndex])
+  }
 
   const handleCopy = useCallback(() => {
     if (selectedItem && !editingItem) {
@@ -184,24 +154,19 @@ const DesignerPage = () => {
       saveToHistory(newPlaced)
       setSelectedItem(newItem.id)
     }
-  }, [clipboard, editingItem, placed, saveToHistory])
+  }, [clipboard, editingItem, placed, saveToHistory, setPlaced])
 
   const handleArrowMovement = useCallback(
     (axis: 'x' | 'y', delta: number) => {
       setPlaced(p =>
-        p.map(item => {
-          if (item.id === selectedItem) return { ...item, [axis]: Math.max(0, item[axis] + delta) }
-
-          return item
-        })
+        p.map(item => (item.id === selectedItem ? { ...item, [axis]: Math.max(0, item[axis] + delta) } : item))
       )
     },
-    [selectedItem]
+    [selectedItem, setPlaced]
   )
 
-  const handleDragStart = useCallback((e: React.DragEvent, item: Field) => {
+  const handleDragStart = (e: React.DragEvent, item: Field) =>
     e.dataTransfer.setData('text/plain', JSON.stringify(item))
-  }, [])
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -268,211 +233,10 @@ const DesignerPage = () => {
       setPlaced(newPlaced)
       saveToHistory(newPlaced)
     },
-    [placed, saveToHistory, snapToGrid]
+    [placed, saveToHistory, snapToGrid, setPlaced]
   )
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-  }, [])
-
-  const updateTextContent = useCallback((id: string, content: string) => {
-    setPlaced(p => p.map(item => (item.id === id ? { ...item, content } : item)))
-  }, [])
-
-  // --- NEW: INLINE SPAN INSERTION & CLICK HANDLER ---
-  const insertDynamicSpan = (itemId: string, fieldKey: string) => {
-    const selection = window.getSelection()
-    if (!selection || selection.rangeCount === 0) return
-    const range = selection.getRangeAt(0)
-
-    let container = range.commonAncestorContainer
-    let isInsideEditor = false
-    while (container && container !== document.body) {
-      if (container.nodeType === Node.ELEMENT_NODE && (container as HTMLElement).id === `text-edit-${itemId}`) {
-        isInsideEditor = true
-        break
-      }
-      container = container.parentNode as Node
-    }
-    if (!isInsideEditor) return
-
-    const span = document.createElement('span')
-    span.id = `span_${Date.now()}`
-    span.setAttribute('data-dynamic', 'true') // Tag it for click detection
-    span.style.color = '#e91e63'
-    span.style.fontWeight = 'bold'
-    span.style.cursor = 'pointer'
-    span.style.padding = '0 2px'
-    span.innerText = `{{ dynamic.${fieldKey} }}`
-
-    range.deleteContents()
-    range.insertNode(span)
-
-    range.setStartAfter(span)
-    range.setEndAfter(span)
-    selection.removeAllRanges()
-    selection.addRange(range)
-
-    const el = document.getElementById(`text-edit-${itemId}`)
-    if (el) updateTextContent(itemId, el.innerHTML)
-  }
-
-  const handleSpanClick = (e: React.MouseEvent, itemId: string) => {
-    const target = e.target as HTMLElement
-
-    // Check if the user clicked exactly on our dynamically generated span
-    if (target.tagName === 'SPAN' && target.dataset.dynamic === 'true') {
-      e.stopPropagation()
-      setEditingSpan({ itemId, spanId: target.id })
-    }
-  }
-
-  const updateSpanStyle = (styleProp: keyof CSSStyleDeclaration, value: string) => {
-    if (!editingSpan) return
-    setPlaced(prev =>
-      prev.map(item => {
-        if (item.id === editingSpan.itemId) {
-          const tempDiv = document.createElement('div')
-          tempDiv.innerHTML = item.content || ''
-          const targetSpan = tempDiv.querySelector(`#${editingSpan.spanId}`) as HTMLElement
-          if (targetSpan) {
-            ;(targetSpan.style as any)[styleProp] = value
-
-            return { ...item, content: tempDiv.innerHTML }
-          }
-        }
-
-        return item
-      })
-    )
-  }
-
-  const handleImageUpload = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]
-      if (!file) return
-      const reader = new FileReader()
-      reader.onload = event => {
-        const newItem: PlacedField = {
-          id: `uploaded_${Date.now()}`,
-          type: 'image',
-          imageUrl: event.target?.result as string,
-          x: 100,
-          y: 100,
-          width: 200,
-          height: 200,
-          fontSize: DEFAULT_SIZES.fontSize,
-          visible: true,
-          zIndex: placed.length,
-          opacity: 1,
-          rotation: 0
-        }
-        const newPlaced = [...placed, newItem]
-        setPlaced(newPlaced)
-        saveToHistory(newPlaced)
-        setSelectedItem(newItem.id)
-      }
-      reader.readAsDataURL(file)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    },
-    [placed, saveToHistory]
-  )
-
-  const handleBackgroundUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = event => setBackgroundImage(event.target?.result as string)
-    reader.readAsDataURL(file)
-    if (bgInputRef.current) bgInputRef.current.value = ''
-  }, [])
-
-  const saveTemplate = useCallback(() => {
-    const payload = {
-      clientId,
-      name: templateName,
-      templateType: 'admission_acknowledgement',
-      config: {
-        canvasBounds: { width: canvasWidth, height: canvasHeight },
-        pageSize,
-        orientation,
-        backgroundImage,
-        backgroundOpacity,
-        placed
-      }
-    }
-    fetch('/api/templates', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-      .then(r => r.json())
-      .then(data => alert('Saved: ' + data.id))
-      .catch(console.error)
-  }, [
-    clientId,
-    templateName,
-    placed,
-    canvasWidth,
-    canvasHeight,
-    pageSize,
-    orientation,
-    backgroundImage,
-    backgroundOpacity
-  ])
-
-  const exportTemplate = useCallback(() => {
-    const dataStr = JSON.stringify(
-      {
-        name: templateName,
-        config: {
-          canvasBounds: { width: canvasWidth, height: canvasHeight },
-          pageSize,
-          orientation,
-          backgroundImage,
-          backgroundOpacity
-        },
-        placed
-      },
-      null,
-      2
-    )
-    const dataBlob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(dataBlob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${templateName.replace(/\s+/g, '_')}.json`
-    link.click()
-    URL.revokeObjectURL(url)
-  }, [templateName, placed, canvasWidth, canvasHeight, pageSize, orientation, backgroundImage, backgroundOpacity])
-
-  const importTemplate = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]
-      if (!file) return
-      const reader = new FileReader()
-      reader.onload = event => {
-        try {
-          const data = JSON.parse(event.target?.result as string)
-          if (data.placed && Array.isArray(data.placed)) {
-            setPlaced(data.placed)
-            saveToHistory(data.placed)
-            if (data.name) setTemplateName(data.name)
-            if (data.config) {
-              if (data.config.pageSize) setPageSize(data.config.pageSize)
-              if (data.config.orientation) setOrientation(data.config.orientation)
-              if (data.config.backgroundImage !== undefined) setBackgroundImage(data.config.backgroundImage)
-              if (data.config.backgroundOpacity !== undefined) setBackgroundOpacity(data.config.backgroundOpacity)
-            }
-          }
-        } catch (error) {
-          alert('Invalid template file')
-        }
-      }
-      reader.readAsText(file)
-    },
-    [saveToHistory]
-  )
+  const handleDragOver = useCallback((e: React.DragEvent) => e.preventDefault(), [])
 
   const handleDragMovement = useCallback(
     (e: React.MouseEvent) => {
@@ -516,7 +280,6 @@ const DesignerPage = () => {
 
       placed.forEach(otherItem => {
         if (otherItem.id === dragState.itemId) return
-
         const otherWidth = otherItem.width || 100
         const otherHeight = otherItem.height || 30
         const otherCenterX = otherItem.x + otherWidth / 2
@@ -533,10 +296,8 @@ const DesignerPage = () => {
 
         alignments.forEach(({ pos, ref, axis }) => {
           const diff = Math.abs(pos - ref)
-
           if (diff < ALIGNMENT_THRESHOLD) {
             newGuides.push({ [axis]: ref, type: 'align' })
-
             if (diff < SNAP_THRESHOLD) {
               if (axis === 'x') {
                 if (pos === newX) newX = ref
@@ -553,7 +314,6 @@ const DesignerPage = () => {
       })
 
       setGuides(newGuides)
-
       setPlaced(p =>
         p.map(item => {
           if (item.id === dragState.itemId) {
@@ -567,7 +327,7 @@ const DesignerPage = () => {
         })
       )
     },
-    [dragState, placed, snapToGrid]
+    [dragState, placed, snapToGrid, setPlaced]
   )
 
   const handleResizeMovement = useCallback(
@@ -632,7 +392,7 @@ const DesignerPage = () => {
         })
       )
     },
-    [resizeState, snapToGrid]
+    [resizeState, snapToGrid, setPlaced]
   )
 
   const handleMouseMove = useCallback(
@@ -708,31 +468,99 @@ const DesignerPage = () => {
     window.addEventListener('keydown', handleKeyDown)
 
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedItem, editingItem, handleCopy, handlePaste, handleArrowMovement, undo, redo])
+  }, [selectedItem, editingItem, handleCopy, handlePaste, handleArrowMovement, undo, redo, deleteItem])
 
-  const updateItemProperty = useCallback((id: string, property: keyof PlacedField, value: any) => {
-    setPlaced(p => p.map(item => (item.id === id ? { ...item, [property]: value } : item)))
-  }, [])
-  const deleteItem = useCallback(
-    (id: string) => {
-      const newPlaced = placed.filter(item => item.id !== id)
-      setPlaced(newPlaced)
-      saveToHistory(newPlaced)
-      if (selectedItem === id) setSelectedItem(null)
+  const updateTextContent = useCallback(
+    (id: string, content: string) => {
+      setPlaced(p => p.map(item => (item.id === id ? { ...item, content } : item)))
     },
-    [selectedItem, placed, saveToHistory]
+    [setPlaced]
   )
 
-  const bringToFront = useCallback(() => {
-    if (!selectedItem) return
-    const maxZ = Math.max(...placed.map(item => item.zIndex || 0))
-    updateItemProperty(selectedItem, 'zIndex', maxZ + 1)
-  }, [selectedItem, placed, updateItemProperty])
-  const sendToBack = useCallback(() => {
-    if (!selectedItem) return
-    const minZ = Math.min(...placed.map(item => item.zIndex || 0))
-    updateItemProperty(selectedItem, 'zIndex', minZ - 1)
-  }, [selectedItem, placed, updateItemProperty])
+  const insertDynamicSpan = (itemId: string, fieldKey: string) => {
+    const selection = window.getSelection()
+    if (!selection || selection.rangeCount === 0) return
+    const range = selection.getRangeAt(0)
+
+    let container = range.commonAncestorContainer
+    let isInsideEditor = false
+    while (container && container !== document.body) {
+      if (container.nodeType === Node.ELEMENT_NODE && (container as HTMLElement).id === `text-edit-${itemId}`) {
+        isInsideEditor = true
+        break
+      }
+      container = container.parentNode as Node
+    }
+    if (!isInsideEditor) return
+
+    const span = document.createElement('span')
+    span.id = `span_${Date.now()}`
+    span.setAttribute('data-dynamic', 'true')
+    span.style.color = '#e91e63'
+    span.style.fontWeight = 'bold'
+    span.style.cursor = 'pointer'
+    span.style.padding = '0 2px'
+    span.innerText = `{{ dynamic.${fieldKey} }}`
+
+    range.deleteContents()
+    range.insertNode(span)
+    range.setStartAfter(span)
+    range.setEndAfter(span)
+    selection.removeAllRanges()
+    selection.addRange(range)
+
+    const el = document.getElementById(`text-edit-${itemId}`)
+    if (el) updateTextContent(itemId, el.innerHTML)
+  }
+
+  const handleSpanClick = (e: React.MouseEvent, itemId: string) => {
+    const target = e.target as HTMLElement
+    if (target.tagName === 'SPAN' && target.dataset.dynamic === 'true') {
+      e.stopPropagation()
+      setEditingSpan({ itemId, spanId: target.id })
+    }
+  }
+
+  const updateSpanStyle = (styleProp: keyof CSSStyleDeclaration, value: string) => {
+    if (!editingSpan) return
+    setPlaced(prev =>
+      prev.map(item => {
+        if (item.id === editingSpan.itemId) {
+          const tempDiv = document.createElement('div')
+          tempDiv.innerHTML = item.content || ''
+          const targetSpan = tempDiv.querySelector(`#${editingSpan.spanId}`) as HTMLElement
+          if (targetSpan) {
+            ;(targetSpan.style as any)[styleProp] = value
+
+            return { ...item, content: tempDiv.innerHTML }
+          }
+        }
+
+        return item
+      })
+    )
+  }
+
+  const updateItemProperty = useCallback(
+    (id: string, property: keyof PlacedField, value: any) => {
+      setPlaced(p => p.map(item => (item.id === id ? { ...item, [property]: value } : item)))
+    },
+    [setPlaced]
+  )
+
+  function deleteItem(id: string) {
+    const newPlaced = placed.filter(item => item.id !== id)
+    setPlaced(newPlaced)
+    saveToHistory(newPlaced)
+    if (selectedItem === id) setSelectedItem(null)
+  }
+
+  const bringToFront = () => {
+    if (selectedItem) updateItemProperty(selectedItem, 'zIndex', Math.max(...placed.map(item => item.zIndex || 0)) + 1)
+  }
+  const sendToBack = () => {
+    if (selectedItem) updateItemProperty(selectedItem, 'zIndex', Math.min(...placed.map(item => item.zIndex || 0)) - 1)
+  }
 
   const renderShape = useCallback((p: PlacedField, borderStyle: string) => {
     if (p.shapeType === 'rectangle') return <div style={{ width: p.width, height: p.height, border: borderStyle }} />
@@ -796,9 +624,102 @@ const DesignerPage = () => {
     return null
   }, [])
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = event => {
+      const newItem: PlacedField = {
+        id: `uploaded_${Date.now()}`,
+        type: 'image',
+        imageUrl: event.target?.result as string,
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 200,
+        fontSize: DEFAULT_SIZES.fontSize,
+        visible: true,
+        zIndex: placed.length,
+        opacity: 1,
+        rotation: 0
+      }
+      const newPlaced = [...placed, newItem]
+      setPlaced(newPlaced)
+      saveToHistory(newPlaced)
+      setSelectedItem(newItem.id)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = event => setBackgroundImage(event.target?.result as string)
+    reader.readAsDataURL(file)
+  }
+
+  const saveTemplate = async () => {
+    const payload = {
+      clientId: 'clientId',
+      templateType: 'admission_acknowledgement',
+      name: templateName,
+      config: {
+        canvasBounds: { width: canvasWidth, height: canvasHeight },
+        pageSize,
+        orientation,
+        backgroundImage,
+        backgroundOpacity
+      },
+      placed
+    }
+    savePdfTemplate({ template_id: selectedTemplateId, template_name: templateName, template_html: payload })
+      .unwrap()
+      .then(() => alert('Template saved successfully!'))
+      .catch(e => console.error(e))
+  }
+
+  const exportTemplate = () => {
+    const dataStr = JSON.stringify(
+      {
+        name: templateName,
+        config: {
+          canvasBounds: { width: canvasWidth, height: canvasHeight },
+          pageSize,
+          orientation,
+          backgroundImage,
+          backgroundOpacity
+        },
+        placed
+      },
+      null,
+      2
+    )
+    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(dataBlob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${templateName.replace(/\s+/g, '_')}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const importTemplate = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = event => {
+      try {
+        handleSetData(JSON.parse(event.target?.result as string))
+      } catch (error) {
+        alert('Invalid template file')
+      }
+    }
+    reader.readAsText(file)
+  }
+
   return (
     <div style={{ display: 'flex', gap: 20, padding: 20, position: 'relative' }}>
-      {/* --- EXPANDED FLOATING SPAN PROPERTIES EDITOR --- */}
       {editingSpan && (
         <div
           style={{
@@ -823,14 +744,12 @@ const DesignerPage = () => {
               ×
             </button>
           </div>
-
           <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Text Color</label>
           <input
             type='color'
             style={{ width: '100%', marginBottom: 12, cursor: 'pointer' }}
             onChange={e => updateSpanStyle('color', e.target.value)}
           />
-
           <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Size (px)</label>
@@ -853,7 +772,6 @@ const DesignerPage = () => {
               </select>
             </div>
           </div>
-
           <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Font Family</label>
           <select
             style={{ width: '100%', padding: 6, marginBottom: 12, border: '1px solid #ddd', borderRadius: 4 }}
@@ -865,7 +783,6 @@ const DesignerPage = () => {
             <option value="'Courier New', monospace">Courier</option>
             <option value='Georgia, serif'>Georgia</option>
           </select>
-
           <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Font Style</label>
           <select
             style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
@@ -877,411 +794,51 @@ const DesignerPage = () => {
         </div>
       )}
 
-      {/* Left Sidebar */}
-      <div
-        style={{
-          width: showSidebar ? 260 : 60,
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          position: 'relative',
-          paddingRight: 10
-        }}
-      >
-        <button
-          onClick={() => setShowSidebar(!showSidebar)}
-          style={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-            padding: '4px 8px',
-            background: '#2196F3',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer',
-            fontSize: 12,
-            zIndex: 10
-          }}
-        >
-          {showSidebar ? '◀' : '▶'}
-        </button>
+      <LeftSidebar
+        showSidebar={showSidebar}
+        setShowSidebar={setShowSidebar}
+        pdfTemplates={pdfTemplates || []}
+        selectedTemplateId={selectedTemplateId}
+        handleTemplateChange={handleTemplateChange}
+        availableItems={availableItems}
+        templateName={templateName}
+        setTemplateName={setTemplateName}
+        pageSize={pageSize}
+        setPageSize={setPageSize}
+        orientation={orientation}
+        setOrientation={setOrientation}
+        undo={undo}
+        redo={redo}
+        historyIndex={historyIndex}
+        historyLength={historyLength}
+        saveTemplate={saveTemplate}
+        exportTemplate={exportTemplate}
+        importTemplate={importTemplate}
+        snapToGrid={snapToGrid}
+        setSnapToGrid={setSnapToGrid}
+        showSafeMargins={showSafeMargins}
+        setShowSafeMargins={setShowSafeMargins}
+        handleImageUpload={handleImageUpload}
+        handleBackgroundUpload={handleBackgroundUpload}
+        backgroundImage={backgroundImage}
+        setBackgroundImage={setBackgroundImage}
+        backgroundOpacity={backgroundOpacity}
+        setBackgroundOpacity={setBackgroundOpacity}
+        handleDragStart={handleDragStart}
+        customWidth={customWidth}
+        setCustomWidth={setCustomWidth}
+        customHeight={customHeight}
+        setCustomHeight={setCustomHeight}
+      />
 
-        {showSidebar && (
-          <>
-            <h3 style={{ marginTop: 0 }}>Elements</h3>
-            <h4 style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4 }}>Fields</h4>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {availableItems
-                .filter(f => f.type === 'field')
-                .map(f => (
-                  <div
-                    key={f.key}
-                    draggable
-                    onDragStart={e => handleDragStart(e, f)}
-                    style={{
-                      padding: '6px 8px',
-                      border: '1px solid #ddd',
-                      cursor: 'grab',
-                      background: '#f9f9f9',
-                      borderRadius: 4,
-                      fontSize: 12,
-                      flex: '1 1 45%'
-                    }}
-                  >
-                    {f.label}
-                  </div>
-                ))}
-            </div>
-
-            <h4
-              style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4, marginTop: 16 }}
-            >
-              Shapes
-            </h4>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-              {availableItems
-                .filter(f => f.type === 'shape')
-                .map(f => (
-                  <div
-                    key={f.key}
-                    draggable
-                    onDragStart={e => handleDragStart(e, f)}
-                    style={{
-                      padding: 8,
-                      cursor: 'grab',
-                      background: '#f9f9f9',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flex: '1 1 40%',
-                      borderRadius: 4,
-                      minHeight: 50,
-                      gap: 4,
-                      border: '1px solid #ddd'
-                    }}
-                  >
-                    {f.key === 'text' && <span style={{ fontSize: 16, color: '#333', fontWeight: '500' }}>abc</span>}
-                    {f.key === 'rectangle' && <div style={{ width: 20, height: 14, border: '2px solid #333' }} />}
-                    {f.key === 'circle' && (
-                      <div style={{ width: 18, height: 18, border: '2px solid #333', borderRadius: '50%' }} />
-                    )}
-                    {f.key === 'line' && <div style={{ width: 24, height: 2, background: '#333' }} />}
-                    {f.key === 'dynamic_table' && (
-                      <div
-                        style={{
-                          width: 24,
-                          height: 16,
-                          border: '2px dashed #2196F3',
-                          background: 'rgba(33, 150, 243, 0.1)'
-                        }}
-                      />
-                    )}
-                    <span style={{ fontSize: 10, textAlign: 'center' }}>{f.label}</span>
-                  </div>
-                ))}
-            </div>
-
-            <h4
-              style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4, marginTop: 16 }}
-            >
-              Images
-            </h4>
-            {availableItems
-              .filter(f => f.type === 'image')
-              .map(f => (
-                <div
-                  key={f.key}
-                  draggable
-                  onDragStart={e => handleDragStart(e, f)}
-                  style={{
-                    padding: '6px 8px',
-                    border: '1px solid #ddd',
-                    cursor: 'grab',
-                    background: '#f9f9f9',
-                    borderRadius: 4,
-                    fontSize: 12
-                  }}
-                >
-                  {f.label}
-                </div>
-              ))}
-            <input
-              ref={fileInputRef}
-              type='file'
-              accept='image/*'
-              onChange={handleImageUpload}
-              style={{ display: 'none' }}
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                width: '100%',
-                padding: '6px',
-                border: '1px solid #2196F3',
-                background: 'white',
-                color: '#2196F3',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 12,
-                marginTop: 8
-              }}
-            >
-              📁 Upload Image
-            </button>
-
-            <h4
-              style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4, marginTop: 20 }}
-            >
-              Canvas Settings
-            </h4>
-            <div style={{ background: '#f9f9f9', padding: 12, borderRadius: 6, border: '1px solid #eee' }}>
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontSize: 13,
-                  marginBottom: 12,
-                  cursor: 'pointer'
-                }}
-              >
-                <input type='checkbox' checked={snapToGrid} onChange={e => setSnapToGrid(e.target.checked)} /> Snap to
-                Grid (20px)
-              </label>
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontSize: 13,
-                  marginBottom: 16,
-                  cursor: 'pointer'
-                }}
-              >
-                <input type='checkbox' checked={showSafeMargins} onChange={e => setShowSafeMargins(e.target.checked)} />{' '}
-                Show Print Safe Area
-              </label>
-              <input
-                ref={bgInputRef}
-                type='file'
-                accept='image/*'
-                onChange={handleBackgroundUpload}
-                style={{ display: 'none' }}
-              />
-              <button
-                onClick={() => bgInputRef.current?.click()}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  background: 'white',
-                  border: '1px solid #9C27B0',
-                  color: '#9C27B0',
-                  borderRadius: 4,
-                  cursor: 'pointer',
-                  fontSize: 12,
-                  fontWeight: 600
-                }}
-              >
-                🖼️ Set Background Watermark
-              </button>
-              {backgroundImage && (
-                <div style={{ marginTop: 12, padding: 8, background: 'rgba(156, 39, 176, 0.05)', borderRadius: 4 }}>
-                  <label style={{ display: 'block', marginBottom: 4, fontSize: 11, fontWeight: 600 }}>
-                    Background Opacity ({Math.round(backgroundOpacity * 100)}%)
-                  </label>
-                  <input
-                    type='range'
-                    min='0.05'
-                    max='1'
-                    step='0.05'
-                    value={backgroundOpacity}
-                    onChange={e => setBackgroundOpacity(Number(e.target.value))}
-                    style={{ width: '100%' }}
-                  />
-                  <button
-                    onClick={() => setBackgroundImage(null)}
-                    style={{
-                      marginTop: 4,
-                      width: '100%',
-                      padding: 4,
-                      color: '#f44336',
-                      background: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: 11
-                    }}
-                  >
-                    Remove Background
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <hr style={{ margin: '16px 0', borderTop: '1px solid #ddd' }} />
-
-            <h4 style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4 }}>
-              Document Setup
-            </h4>
-            <select
-              value={pageSize}
-              onChange={e => setPageSize(e.target.value as keyof typeof PAGE_SIZES | 'Custom')}
-              style={{
-                width: '100%',
-                padding: 6,
-                marginBottom: 8,
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                fontSize: 12
-              }}
-            >
-              {Object.entries(PAGE_SIZES).map(([key, { label }]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-              <option value='Custom'>Custom Size</option>
-            </select>
-            {pageSize === 'Custom' && (
-              <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-                <input
-                  type='number'
-                  value={customWidth}
-                  onChange={e => setCustomWidth(Number(e.target.value))}
-                  style={{ flex: 1, padding: 6, border: '1px solid #ddd', borderRadius: 4, fontSize: 12 }}
-                  placeholder='W'
-                />
-                <input
-                  type='number'
-                  value={customHeight}
-                  onChange={e => setCustomHeight(Number(e.target.value))}
-                  style={{ flex: 1, padding: 6, border: '1px solid #ddd', borderRadius: 4, fontSize: 12 }}
-                  placeholder='H'
-                />
-              </div>
-            )}
-            <select
-              value={orientation}
-              onChange={e => setOrientation(e.target.value as 'portrait' | 'landscape')}
-              style={{
-                width: '100%',
-                padding: 6,
-                marginBottom: 12,
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                fontSize: 12
-              }}
-            >
-              <option value='portrait'>Portrait</option>
-              <option value='landscape'>Landscape</option>
-            </select>
-
-            <h4 style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4 }}>Actions</h4>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-              <button
-                onClick={undo}
-                disabled={historyIndex === 0}
-                style={{
-                  flex: 1,
-                  padding: 6,
-                  background: historyIndex === 0 ? '#e0e0e0' : '#f5f5f5',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  cursor: historyIndex === 0 ? 'not-allowed' : 'pointer',
-                  fontSize: 12
-                }}
-              >
-                ↶ Undo
-              </button>
-              <button
-                onClick={redo}
-                disabled={historyIndex >= history.length - 1}
-                style={{
-                  flex: 1,
-                  padding: 6,
-                  background: historyIndex >= history.length - 1 ? '#e0e0e0' : '#f5f5f5',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  cursor: historyIndex >= history.length - 1 ? 'not-allowed' : 'pointer',
-                  fontSize: 12
-                }}
-              >
-                ↷ Redo
-              </button>
-            </div>
-
-            <input
-              value={templateName}
-              onChange={e => setTemplateName(e.target.value)}
-              style={{
-                width: '100%',
-                padding: 8,
-                marginBottom: 8,
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                fontSize: 13
-              }}
-            />
-
-            <button
-              onClick={saveTemplate}
-              style={{
-                width: '100%',
-                padding: 10,
-                background: '#2196F3',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 13,
-                fontWeight: 500,
-                marginBottom: 8
-              }}
-            >
-              Save Template
-            </button>
-            <button
-              onClick={exportTemplate}
-              style={{
-                width: '100%',
-                padding: 8,
-                background: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 12,
-                marginBottom: 8
-              }}
-            >
-              💾 Export Template
-            </button>
-            <input type='file' accept='.json' onChange={importTemplate} style={{ display: 'none' }} id='import-input' />
-            <button
-              onClick={() => document.getElementById('import-input')?.click()}
-              style={{
-                width: '100%',
-                padding: 8,
-                background: '#FF9800',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 12
-              }}
-            >
-              📂 Import Template
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* Center - Canvas */}
       <div style={{ flex: 1, position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <h3 style={{ margin: 0, fontSize: 16 }}>
             Canvas (
-            {pageSize === 'Custom' ? `Custom (${customWidth} × ${customHeight} px)` : PAGE_SIZES[pageSize].label})
+            {pageSize === 'Custom'
+              ? `Custom (${customWidth} × ${customHeight} px)`
+              : PAGE_SIZES[pageSize as keyof typeof PAGE_SIZES]?.label}
+            )
           </h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button
@@ -1328,6 +885,8 @@ const DesignerPage = () => {
             </button>
           </div>
         </div>
+
+        <button onClick={() => refetch()}>refetch</button>
 
         <div
           style={{
@@ -1406,7 +965,7 @@ const DesignerPage = () => {
               </div>
             )}
 
-            {placed
+            {[...placed]
               .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
               .map(p => (
                 <div
@@ -1415,7 +974,6 @@ const DesignerPage = () => {
                   onMouseDown={e => {
                     e.stopPropagation()
                     if (editingItem === p.id) return
-
                     setDragState({
                       isDragging: true,
                       itemId: p.id,
@@ -1431,8 +989,6 @@ const DesignerPage = () => {
                   }}
                   onDoubleClick={e => {
                     e.stopPropagation()
-
-                    // Allow double clicking to start editing even if we hit a child span
                     setEditingItem(p.id)
                   }}
                   onMouseEnter={() => setHoveredItem(p.id)}
@@ -1524,7 +1080,6 @@ const DesignerPage = () => {
                         }}
                         onClick={e => handleSpanClick(e, p.id)}
                         onBlur={e => {
-                          // Pass through the Auto-Formatter when user finishes typing
                           const cleanHtml = formatHtmlVariables(e.currentTarget.innerHTML)
                           updateTextContent(p.id, cleanHtml)
                           setTimeout(() => setEditingItem(null), 150)
@@ -1836,7 +1391,6 @@ const DesignerPage = () => {
                 </div>
               ))}
 
-            {/* Alignment Guides Rendering */}
             {guides.map((guide, idx) => (
               <React.Fragment key={idx}>
                 {guide.x !== undefined && (
@@ -1873,7 +1427,6 @@ const DesignerPage = () => {
         </div>
       </div>
 
-      {/* Right Sidebar */}
       {selectedItem && (
         <PropertiesPanel
           item={placed.find(p => p.id === selectedItem)!}
@@ -1888,5 +1441,4 @@ const DesignerPage = () => {
 }
 
 DesignerPage.getLayout = (page: ReactNode) => <BlankLayout>{page}</BlankLayout>
-
 export default DesignerPage
