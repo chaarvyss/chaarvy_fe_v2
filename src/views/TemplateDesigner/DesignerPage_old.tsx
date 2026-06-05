@@ -1,142 +1,36 @@
-import React, { useState, useEffect, useRef, ReactNode, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useRef, ReactNode, useCallback } from 'react'
 
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 import { useAddUpdatePdfTemplateMutation, useGetPdfTemplatesQuery } from 'src/store/services/pdfTemplateServices'
 
-import PropertiesPanel from './PropertiesPanel' // Assuming this sits in the same directory
-
-// --- CONSTANTS ---
-const PAGE_SIZES = {
-  A4: { width: 794, height: 1123, label: 'A4 (210 × 297 mm)' },
-  A5: { width: 559, height: 794, label: 'A5 (148 × 210 mm)' },
-  Letter: { width: 816, height: 1056, label: 'Letter (8.5 × 11 in)' },
-  Legal: { width: 816, height: 1344, label: 'Legal (8.5 × 14 in)' }
-}
-const GRID_SIZE = 20
-const MIN_SIZE = 10
-const ALIGNMENT_THRESHOLD = 5
-const SNAP_THRESHOLD = 10
-const RESIZE_HANDLE_SIZE = 8
-const DELETE_BUTTON_SIZE = 16
-
-const DEFAULT_SIZES = {
-  fontSize: 12,
-  rectangle: { width: 100, height: 50 },
-  circle: { width: 80, height: 80 },
-  line: { width: 100, height: 2 },
-  dynamic_table: { width: 600, height: 100 },
-  image: { width: 150, height: 150 }
-}
-
-// 1. Define the type so TypeScript knows some properties are optional
-type ResizeHandleConfig = {
-  handle: 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
-  top?: number | string
-  bottom?: number | string
-  left?: number | string
-  right?: number | string
-  transform?: string
-  cursor: string
-}
-
-// 2. Apply the type to the array (and remove the "as const" from the end)
-const RESIZE_HANDLES: ResizeHandleConfig[] = [
-  { handle: 'nw', top: -4, left: -4, cursor: 'nw-resize' },
-  { handle: 'n', top: -4, left: '50%', transform: 'translateX(-50%)', cursor: 'n-resize' },
-  { handle: 'ne', top: -4, right: -4, cursor: 'ne-resize' },
-  { handle: 'w', top: '50%', left: -4, transform: 'translateY(-50%)', cursor: 'w-resize' },
-  { handle: 'e', top: '50%', right: -4, transform: 'translateY(-50%)', cursor: 'e-resize' },
-  { handle: 'sw', bottom: -4, left: -4, cursor: 'sw-resize' },
-  { handle: 's', bottom: -4, left: '50%', transform: 'translateX(-50%)', cursor: 's-resize' },
-  { handle: 'se', bottom: -4, right: -4, cursor: 'se-resize' }
-]
-
-// --- UTILS ---
-const formatHtmlVariables = (html: string) => {
-  const temp = document.createElement('div')
-  temp.innerHTML = html
-  const walk = document.createTreeWalker(temp, NodeFilter.SHOW_TEXT, null)
-  let node
-  const textNodes: Node[] = []
-  while ((node = walk.nextNode())) textNodes.push(node)
-
-  textNodes.forEach(textNode => {
-    const text = textNode.nodeValue || ''
-    const regex = /\{\{(.*?)\}\}/g
-    if (regex.test(text)) {
-      const spanWrap = document.createElement('span')
-      spanWrap.innerHTML = text.replace(regex, match => {
-        const uniqueId = `span_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
-        return `<span id="${uniqueId}" data-dynamic="true" style="color: #e91e63; font-weight: bold; cursor: pointer; padding: 0 2px;">${match}</span>`
-      })
-      textNode.parentNode?.replaceChild(spanWrap, textNode)
-    }
-  })
-
-  return temp.innerHTML
-}
-
-// --- TYPES ---
-type Field = { key: string; label: string; type: 'field' | 'shape' | 'image' }
-type PlacedField = any
-type DragState = {
-  isDragging: boolean
-  itemId: string | null
-  startX: number
-  startY: number
-  offsetX: number
-  offsetY: number
-}
-type ResizeState = {
-  isResizing: boolean
-  itemId: string | null
-  handle: string | null
-  startX: number
-  startY: number
-  startWidth: number
-  startHeight: number
-}
+import { LeftSidebar } from './components/LeftSidebar'
+import {
+  PAGE_SIZES,
+  DEFAULT_AVAILABLE_ITEMS,
+  GRID_SIZE,
+  DEFAULT_SIZES,
+  ALIGNMENT_THRESHOLD,
+  SNAP_THRESHOLD,
+  RESIZE_HANDLE_SIZE,
+  DELETE_BUTTON_SIZE,
+  MIN_SIZE
+} from './designerConstants'
+import { formatHtmlVariables } from './designerUtils'
+import { useTemplateHistory } from './hooks/useTemplateHistory'
+import PropertiesPanel from './PropertiesPanel' // Assuming this already exists in your folder
 
 const DesignerPage = () => {
-  const availableItems: Field[] = useMemo(
-    () => [
-      { key: 'studentName', label: 'Student Name', type: 'field' },
-      { key: 'fatherName', label: 'Father Name', type: 'field' },
-      { key: 'admission_number', label: 'Admission Number', type: 'field' },
-      { key: 'collegeName', label: 'College Name', type: 'field' },
-      { key: 'campus_name', label: 'Campus Name', type: 'field' },
-      { key: 'gender', label: 'Gender', type: 'field' },
-      { key: 'group', label: 'Group', type: 'field' },
-      { key: 'segment', label: 'Segment', type: 'field' },
-      { key: 'medium', label: 'Medium', type: 'field' },
-      { key: 'section', label: 'Section', type: 'field' },
-      { key: 'dob', label: 'Date of Birth', type: 'field' },
-      { key: 'admissionDate', label: 'Admission Date', type: 'field' },
-      { key: 'receipt_number', label: 'Receipt Number', type: 'field' },
-      { key: 'transaction_id', label: 'Transaction ID', type: 'field' },
-      { key: 'date_of_payment', label: 'Date of Payment', type: 'field' },
-      { key: 'prepared_by', label: 'Prepared By', type: 'field' },
-      { key: 'printed_on', label: 'Printed On', type: 'field' },
-      { key: 'text', label: 'Text Label', type: 'shape' },
-      { key: 'rectangle', label: 'Rectangle', type: 'shape' },
-      { key: 'circle', label: 'Circle', type: 'shape' },
-      { key: 'line', label: 'Line', type: 'shape' },
-      { key: 'dynamic_table', label: 'Dynamic Table Area', type: 'shape' },
-      { key: 'logo', label: 'Logo/Image', type: 'image' }
-    ],
-    []
-  )
+  // FUTURE API CALL (uncomment when ready):
+  // const { data: apiAvailableItems } = useGetAvailableItemsQuery();
+  // const availableItems = apiAvailableItems || DEFAULT_AVAILABLE_ITEMS;
+  const availableItems: Field[] = DEFAULT_AVAILABLE_ITEMS
 
-  // --- API ---
-  const { data: pdfTemplates } = useGetPdfTemplatesQuery(undefined, { refetchOnMountOrArgChange: true })
+  const { data: pdfTemplates, refetch } = useGetPdfTemplatesQuery(undefined, { refetchOnMountOrArgChange: 30 })
   const [savePdfTemplate] = useAddUpdatePdfTemplateMutation()
+  const { placed, setPlaced, historyIndex, historyLength, saveToHistory, undo, redo, clearHistory } =
+    useTemplateHistory()
 
-  // --- STATE ---
-  const [placed, setPlaced] = useState<PlacedField[]>([])
   const canvasRef = useRef<HTMLDivElement | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const bgInputRef = useRef<HTMLInputElement>(null)
   const isInitialLoad = useRef(true)
 
   const [templateName, setTemplateName] = useState('My Template')
@@ -145,20 +39,14 @@ const DesignerPage = () => {
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait')
   const [customWidth, setCustomWidth] = useState(794)
   const [customHeight, setCustomHeight] = useState(1123)
-  const [totalPages, setTotalPages] = useState(1)
   const [zoom, setZoom] = useState(100)
   const [showSidebar, setShowSidebar] = useState(true)
 
-  // Display Toggles
-  const [isPreviewMode, setIsPreviewMode] = useState(false)
-  const [showBorders, setShowBorders] = useState(true)
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(null)
+  const [backgroundOpacity, setBackgroundOpacity] = useState<number>(0.15)
   const [snapToGrid, setSnapToGrid] = useState(false)
   const [showSafeMargins, setShowSafeMargins] = useState(true)
 
-  const [backgroundImage, setBackgroundImage] = useState<string | null>(null)
-  const [backgroundOpacity, setBackgroundOpacity] = useState<number>(0.15)
-
-  // Interaction State
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
     itemId: null,
@@ -180,64 +68,38 @@ const DesignerPage = () => {
   const [editingItem, setEditingItem] = useState<string | null>(null)
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
   const [editingSpan, setEditingSpan] = useState<{ itemId: string; spanId: string } | null>(null)
-  const [guides, setGuides] = useState<{ x?: number; y?: number; type?: string }[]>([])
-  const [history, setHistory] = useState<PlacedField[][]>([[]])
-  const [historyIndex, setHistoryIndex] = useState(0)
   const [clipboard, setClipboard] = useState<PlacedField | null>(null)
+  const [guides, setGuides] = useState<{ x?: number; y?: number; type?: string }[]>([])
 
-  // --- MATH & DIMENSIONS ---
   const getCanvasDimensions = useCallback(() => {
     const isCustom = pageSize === 'Custom'
     const isPortrait = orientation === 'portrait'
-    const baseW = isCustom
-      ? isPortrait
-        ? customWidth
-        : customHeight
-      : isPortrait
-        ? PAGE_SIZES[pageSize as keyof typeof PAGE_SIZES].width
-        : PAGE_SIZES[pageSize as keyof typeof PAGE_SIZES].height
-    const baseH = isCustom
-      ? isPortrait
-        ? customHeight
-        : customWidth
-      : isPortrait
-        ? PAGE_SIZES[pageSize as keyof typeof PAGE_SIZES].height
-        : PAGE_SIZES[pageSize as keyof typeof PAGE_SIZES].width
+    if (isCustom)
+      return { width: isPortrait ? customWidth : customHeight, height: isPortrait ? customHeight : customWidth }
+    const sizes = PAGE_SIZES[pageSize as keyof typeof PAGE_SIZES]
 
-    return { width: baseW, height: baseH * totalPages, singlePageHeight: baseH }
-  }, [pageSize, orientation, customWidth, customHeight, totalPages])
+    return { width: isPortrait ? sizes.width : sizes.height, height: isPortrait ? sizes.height : sizes.width }
+  }, [pageSize, orientation, customWidth, customHeight])
 
-  const { width: canvasWidth, height: canvasHeight, singlePageHeight } = getCanvasDimensions()
+  const { width: canvasWidth, height: canvasHeight } = getCanvasDimensions()
 
-  // --- DATA LOADING & HISTORY ---
-  const saveToHistory = useCallback(
-    (newPlaced: PlacedField[]) => {
-      setHistory(prev => {
-        const newHistory = prev.slice(0, historyIndex + 1)
-        newHistory.push(newPlaced)
-
-        return newHistory
-      })
-      setHistoryIndex(prev => prev + 1)
-    },
-    [historyIndex]
-  )
-
-  const handleSetData = (data: any) => {
-    if (!data) return
-    if (data.placed && Array.isArray(data.placed)) {
-      setPlaced(data.placed)
-      saveToHistory(data.placed)
-      if (data.name) setTemplateName(data.name)
-      if (data.config) {
-        if (data.config.pageSize) setPageSize(data.config.pageSize)
-        if (data.config.orientation) setOrientation(data.config.orientation)
-        if (data.config.totalPages) setTotalPages(data.config.totalPages)
-        if (data.config.backgroundImage !== undefined) setBackgroundImage(data.config.backgroundImage)
-        if (data.config.backgroundOpacity !== undefined) setBackgroundOpacity(data.config.backgroundOpacity)
+  const handleSetData = useCallback(
+    (data: any) => {
+      if (!data) return
+      if (data.placed && Array.isArray(data.placed)) {
+        setPlaced(data.placed)
+        saveToHistory(data.placed)
+        if (data.name) setTemplateName(data.name)
+        if (data.config) {
+          if (data.config.pageSize) setPageSize(data.config.pageSize)
+          if (data.config.orientation) setOrientation(data.config.orientation)
+          if (data.config.backgroundImage !== undefined) setBackgroundImage(data.config.backgroundImage)
+          if (data.config.backgroundOpacity !== undefined) setBackgroundOpacity(data.config.backgroundOpacity)
+        }
       }
-    }
-  }
+    },
+    [setPlaced, saveToHistory]
+  )
 
   useEffect(() => {
     if (pdfTemplates && pdfTemplates.length > 0 && isInitialLoad.current) {
@@ -250,17 +112,14 @@ const DesignerPage = () => {
           : pdfTemplates[0].template_html
       handleSetData(templateHtml)
     }
-  }, [pdfTemplates])
+  }, [pdfTemplates, handleSetData])
 
   const handleCreateNew = () => {
     setSelectedTemplateId(undefined)
     setTemplateName('New Template')
-    setPlaced([])
-    setHistory([[]])
-    setHistoryIndex(0)
+    clearHistory()
     setPageSize('A4')
     setOrientation('portrait')
-    setTotalPages(1)
     setBackgroundImage(null)
     setBackgroundOpacity(0.15)
     setSelectedItem(null)
@@ -280,24 +139,13 @@ const DesignerPage = () => {
     }
   }
 
-  const undo = useCallback(() => {
-    if (historyIndex > 0) {
-      setHistoryIndex(prev => prev - 1)
-      setPlaced(history[historyIndex - 1])
-    }
-  }, [history, historyIndex])
-  const redo = useCallback(() => {
-    if (historyIndex < history.length - 1) {
-      setHistoryIndex(prev => prev + 1)
-      setPlaced(history[historyIndex + 1])
-    }
-  }, [history, historyIndex])
   const handleCopy = useCallback(() => {
     if (selectedItem && !editingItem) {
       const item = placed.find(p => p.id === selectedItem)
       if (item) setClipboard(item)
     }
   }, [selectedItem, editingItem, placed])
+
   const handlePaste = useCallback(() => {
     if (clipboard && !editingItem) {
       const newItem = { ...clipboard, id: `${clipboard.type}_${Date.now()}`, x: clipboard.x + 20, y: clipboard.y + 20 }
@@ -306,29 +154,26 @@ const DesignerPage = () => {
       saveToHistory(newPlaced)
       setSelectedItem(newItem.id)
     }
-  }, [clipboard, editingItem, placed, saveToHistory])
+  }, [clipboard, editingItem, placed, saveToHistory, setPlaced])
+
   const handleArrowMovement = useCallback(
     (axis: 'x' | 'y', delta: number) => {
       setPlaced(p =>
-        p.map(item => {
-          if (item.id === selectedItem) return { ...item, [axis]: Math.max(0, item[axis] + delta) }
-
-          return item
-        })
+        p.map(item => (item.id === selectedItem ? { ...item, [axis]: Math.max(0, item[axis] + delta) } : item))
       )
     },
-    [selectedItem]
+    [selectedItem, setPlaced]
   )
 
-  // --- DRAG, DROP, RESIZE LOGIC ---
-  const handleDragStart = useCallback((e: React.DragEvent, item: Field) => {
+  const handleDragStart = (e: React.DragEvent, item: Field) =>
     e.dataTransfer.setData('text/plain', JSON.stringify(item))
-  }, [])
+
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
       const dataString = e.dataTransfer.getData('text/plain')
       if (!dataString) return
+
       let itemData: Field
       try {
         itemData = JSON.parse(dataString)
@@ -371,11 +216,11 @@ const DesignerPage = () => {
           newItem.borderWidth = 2
           newItem.borderColor = '#2196F3'
         } else {
-          newItem.shapeType = itemData.key
+          newItem.shapeType = itemData.key as 'rectangle' | 'circle' | 'line'
           const sizes = DEFAULT_SIZES[itemData.key as keyof typeof DEFAULT_SIZES]
-          if (sizes) {
-            newItem.width = (sizes as any).width
-            newItem.height = (sizes as any).height
+          if (sizes && typeof sizes === 'object') {
+            newItem.width = sizes.width
+            newItem.height = sizes.height
           }
         }
       } else if (itemData.type === 'image') {
@@ -388,12 +233,10 @@ const DesignerPage = () => {
       setPlaced(newPlaced)
       saveToHistory(newPlaced)
     },
-    [placed, saveToHistory, snapToGrid]
+    [placed, saveToHistory, snapToGrid, setPlaced]
   )
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-  }, [])
+  const handleDragOver = useCallback((e: React.DragEvent) => e.preventDefault(), [])
 
   const handleDragMovement = useCallback(
     (e: React.MouseEvent) => {
@@ -402,6 +245,7 @@ const DesignerPage = () => {
       const rect = canvas.getBoundingClientRect()
       let newX = e.clientX - rect.left - dragState.offsetX
       let newY = e.clientY - rect.top - dragState.offsetY
+
       if (snapToGrid) {
         newX = Math.round(newX / GRID_SIZE) * GRID_SIZE
         newY = Math.round(newY / GRID_SIZE) * GRID_SIZE
@@ -409,9 +253,11 @@ const DesignerPage = () => {
 
       const currentItem = placed.find(p => p.id === dragState.itemId)
       if (!currentItem) return
-      const newGuides: any[] = []
+
+      const newGuides: { x?: number; y?: number; type?: string }[] = []
       const itemWidth = currentItem.width || 100
       const itemHeight = currentItem.height || 30
+
       const canvasCenterX = rect.width / 2
       const canvasCenterY = rect.height / 2
       let itemCenterX = newX + itemWidth / 2
@@ -438,6 +284,7 @@ const DesignerPage = () => {
         const otherHeight = otherItem.height || 30
         const otherCenterX = otherItem.x + otherWidth / 2
         const otherCenterY = otherItem.y + otherHeight / 2
+
         const alignments = [
           { pos: newX, ref: otherItem.x, axis: 'x' as const },
           { pos: newX + itemWidth, ref: otherItem.x + otherWidth, axis: 'x' as const },
@@ -446,6 +293,7 @@ const DesignerPage = () => {
           { pos: newY + itemHeight, ref: otherItem.y + otherHeight, axis: 'y' as const },
           { pos: itemCenterY, ref: otherCenterY, axis: 'y' as const }
         ]
+
         alignments.forEach(({ pos, ref, axis }) => {
           const diff = Math.abs(pos - ref)
           if (diff < ALIGNMENT_THRESHOLD) {
@@ -464,6 +312,7 @@ const DesignerPage = () => {
           }
         })
       })
+
       setGuides(newGuides)
       setPlaced(p =>
         p.map(item => {
@@ -478,13 +327,14 @@ const DesignerPage = () => {
         })
       )
     },
-    [dragState, placed, snapToGrid]
+    [dragState, placed, snapToGrid, setPlaced]
   )
 
   const handleResizeMovement = useCallback(
     (e: React.MouseEvent) => {
       const deltaX = e.clientX - resizeState.startX
       const deltaY = e.clientY - resizeState.startY
+
       setPlaced(p =>
         p.map(item => {
           if (item.id === resizeState.itemId) {
@@ -492,6 +342,7 @@ const DesignerPage = () => {
             let newHeight = resizeState.startHeight
             let newX = item.x
             let newY = item.y
+
             switch (resizeState.handle) {
               case 'se':
                 newWidth = Math.max(MIN_SIZE, resizeState.startWidth + deltaX)
@@ -528,6 +379,7 @@ const DesignerPage = () => {
                 newX = item.x + (resizeState.startWidth - newWidth)
                 break
             }
+
             if (snapToGrid) {
               newWidth = Math.round(newWidth / GRID_SIZE) * GRID_SIZE
               newHeight = Math.round(newHeight / GRID_SIZE) * GRID_SIZE
@@ -540,7 +392,7 @@ const DesignerPage = () => {
         })
       )
     },
-    [resizeState, snapToGrid]
+    [resizeState, snapToGrid, setPlaced]
   )
 
   const handleMouseMove = useCallback(
@@ -550,6 +402,7 @@ const DesignerPage = () => {
     },
     [dragState, resizeState, handleDragMovement, handleResizeMovement]
   )
+
   const handleMouseUp = useCallback(() => {
     if (dragState.isDragging || resizeState.isResizing) saveToHistory(placed)
     setDragState({ isDragging: false, itemId: null, startX: 0, startY: 0, offsetX: 0, offsetY: 0 })
@@ -565,7 +418,6 @@ const DesignerPage = () => {
     setGuides([])
   }, [dragState.isDragging, resizeState.isResizing, placed, saveToHistory])
 
-  // --- KEYBOARD SHORTCUTS ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
@@ -592,15 +444,16 @@ const DesignerPage = () => {
 
         return
       }
-      if (!selectedItem || editingItem || isPreviewMode) return
+      if (!selectedItem || editingItem) return
       if (e.key === 'Delete') {
         e.preventDefault()
         deleteItem(selectedItem)
 
         return
       }
+
       const step = e.shiftKey ? 10 : 1
-      const keyMap: any = {
+      const keyMap: Record<string, { axis: 'x' | 'y'; delta: number }> = {
         ArrowUp: { axis: 'y', delta: -step },
         ArrowDown: { axis: 'y', delta: step },
         ArrowLeft: { axis: 'x', delta: -step },
@@ -615,17 +468,20 @@ const DesignerPage = () => {
     window.addEventListener('keydown', handleKeyDown)
 
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedItem, editingItem, isPreviewMode, handleCopy, handlePaste, handleArrowMovement, undo, redo])
+  }, [selectedItem, editingItem, handleCopy, handlePaste, handleArrowMovement, undo, redo, deleteItem])
 
-  // --- TEXT SPAN PROPERTIES LOGIC ---
-  const updateTextContent = useCallback((id: string, content: string) => {
-    setPlaced(p => p.map(item => (item.id === id ? { ...item, content } : item)))
-  }, [])
+  const updateTextContent = useCallback(
+    (id: string, content: string) => {
+      setPlaced(p => p.map(item => (item.id === id ? { ...item, content } : item)))
+    },
+    [setPlaced]
+  )
 
   const insertDynamicSpan = (itemId: string, fieldKey: string) => {
     const selection = window.getSelection()
     if (!selection || selection.rangeCount === 0) return
     const range = selection.getRangeAt(0)
+
     let container = range.commonAncestorContainer
     let isInsideEditor = false
     while (container && container !== document.body) {
@@ -636,6 +492,7 @@ const DesignerPage = () => {
       container = container.parentNode as Node
     }
     if (!isInsideEditor) return
+
     const span = document.createElement('span')
     span.id = `span_${Date.now()}`
     span.setAttribute('data-dynamic', 'true')
@@ -644,12 +501,14 @@ const DesignerPage = () => {
     span.style.cursor = 'pointer'
     span.style.padding = '0 2px'
     span.innerText = `{{ dynamic.${fieldKey} }}`
+
     range.deleteContents()
     range.insertNode(span)
     range.setStartAfter(span)
     range.setEndAfter(span)
     selection.removeAllRanges()
     selection.addRange(range)
+
     const el = document.getElementById(`text-edit-${itemId}`)
     if (el) updateTextContent(itemId, el.innerHTML)
   }
@@ -664,14 +523,6 @@ const DesignerPage = () => {
 
   const updateSpanStyle = (styleProp: keyof CSSStyleDeclaration, value: string) => {
     if (!editingSpan) return
-
-    // 1. INSTANT VISUAL UPDATE: Apply directly to DOM
-    const activeDOMSpan = document.getElementById(editingSpan.spanId)
-    if (activeDOMSpan) {
-      ;(activeDOMSpan.style as any)[styleProp] = value
-    }
-
-    // 2. STATE UPDATE: Save correctly for persistence
     setPlaced(prev =>
       prev.map(item => {
         if (item.id === editingSpan.itemId) {
@@ -690,29 +541,26 @@ const DesignerPage = () => {
     )
   }
 
-  // --- ITEM MANAGEMENT ---
-  const updateItemProperty = useCallback((id: string, property: string, value: any) => {
-    setPlaced(p => p.map(item => (item.id === id ? { ...item, [property]: value } : item)))
-  }, [])
-  const deleteItem = useCallback(
-    (id: string) => {
-      const newPlaced = placed.filter(item => item.id !== id)
-      setPlaced(newPlaced)
-      saveToHistory(newPlaced)
-      if (selectedItem === id) setSelectedItem(null)
+  const updateItemProperty = useCallback(
+    (id: string, property: keyof PlacedField, value: any) => {
+      setPlaced(p => p.map(item => (item.id === id ? { ...item, [property]: value } : item)))
     },
-    [selectedItem, placed, saveToHistory]
+    [setPlaced]
   )
-  const bringToFront = useCallback(() => {
-    if (!selectedItem) return
-    const maxZ = Math.max(...placed.map(item => item.zIndex || 0))
-    updateItemProperty(selectedItem, 'zIndex', maxZ + 1)
-  }, [selectedItem, placed, updateItemProperty])
-  const sendToBack = useCallback(() => {
-    if (!selectedItem) return
-    const minZ = Math.min(...placed.map(item => item.zIndex || 0))
-    updateItemProperty(selectedItem, 'zIndex', minZ - 1)
-  }, [selectedItem, placed, updateItemProperty])
+
+  function deleteItem(id: string) {
+    const newPlaced = placed.filter(item => item.id !== id)
+    setPlaced(newPlaced)
+    saveToHistory(newPlaced)
+    if (selectedItem === id) setSelectedItem(null)
+  }
+
+  const bringToFront = () => {
+    if (selectedItem) updateItemProperty(selectedItem, 'zIndex', Math.max(...placed.map(item => item.zIndex || 0)) + 1)
+  }
+  const sendToBack = () => {
+    if (selectedItem) updateItemProperty(selectedItem, 'zIndex', Math.min(...placed.map(item => item.zIndex || 0)) - 1)
+  }
 
   const renderShape = useCallback((p: PlacedField, borderStyle: string) => {
     if (p.shapeType === 'rectangle') return <div style={{ width: p.width, height: p.height, border: borderStyle }} />
@@ -742,7 +590,7 @@ const DesignerPage = () => {
               background: 'rgba(33, 150, 243, 0.1)'
             }}
           >
-            {p.tableColumns?.map((col: string, i: number) => (
+            {p.tableColumns?.map((col, i) => (
               <div
                 key={i}
                 style={{
@@ -776,46 +624,40 @@ const DesignerPage = () => {
     return null
   }, [])
 
-  // --- SAVING & UPLOADS ---
-  const handleImageUpload = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]
-      if (!file) return
-      const reader = new FileReader()
-      reader.onload = event => {
-        const newItem: PlacedField = {
-          id: `uploaded_${Date.now()}`,
-          type: 'image',
-          imageUrl: event.target?.result as string,
-          x: 100,
-          y: 100,
-          width: 200,
-          height: 200,
-          fontSize: DEFAULT_SIZES.fontSize,
-          visible: true,
-          zIndex: placed.length,
-          opacity: 1,
-          rotation: 0
-        }
-        const newPlaced = [...placed, newItem]
-        setPlaced(newPlaced)
-        saveToHistory(newPlaced)
-        setSelectedItem(newItem.id)
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = event => {
+      const newItem: PlacedField = {
+        id: `uploaded_${Date.now()}`,
+        type: 'image',
+        imageUrl: event.target?.result as string,
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 200,
+        fontSize: DEFAULT_SIZES.fontSize,
+        visible: true,
+        zIndex: placed.length,
+        opacity: 1,
+        rotation: 0
       }
-      reader.readAsDataURL(file)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    },
-    [placed, saveToHistory]
-  )
+      const newPlaced = [...placed, newItem]
+      setPlaced(newPlaced)
+      saveToHistory(newPlaced)
+      setSelectedItem(newItem.id)
+    }
+    reader.readAsDataURL(file)
+  }
 
-  const handleBackgroundUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
     reader.onload = event => setBackgroundImage(event.target?.result as string)
     reader.readAsDataURL(file)
-    if (bgInputRef.current) bgInputRef.current.value = ''
-  }, [])
+  }
 
   const saveTemplate = async () => {
     const payload = {
@@ -823,10 +665,9 @@ const DesignerPage = () => {
       templateType: 'admission_acknowledgement',
       name: templateName,
       config: {
-        canvasBounds: { width: canvasWidth, height: singlePageHeight },
+        canvasBounds: { width: canvasWidth, height: canvasHeight },
         pageSize,
         orientation,
-        totalPages,
         backgroundImage,
         backgroundOpacity
       },
@@ -835,18 +676,17 @@ const DesignerPage = () => {
     savePdfTemplate({ template_id: selectedTemplateId, template_name: templateName, template_html: payload })
       .unwrap()
       .then(() => alert('Template saved successfully!'))
-      .catch(e => console.log(e))
+      .catch(e => console.error(e))
   }
 
-  const exportTemplate = useCallback(() => {
+  const exportTemplate = () => {
     const dataStr = JSON.stringify(
       {
         name: templateName,
         config: {
-          canvasBounds: { width: canvasWidth, height: singlePageHeight },
+          canvasBounds: { width: canvasWidth, height: canvasHeight },
           pageSize,
           orientation,
-          totalPages,
           backgroundImage,
           backgroundOpacity
         },
@@ -862,36 +702,24 @@ const DesignerPage = () => {
     link.download = `${templateName.replace(/\s+/g, '_')}.json`
     link.click()
     URL.revokeObjectURL(url)
-  }, [
-    templateName,
-    placed,
-    canvasWidth,
-    singlePageHeight,
-    pageSize,
-    orientation,
-    totalPages,
-    backgroundImage,
-    backgroundOpacity
-  ])
+  }
 
-  const importTemplate = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const importTemplate = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
     reader.onload = event => {
       try {
-        const data = JSON.parse(event.target?.result as string)
-        handleSetData(data)
+        handleSetData(JSON.parse(event.target?.result as string))
       } catch (error) {
         alert('Invalid template file')
       }
     }
     reader.readAsText(file)
-  }, [])
+  }
 
   return (
     <div style={{ display: 'flex', gap: 20, padding: 20, position: 'relative' }}>
-      {/* FLOATING TEXT PROPERTIES EDITOR */}
       {editingSpan && (
         <div
           style={{
@@ -966,476 +794,43 @@ const DesignerPage = () => {
         </div>
       )}
 
-      {/* LEFT SIDEBAR */}
-      <div
-        style={{
-          width: showSidebar ? 260 : 60,
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          position: 'relative',
-          paddingRight: 10
-        }}
-      >
-        <button
-          onClick={() => setShowSidebar(!showSidebar)}
-          style={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-            padding: '4px 8px',
-            background: '#2196F3',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer',
-            fontSize: 12,
-            zIndex: 10
-          }}
-        >
-          {showSidebar ? '◀' : '▶'}
-        </button>
+      <LeftSidebar
+        showSidebar={showSidebar}
+        setShowSidebar={setShowSidebar}
+        pdfTemplates={pdfTemplates || []}
+        selectedTemplateId={selectedTemplateId}
+        handleTemplateChange={handleTemplateChange}
+        availableItems={availableItems}
+        templateName={templateName}
+        setTemplateName={setTemplateName}
+        pageSize={pageSize}
+        setPageSize={setPageSize}
+        orientation={orientation}
+        setOrientation={setOrientation}
+        undo={undo}
+        redo={redo}
+        historyIndex={historyIndex}
+        historyLength={historyLength}
+        saveTemplate={saveTemplate}
+        exportTemplate={exportTemplate}
+        importTemplate={importTemplate}
+        snapToGrid={snapToGrid}
+        setSnapToGrid={setSnapToGrid}
+        showSafeMargins={showSafeMargins}
+        setShowSafeMargins={setShowSafeMargins}
+        handleImageUpload={handleImageUpload}
+        handleBackgroundUpload={handleBackgroundUpload}
+        backgroundImage={backgroundImage}
+        setBackgroundImage={setBackgroundImage}
+        backgroundOpacity={backgroundOpacity}
+        setBackgroundOpacity={setBackgroundOpacity}
+        handleDragStart={handleDragStart}
+        customWidth={customWidth}
+        setCustomWidth={setCustomWidth}
+        customHeight={customHeight}
+        setCustomHeight={setCustomHeight}
+      />
 
-        {showSidebar && (
-          <>
-            <h3 style={{ marginTop: 0 }}>Template</h3>
-            <select
-              value={selectedTemplateId || ''}
-              onChange={handleTemplateChange}
-              style={{
-                width: '100%',
-                padding: 8,
-                marginBottom: 16,
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                fontSize: 13,
-                cursor: 'pointer'
-              }}
-            >
-              <option value=''>+ Create New Template</option>
-              {pdfTemplates?.map((t: any) => (
-                <option key={t.template_id} value={t.template_id}>
-                  {t.template_name}
-                </option>
-              ))}
-            </select>
-            <hr style={{ margin: '16px 0', borderTop: '1px solid #ddd' }} />
-
-            <h3 style={{ marginTop: 0 }}>Elements</h3>
-            <h4 style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4 }}>Fields</h4>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {availableItems
-                .filter(f => f.type === 'field')
-                .map(f => (
-                  <div
-                    key={f.key}
-                    draggable
-                    onDragStart={e => handleDragStart(e, f)}
-                    style={{
-                      padding: '6px 8px',
-                      border: '1px solid #ddd',
-                      cursor: 'grab',
-                      background: '#f9f9f9',
-                      borderRadius: 4,
-                      fontSize: 12,
-                      flex: '1 1 45%'
-                    }}
-                  >
-                    {f.label}
-                  </div>
-                ))}
-            </div>
-
-            <h4
-              style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4, marginTop: 16 }}
-            >
-              Shapes
-            </h4>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-              {availableItems
-                .filter(f => f.type === 'shape')
-                .map(f => (
-                  <div
-                    key={f.key}
-                    draggable
-                    onDragStart={e => handleDragStart(e, f)}
-                    style={{
-                      padding: 8,
-                      cursor: 'grab',
-                      background: '#f9f9f9',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flex: '1 1 40%',
-                      borderRadius: 4,
-                      minHeight: 50,
-                      gap: 4,
-                      border: '1px solid #ddd'
-                    }}
-                  >
-                    {f.key === 'text' && <span style={{ fontSize: 16, color: '#333', fontWeight: '500' }}>abc</span>}
-                    {f.key === 'rectangle' && <div style={{ width: 20, height: 14, border: '2px solid #333' }} />}
-                    {f.key === 'circle' && (
-                      <div style={{ width: 18, height: 18, border: '2px solid #333', borderRadius: '50%' }} />
-                    )}
-                    {f.key === 'line' && <div style={{ width: 24, height: 2, background: '#333' }} />}
-                    {f.key === 'dynamic_table' && (
-                      <div
-                        style={{
-                          width: 24,
-                          height: 16,
-                          border: '2px dashed #2196F3',
-                          background: 'rgba(33, 150, 243, 0.1)'
-                        }}
-                      />
-                    )}
-                    <span style={{ fontSize: 10, textAlign: 'center' }}>{f.label}</span>
-                  </div>
-                ))}
-            </div>
-
-            <h4
-              style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4, marginTop: 16 }}
-            >
-              Images
-            </h4>
-            {availableItems
-              .filter(f => f.type === 'image')
-              .map(f => (
-                <div
-                  key={f.key}
-                  draggable
-                  onDragStart={e => handleDragStart(e, f)}
-                  style={{
-                    padding: '6px 8px',
-                    border: '1px solid #ddd',
-                    cursor: 'grab',
-                    background: '#f9f9f9',
-                    borderRadius: 4,
-                    fontSize: 12
-                  }}
-                >
-                  {f.label}
-                </div>
-              ))}
-            <input
-              ref={fileInputRef}
-              type='file'
-              accept='image/*'
-              onChange={handleImageUpload}
-              style={{ display: 'none' }}
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                width: '100%',
-                padding: '6px',
-                border: '1px solid #2196F3',
-                background: 'white',
-                color: '#2196F3',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 12,
-                marginTop: 8
-              }}
-            >
-              📁 Upload Image
-            </button>
-
-            <h4
-              style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4, marginTop: 20 }}
-            >
-              Canvas Settings
-            </h4>
-            <div style={{ background: '#f9f9f9', padding: 12, borderRadius: 6, border: '1px solid #eee' }}>
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontSize: 13,
-                  marginBottom: 12,
-                  cursor: 'pointer'
-                }}
-              >
-                <input type='checkbox' checked={snapToGrid} onChange={e => setSnapToGrid(e.target.checked)} /> Snap to
-                Grid (20px)
-              </label>
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontSize: 13,
-                  marginBottom: 16,
-                  cursor: 'pointer'
-                }}
-              >
-                <input type='checkbox' checked={showSafeMargins} onChange={e => setShowSafeMargins(e.target.checked)} />{' '}
-                Show Print Safe Area
-              </label>
-
-              {/* --- NEW CHECKBOX FOR HIDING BORDERS --- */}
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontSize: 13,
-                  marginBottom: 16,
-                  cursor: 'pointer'
-                }}
-              >
-                <input type='checkbox' checked={showBorders} onChange={e => setShowBorders(e.target.checked)} /> Show
-                Element Outlines
-              </label>
-
-              <input
-                ref={bgInputRef}
-                type='file'
-                accept='image/*'
-                onChange={handleBackgroundUpload}
-                style={{ display: 'none' }}
-              />
-              <button
-                onClick={() => bgInputRef.current?.click()}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  background: 'white',
-                  border: '1px solid #9C27B0',
-                  color: '#9C27B0',
-                  borderRadius: 4,
-                  cursor: 'pointer',
-                  fontSize: 12,
-                  fontWeight: 600
-                }}
-              >
-                🖼️ Set Background Watermark
-              </button>
-              {backgroundImage && (
-                <div style={{ marginTop: 12, padding: 8, background: 'rgba(156, 39, 176, 0.05)', borderRadius: 4 }}>
-                  <label style={{ display: 'block', marginBottom: 4, fontSize: 11, fontWeight: 600 }}>
-                    Background Opacity ({Math.round(backgroundOpacity * 100)}%)
-                  </label>
-                  <input
-                    type='range'
-                    min='0.05'
-                    max='1'
-                    step='0.05'
-                    value={backgroundOpacity}
-                    onChange={e => setBackgroundOpacity(Number(e.target.value))}
-                    style={{ width: '100%' }}
-                  />
-                  <button
-                    onClick={() => setBackgroundImage(null)}
-                    style={{
-                      marginTop: 4,
-                      width: '100%',
-                      padding: 4,
-                      color: '#f44336',
-                      background: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: 11
-                    }}
-                  >
-                    Remove Background
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <hr style={{ margin: '16px 0', borderTop: '1px solid #ddd' }} />
-
-            <h4 style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4 }}>
-              Document Setup
-            </h4>
-
-            {/* MULTI-PAGE CONTROLS */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 16,
-                background: '#fff',
-                padding: 8,
-                border: '1px solid #ddd',
-                borderRadius: 4
-              }}
-            >
-              <span style={{ fontSize: 13, fontWeight: 500 }}>Total Pages</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <button
-                  onClick={() => setTotalPages(Math.max(1, totalPages - 1))}
-                  style={{ padding: '2px 8px', cursor: 'pointer' }}
-                >
-                  −
-                </button>
-                <span style={{ fontSize: 13, minWidth: 20, textAlign: 'center' }}>{totalPages}</span>
-                <button onClick={() => setTotalPages(totalPages + 1)} style={{ padding: '2px 8px', cursor: 'pointer' }}>
-                  +
-                </button>
-              </div>
-            </div>
-
-            <select
-              value={pageSize}
-              onChange={e => setPageSize(e.target.value as keyof typeof PAGE_SIZES | 'Custom')}
-              style={{
-                width: '100%',
-                padding: 6,
-                marginBottom: 8,
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                fontSize: 12
-              }}
-            >
-              {Object.entries(PAGE_SIZES).map(([key, { label }]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-              <option value='Custom'>Custom Size</option>
-            </select>
-
-            {/* RESTORED CUSTOM SIZE INPUTS */}
-            {pageSize === 'Custom' && (
-              <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-                <input
-                  type='number'
-                  value={customWidth}
-                  onChange={e => setCustomWidth(Number(e.target.value))}
-                  style={{ flex: 1, padding: 6, border: '1px solid #ddd', borderRadius: 4, fontSize: 12 }}
-                  placeholder='W'
-                />
-                <input
-                  type='number'
-                  value={customHeight}
-                  onChange={e => setCustomHeight(Number(e.target.value))}
-                  style={{ flex: 1, padding: 6, border: '1px solid #ddd', borderRadius: 4, fontSize: 12 }}
-                  placeholder='H'
-                />
-              </div>
-            )}
-
-            <select
-              value={orientation}
-              onChange={e => setOrientation(e.target.value as 'portrait' | 'landscape')}
-              style={{
-                width: '100%',
-                padding: 6,
-                marginBottom: 12,
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                fontSize: 12
-              }}
-            >
-              <option value='portrait'>Portrait</option>
-              <option value='landscape'>Landscape</option>
-            </select>
-
-            <h4 style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4 }}>Actions</h4>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-              <button
-                onClick={undo}
-                disabled={historyIndex === 0}
-                style={{
-                  flex: 1,
-                  padding: 6,
-                  background: historyIndex === 0 ? '#e0e0e0' : '#f5f5f5',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  cursor: historyIndex === 0 ? 'not-allowed' : 'pointer',
-                  fontSize: 12
-                }}
-              >
-                ↶ Undo
-              </button>
-              <button
-                onClick={redo}
-                disabled={historyIndex >= history.length - 1}
-                style={{
-                  flex: 1,
-                  padding: 6,
-                  background: historyIndex >= history.length - 1 ? '#e0e0e0' : '#f5f5f5',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  cursor: historyIndex >= history.length - 1 ? 'not-allowed' : 'pointer',
-                  fontSize: 12
-                }}
-              >
-                ↷ Redo
-              </button>
-            </div>
-
-            <input
-              value={templateName}
-              onChange={e => setTemplateName(e.target.value)}
-              style={{
-                width: '100%',
-                padding: 8,
-                marginBottom: 8,
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                fontSize: 13
-              }}
-            />
-            <button
-              onClick={saveTemplate}
-              style={{
-                width: '100%',
-                padding: 10,
-                background: '#2196F3',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 13,
-                fontWeight: 500,
-                marginBottom: 8
-              }}
-            >
-              Save Template
-            </button>
-            <button
-              onClick={exportTemplate}
-              style={{
-                width: '100%',
-                padding: 8,
-                background: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 12,
-                marginBottom: 8
-              }}
-            >
-              💾 Export Template
-            </button>
-            <input type='file' accept='.json' onChange={importTemplate} style={{ display: 'none' }} id='import-input' />
-            <button
-              onClick={() => document.getElementById('import-input')?.click()}
-              style={{
-                width: '100%',
-                padding: 8,
-                background: '#FF9800',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 12
-              }}
-            >
-              📂 Import Template
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* CENTER CANVAS */}
       <div style={{ flex: 1, position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <h3 style={{ margin: 0, fontSize: 16 }}>
@@ -1446,28 +841,6 @@ const DesignerPage = () => {
             )
           </h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* PREVIEW MODE BUTTON */}
-            <button
-              onClick={() => {
-                setIsPreviewMode(!isPreviewMode)
-                setSelectedItem(null)
-                setEditingItem(null)
-              }}
-              style={{
-                padding: '6px 12px',
-                background: isPreviewMode ? '#4CAF50' : '#2196F3',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                fontSize: 12,
-                marginRight: 16
-              }}
-            >
-              {isPreviewMode ? '✏️ Exit Preview' : '👁️ Preview Mode'}
-            </button>
-
             <button
               onClick={() => setZoom(prev => Math.max(prev - 10, 50))}
               disabled={zoom <= 50}
@@ -1513,6 +886,8 @@ const DesignerPage = () => {
           </div>
         </div>
 
+        <button onClick={() => refetch()}>refetch</button>
+
         <div
           style={{
             overflow: 'auto',
@@ -1545,11 +920,10 @@ const DesignerPage = () => {
               transformOrigin: 'top center',
               cursor: dragState.isDragging ? 'grabbing' : 'default',
               overflow: 'hidden',
-              backgroundImage:
-                snapToGrid && !isPreviewMode
-                  ? 'linear-gradient(to right, #e8e8e8 1px, transparent 1px), linear-gradient(to bottom, #e8e8e8 1px, transparent 1px)'
-                  : 'none',
-              backgroundSize: snapToGrid && !isPreviewMode ? `${GRID_SIZE}px ${GRID_SIZE}px` : 'auto'
+              backgroundImage: snapToGrid
+                ? 'linear-gradient(to right, #e8e8e8 1px, transparent 1px), linear-gradient(to bottom, #e8e8e8 1px, transparent 1px)'
+                : 'none',
+              backgroundSize: snapToGrid ? `${GRID_SIZE}px ${GRID_SIZE}px` : 'auto'
             }}
           >
             {backgroundImage && (
@@ -1561,17 +935,16 @@ const DesignerPage = () => {
                   right: 0,
                   bottom: 0,
                   backgroundImage: `url(${backgroundImage})`,
-                  backgroundSize: `${canvasWidth}px ${singlePageHeight}px`,
-                  backgroundRepeat: 'repeat-y',
-                  backgroundPosition: 'top center',
+                  backgroundSize: '100% 100%',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'center',
                   opacity: backgroundOpacity,
                   pointerEvents: 'none',
                   zIndex: 0
                 }}
               />
             )}
-
-            {showSafeMargins && !isPreviewMode && (
+            {showSafeMargins && (
               <div
                 style={{
                   position: 'absolute',
@@ -1592,43 +965,6 @@ const DesignerPage = () => {
               </div>
             )}
 
-            {/* PAGE BREAK CUT LINES */}
-            {Array.from({ length: totalPages - 1 }).map((_, index) => {
-              const breakY = singlePageHeight * (index + 1)
-
-              return (
-                <div
-                  key={`page-break-${index}`}
-                  style={{
-                    position: 'absolute',
-                    top: breakY,
-                    left: 0,
-                    right: 0,
-                    height: 2,
-                    borderTop: '2px dashed #ff5252',
-                    zIndex: 0,
-                    pointerEvents: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <span
-                    style={{
-                      background: '#ff5252',
-                      color: 'white',
-                      padding: '2px 8px',
-                      fontSize: 10,
-                      borderRadius: 10,
-                      fontWeight: 'bold'
-                    }}
-                  >
-                    Page {index + 2} Break
-                  </span>
-                </div>
-              )
-            })}
-
             {[...placed]
               .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
               .map(p => (
@@ -1636,7 +972,6 @@ const DesignerPage = () => {
                   key={p.id}
                   draggable={false}
                   onMouseDown={e => {
-                    if (isPreviewMode) return
                     e.stopPropagation()
                     if (editingItem === p.id) return
                     setDragState({
@@ -1649,12 +984,10 @@ const DesignerPage = () => {
                     })
                   }}
                   onClick={e => {
-                    if (isPreviewMode) return
                     e.stopPropagation()
                     setSelectedItem(p.id)
                   }}
                   onDoubleClick={e => {
-                    if (isPreviewMode) return
                     e.stopPropagation()
                     setEditingItem(p.id)
                   }}
@@ -1666,21 +999,11 @@ const DesignerPage = () => {
                     left: p.x,
                     top: p.y,
                     fontSize: p.fontSize,
-                    padding: '4px 8px',
-                    cursor: isPreviewMode ? 'default' : editingItem === p.id ? 'text' : 'grab',
+                    cursor: editingItem === p.id ? 'text' : 'grab',
                     userSelect: editingItem === p.id ? 'auto' : 'none',
-                    borderRadius: '4px',
-                    transition: 'all 0.2s ease',
-                    opacity: p.opacity !== undefined ? p.opacity : 1,
-                    transform: `rotate(${p.rotation || 0}deg)`,
-                    zIndex: p.zIndex || 10,
-
-                    // BORDER TOGGLE LOGIC
-                    border: isPreviewMode
-                      ? p.borderWidth
-                        ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
-                        : 'transparent'
-                      : dragState.itemId === p.id
+                    padding: '4px 8px',
+                    border:
+                      dragState.itemId === p.id
                         ? '2px solid #2196F3'
                         : selectedItem === p.id
                           ? '2px solid #4CAF50'
@@ -1688,17 +1011,18 @@ const DesignerPage = () => {
                             ? '1px solid #2196F3'
                             : p.borderWidth
                               ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
-                              : showBorders
-                                ? '1px dashed #ccc'
-                                : '1px solid transparent',
-
-                    background: isPreviewMode
-                      ? 'transparent'
-                      : dragState.itemId === p.id
+                              : '1px dashed #ccc',
+                    background:
+                      dragState.itemId === p.id
                         ? 'rgba(33, 150, 243, 0.1)'
                         : hoveredItem === p.id
                           ? 'rgba(33, 150, 243, 0.05)'
-                          : 'transparent'
+                          : 'transparent',
+                    borderRadius: '4px',
+                    transition: 'all 0.2s ease',
+                    opacity: p.opacity !== undefined ? p.opacity : 1,
+                    transform: `rotate(${p.rotation || 0}deg)`,
+                    zIndex: p.zIndex || 10
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
@@ -1825,8 +1149,7 @@ const DesignerPage = () => {
                     )}
                   </div>
 
-                  {/* DELETE BUTTON */}
-                  {hoveredItem === p.id && !isPreviewMode && (
+                  {hoveredItem === p.id && (
                     <span
                       onClick={e => {
                         e.stopPropagation()
@@ -1857,44 +1180,214 @@ const DesignerPage = () => {
                     </span>
                   )}
 
-                  {/* OPTIMIZED DRAG HANDLES ARRAY MAPPING */}
-                  {hoveredItem === p.id &&
-                    !isPreviewMode &&
-                    (p.type === 'shape' || p.type === 'image' || p.type === 'text') && (
-                      <>
-                        {RESIZE_HANDLES.map(({ handle, top, bottom, left, right, transform, cursor }) => (
-                          <div
-                            key={handle}
-                            onMouseDown={e => {
-                              e.stopPropagation()
-                              setResizeState({
-                                isResizing: true,
-                                itemId: p.id,
-                                handle,
-                                startX: e.clientX,
-                                startY: e.clientY,
-                                startWidth: p.width || 200,
-                                startHeight: p.height || 100
-                              })
-                            }}
-                            style={{
-                              position: 'absolute',
-                              top,
-                              bottom,
-                              left,
-                              right,
-                              transform,
-                              width: RESIZE_HANDLE_SIZE,
-                              height: RESIZE_HANDLE_SIZE,
-                              background: '#2196F3',
-                              cursor,
-                              borderRadius: '50%',
-                              border: '2px solid white'
-                            }}
-                          />
-                        ))}
-                      </>
-                    )}
+                  {hoveredItem === p.id && (p.type === 'shape' || p.type === 'image' || p.type === 'text') && (
+                    <>
+                      <div
+                        onMouseDown={e => {
+                          e.stopPropagation()
+                          setResizeState({
+                            isResizing: true,
+                            itemId: p.id,
+                            handle: 'se',
+                            startX: e.clientX,
+                            startY: e.clientY,
+                            startWidth: p.width || 200,
+                            startHeight: p.height || 100
+                          })
+                        }}
+                        style={{
+                          position: 'absolute',
+                          right: -4,
+                          bottom: -4,
+                          width: RESIZE_HANDLE_SIZE,
+                          height: RESIZE_HANDLE_SIZE,
+                          background: '#2196F3',
+                          cursor: 'se-resize',
+                          borderRadius: '50%',
+                          border: '2px solid white'
+                        }}
+                      />
+                      <div
+                        onMouseDown={e => {
+                          e.stopPropagation()
+                          setResizeState({
+                            isResizing: true,
+                            itemId: p.id,
+                            handle: 'sw',
+                            startX: e.clientX,
+                            startY: e.clientY,
+                            startWidth: p.width || 200,
+                            startHeight: p.height || 100
+                          })
+                        }}
+                        style={{
+                          position: 'absolute',
+                          left: -4,
+                          bottom: -4,
+                          width: RESIZE_HANDLE_SIZE,
+                          height: RESIZE_HANDLE_SIZE,
+                          background: '#2196F3',
+                          cursor: 'sw-resize',
+                          borderRadius: '50%',
+                          border: '2px solid white'
+                        }}
+                      />
+                      <div
+                        onMouseDown={e => {
+                          e.stopPropagation()
+                          setResizeState({
+                            isResizing: true,
+                            itemId: p.id,
+                            handle: 'ne',
+                            startX: e.clientX,
+                            startY: e.clientY,
+                            startWidth: p.width || 200,
+                            startHeight: p.height || 100
+                          })
+                        }}
+                        style={{
+                          position: 'absolute',
+                          right: -4,
+                          top: -4,
+                          width: RESIZE_HANDLE_SIZE,
+                          height: RESIZE_HANDLE_SIZE,
+                          background: '#2196F3',
+                          cursor: 'ne-resize',
+                          borderRadius: '50%',
+                          border: '2px solid white'
+                        }}
+                      />
+                      <div
+                        onMouseDown={e => {
+                          e.stopPropagation()
+                          setResizeState({
+                            isResizing: true,
+                            itemId: p.id,
+                            handle: 'nw',
+                            startX: e.clientX,
+                            startY: e.clientY,
+                            startWidth: p.width || 200,
+                            startHeight: p.height || 100
+                          })
+                        }}
+                        style={{
+                          position: 'absolute',
+                          left: -4,
+                          top: -4,
+                          width: RESIZE_HANDLE_SIZE,
+                          height: RESIZE_HANDLE_SIZE,
+                          background: '#2196F3',
+                          cursor: 'nw-resize',
+                          borderRadius: '50%',
+                          border: '2px solid white'
+                        }}
+                      />
+                      <div
+                        onMouseDown={e => {
+                          e.stopPropagation()
+                          setResizeState({
+                            isResizing: true,
+                            itemId: p.id,
+                            handle: 'n',
+                            startX: e.clientX,
+                            startY: e.clientY,
+                            startWidth: p.width || 200,
+                            startHeight: p.height || 100
+                          })
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: -4,
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: RESIZE_HANDLE_SIZE,
+                          height: RESIZE_HANDLE_SIZE,
+                          background: '#2196F3',
+                          cursor: 'n-resize',
+                          borderRadius: '50%',
+                          border: '2px solid white'
+                        }}
+                      />
+                      <div
+                        onMouseDown={e => {
+                          e.stopPropagation()
+                          setResizeState({
+                            isResizing: true,
+                            itemId: p.id,
+                            handle: 's',
+                            startX: e.clientX,
+                            startY: e.clientY,
+                            startWidth: p.width || 200,
+                            startHeight: p.height || 100
+                          })
+                        }}
+                        style={{
+                          position: 'absolute',
+                          bottom: -4,
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: RESIZE_HANDLE_SIZE,
+                          height: RESIZE_HANDLE_SIZE,
+                          background: '#2196F3',
+                          cursor: 's-resize',
+                          borderRadius: '50%',
+                          border: '2px solid white'
+                        }}
+                      />
+                      <div
+                        onMouseDown={e => {
+                          e.stopPropagation()
+                          setResizeState({
+                            isResizing: true,
+                            itemId: p.id,
+                            handle: 'e',
+                            startX: e.clientX,
+                            startY: e.clientY,
+                            startWidth: p.width || 200,
+                            startHeight: p.height || 100
+                          })
+                        }}
+                        style={{
+                          position: 'absolute',
+                          right: -4,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          width: RESIZE_HANDLE_SIZE,
+                          height: RESIZE_HANDLE_SIZE,
+                          background: '#2196F3',
+                          cursor: 'e-resize',
+                          borderRadius: '50%',
+                          border: '2px solid white'
+                        }}
+                      />
+                      <div
+                        onMouseDown={e => {
+                          e.stopPropagation()
+                          setResizeState({
+                            isResizing: true,
+                            itemId: p.id,
+                            handle: 'w',
+                            startX: e.clientX,
+                            startY: e.clientY,
+                            startWidth: p.width || 200,
+                            startHeight: p.height || 100
+                          })
+                        }}
+                        style={{
+                          position: 'absolute',
+                          left: -4,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          width: RESIZE_HANDLE_SIZE,
+                          height: RESIZE_HANDLE_SIZE,
+                          background: '#2196F3',
+                          cursor: 'w-resize',
+                          borderRadius: '50%',
+                          border: '2px solid white'
+                        }}
+                      />
+                    </>
+                  )}
                 </div>
               ))}
 
@@ -1934,7 +1427,7 @@ const DesignerPage = () => {
         </div>
       </div>
 
-      {selectedItem && !isPreviewMode && (
+      {selectedItem && (
         <PropertiesPanel
           item={placed.find(p => p.id === selectedItem)!}
           updateItemProperty={updateItemProperty}
