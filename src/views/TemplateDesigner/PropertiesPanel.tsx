@@ -2,6 +2,29 @@ import React, { useCallback } from 'react'
 
 import { FONT_FAMILIES, FONT_WEIGHTS } from './designerConstants'
 
+interface PlacedField {
+  id: string
+  type: string
+  x: number
+  y: number
+  width?: number
+  height?: number
+  fontSize?: number
+  fontFamily?: string
+  fontWeight?: string
+  color?: string
+  backgroundColor?: string | null
+  letterSpacing?: number
+  textAlign?: 'left' | 'center' | 'right' | 'justify'
+  opacity?: number
+  rotation?: number
+  borderWidth?: number
+  borderColor?: string
+  borderStyle?: string
+  shapeType?: string
+  tableColumns?: string[]
+}
+
 interface PropertiesPanelProps {
   item: PlacedField
   updateItemProperty: (id: string, property: keyof PlacedField, value: any) => void
@@ -67,7 +90,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         </div>
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-            Color
+            Text Color
           </label>
           <input
             type='color'
@@ -241,6 +264,44 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       {renderTableProperties()}
       {renderTextProperties()}
 
+      {/* --- NEW: Background Color --- */}
+      {(item.type === 'shape' || item.type === 'text' || item.type === 'field') && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+            Background Color
+          </label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              type='color'
+              value={item.backgroundColor || '#ffffff'}
+              onChange={e => updateItemProperty(item.id, 'backgroundColor', e.target.value)}
+              style={{
+                flex: 1,
+                height: 40,
+                padding: 2,
+                border: '1px solid #ddd',
+                borderRadius: 4,
+                cursor: 'pointer'
+              }}
+            />
+            <button
+              onClick={() => updateItemProperty(item.id, 'backgroundColor', null)}
+              style={{
+                padding: '0 12px',
+                background: '#f5f5f5',
+                color: '#333',
+                border: '1px solid #ddd',
+                borderRadius: 4,
+                cursor: 'pointer',
+                fontSize: 12
+              }}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
           Opacity ({((item.opacity ?? 1) * 100).toFixed(0)}%)
@@ -269,7 +330,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         />
       </div>
 
-      {(item.type === 'shape' || item.type === 'text' || item.type === 'field') && (
+      {(item.type === 'shape' || item.type === 'text' || item.type === 'field' || item.type === 'image_field') && (
         <>
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
@@ -283,42 +344,40 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
             />
           </div>
-          {item.borderWidth && item.borderWidth > 0 ? (
-            <>
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                  Border Color
-                </label>
-                <input
-                  type='color'
-                  value={item.borderColor || '#333333'}
-                  onChange={e => updateItemProperty(item.id, 'borderColor', e.target.value)}
-                  style={{
-                    width: '100%',
-                    height: 40,
-                    padding: 2,
-                    border: '1px solid #ddd',
-                    borderRadius: 4,
-                    cursor: 'pointer'
-                  }}
-                />
-              </div>
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
-                  Border Style
-                </label>
-                <select
-                  value={item.borderStyle || 'solid'}
-                  onChange={e => updateItemProperty(item.id, 'borderStyle', e.target.value as any)}
-                  style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                >
-                  <option value='solid'>Solid</option>
-                  <option value='dashed'>Dashed</option>
-                  <option value='dotted'>Dotted</option>
-                </select>
-              </div>
-            </>
-          ) : null}
+
+          {/* Removed the item.borderWidth > 0 restriction so these are always visible! */}
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Border Color
+            </label>
+            <input
+              type='color'
+              value={item.borderColor || '#333333'}
+              onChange={e => updateItemProperty(item.id, 'borderColor', e.target.value)}
+              style={{
+                width: '100%',
+                height: 40,
+                padding: 2,
+                border: '1px solid #ddd',
+                borderRadius: 4,
+                cursor: 'pointer'
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 500, color: '#666' }}>
+              Border Style
+            </label>
+            <select
+              value={item.borderStyle || 'solid'}
+              onChange={e => updateItemProperty(item.id, 'borderStyle', e.target.value as any)}
+              style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+            >
+              <option value='solid'>Solid</option>
+              <option value='dashed'>Dashed</option>
+              <option value='dotted'>Dotted</option>
+            </select>
+          </div>
         </>
       )}
 

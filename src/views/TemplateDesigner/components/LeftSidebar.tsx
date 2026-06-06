@@ -145,7 +145,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
           <h4 style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4 }}>Fields</h4>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {availableItems
-              .filter(f => f.type === 'field')
+              .filter(f => f.type === 'field' || f.type === 'image_field')
               .map(f => (
                 <div
                   key={f.key}

@@ -1,7 +1,7 @@
-type Field = { key: string; label: string; type: 'field' | 'shape' | 'image' }
+type Field = { key: string; label: string; type: 'field' | 'shape' | 'image' | 'image_field' }
 type PlacedField = {
   id: string
-  type: 'field' | 'text' | 'shape' | 'image'
+  type: 'field' | 'text' | 'shape' | 'image' | 'image_field'
   fieldKey?: string
   content?: string
   shapeType?: 'rectangle' | 'circle' | 'line' | 'dynamic_table' | string
