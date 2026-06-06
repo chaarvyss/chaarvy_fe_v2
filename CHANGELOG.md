@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.14.0...v1.15.0) (2026-06-06)
+
+
+### Features
+
+* **templateDesiner:** AC-60: utilizing available field from backend ([#52](https://github.com/chaarvyss/chaarvy_fe_v2/issues/52)) ([990fed1](https://github.com/chaarvyss/chaarvy_fe_v2/commit/990fed133dc88eb7c3c8486056e7de525a0ae383))
+
 # [1.14.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.13.0...v1.14.0) (2026-06-06)
 
 
