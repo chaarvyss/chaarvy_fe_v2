@@ -2,10 +2,7 @@ import React, { useState } from 'react'
 
 import { Card, Typography } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import ChaarvyDataTable, {
-  ChaarvyTableColumn,
-  EditedDataTableOnSubmitPayload
-} from 'src/reusable_components/Table/ChaarvyDataTable'
+import ChaarvyDataTable, { EditedDataTableOnSubmitPayload } from 'src/reusable_components/Table/ChaarvyDataTable'
 import { useCreateUpdateFeesTypeMutation } from 'src/store/services/adminServices'
 import { useGetFeesTypesListQuery } from 'src/store/services/listServices'
 import BulkProcessStatusModal, {

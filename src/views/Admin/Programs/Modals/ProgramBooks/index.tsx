@@ -5,10 +5,7 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import CascadingSelectors, { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import ChaarvyDataTable, {
-  ChaarvyTableColumn,
-  EditedDataTableOnSubmitPayload
-} from 'src/reusable_components/Table/ChaarvyDataTable'
+import ChaarvyDataTable, { EditedDataTableOnSubmitPayload } from 'src/reusable_components/Table/ChaarvyDataTable'
 import { useLazyGetProgramRelatedBooksOptionsQuery } from 'src/store/services/listServices'
 import {
   CreateProgramBookRequest,
