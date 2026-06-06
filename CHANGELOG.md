@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.13.0...v1.14.0) (2026-06-06)
+
+
+### Features
+
+* **permissions:** AC-57 Permission template ([#51](https://github.com/chaarvyss/chaarvy_fe_v2/issues/51)) ([ee65422](https://github.com/chaarvyss/chaarvy_fe_v2/commit/ee654222c0f808786bbbe573fffc410799a0e25e))
+
 # [1.13.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.12.0...v1.13.0) (2026-06-03)
 
 
