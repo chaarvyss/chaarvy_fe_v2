@@ -1,11 +1,10 @@
-type Field = { key: string; label: string; type: 'field' | 'text' | 'shape' | 'image' }
-
+type Field = { key: string; label: string; type: 'field' | 'shape' | 'image' }
 type PlacedField = {
   id: string
   type: 'field' | 'text' | 'shape' | 'image'
   fieldKey?: string
   content?: string
-  shapeType?: 'rectangle' | 'circle' | 'line' | 'dynamic_table'
+  shapeType?: 'rectangle' | 'circle' | 'line' | 'dynamic_table' | string
   tableColumns?: string[]
   imageUrl?: string
   x: number
@@ -26,7 +25,6 @@ type PlacedField = {
   borderStyle?: 'solid' | 'dashed' | 'dotted'
   visible?: boolean
 }
-
 type DragState = {
   isDragging: boolean
   itemId: string | null
@@ -38,7 +36,7 @@ type DragState = {
 type ResizeState = {
   isResizing: boolean
   itemId: string | null
-  handle: 'se' | 'sw' | 'ne' | 'nw' | 'n' | 's' | 'e' | 'w' | null
+  handle: string | null
   startX: number
   startY: number
   startWidth: number
@@ -66,4 +64,5 @@ type PdfTemplate = {
   template_id?: string
   template_name: string
   template_html: Template
+  available_fields: Field[]
 }
