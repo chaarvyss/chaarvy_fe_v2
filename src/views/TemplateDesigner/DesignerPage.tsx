@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef, ReactNode, useCallback, useMemo } from 'react'
 
+import { useToast, ToastVariants } from 'src/@core/context/toastContext'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
+import OverlaySpinner from 'src/reusable_components/overlaySpinner'
 import { useAddUpdatePdfTemplateMutation, useGetPdfTemplatesQuery } from 'src/store/services/pdfTemplateServices'
 
+import { LeftSidebar } from './components/LeftSidebar'
 import PropertiesPanel from './PropertiesPanel' // Assuming this sits in the same directory
 
 // --- CONSTANTS ---
@@ -77,60 +80,12 @@ const formatHtmlVariables = (html: string) => {
   return temp.innerHTML
 }
 
-// --- TYPES ---
-type Field = { key: string; label: string; type: 'field' | 'shape' | 'image' }
-type PlacedField = any
-type DragState = {
-  isDragging: boolean
-  itemId: string | null
-  startX: number
-  startY: number
-  offsetX: number
-  offsetY: number
-}
-type ResizeState = {
-  isResizing: boolean
-  itemId: string | null
-  handle: string | null
-  startX: number
-  startY: number
-  startWidth: number
-  startHeight: number
-}
-
 const DesignerPage = () => {
-  const availableItems: Field[] = useMemo(
-    () => [
-      { key: 'studentName', label: 'Student Name', type: 'field' },
-      { key: 'fatherName', label: 'Father Name', type: 'field' },
-      { key: 'admission_number', label: 'Admission Number', type: 'field' },
-      { key: 'collegeName', label: 'College Name', type: 'field' },
-      { key: 'campus_name', label: 'Campus Name', type: 'field' },
-      { key: 'gender', label: 'Gender', type: 'field' },
-      { key: 'group', label: 'Group', type: 'field' },
-      { key: 'segment', label: 'Segment', type: 'field' },
-      { key: 'medium', label: 'Medium', type: 'field' },
-      { key: 'section', label: 'Section', type: 'field' },
-      { key: 'dob', label: 'Date of Birth', type: 'field' },
-      { key: 'admissionDate', label: 'Admission Date', type: 'field' },
-      { key: 'receipt_number', label: 'Receipt Number', type: 'field' },
-      { key: 'transaction_id', label: 'Transaction ID', type: 'field' },
-      { key: 'date_of_payment', label: 'Date of Payment', type: 'field' },
-      { key: 'prepared_by', label: 'Prepared By', type: 'field' },
-      { key: 'printed_on', label: 'Printed On', type: 'field' },
-      { key: 'text', label: 'Text Label', type: 'shape' },
-      { key: 'rectangle', label: 'Rectangle', type: 'shape' },
-      { key: 'circle', label: 'Circle', type: 'shape' },
-      { key: 'line', label: 'Line', type: 'shape' },
-      { key: 'dynamic_table', label: 'Dynamic Table Area', type: 'shape' },
-      { key: 'logo', label: 'Logo/Image', type: 'image' }
-    ],
-    []
-  )
-
   // --- API ---
   const { data: pdfTemplates } = useGetPdfTemplatesQuery(undefined, { refetchOnMountOrArgChange: true })
-  const [savePdfTemplate] = useAddUpdatePdfTemplateMutation()
+  const [savePdfTemplate, { isLoading: isSaving }] = useAddUpdatePdfTemplateMutation()
+
+  const { triggerToast } = useToast()
 
   // --- STATE ---
   const [placed, setPlaced] = useState<PlacedField[]>([])
@@ -184,6 +139,26 @@ const DesignerPage = () => {
   const [history, setHistory] = useState<PlacedField[][]>([[]])
   const [historyIndex, setHistoryIndex] = useState(0)
   const [clipboard, setClipboard] = useState<PlacedField | null>(null)
+
+  const get_available_fields = () => {
+    const selected_template = (pdfTemplates ?? []).find(each => each.template_id == selectedTemplateId)
+    if (!selected_template) return []
+
+    return selected_template.available_fields ?? []
+  }
+
+  const availableItems: Field[] = useMemo(
+    () => [
+      { key: 'text', label: 'Text Label', type: 'shape' },
+      { key: 'rectangle', label: 'Rectangle', type: 'shape' },
+      { key: 'circle', label: 'Circle', type: 'shape' },
+      { key: 'line', label: 'Line', type: 'shape' },
+      { key: 'dynamic_table', label: 'Dynamic Table Area', type: 'shape' },
+      { key: 'logo', label: 'Logo/Image', type: 'image' },
+      ...get_available_fields()
+    ],
+    [selectedTemplateId]
+  )
 
   // --- MATH & DIMENSIONS ---
   const getCanvasDimensions = useCallback(() => {
@@ -832,10 +807,17 @@ const DesignerPage = () => {
       },
       placed
     }
-    savePdfTemplate({ template_id: selectedTemplateId, template_name: templateName, template_html: payload })
+    savePdfTemplate({
+      template_id: selectedTemplateId,
+      template_name: templateName,
+      template_html: payload,
+      available_fields: get_available_fields()
+    })
       .unwrap()
-      .then(() => alert('Template saved successfully!'))
-      .catch(e => console.log(e))
+      .then(() => {
+        triggerToast('Template saved successfully', { variants: ToastVariants.SUCCESS })
+      })
+      .catch(e => triggerToast(e, { variants: ToastVariants.ERROR }))
   }
 
   const exportTemplate = useCallback(() => {
@@ -890,1060 +872,644 @@ const DesignerPage = () => {
   }, [])
 
   return (
-    <div style={{ display: 'flex', gap: 20, padding: 20, position: 'relative' }}>
-      {/* FLOATING TEXT PROPERTIES EDITOR */}
-      {editingSpan && (
-        <div
-          style={{
-            position: 'absolute',
-            right: 280,
-            top: 20,
-            width: 240,
-            background: 'white',
-            padding: 16,
-            border: '1px solid #ccc',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            zIndex: 2000,
-            borderRadius: 8
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <h4 style={{ margin: 0, fontSize: 14, color: '#333' }}>Variable Settings</h4>
-            <button
-              onClick={() => setEditingSpan(null)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#999' }}
-            >
-              ×
-            </button>
-          </div>
-          <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Text Color</label>
-          <input
-            type='color'
-            style={{ width: '100%', marginBottom: 12, cursor: 'pointer' }}
-            onChange={e => updateSpanStyle('color', e.target.value)}
-          />
-          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Size (px)</label>
-              <input
-                type='number'
-                placeholder='e.g. 14'
-                style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                onChange={e => updateSpanStyle('fontSize', `${e.target.value}px`)}
-              />
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Weight</label>
-              <select
-                style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-                onChange={e => updateSpanStyle('fontWeight', e.target.value)}
-              >
-                <option value='normal'>Normal</option>
-                <option value='bold'>Bold</option>
-                <option value='600'>Semi-Bold</option>
-              </select>
-            </div>
-          </div>
-          <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Font Family</label>
-          <select
-            style={{ width: '100%', padding: 6, marginBottom: 12, border: '1px solid #ddd', borderRadius: 4 }}
-            onChange={e => updateSpanStyle('fontFamily', e.target.value)}
+    <>
+      {isSaving && <OverlaySpinner />}
+      <div style={{ display: 'flex', gap: 20, padding: 20, position: 'relative' }}>
+        {/* FLOATING TEXT PROPERTIES EDITOR */}
+        {editingSpan && (
+          <div
+            style={{
+              position: 'absolute',
+              right: 280,
+              top: 20,
+              width: 240,
+              background: 'white',
+              padding: 16,
+              border: '1px solid #ccc',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              zIndex: 2000,
+              borderRadius: 8
+            }}
           >
-            <option value='inherit'>Inherit from Box</option>
-            <option value='Arial, sans-serif'>Arial</option>
-            <option value="'Times New Roman', serif">Times New Roman</option>
-            <option value="'Courier New', monospace">Courier</option>
-            <option value='Georgia, serif'>Georgia</option>
-          </select>
-          <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Font Style</label>
-          <select
-            style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
-            onChange={e => updateSpanStyle('fontStyle', e.target.value)}
-          >
-            <option value='normal'>Normal</option>
-            <option value='italic'>Italic</option>
-          </select>
-        </div>
-      )}
-
-      {/* LEFT SIDEBAR */}
-      <div
-        style={{
-          width: showSidebar ? 260 : 60,
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          position: 'relative',
-          paddingRight: 10
-        }}
-      >
-        <button
-          onClick={() => setShowSidebar(!showSidebar)}
-          style={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-            padding: '4px 8px',
-            background: '#2196F3',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer',
-            fontSize: 12,
-            zIndex: 10
-          }}
-        >
-          {showSidebar ? '◀' : '▶'}
-        </button>
-
-        {showSidebar && (
-          <>
-            <h3 style={{ marginTop: 0 }}>Template</h3>
-            <select
-              value={selectedTemplateId || ''}
-              onChange={handleTemplateChange}
-              style={{
-                width: '100%',
-                padding: 8,
-                marginBottom: 16,
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                fontSize: 13,
-                cursor: 'pointer'
-              }}
-            >
-              <option value=''>+ Create New Template</option>
-              {pdfTemplates?.map((t: any) => (
-                <option key={t.template_id} value={t.template_id}>
-                  {t.template_name}
-                </option>
-              ))}
-            </select>
-            <hr style={{ margin: '16px 0', borderTop: '1px solid #ddd' }} />
-
-            <h3 style={{ marginTop: 0 }}>Elements</h3>
-            <h4 style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4 }}>Fields</h4>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {availableItems
-                .filter(f => f.type === 'field')
-                .map(f => (
-                  <div
-                    key={f.key}
-                    draggable
-                    onDragStart={e => handleDragStart(e, f)}
-                    style={{
-                      padding: '6px 8px',
-                      border: '1px solid #ddd',
-                      cursor: 'grab',
-                      background: '#f9f9f9',
-                      borderRadius: 4,
-                      fontSize: 12,
-                      flex: '1 1 45%'
-                    }}
-                  >
-                    {f.label}
-                  </div>
-                ))}
-            </div>
-
-            <h4
-              style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4, marginTop: 16 }}
-            >
-              Shapes
-            </h4>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-              {availableItems
-                .filter(f => f.type === 'shape')
-                .map(f => (
-                  <div
-                    key={f.key}
-                    draggable
-                    onDragStart={e => handleDragStart(e, f)}
-                    style={{
-                      padding: 8,
-                      cursor: 'grab',
-                      background: '#f9f9f9',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flex: '1 1 40%',
-                      borderRadius: 4,
-                      minHeight: 50,
-                      gap: 4,
-                      border: '1px solid #ddd'
-                    }}
-                  >
-                    {f.key === 'text' && <span style={{ fontSize: 16, color: '#333', fontWeight: '500' }}>abc</span>}
-                    {f.key === 'rectangle' && <div style={{ width: 20, height: 14, border: '2px solid #333' }} />}
-                    {f.key === 'circle' && (
-                      <div style={{ width: 18, height: 18, border: '2px solid #333', borderRadius: '50%' }} />
-                    )}
-                    {f.key === 'line' && <div style={{ width: 24, height: 2, background: '#333' }} />}
-                    {f.key === 'dynamic_table' && (
-                      <div
-                        style={{
-                          width: 24,
-                          height: 16,
-                          border: '2px dashed #2196F3',
-                          background: 'rgba(33, 150, 243, 0.1)'
-                        }}
-                      />
-                    )}
-                    <span style={{ fontSize: 10, textAlign: 'center' }}>{f.label}</span>
-                  </div>
-                ))}
-            </div>
-
-            <h4
-              style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4, marginTop: 16 }}
-            >
-              Images
-            </h4>
-            {availableItems
-              .filter(f => f.type === 'image')
-              .map(f => (
-                <div
-                  key={f.key}
-                  draggable
-                  onDragStart={e => handleDragStart(e, f)}
-                  style={{
-                    padding: '6px 8px',
-                    border: '1px solid #ddd',
-                    cursor: 'grab',
-                    background: '#f9f9f9',
-                    borderRadius: 4,
-                    fontSize: 12
-                  }}
-                >
-                  {f.label}
-                </div>
-              ))}
-            <input
-              ref={fileInputRef}
-              type='file'
-              accept='image/*'
-              onChange={handleImageUpload}
-              style={{ display: 'none' }}
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                width: '100%',
-                padding: '6px',
-                border: '1px solid #2196F3',
-                background: 'white',
-                color: '#2196F3',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 12,
-                marginTop: 8
-              }}
-            >
-              📁 Upload Image
-            </button>
-
-            <h4
-              style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4, marginTop: 20 }}
-            >
-              Canvas Settings
-            </h4>
-            <div style={{ background: '#f9f9f9', padding: 12, borderRadius: 6, border: '1px solid #eee' }}>
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontSize: 13,
-                  marginBottom: 12,
-                  cursor: 'pointer'
-                }}
-              >
-                <input type='checkbox' checked={snapToGrid} onChange={e => setSnapToGrid(e.target.checked)} /> Snap to
-                Grid (20px)
-              </label>
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontSize: 13,
-                  marginBottom: 16,
-                  cursor: 'pointer'
-                }}
-              >
-                <input type='checkbox' checked={showSafeMargins} onChange={e => setShowSafeMargins(e.target.checked)} />{' '}
-                Show Print Safe Area
-              </label>
-
-              {/* --- NEW CHECKBOX FOR HIDING BORDERS --- */}
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontSize: 13,
-                  marginBottom: 16,
-                  cursor: 'pointer'
-                }}
-              >
-                <input type='checkbox' checked={showBorders} onChange={e => setShowBorders(e.target.checked)} /> Show
-                Element Outlines
-              </label>
-
-              <input
-                ref={bgInputRef}
-                type='file'
-                accept='image/*'
-                onChange={handleBackgroundUpload}
-                style={{ display: 'none' }}
-              />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <h4 style={{ margin: 0, fontSize: 14, color: '#333' }}>Variable Settings</h4>
               <button
-                onClick={() => bgInputRef.current?.click()}
+                onClick={() => setEditingSpan(null)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#999' }}
+              >
+                ×
+              </button>
+            </div>
+            <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Text Color</label>
+            <input
+              type='color'
+              style={{ width: '100%', marginBottom: 12, cursor: 'pointer' }}
+              onChange={e => updateSpanStyle('color', e.target.value)}
+            />
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Size (px)</label>
+                <input
+                  type='number'
+                  placeholder='e.g. 14'
+                  style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+                  onChange={e => updateSpanStyle('fontSize', `${e.target.value}px`)}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Weight</label>
+                <select
+                  style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+                  onChange={e => updateSpanStyle('fontWeight', e.target.value)}
+                >
+                  <option value='normal'>Normal</option>
+                  <option value='bold'>Bold</option>
+                  <option value='600'>Semi-Bold</option>
+                </select>
+              </div>
+            </div>
+            <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Font Family</label>
+            <select
+              style={{ width: '100%', padding: 6, marginBottom: 12, border: '1px solid #ddd', borderRadius: 4 }}
+              onChange={e => updateSpanStyle('fontFamily', e.target.value)}
+            >
+              <option value='inherit'>Inherit from Box</option>
+              <option value='Arial, sans-serif'>Arial</option>
+              <option value="'Times New Roman', serif">Times New Roman</option>
+              <option value="'Courier New', monospace">Courier</option>
+              <option value='Georgia, serif'>Georgia</option>
+            </select>
+            <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: '#666' }}>Font Style</label>
+            <select
+              style={{ width: '100%', padding: 6, border: '1px solid #ddd', borderRadius: 4 }}
+              onChange={e => updateSpanStyle('fontStyle', e.target.value)}
+            >
+              <option value='normal'>Normal</option>
+              <option value='italic'>Italic</option>
+            </select>
+          </div>
+        )}
+
+        {/* LEFT SIDEBAR */}
+        <LeftSidebar
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          pdfTemplates={pdfTemplates ?? []}
+          selectedTemplateId={selectedTemplateId}
+          handleTemplateChange={handleTemplateChange}
+          availableItems={availableItems}
+          templateName={templateName}
+          setTemplateName={setTemplateName}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          orientation={orientation}
+          setOrientation={setOrientation}
+          undo={undo}
+          redo={redo}
+          saveTemplate={saveTemplate}
+          exportTemplate={exportTemplate}
+          importTemplate={importTemplate}
+          snapToGrid={snapToGrid}
+          setSnapToGrid={setSnapToGrid}
+          showSafeMargins={showSafeMargins}
+          setShowSafeMargins={setShowSafeMargins}
+          showBorders={showBorders}
+          setShowBorders={setShowBorders}
+          handleImageUpload={handleImageUpload}
+          handleBackgroundUpload={handleBackgroundUpload}
+          backgroundImage={backgroundImage}
+          setBackgroundImage={setBackgroundImage}
+          backgroundOpacity={backgroundOpacity}
+          setBackgroundOpacity={setBackgroundOpacity}
+          handleDragStart={handleDragStart}
+          customWidth={customWidth}
+          setCustomHeight={setCustomHeight}
+          customHeight={customHeight}
+          setCustomWidth={setCustomWidth}
+          totalPages={totalPages}
+          setTotalPages={setTotalPages}
+          historyIndex={historyIndex}
+        />
+
+        {/* CENTER CANVAS */}
+        <div style={{ flex: 1, position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <h3 style={{ margin: 0, fontSize: 16 }}>
+              Canvas (
+              {pageSize === 'Custom'
+                ? `Custom (${customWidth} × ${customHeight} px)`
+                : PAGE_SIZES[pageSize as keyof typeof PAGE_SIZES]?.label}
+              )
+            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {/* PREVIEW MODE BUTTON */}
+              <button
+                onClick={() => {
+                  setIsPreviewMode(!isPreviewMode)
+                  setSelectedItem(null)
+                  setEditingItem(null)
+                }}
                 style={{
-                  width: '100%',
-                  padding: '8px',
-                  background: 'white',
-                  border: '1px solid #9C27B0',
-                  color: '#9C27B0',
+                  padding: '6px 12px',
+                  background: isPreviewMode ? '#4CAF50' : '#2196F3',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: 12,
+                  marginRight: 16
+                }}
+              >
+                {isPreviewMode ? '✏️ Exit Preview' : '👁️ Preview Mode'}
+              </button>
+
+              <button
+                onClick={() => setZoom(prev => Math.max(prev - 10, 50))}
+                disabled={zoom <= 50}
+                style={{
+                  padding: '4px 10px',
+                  background: zoom <= 50 ? '#e0e0e0' : '#f5f5f5',
+                  border: '1px solid #ddd',
+                  borderRadius: 4,
+                  cursor: zoom <= 50 ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                −
+              </button>
+              <button
+                onClick={() => setZoom(100)}
+                style={{
+                  padding: '4px 10px',
+                  background: '#f5f5f5',
+                  border: '1px solid #ddd',
                   borderRadius: 4,
                   cursor: 'pointer',
                   fontSize: 12,
-                  fontWeight: 600
+                  minWidth: 50
                 }}
               >
-                🖼️ Set Background Watermark
-              </button>
-              {backgroundImage && (
-                <div style={{ marginTop: 12, padding: 8, background: 'rgba(156, 39, 176, 0.05)', borderRadius: 4 }}>
-                  <label style={{ display: 'block', marginBottom: 4, fontSize: 11, fontWeight: 600 }}>
-                    Background Opacity ({Math.round(backgroundOpacity * 100)}%)
-                  </label>
-                  <input
-                    type='range'
-                    min='0.05'
-                    max='1'
-                    step='0.05'
-                    value={backgroundOpacity}
-                    onChange={e => setBackgroundOpacity(Number(e.target.value))}
-                    style={{ width: '100%' }}
-                  />
-                  <button
-                    onClick={() => setBackgroundImage(null)}
-                    style={{
-                      marginTop: 4,
-                      width: '100%',
-                      padding: 4,
-                      color: '#f44336',
-                      background: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: 11
-                    }}
-                  >
-                    Remove Background
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <hr style={{ margin: '16px 0', borderTop: '1px solid #ddd' }} />
-
-            <h4 style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4 }}>
-              Document Setup
-            </h4>
-
-            {/* MULTI-PAGE CONTROLS */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 16,
-                background: '#fff',
-                padding: 8,
-                border: '1px solid #ddd',
-                borderRadius: 4
-              }}
-            >
-              <span style={{ fontSize: 13, fontWeight: 500 }}>Total Pages</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <button
-                  onClick={() => setTotalPages(Math.max(1, totalPages - 1))}
-                  style={{ padding: '2px 8px', cursor: 'pointer' }}
-                >
-                  −
-                </button>
-                <span style={{ fontSize: 13, minWidth: 20, textAlign: 'center' }}>{totalPages}</span>
-                <button onClick={() => setTotalPages(totalPages + 1)} style={{ padding: '2px 8px', cursor: 'pointer' }}>
-                  +
-                </button>
-              </div>
-            </div>
-
-            <select
-              value={pageSize}
-              onChange={e => setPageSize(e.target.value as keyof typeof PAGE_SIZES | 'Custom')}
-              style={{
-                width: '100%',
-                padding: 6,
-                marginBottom: 8,
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                fontSize: 12
-              }}
-            >
-              {Object.entries(PAGE_SIZES).map(([key, { label }]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-              <option value='Custom'>Custom Size</option>
-            </select>
-
-            {/* RESTORED CUSTOM SIZE INPUTS */}
-            {pageSize === 'Custom' && (
-              <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-                <input
-                  type='number'
-                  value={customWidth}
-                  onChange={e => setCustomWidth(Number(e.target.value))}
-                  style={{ flex: 1, padding: 6, border: '1px solid #ddd', borderRadius: 4, fontSize: 12 }}
-                  placeholder='W'
-                />
-                <input
-                  type='number'
-                  value={customHeight}
-                  onChange={e => setCustomHeight(Number(e.target.value))}
-                  style={{ flex: 1, padding: 6, border: '1px solid #ddd', borderRadius: 4, fontSize: 12 }}
-                  placeholder='H'
-                />
-              </div>
-            )}
-
-            <select
-              value={orientation}
-              onChange={e => setOrientation(e.target.value as 'portrait' | 'landscape')}
-              style={{
-                width: '100%',
-                padding: 6,
-                marginBottom: 12,
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                fontSize: 12
-              }}
-            >
-              <option value='portrait'>Portrait</option>
-              <option value='landscape'>Landscape</option>
-            </select>
-
-            <h4 style={{ fontSize: 13, color: '#666', borderBottom: '1px solid #eee', paddingBottom: 4 }}>Actions</h4>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-              <button
-                onClick={undo}
-                disabled={historyIndex === 0}
-                style={{
-                  flex: 1,
-                  padding: 6,
-                  background: historyIndex === 0 ? '#e0e0e0' : '#f5f5f5',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  cursor: historyIndex === 0 ? 'not-allowed' : 'pointer',
-                  fontSize: 12
-                }}
-              >
-                ↶ Undo
+                {zoom}%
               </button>
               <button
-                onClick={redo}
-                disabled={historyIndex >= history.length - 1}
+                onClick={() => setZoom(prev => Math.min(prev + 10, 200))}
+                disabled={zoom >= 200}
                 style={{
-                  flex: 1,
-                  padding: 6,
-                  background: historyIndex >= history.length - 1 ? '#e0e0e0' : '#f5f5f5',
+                  padding: '4px 10px',
+                  background: zoom >= 200 ? '#e0e0e0' : '#f5f5f5',
                   border: '1px solid #ddd',
                   borderRadius: 4,
-                  cursor: historyIndex >= history.length - 1 ? 'not-allowed' : 'pointer',
-                  fontSize: 12
+                  cursor: zoom >= 200 ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold'
                 }}
               >
-                ↷ Redo
+                +
               </button>
             </div>
-
-            <input
-              value={templateName}
-              onChange={e => setTemplateName(e.target.value)}
-              style={{
-                width: '100%',
-                padding: 8,
-                marginBottom: 8,
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                fontSize: 13
-              }}
-            />
-            <button
-              onClick={saveTemplate}
-              style={{
-                width: '100%',
-                padding: 10,
-                background: '#2196F3',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 13,
-                fontWeight: 500,
-                marginBottom: 8
-              }}
-            >
-              Save Template
-            </button>
-            <button
-              onClick={exportTemplate}
-              style={{
-                width: '100%',
-                padding: 8,
-                background: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 12,
-                marginBottom: 8
-              }}
-            >
-              💾 Export Template
-            </button>
-            <input type='file' accept='.json' onChange={importTemplate} style={{ display: 'none' }} id='import-input' />
-            <button
-              onClick={() => document.getElementById('import-input')?.click()}
-              style={{
-                width: '100%',
-                padding: 8,
-                background: '#FF9800',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 12
-              }}
-            >
-              📂 Import Template
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* CENTER CANVAS */}
-      <div style={{ flex: 1, position: 'relative' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <h3 style={{ margin: 0, fontSize: 16 }}>
-            Canvas (
-            {pageSize === 'Custom'
-              ? `Custom (${customWidth} × ${customHeight} px)`
-              : PAGE_SIZES[pageSize as keyof typeof PAGE_SIZES]?.label}
-            )
-          </h3>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* PREVIEW MODE BUTTON */}
-            <button
-              onClick={() => {
-                setIsPreviewMode(!isPreviewMode)
-                setSelectedItem(null)
-                setEditingItem(null)
-              }}
-              style={{
-                padding: '6px 12px',
-                background: isPreviewMode ? '#4CAF50' : '#2196F3',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                fontSize: 12,
-                marginRight: 16
-              }}
-            >
-              {isPreviewMode ? '✏️ Exit Preview' : '👁️ Preview Mode'}
-            </button>
-
-            <button
-              onClick={() => setZoom(prev => Math.max(prev - 10, 50))}
-              disabled={zoom <= 50}
-              style={{
-                padding: '4px 10px',
-                background: zoom <= 50 ? '#e0e0e0' : '#f5f5f5',
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                cursor: zoom <= 50 ? 'not-allowed' : 'pointer',
-                fontWeight: 'bold'
-              }}
-            >
-              −
-            </button>
-            <button
-              onClick={() => setZoom(100)}
-              style={{
-                padding: '4px 10px',
-                background: '#f5f5f5',
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 12,
-                minWidth: 50
-              }}
-            >
-              {zoom}%
-            </button>
-            <button
-              onClick={() => setZoom(prev => Math.min(prev + 10, 200))}
-              disabled={zoom >= 200}
-              style={{
-                padding: '4px 10px',
-                background: zoom >= 200 ? '#e0e0e0' : '#f5f5f5',
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                cursor: zoom >= 200 ? 'not-allowed' : 'pointer',
-                fontWeight: 'bold'
-              }}
-            >
-              +
-            </button>
           </div>
-        </div>
 
-        <div
-          style={{
-            overflow: 'auto',
-            maxHeight: 'calc(90vh - 80px)',
-            border: '1px solid #e0e0e0',
-            padding: 20,
-            background: '#f0f2f5'
-          }}
-        >
           <div
-            ref={canvasRef}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onClick={() => {
-              setSelectedItem(null)
-              setEditingItem(null)
-              setEditingSpan(null)
-            }}
             style={{
-              position: 'relative',
-              width: canvasWidth,
-              height: canvasHeight,
-              border: '1px solid #ccc',
-              margin: 'auto',
-              background: 'white',
-              transform: `scale(${zoom / 100})`,
-              transformOrigin: 'top center',
-              cursor: dragState.isDragging ? 'grabbing' : 'default',
-              overflow: 'hidden',
-              backgroundImage:
-                snapToGrid && !isPreviewMode
-                  ? 'linear-gradient(to right, #e8e8e8 1px, transparent 1px), linear-gradient(to bottom, #e8e8e8 1px, transparent 1px)'
-                  : 'none',
-              backgroundSize: snapToGrid && !isPreviewMode ? `${GRID_SIZE}px ${GRID_SIZE}px` : 'auto'
+              overflow: 'auto',
+              maxHeight: 'calc(90vh - 80px)',
+              border: '1px solid #e0e0e0',
+              padding: 20,
+              background: '#f0f2f5'
             }}
           >
-            {backgroundImage && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundImage: `url(${backgroundImage})`,
-                  backgroundSize: `${canvasWidth}px ${singlePageHeight}px`,
-                  backgroundRepeat: 'repeat-y',
-                  backgroundPosition: 'top center',
-                  opacity: backgroundOpacity,
-                  pointerEvents: 'none',
-                  zIndex: 0
-                }}
-              />
-            )}
-
-            {showSafeMargins && !isPreviewMode && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 20,
-                  left: 20,
-                  right: 20,
-                  bottom: 20,
-                  border: '1px dashed #ff5252',
-                  pointerEvents: 'none',
-                  zIndex: 999
-                }}
-              >
-                <span
-                  style={{ position: 'absolute', top: 2, left: 4, fontSize: 10, color: '#ff5252', fontWeight: 'bold' }}
-                >
-                  Print Safe Area
-                </span>
-              </div>
-            )}
-
-            {/* PAGE BREAK CUT LINES */}
-            {Array.from({ length: totalPages - 1 }).map((_, index) => {
-              const breakY = singlePageHeight * (index + 1)
-
-              return (
+            <div
+              ref={canvasRef}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onClick={() => {
+                setSelectedItem(null)
+                setEditingItem(null)
+                setEditingSpan(null)
+              }}
+              style={{
+                position: 'relative',
+                width: canvasWidth,
+                height: canvasHeight,
+                border: '1px solid #ccc',
+                margin: 'auto',
+                background: 'white',
+                transform: `scale(${zoom / 100})`,
+                transformOrigin: 'top center',
+                cursor: dragState.isDragging ? 'grabbing' : 'default',
+                overflow: 'hidden',
+                backgroundImage:
+                  snapToGrid && !isPreviewMode
+                    ? 'linear-gradient(to right, #e8e8e8 1px, transparent 1px), linear-gradient(to bottom, #e8e8e8 1px, transparent 1px)'
+                    : 'none',
+                backgroundSize: snapToGrid && !isPreviewMode ? `${GRID_SIZE}px ${GRID_SIZE}px` : 'auto'
+              }}
+            >
+              {backgroundImage && (
                 <div
-                  key={`page-break-${index}`}
                   style={{
                     position: 'absolute',
-                    top: breakY,
+                    top: 0,
                     left: 0,
                     right: 0,
-                    height: 2,
-                    borderTop: '2px dashed #ff5252',
-                    zIndex: 0,
+                    bottom: 0,
+                    backgroundImage: `url(${backgroundImage})`,
+                    backgroundSize: `${canvasWidth}px ${singlePageHeight}px`,
+                    backgroundRepeat: 'repeat-y',
+                    backgroundPosition: 'top center',
+                    opacity: backgroundOpacity,
                     pointerEvents: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    zIndex: 0
+                  }}
+                />
+              )}
+
+              {showSafeMargins && !isPreviewMode && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 20,
+                    left: 20,
+                    right: 20,
+                    bottom: 20,
+                    border: '1px dashed #ff5252',
+                    pointerEvents: 'none',
+                    zIndex: 999
                   }}
                 >
                   <span
                     style={{
-                      background: '#ff5252',
-                      color: 'white',
-                      padding: '2px 8px',
+                      position: 'absolute',
+                      top: 2,
+                      left: 4,
                       fontSize: 10,
-                      borderRadius: 10,
+                      color: '#ff5252',
                       fontWeight: 'bold'
                     }}
                   >
-                    Page {index + 2} Break
+                    Print Safe Area
                   </span>
                 </div>
-              )
-            })}
+              )}
 
-            {[...placed]
-              .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
-              .map(p => (
-                <div
-                  key={p.id}
-                  draggable={false}
-                  onMouseDown={e => {
-                    if (isPreviewMode) return
-                    e.stopPropagation()
-                    if (editingItem === p.id) return
-                    setDragState({
-                      isDragging: true,
-                      itemId: p.id,
-                      startX: e.clientX,
-                      startY: e.clientY,
-                      offsetX: e.clientX - canvasRef.current!.getBoundingClientRect().left - p.x,
-                      offsetY: e.clientY - canvasRef.current!.getBoundingClientRect().top - p.y
-                    })
-                  }}
-                  onClick={e => {
-                    if (isPreviewMode) return
-                    e.stopPropagation()
-                    setSelectedItem(p.id)
-                  }}
-                  onDoubleClick={e => {
-                    if (isPreviewMode) return
-                    e.stopPropagation()
-                    setEditingItem(p.id)
-                  }}
-                  onMouseEnter={() => setHoveredItem(p.id)}
-                  onMouseLeave={() => setHoveredItem(null)}
-                  onDragStart={e => e.preventDefault()}
-                  style={{
-                    position: 'absolute',
-                    left: p.x,
-                    top: p.y,
-                    fontSize: p.fontSize,
-                    padding: '4px 8px',
-                    cursor: isPreviewMode ? 'default' : editingItem === p.id ? 'text' : 'grab',
-                    userSelect: editingItem === p.id ? 'auto' : 'none',
-                    borderRadius: '4px',
-                    transition: 'all 0.2s ease',
-                    opacity: p.opacity !== undefined ? p.opacity : 1,
-                    transform: `rotate(${p.rotation || 0}deg)`,
-                    zIndex: p.zIndex || 10,
+              {/* PAGE BREAK CUT LINES */}
+              {Array.from({ length: totalPages - 1 }).map((_, index) => {
+                const breakY = singlePageHeight * (index + 1)
 
-                    // BORDER TOGGLE LOGIC
-                    border: isPreviewMode
-                      ? p.borderWidth
-                        ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
-                        : 'transparent'
-                      : dragState.itemId === p.id
-                        ? '2px solid #2196F3'
-                        : selectedItem === p.id
-                          ? '2px solid #4CAF50'
-                          : hoveredItem === p.id
-                            ? '1px solid #2196F3'
-                            : p.borderWidth
-                              ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
-                              : showBorders
-                                ? '1px dashed #ccc'
-                                : '1px solid transparent',
-
-                    background: isPreviewMode
-                      ? 'transparent'
-                      : dragState.itemId === p.id
-                        ? 'rgba(33, 150, 243, 0.1)'
-                        : hoveredItem === p.id
-                          ? 'rgba(33, 150, 243, 0.05)'
-                          : 'transparent'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
-                    {p.type === 'text' && editingItem === p.id && (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: -35,
-                          left: 0,
-                          background: '#fff',
-                          border: '1px solid #ccc',
-                          display: 'flex',
-                          gap: 4,
-                          padding: '4px 8px',
-                          borderRadius: 4,
-                          zIndex: 100,
-                          boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
-                        }}
-                        onMouseDown={e => e.preventDefault()}
-                      >
-                        <select
-                          style={{
-                            border: 'none',
-                            outline: 'none',
-                            background: 'transparent',
-                            fontSize: 12,
-                            cursor: 'pointer'
-                          }}
-                          onChange={e => {
-                            if (e.target.value) insertDynamicSpan(p.id, e.target.value)
-                            e.target.value = ''
-                          }}
-                        >
-                          <option value=''>+ Insert Variable Field</option>
-                          {availableItems
-                            .filter(f => f.type === 'field')
-                            .map(f => (
-                              <option key={f.key} value={f.key}>
-                                {f.label}
-                              </option>
-                            ))}
-                        </select>
-                      </div>
-                    )}
-
-                    {p.type === 'text' && editingItem === p.id ? (
-                      <div
-                        id={`text-edit-${p.id}`}
-                        contentEditable
-                        suppressContentEditableWarning
-                        ref={el => {
-                          if (el && document.activeElement !== el) {
-                            setTimeout(() => el.focus(), 0)
-                          }
-                        }}
-                        onClick={e => handleSpanClick(e, p.id)}
-                        onBlur={e => {
-                          const cleanHtml = formatHtmlVariables(e.currentTarget.innerHTML)
-                          updateTextContent(p.id, cleanHtml)
-                          setTimeout(() => setEditingItem(null), 150)
-                        }}
-                        onKeyDown={e => e.stopPropagation()}
-                        style={{
-                          border: 'none',
-                          outline: '2px solid #2196F3',
-                          background: 'white',
-                          fontSize: p.fontSize,
-                          fontFamily: p.fontFamily,
-                          fontWeight: p.fontWeight,
-                          color: p.color,
-                          letterSpacing: p.letterSpacing,
-                          padding: 4,
-                          width: p.width ? `${p.width}px` : '200px',
-                          minHeight: '20px',
-                          wordWrap: 'break-word',
-                          whiteSpace: 'pre-wrap',
-                          cursor: 'text'
-                        }}
-                        dangerouslySetInnerHTML={{ __html: p.content || '' }}
-                      />
-                    ) : p.type === 'text' ? (
-                      <div
-                        onClick={e => handleSpanClick(e, p.id)}
-                        style={{
-                          fontFamily: p.fontFamily,
-                          fontWeight: p.fontWeight,
-                          color: p.color,
-                          letterSpacing: p.letterSpacing,
-                          width: p.width ? `${p.width}px` : 'max-content',
-                          wordWrap: 'break-word',
-                          whiteSpace: 'pre-wrap',
-                          padding: 4
-                        }}
-                        dangerouslySetInnerHTML={{ __html: p.content || 'Text' }}
-                      />
-                    ) : p.type !== 'shape' && p.type !== 'image' ? (
-                      <span
-                        style={{
-                          fontFamily: p.fontFamily,
-                          fontWeight: p.fontWeight,
-                          color: p.color,
-                          letterSpacing: p.letterSpacing
-                        }}
-                      >
-                        {p.type === 'field' ? (
-                          <span style={{ textAlign: p.textAlign || 'left' }}>{'{{ dynamic.' + p.fieldKey + ' }}'}</span>
-                        ) : null}
-                      </span>
-                    ) : null}
-
-                    {(p.type === 'shape' || p.type === 'image') &&
-                      renderShape(
-                        p,
-                        p.borderWidth
-                          ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
-                          : '2px solid #333'
-                      )}
-                    {p.type === 'image' && (
-                      <img
-                        src={p.imageUrl}
-                        alt='Placed'
-                        style={{ width: p.width, height: p.height, objectFit: 'contain' }}
-                      />
-                    )}
-                  </div>
-
-                  {/* DELETE BUTTON */}
-                  {hoveredItem === p.id && !isPreviewMode && (
-                    <span
-                      onClick={e => {
-                        e.stopPropagation()
-                        deleteItem(p.id)
-                      }}
-                      onMouseEnter={() => setHoveredItem(p.id)}
-                      style={{
-                        position: 'absolute',
-                        top: -8,
-                        right: -8,
-                        cursor: 'pointer',
-                        fontSize: 12,
-                        fontWeight: 'bold',
-                        color: '#fff',
-                        background: '#f44336',
-                        width: DELETE_BUTTON_SIZE,
-                        height: DELETE_BUTTON_SIZE,
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: '1px solid white',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                        zIndex: 100
-                      }}
-                    >
-                      ×
-                    </span>
-                  )}
-
-                  {/* OPTIMIZED DRAG HANDLES ARRAY MAPPING */}
-                  {hoveredItem === p.id &&
-                    !isPreviewMode &&
-                    (p.type === 'shape' || p.type === 'image' || p.type === 'text') && (
-                      <>
-                        {RESIZE_HANDLES.map(({ handle, top, bottom, left, right, transform, cursor }) => (
-                          <div
-                            key={handle}
-                            onMouseDown={e => {
-                              e.stopPropagation()
-                              setResizeState({
-                                isResizing: true,
-                                itemId: p.id,
-                                handle,
-                                startX: e.clientX,
-                                startY: e.clientY,
-                                startWidth: p.width || 200,
-                                startHeight: p.height || 100
-                              })
-                            }}
-                            style={{
-                              position: 'absolute',
-                              top,
-                              bottom,
-                              left,
-                              right,
-                              transform,
-                              width: RESIZE_HANDLE_SIZE,
-                              height: RESIZE_HANDLE_SIZE,
-                              background: '#2196F3',
-                              cursor,
-                              borderRadius: '50%',
-                              border: '2px solid white'
-                            }}
-                          />
-                        ))}
-                      </>
-                    )}
-                </div>
-              ))}
-
-            {guides.map((guide, idx) => (
-              <React.Fragment key={idx}>
-                {guide.x !== undefined && (
+                return (
                   <div
+                    key={`page-break-${index}`}
                     style={{
                       position: 'absolute',
-                      left: guide.x,
-                      top: 0,
-                      bottom: 0,
-                      width: 1,
-                      background: guide.type === 'center' ? '#9C27B0' : '#2196F3',
-                      pointerEvents: 'none',
-                      zIndex: 1000
-                    }}
-                  />
-                )}
-                {guide.y !== undefined && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: guide.y,
+                      top: breakY,
                       left: 0,
                       right: 0,
-                      height: 1,
-                      background: guide.type === 'center' ? '#9C27B0' : '#2196F3',
+                      height: 2,
+                      borderTop: '2px dashed #ff5252',
+                      zIndex: 0,
                       pointerEvents: 'none',
-                      zIndex: 1000
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
                     }}
-                  />
-                )}
-              </React.Fragment>
-            ))}
+                  >
+                    <span
+                      style={{
+                        background: '#ff5252',
+                        color: 'white',
+                        padding: '2px 8px',
+                        fontSize: 10,
+                        borderRadius: 10,
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      Page {index + 2} Break
+                    </span>
+                  </div>
+                )
+              })}
+
+              {[...placed]
+                .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
+                .map(p => (
+                  <div
+                    key={p.id}
+                    draggable={false}
+                    onMouseDown={e => {
+                      if (isPreviewMode) return
+                      e.stopPropagation()
+                      if (editingItem === p.id) return
+                      setDragState({
+                        isDragging: true,
+                        itemId: p.id,
+                        startX: e.clientX,
+                        startY: e.clientY,
+                        offsetX: e.clientX - canvasRef.current!.getBoundingClientRect().left - p.x,
+                        offsetY: e.clientY - canvasRef.current!.getBoundingClientRect().top - p.y
+                      })
+                    }}
+                    onClick={e => {
+                      if (isPreviewMode) return
+                      e.stopPropagation()
+                      setSelectedItem(p.id)
+                    }}
+                    onDoubleClick={e => {
+                      if (isPreviewMode) return
+                      e.stopPropagation()
+                      setEditingItem(p.id)
+                    }}
+                    onMouseEnter={() => setHoveredItem(p.id)}
+                    onMouseLeave={() => setHoveredItem(null)}
+                    onDragStart={e => e.preventDefault()}
+                    style={{
+                      position: 'absolute',
+                      left: p.x,
+                      top: p.y,
+                      fontSize: p.fontSize,
+                      padding: '4px 8px',
+                      cursor: isPreviewMode ? 'default' : editingItem === p.id ? 'text' : 'grab',
+                      userSelect: editingItem === p.id ? 'auto' : 'none',
+                      borderRadius: '4px',
+                      transition: 'all 0.2s ease',
+                      opacity: p.opacity !== undefined ? p.opacity : 1,
+                      transform: `rotate(${p.rotation || 0}deg)`,
+                      zIndex: p.zIndex || 10,
+
+                      // BORDER TOGGLE LOGIC
+                      border: isPreviewMode
+                        ? p.borderWidth
+                          ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
+                          : 'transparent'
+                        : dragState.itemId === p.id
+                          ? '2px solid #2196F3'
+                          : selectedItem === p.id
+                            ? '2px solid #4CAF50'
+                            : hoveredItem === p.id
+                              ? '1px solid #2196F3'
+                              : p.borderWidth
+                                ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
+                                : showBorders
+                                  ? '1px dashed #ccc'
+                                  : '1px solid transparent',
+
+                      background: isPreviewMode
+                        ? 'transparent'
+                        : dragState.itemId === p.id
+                          ? 'rgba(33, 150, 243, 0.1)'
+                          : hoveredItem === p.id
+                            ? 'rgba(33, 150, 243, 0.05)'
+                            : 'transparent'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
+                      {p.type === 'text' && editingItem === p.id && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: -35,
+                            left: 0,
+                            background: '#fff',
+                            border: '1px solid #ccc',
+                            display: 'flex',
+                            gap: 4,
+                            padding: '4px 8px',
+                            borderRadius: 4,
+                            zIndex: 100,
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+                          }}
+                          onMouseDown={e => e.preventDefault()}
+                        >
+                          <select
+                            style={{
+                              border: 'none',
+                              outline: 'none',
+                              background: 'transparent',
+                              fontSize: 12,
+                              cursor: 'pointer'
+                            }}
+                            onChange={e => {
+                              if (e.target.value) insertDynamicSpan(p.id, e.target.value)
+                              e.target.value = ''
+                            }}
+                          >
+                            <option value=''>+ Insert Variable Field</option>
+                            {availableItems
+                              .filter(f => f.type === 'field')
+                              .map(f => (
+                                <option key={f.key} value={f.key}>
+                                  {f.label}
+                                </option>
+                              ))}
+                          </select>
+                        </div>
+                      )}
+
+                      {p.type === 'text' && editingItem === p.id ? (
+                        <div
+                          id={`text-edit-${p.id}`}
+                          contentEditable
+                          suppressContentEditableWarning
+                          ref={el => {
+                            if (el && document.activeElement !== el) {
+                              setTimeout(() => el.focus(), 0)
+                            }
+                          }}
+                          onClick={e => handleSpanClick(e, p.id)}
+                          onBlur={e => {
+                            const cleanHtml = formatHtmlVariables(e.currentTarget.innerHTML)
+                            updateTextContent(p.id, cleanHtml)
+                            setTimeout(() => setEditingItem(null), 150)
+                          }}
+                          onKeyDown={e => e.stopPropagation()}
+                          style={{
+                            border: 'none',
+                            outline: '2px solid #2196F3',
+                            background: 'white',
+                            fontSize: p.fontSize,
+                            fontFamily: p.fontFamily,
+                            fontWeight: p.fontWeight,
+                            color: p.color,
+                            letterSpacing: p.letterSpacing,
+                            padding: 4,
+                            width: p.width ? `${p.width}px` : '200px',
+                            minHeight: '20px',
+                            wordWrap: 'break-word',
+                            whiteSpace: 'pre-wrap',
+                            cursor: 'text'
+                          }}
+                          dangerouslySetInnerHTML={{ __html: p.content || '' }}
+                        />
+                      ) : p.type === 'text' ? (
+                        <div
+                          onClick={e => handleSpanClick(e, p.id)}
+                          style={{
+                            fontFamily: p.fontFamily,
+                            fontWeight: p.fontWeight,
+                            color: p.color,
+                            letterSpacing: p.letterSpacing,
+                            width: p.width ? `${p.width}px` : 'max-content',
+                            wordWrap: 'break-word',
+                            whiteSpace: 'pre-wrap',
+                            padding: 4
+                          }}
+                          dangerouslySetInnerHTML={{ __html: p.content || 'Text' }}
+                        />
+                      ) : p.type !== 'shape' && p.type !== 'image' ? (
+                        <span
+                          style={{
+                            fontFamily: p.fontFamily,
+                            fontWeight: p.fontWeight,
+                            color: p.color,
+                            letterSpacing: p.letterSpacing
+                          }}
+                        >
+                          {p.type === 'field' ? (
+                            <span style={{ textAlign: p.textAlign || 'left' }}>
+                              {'{{ dynamic.' + p.fieldKey + ' }}'}
+                            </span>
+                          ) : null}
+                        </span>
+                      ) : null}
+
+                      {(p.type === 'shape' || p.type === 'image') &&
+                        renderShape(
+                          p,
+                          p.borderWidth
+                            ? `${p.borderWidth}px ${p.borderStyle || 'solid'} ${p.borderColor || '#333'}`
+                            : '2px solid #333'
+                        )}
+                      {p.type === 'image' && (
+                        <img
+                          src={p.imageUrl}
+                          alt='Placed'
+                          style={{ width: p.width, height: p.height, objectFit: 'contain' }}
+                        />
+                      )}
+                    </div>
+
+                    {/* DELETE BUTTON */}
+                    {hoveredItem === p.id && !isPreviewMode && (
+                      <span
+                        onClick={e => {
+                          e.stopPropagation()
+                          deleteItem(p.id)
+                        }}
+                        onMouseEnter={() => setHoveredItem(p.id)}
+                        style={{
+                          position: 'absolute',
+                          top: -8,
+                          right: -8,
+                          cursor: 'pointer',
+                          fontSize: 12,
+                          fontWeight: 'bold',
+                          color: '#fff',
+                          background: '#f44336',
+                          width: DELETE_BUTTON_SIZE,
+                          height: DELETE_BUTTON_SIZE,
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: '1px solid white',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                          zIndex: 100
+                        }}
+                      >
+                        ×
+                      </span>
+                    )}
+
+                    {/* OPTIMIZED DRAG HANDLES ARRAY MAPPING */}
+                    {hoveredItem === p.id &&
+                      !isPreviewMode &&
+                      (p.type === 'shape' || p.type === 'image' || p.type === 'text') && (
+                        <>
+                          {RESIZE_HANDLES.map(({ handle, top, bottom, left, right, transform, cursor }) => (
+                            <div
+                              key={handle}
+                              onMouseDown={e => {
+                                e.stopPropagation()
+                                setResizeState({
+                                  isResizing: true,
+                                  itemId: p.id,
+                                  handle,
+                                  startX: e.clientX,
+                                  startY: e.clientY,
+                                  startWidth: p.width || 200,
+                                  startHeight: p.height || 100
+                                })
+                              }}
+                              style={{
+                                position: 'absolute',
+                                top,
+                                bottom,
+                                left,
+                                right,
+                                transform,
+                                width: RESIZE_HANDLE_SIZE,
+                                height: RESIZE_HANDLE_SIZE,
+                                background: '#2196F3',
+                                cursor,
+                                borderRadius: '50%',
+                                border: '2px solid white'
+                              }}
+                            />
+                          ))}
+                        </>
+                      )}
+                  </div>
+                ))}
+
+              {guides.map((guide, idx) => (
+                <React.Fragment key={idx}>
+                  {guide.x !== undefined && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: guide.x,
+                        top: 0,
+                        bottom: 0,
+                        width: 1,
+                        background: guide.type === 'center' ? '#9C27B0' : '#2196F3',
+                        pointerEvents: 'none',
+                        zIndex: 1000
+                      }}
+                    />
+                  )}
+                  {guide.y !== undefined && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: guide.y,
+                        left: 0,
+                        right: 0,
+                        height: 1,
+                        background: guide.type === 'center' ? '#9C27B0' : '#2196F3',
+                        pointerEvents: 'none',
+                        zIndex: 1000
+                      }}
+                    />
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      {selectedItem && !isPreviewMode && (
-        <PropertiesPanel
-          item={placed.find(p => p.id === selectedItem)!}
-          updateItemProperty={updateItemProperty}
-          bringToFront={bringToFront}
-          sendToBack={sendToBack}
-          deleteItem={deleteItem}
-        />
-      )}
-    </div>
+        {selectedItem && !isPreviewMode && (
+          <PropertiesPanel
+            item={placed.find(p => p.id === selectedItem)!}
+            updateItemProperty={updateItemProperty}
+            bringToFront={bringToFront}
+            sendToBack={sendToBack}
+            deleteItem={deleteItem}
+          />
+        )}
+      </div>
+    </>
   )
 }
 
