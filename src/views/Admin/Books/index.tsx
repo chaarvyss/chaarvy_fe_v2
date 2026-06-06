@@ -6,7 +6,6 @@ import RenderFilterOptions from 'src/common/filters'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import { FilterProps } from 'src/lib/interfaces'
 import { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
-import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
 import { useLazyGetBooksListQuery } from 'src/store/services/listServices'
 import GetChaarvyIcons from 'src/utils/icons'
 

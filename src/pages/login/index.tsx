@@ -2,7 +2,6 @@ import { CardProps } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
 
 import { useLoader } from 'src/@core/context/loaderContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
@@ -11,10 +10,10 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 import themeConfig from 'src/configs/themeConfig'
 import { MASTER_TYPE } from 'src/constants/constants'
 import { PagePath } from 'src/constants/pagePathConstants'
+import { useSavePermissions } from 'src/hooks/useSavePermissions'
 import { sessionStorageKeys } from 'src/lib/enums'
 import { getEmptyKeysList } from 'src/lib/helpers'
 import { LoginProps } from 'src/lib/interfaces'
-import { setAvailablePermissionsData } from 'src/store/permissionSlice'
 import { useLoginMutation } from 'src/store/services/authServices'
 import { EyeOutline, EyeOffOutline } from 'src/utils/mdiElements'
 import {
@@ -46,8 +45,8 @@ const Card = styled(MuiCard)<CardProps>(({ theme }) => ({
 }))
 
 const LoginPage = () => {
-  const dispatch = useDispatch()
   const { setLoading } = useLoader()
+  const savePermissions = useSavePermissions()
 
   // ** State
   const [values, setValues] = useState<LoginProps>({
@@ -83,15 +82,14 @@ const LoginPage = () => {
       login(values)
         .unwrap()
         .then(response => {
-          const res = response as any
-          const { clcode, name, authToken, role, permission } = res.data
-
-          dispatch(setAvailablePermissionsData(permission))
+          const { clcode, name, authToken, role, permission, uid } = response
+          savePermissions(permission)
           triggerToast('Login Successful', { variant: ToastVariants.SUCCESS })
           localStorage.setItem(sessionStorageKeys.clientCode, clcode)
           saveSettings({ ...settings, current_username: name })
           sessionStorage.setItem(sessionStorageKeys.accessToken, authToken)
           sessionStorage.setItem(sessionStorageKeys.clientCode, clcode)
+          sessionStorage.setItem(sessionStorageKeys.userId, uid)
           sessionStorage.setItem('role', role)
           if (clcode == MASTER_TYPE) {
             router.push(PagePath.MASTER_DASHBOARD)

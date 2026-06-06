@@ -1,6 +1,6 @@
 import { LoadingButton } from '@mui/lab'
 import { Checkbox, FormControlLabel, TextField, Select, MenuItem, Tooltip } from '@mui/material'
-import { ReactNode, useEffect, useState, MouseEvent } from 'react'
+import { useEffect, useState, MouseEvent } from 'react'
 
 import {
   Box,
@@ -19,24 +19,6 @@ import GetChaarvyIcons from 'src/utils/icons'
 
 import ChaarvyButton from '../ChaarvyButton'
 import ChaarvyFlex from '../chaarvyFlex'
-
-export interface ChaarvyTableColumn<T = any> {
-  id: string
-  label: string
-  width?: string | number
-  align?: 'left' | 'center' | 'right'
-  hideable?: boolean
-  defaultHidden?: boolean
-  editable?: boolean
-  readonly?: boolean
-  inputType?: 'text' | 'number' | 'select' | 'checkbox'
-  inputLabel?: string
-  uniqueOptionsOnly?: boolean
-  options?: { label: string; value: any }[]
-  render?: (row: T, index: number) => ReactNode
-  headerSx?: Record<string, any>
-  cellSx?: Record<string, any>
-}
 
 export type EditedDataTableOnSubmitPayload<T = any> = {
   created: T[]

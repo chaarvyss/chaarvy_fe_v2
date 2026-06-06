@@ -1,9 +1,12 @@
-import { Paper, Typography } from '@mui/material'
-import React, { useState, useEffect, useCallback } from 'react'
-import GridLayout from 'react-grid-layout'
+import { Paper, Typography, Box } from '@mui/material'
+import type { GridStack } from 'gridstack'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 
-import 'react-grid-layout/css/styles.css'
-import 'react-resizable/css/styles.css'
+// 1. Import GridStack core and its CSS
+import 'gridstack/dist/gridstack.min.css'
+
+import { PermissionLabels } from 'src/constants/permissions'
+import { isAuthorised } from 'src/lib/util/permissionCheck'
 import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
 import GetChaarvyIcons from 'src/utils/icons'
 import Attendence from 'src/views/dashboardCards/attendence'
@@ -20,90 +23,185 @@ type DashboardCardProps = {
   children: React.ReactNode
 } & React.HTMLAttributes<HTMLDivElement>
 
+// 2. Refactor Card to match GridStack's strict DOM requirements
 const DashboardCard = React.forwardRef<HTMLDivElement, DashboardCardProps>(
   ({ item, title, onRemove, children, ...rest }, ref) => {
     const [isHovered, setIsHovered] = useState(false)
 
     return (
-      <div ref={ref} {...rest} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-        <Paper elevation={3} className='p-3' style={{ position: 'relative' }}>
-          {isHovered && (
-            <ChaarvyButton
-              size='small'
-              variant='contained'
-              color='error'
-              onClick={() => onRemove(item.i)}
-              style={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                minWidth: 32,
-                padding: '4px 8px',
-                zIndex: 10
-              }}
-              startIcon={<GetChaarvyIcons iconName='Close' />}
-            />
-          )}
-          <Typography variant='h6' className='drag-handle'>
-            {title}
-          </Typography>
-          {children}
-        </Paper>
+      <div
+        ref={ref}
+        className='grid-stack-item'
+        gs-id={item.i}
+        gs-x={item.x}
+        gs-y={item.y}
+        gs-w={item.w}
+        gs-h={item.h}
+        {...rest}
+      >
+        <div
+          className='grid-stack-item-content'
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <Paper
+            elevation={3}
+            className='p-3'
+            style={{
+              position: 'relative',
+              height: '100%',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            {isHovered && (
+              <ChaarvyButton
+                size='small'
+                variant='contained'
+                color='error'
+                onClick={() => onRemove(item.i)}
+                style={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  minWidth: 32,
+                  padding: '4px 8px',
+                  zIndex: 10
+                }}
+                startIcon={<GetChaarvyIcons iconName='Close' />}
+              />
+            )}
+            <Typography variant='h6' className='drag-handle' style={{ cursor: 'grab', marginBottom: '8px' }}>
+              {title}
+            </Typography>
+            <div style={{ flexGrow: 1, overflow: 'auto' }}>{children}</div>
+          </Paper>
+        </div>
       </div>
     )
   }
 )
 
+interface LayoutCards {
+  i: string
+  x: number
+  y: number
+  w: number
+  h: number
+  shouldHide: boolean
+  permission_key: string
+}
+
 const Dashboard: React.FC = () => {
-  const [gridWidth, setGridWidth] = useState(window.innerWidth * 0.95)
+  const permissionPrefix = PermissionLabels.dashboard
+  const containerRef = useRef<HTMLDivElement>(null)
+  const gridRef = useRef<GridStack | null>(null)
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const updateWidth = () => {
-      const sidebar = document.querySelector('.MuiBox-root.css-0') as HTMLElement
-      const sidebarW = sidebar ? sidebar.offsetWidth : 0
-      setGridWidth(window.innerWidth - sidebarW - 60)
+  const defaultLayout: LayoutCards[] = [
+    { i: 'greetingCard', x: 0, y: 0, w: 8, h: 2, shouldHide: true, permission_key: '' },
+    { i: 'Students', x: 0, y: 0, w: 4, h: 3, shouldHide: false, permission_key: permissionPrefix.studentCount },
+    { i: 'Attendence', x: 4, y: 0, w: 4, h: 3, shouldHide: true, permission_key: '' },
+    { i: 'Calender', x: 8, y: 0, w: 4, h: 4, shouldHide: true, permission_key: '' },
+    { i: 'Payments', x: 0, y: 3, w: 6, h: 2, shouldHide: false, permission_key: permissionPrefix.payments },
+    {
+      i: 'Stationary_stock',
+      x: 6,
+      y: 3,
+      w: 6,
+      h: 3,
+      shouldHide: false,
+      permission_key: permissionPrefix.stationaryStock
+    },
+    {
+      i: 'Student_enrollments',
+      x: 0,
+      y: 6,
+      w: 12,
+      h: 4,
+      shouldHide: false,
+      permission_key: permissionPrefix.studentEnrollments
     }
-
-    // Run on mount
-    updateWidth()
-
-    // Debounced resize event
-    let resizeTimeout: NodeJS.Timeout
-    const handleResize = () => {
-      clearTimeout(resizeTimeout)
-      resizeTimeout = setTimeout(updateWidth, 150) // Adjust debounce time if needed
-    }
-
-    window.addEventListener('resize', handleResize)
-
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  const defaultLayout = [
-    { i: 'greetingCard', x: 0, y: 0, w: 8, h: 2, shouldHide: true },
-    { i: 'Students', x: 0, y: 0, w: 4, h: 3, shouldHide: false },
-    { i: 'Attendence', x: 4, y: 0, w: 4, h: 3, shouldHide: true },
-    { i: 'Calender', x: 8, y: 0, w: 4, h: 4, shouldHide: true },
-    { i: 'Payments', x: 0, y: 3, w: 6, h: 2, shouldHide: false },
-    { i: 'Stationary_stock', x: 6, y: 3, w: 6, h: 3, shouldHide: false },
-    { i: 'Student_enrollments', x: 0, y: 5, w: 12, h: 4, shouldHide: false }
   ]
 
-  const [layout, setLayout] = useState<Array<any>>([])
+  const [layout, setLayout] = useState<LayoutCards[]>([])
+  const [isGridReady, setIsGridReady] = useState(false)
 
+  // Initialization & LocalStorage merge
   useEffect(() => {
     const customizedLayout = localStorage.getItem('dashLayout')
     if (customizedLayout) {
-      setLayout(JSON.parse(customizedLayout))
+      const parsedSavedLayout = JSON.parse(customizedLayout)
+      const mergedLayout = defaultLayout.map(defItem => {
+        const savedItem = parsedSavedLayout.find((s: LayoutCards) => s.i === defItem.i)
+
+        return savedItem ? { ...defItem, ...savedItem } : defItem
+      })
+      setLayout(mergedLayout)
     } else {
       setLayout(defaultLayout)
       localStorage.setItem('dashLayout', JSON.stringify(defaultLayout))
     }
+    setIsGridReady(true)
   }, [])
 
-  const components = {
+  // 3. GridStack Initialization and Event Syncing
+  useEffect(() => {
+    if (!isGridReady || !containerRef.current) return
+
+    // Safely capture the DOM element so TypeScript knows it is definitely not null
+    const gridEl = containerRef.current
+
+    const timer = setTimeout(async () => {
+      const { GridStack: GridStackLib } = await import('gridstack')
+
+      if (!gridRef.current) {
+        gridRef.current = GridStackLib.init(
+          {
+            column: 12,
+            cellHeight: 100,
+            margin: 16,
+            float: false,
+            handle: '.drag-handle',
+            animate: true
+          },
+          gridEl
+        ) // <-- Pass the safe variable here instead of containerRef.current
+
+        gridRef.current.on('change', (event: Event, items: any) => {
+          if (!items) return
+          setLayout(prevLayout => {
+            const updatedLayout = [...prevLayout]
+            items.forEach((item: any) => {
+              const idx = updatedLayout.findIndex(u => u.i === item.id)
+              if (idx > -1) {
+                updatedLayout[idx] = {
+                  ...updatedLayout[idx],
+                  x: item.x,
+                  y: item.y,
+                  w: item.w,
+                  h: item.h
+                }
+              }
+            })
+            localStorage.setItem('dashLayout', JSON.stringify(updatedLayout))
+
+            return updatedLayout
+          })
+        })
+      } else {
+        // Use the safe variable here as well
+        const uninitializedWidgets = gridEl.querySelectorAll('.grid-stack-item:not(.ui-draggable)')
+        uninitializedWidgets.forEach(el => {
+          gridRef.current?.makeWidget(el as HTMLElement) // <--- Add 'as HTMLElement'
+        })
+      }
+    }, 50)
+
+    return () => clearTimeout(timer)
+  }, [layout, isGridReady])
+
+  const components: { [key: string]: React.ElementType } = {
     Calender: MyCalendar,
     Students: Population,
     Attendence: Attendence,
@@ -112,47 +210,75 @@ const Dashboard: React.FC = () => {
     Student_enrollments: StudentEnrollmentChart
   }
 
-  const handleLayoutChange = useCallback(newLayout => {
-    setLayout(newLayout)
-    localStorage.setItem('dashLayout', JSON.stringify(newLayout))
+  // Remove (Hide) Component
+  const handleRemoveComponent = useCallback((id: string) => {
+    // Manually tell GridStack to release the element before React unmounts it
+    const el = document.querySelector(`[gs-id="${id}"]`)
+    if (el && gridRef.current) gridRef.current.removeWidget(el as HTMLElement, false) // <--- Add 'as HTMLElement'
+
+    setLayout(prevLayout => {
+      const nextLayout = prevLayout.map(item => (item.i === id ? { ...item, shouldHide: true } : item))
+      localStorage.setItem('dashLayout', JSON.stringify(nextLayout))
+
+      return nextLayout
+    })
   }, [])
 
-  const handleRemoveComponent = useCallback(
-    id => {
-      const nextLayout = layout.filter(item => item.i !== id)
-      setLayout(nextLayout)
+  // Restore Component
+  const handleRestoreComponent = useCallback((id: string) => {
+    setLayout(prevLayout => {
+      const nextLayout = prevLayout.map(item => (item.i === id ? { ...item, shouldHide: false } : item))
       localStorage.setItem('dashLayout', JSON.stringify(nextLayout))
-    },
-    [layout]
-  )
 
+      return nextLayout
+    })
+  }, [])
+
+  // Reset Component
   const handleResetDashboard = () => {
+    if (gridRef.current) {
+      gridRef.current.destroy(false)
+      gridRef.current = null
+    }
     setLayout(defaultLayout)
     localStorage.setItem('dashLayout', JSON.stringify(defaultLayout))
   }
 
+  const availableHiddenWidgets = layout.filter(
+    item => item.shouldHide && isAuthorised(item.permission_key) && item.i !== 'greetingCard'
+  )
+
   return (
     <div className='container-fluid' style={{ position: 'relative' }}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+      {/* Dashboard Toolbar */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          {availableHiddenWidgets.length > 0 && (
+            <Typography variant='body2' sx={{ alignSelf: 'center', mr: 1, color: 'text.secondary' }}>
+              Hidden Widgets:
+            </Typography>
+          )}
+          {availableHiddenWidgets.map(widget => (
+            <ChaarvyButton
+              key={widget.i}
+              size='small'
+              variant='outlined'
+              onClick={() => handleRestoreComponent(widget.i)}
+            >
+              + Add {widget.i.replace(/_/g, ' ')}
+            </ChaarvyButton>
+          ))}
+        </Box>
+
         <ChaarvyButton size='small' variant='outlined' color='primary' onClick={handleResetDashboard}>
-          <GetChaarvyIcons iconName='Undo' />
+          <GetChaarvyIcons iconName='Undo' /> Reset Layout
         </ChaarvyButton>
-      </div>
-      <GridLayout
-        className='layout'
-        layout={layout}
-        cols={12}
-        rowHeight={100}
-        width={gridWidth}
-        isDraggable={true}
-        isResizable={true}
-        compactType={null}
-        preventCollision={true}
-        draggableHandle='.drag-handle'
-        onLayoutChange={newLayout => handleLayoutChange(newLayout)}
-      >
+      </Box>
+
+      {/* GridStack Container */}
+      <div className='grid-stack' ref={containerRef}>
         {layout.map(item => {
-          if (item.shouldHide) return null
+          if (item.shouldHide || !isAuthorised(item.permission_key)) return null
 
           const Component = components[item.i]
 
@@ -162,7 +288,7 @@ const Dashboard: React.FC = () => {
             </DashboardCard>
           )
         })}
-      </GridLayout>
+      </div>
     </div>
   )
 }

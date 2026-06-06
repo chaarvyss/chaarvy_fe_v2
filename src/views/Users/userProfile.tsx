@@ -172,6 +172,7 @@ const ViewUserProfile = (props: UserProfileProps) => {
       icon: <GetChaarvyIcons iconName='MapMarkerOutline' />,
       component: <AddressForm user_type={AddressType.USER} user_id={user_id} address_id={details?.address_id} />
     },
+
     {
       value: FormType.PERMISSIONS,
       label: 'Permissions',

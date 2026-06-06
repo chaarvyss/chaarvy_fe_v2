@@ -3,7 +3,6 @@ import { Typography } from '@mui/material'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
-import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
 import Tag from 'src/reusable_components/tag'
 import {
   useEnrollAddonCourseMutation,

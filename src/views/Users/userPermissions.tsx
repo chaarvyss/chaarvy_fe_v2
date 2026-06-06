@@ -1,50 +1,36 @@
-import { Button, Checkbox, FormControlLabel, FormGroup, Grid } from '@mui/material'
-import React, { ChangeEvent, useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
-
-import { Box, Typography } from '@muiElements'
+import { Box } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { Permissions } from 'src/constants/permissions'
-import { setAvailablePermissionsData } from 'src/store/permissionSlice'
+import { useSavePermissions } from 'src/hooks/useSavePermissions'
+import { sessionStorageKeys } from 'src/lib/enums'
+import { LoadingSpinner } from 'src/reusable_components'
 import { useGetUserPermissionsQuery, useUpdateUserPermissionsMutation } from 'src/store/services/adminServices'
+
+import PermissionsEditor from '../Permissions'
 
 interface UserPermissionsProps {
   user_id: string
 }
 
 const UserPermissions = ({ user_id }: UserPermissionsProps) => {
-  const [allowedPermissions, setAllowedPermissions] = useState<Set<string>>(new Set())
-
-  const { data: current_available_permissions } = useGetUserPermissionsQuery(user_id)
-  const dispatch = useDispatch()
-
-  useEffect(() => {
-    if (current_available_permissions) {
-      setAllowedPermissions(new Set(current_available_permissions))
-    }
-  }, [current_available_permissions])
+  const savePermissions = useSavePermissions()
+  const { data: current_available_permissions, isFetching: isFetchingAvailablePermissions } =
+    useGetUserPermissionsQuery(user_id)
 
   const { triggerToast } = useToast()
-  const [updatePermissions] = useUpdateUserPermissionsMutation()
+  const [updatePermissions, { isLoading: isSubmitting }] = useUpdateUserPermissionsMutation()
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setAllowedPermissions(prevIds => {
-      const newIds = new Set(prevIds)
-      e.target.checked ? newIds.add(e.target.id) : newIds.delete(e.target.id)
-
-      return new Set(newIds)
-    })
-  }
-
-  const handleSubmit = () => {
-    const available_permissions = Array.from(allowedPermissions).filter(e => e !== undefined)
+  const handleSubmit = (available_permissions: string[]) => {
     updatePermissions({
       user_id,
       available_permissions
     })
       .unwrap()
       .then(response => {
-        dispatch(setAvailablePermissionsData(available_permissions))
+        const current_user = sessionStorage.getItem(sessionStorageKeys.userId)
+        if (user_id === current_user) {
+          alert('same')
+          savePermissions(available_permissions)
+        }
         triggerToast(response, { variant: ToastVariants.SUCCESS })
       })
       .catch(e => {
@@ -54,25 +40,15 @@ const UserPermissions = ({ user_id }: UserPermissionsProps) => {
 
   return (
     <Box gap={4}>
-      <Typography variant='body1'>Side Menus</Typography>
-      <Box>
-        <FormGroup>
-          <Grid container spacing={2}>
-            {Object.entries(Permissions.NAV).map(([key, value]) => (
-              <Grid key={key} item sm={12} md={4}>
-                <FormControlLabel
-                  key={value}
-                  control={<Checkbox id={value} onChange={handleChange} checked={allowedPermissions.has(value)} />}
-                  label={key}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        </FormGroup>
-      </Box>
-      <Box>
-        <Button onClick={handleSubmit}>Update Permissions</Button>
-      </Box>
+      {isFetchingAvailablePermissions ? (
+        <LoadingSpinner />
+      ) : (
+        <PermissionsEditor
+          isSubmitting={isSubmitting}
+          onSubmit={handleSubmit}
+          initialSelected={current_available_permissions ?? []}
+        />
+      )}
     </Box>
   )
 }

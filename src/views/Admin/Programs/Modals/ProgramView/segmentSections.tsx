@@ -3,10 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Button, Typography } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
-import ChaarvyDataTable, {
-  ChaarvyTableColumn,
-  EditedDataTableOnSubmitPayload
-} from 'src/reusable_components/Table/ChaarvyDataTable'
+import ChaarvyDataTable, { EditedDataTableOnSubmitPayload } from 'src/reusable_components/Table/ChaarvyDataTable'
 import {
   useGetProgramCommonMediumsQuery,
   useGetSectionsListQuery,

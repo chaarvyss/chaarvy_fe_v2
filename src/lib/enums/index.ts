@@ -1,7 +1,8 @@
 export enum sessionStorageKeys {
   accessToken = 'accessToken',
   clientCode = 'clcode',
-  name = 'name'
+  name = 'name',
+  userId = 'uid'
 }
 
 export enum ButtonColors {

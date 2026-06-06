@@ -46,7 +46,8 @@ const authServiceApi = api.injectEndpoints({
         }
       }
     })
-  })
+  }),
+  overrideExisting: true
 })
 
 export const { useLoginMutation, useChangePasswordMutation, useUploadProfilePicMutation } = authServiceApi

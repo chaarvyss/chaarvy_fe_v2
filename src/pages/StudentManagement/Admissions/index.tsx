@@ -9,7 +9,6 @@ import { PagePath } from 'src/constants/pagePathConstants'
 import { FilterProps } from 'src/lib/interfaces'
 import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
-import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
 import {
   useGetProcessingFeesPendingEnrollmentsQuery,
   useLazyGetAdmissionsListQuery
