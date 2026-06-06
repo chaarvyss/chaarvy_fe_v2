@@ -1,4 +1,4 @@
-export type ChaarvyTableColumn<T = any> = {
+type ChaarvyTableColumn<T = any> = {
   id: string
   label: string
   width?: string | number
@@ -16,13 +16,13 @@ export type ChaarvyTableColumn<T = any> = {
   cellSx?: Record<string, any>
 }
 
-export type EditedDataTableOnSubmitPayload<T = any> = {
+type EditedDataTableOnSubmitPayload<T = any> = {
   created: T[]
   updated: T[]
   deleted: T[]
 }
 
-export type ChaarvyDataTableProps<T = any> = {
+type ChaarvyDataTableProps<T = any> = {
   columns: ChaarvyTableColumn<T>[]
   data: T[]
   getRowKey: (row: T, index: number) => string | number
