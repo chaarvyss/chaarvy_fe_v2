@@ -5,7 +5,6 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
 import LoadingSpinner from 'src/reusable_components/LoadingSpinner'
-import { ChaarvyTableColumn } from 'src/reusable_components/Table/type'
 import { StudentPendingFeesDetails, useLazyGetStudentPendingFeesDetailsQuery } from 'src/store/services/feesServices'
 
 import CollectPaymentModal from './collectPaymentModal'

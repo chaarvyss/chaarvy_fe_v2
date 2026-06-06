@@ -4,7 +4,6 @@ import { Box, Button, TextField, Typography } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { InputVariants } from 'src/lib/enums'
 import LoadingSpinner from 'src/reusable_components/LoadingSpinner'
-import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
 import { renderStats } from 'src/reusable_components/Table/TableTilteHeader'
 import {
   useGetRawFeesDetailsQuery,

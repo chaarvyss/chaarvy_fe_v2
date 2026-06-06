@@ -1,7 +1,6 @@
 import { Checkbox, FormControlLabel } from '@mui/material'
 
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
-import { ChaarvyTableColumn } from 'src/reusable_components/Table/ChaarvyDataTable'
 
 interface BooksFeeProps {
   books: Book[]
