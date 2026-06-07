@@ -30,7 +30,7 @@ export const urlConstants = {
   },
   list: {
     addOnCourse: `${interRoutePrefix.list}/addon_courses`,
-    books: `${interRoutePrefix.list}/books`,
+    books: `${interRoutePrefix.list}/v2/books`,
     communities: `${interRoutePrefix.list}/communities`,
     districts: `${interRoutePrefix.list}/districts`,
     feesTypes: `${interRoutePrefix.list}/fee-types`,
@@ -62,7 +62,7 @@ export const urlConstants = {
     createUpdateSection: `${interRoutePrefix.admin}/add-update-section`,
     createUpdateRole: `${interRoutePrefix.admin}/create-update-role`,
     createUpdateSegment: `${interRoutePrefix.admin}/create-update-segment`,
-    createUpdateBook: `${interRoutePrefix.admin}/create-update-books`,
+    createUpdateBook: `${interRoutePrefix.admin}/v2/create-update-books`,
     createUpdateFeesType: `${interRoutePrefix.admin}/create-update-fees-type`,
     createUpdateProgramAddonCourse: `${interRoutePrefix.admin}/create-update-program-addon-course`,
     add: {

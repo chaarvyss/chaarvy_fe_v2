@@ -31,58 +31,111 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
   const { triggerToast } = useToast()
 
   const [isBulkProcessStatusModalOpen, setIsBulkProcessStatusModalOpen] = useState(false)
-
   const [processStats, setProcessStats] = useState<ProcessStatRow[]>([])
 
-  const [itemType, setItemType] = useState<ItemType>()
+  const [itemType, setItemType] = useState<ItemType>('specific')
 
-  const [filterData, setFilterData] = useState<CascadingSelectorState>(
-    defaultData || { program: '', segment: '', medium: '' }
-  )
+  // --- Normalize default data to guarantee `program` is an array for MUI ---
+  const normalizedDefaultData = useMemo(() => {
+    if (!defaultData) return { program: [], segment: '', medium: '' }
 
-  const { program, segment, medium } = filterData
-  const isFilterReady = Boolean(program && segment && medium)
+    return {
+      ...defaultData,
+      program: Array.isArray(defaultData.program)
+        ? defaultData.program
+        : defaultData.program
+          ? [defaultData.program]
+          : []
+    }
+  }, [defaultData])
+
+  // Initialize state with the guaranteed array
+  const [filterData, setFilterData] = useState<CascadingSelectorState>(normalizedDefaultData)
+
+  const hasPrograms = Array.isArray(filterData.program) ? filterData.program.length > 0 : Boolean(filterData.program)
+  const isSpecificFilterReady = Boolean(hasPrograms && filterData.segment && filterData.medium)
+  const isFilterReady = itemType === 'specific' ? isSpecificFilterReady : true
 
   const queryParams = useMemo(() => {
-    return itemType === 'specific' ? { program, segment, medium, isCommon: false } : { isCommon: true }
-  }, [itemType, program, segment, medium])
+    if (itemType === 'specific') {
+      const rawPrograms = Array.isArray(filterData.program)
+        ? filterData.program
+        : filterData.program
+          ? [filterData.program]
+          : []
+
+      // 2. Filter out undefined/null/empty strings and cast to string[]
+      const validPrograms = rawPrograms.filter((p): p is string => !!p && typeof p === 'string')
+
+      return {
+        program: validPrograms,
+        segment: filterData.segment,
+        medium: filterData.medium,
+        isCommon: false
+      }
+    }
+
+    return { isCommon: true }
+  }, [itemType, filterData])
 
   const { data: booksListResponse, isFetching: isFetchingBooks } = useGetBooksListQuery(
     { ...queryParams, offset: 0, limit: 100 },
     { skip: itemType === 'specific' && !isFilterReady }
   )
 
-  const tableData = booksListResponse?.booksDetails || []
+  // --- NEW: Group books by book_id to prevent duplicates in the modal table ---
+  const aggregatedBooks = useMemo(() => {
+    if (!booksListResponse?.booksDetails) return []
+
+    const map = new Map<string, any>()
+
+    booksListResponse.booksDetails.forEach((row: any) => {
+      if (!map.has(row.book_id)) {
+        map.set(row.book_id, {
+          ...row,
+          program_names: row.program ? [row.program] : [],
+          program_ids: row.program_id ? [row.program_id] : []
+        })
+      } else {
+        const existing = map.get(row.book_id)
+        if (row.program && !existing.program_names.includes(row.program)) {
+          existing.program_names.push(row.program)
+        }
+        if (row.program_id && !existing.program_ids.includes(row.program_id)) {
+          existing.program_ids.push(row.program_id)
+        }
+      }
+    })
+
+    return Array.from(map.values())
+  }, [booksListResponse?.booksDetails])
 
   const columns: ChaarvyTableColumn[] = useMemo(
     () => [
-      {
-        id: 'sno',
-        label: '#',
-        width: 30,
-        render: (_, index) => <Typography variant='body2'>{index + 1}</Typography>
-      },
+      { id: 'sno', label: '#', width: 30, render: (_, index) => <Typography variant='body2'>{index + 1}</Typography> },
       {
         id: 'book_name',
         label: 'Book Name',
         editable: true,
         inputType: 'text',
-        width: 250
+        width: 250,
+
+        // Add the custom render here so it shows the beautiful caption in the modal!
+        render: (row: any) => (
+          <Box>
+            <Typography variant='body1'>{row.book_name}</Typography>
+            {row.book_id && (
+              <Typography variant='caption' color='textSecondary'>
+                {row.isCommon
+                  ? 'Common book'
+                  : `(${row.program_names?.join(', ') || ''}) - ${row.segment} - ${row.medium}`}
+              </Typography>
+            )}
+          </Box>
+        )
       },
-      {
-        id: 'price',
-        label: 'Price',
-        editable: true,
-        inputType: 'number',
-        width: 40
-      },
-      {
-        id: 'available_quantity',
-        label: 'Stock',
-        editable: true,
-        inputType: 'number',
-        width: 40
-      }
+      { id: 'price', label: 'Price', editable: true, inputType: 'number', width: 40 },
+      { id: 'available_quantity', label: 'Stock', editable: true, inputType: 'number', width: 40 }
     ],
     []
   )
@@ -94,10 +147,12 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
   const handleEditSubmit = (payload: EditedDataTableOnSubmitPayload) => {
     const formattedPayload =
       itemType === 'specific' ? generateSpecificBooksPayload(payload, filterData) : generateCommonBooksPayload(payload)
+
     setProcessStats(getDefaultProcessStats(payload))
     setIsBulkProcessStatusModalOpen(true)
 
     if (!formattedPayload?.length) return
+
     createUpdateBook(formattedPayload)
       .unwrap()
       .then(res => {
@@ -107,24 +162,14 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
         }
       })
       .catch((err: any) => {
-        triggerToast(err?.data || 'Something went wrong', {
-          variant: ToastVariants.ERROR
-        })
+        triggerToast(err?.data || 'Something went wrong', { variant: ToastVariants.ERROR })
       })
-  }
-
-  const handleItemTypeChange = (type: ItemType) => {
-    setItemType(type)
-  }
-
-  const handleCascadingChange = (values: CascadingSelectorState) => {
-    setFilterData(values)
   }
 
   const renderTable = () => {
     if (itemType === 'specific' && !isFilterReady) {
       return (
-        <ChaarvyFlex className={{ height: '200px' }}>
+        <ChaarvyFlex className={{ height: '200px', justifyContent: 'center', alignItems: 'center' }}>
           <Typography variant='body2'>Please select Program, Segment and Medium to view the books</Typography>
         </ChaarvyFlex>
       )
@@ -135,7 +180,7 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
         showColumnToggle={false}
         editable
         columns={columns}
-        data={isFetchingBooks ? [] : tableData}
+        data={isFetchingBooks ? [] : aggregatedBooks} // Use aggregatedBooks here!
         getRowKey={(row, index) => row.book_id || `temp-${index}`}
         onSubmit={handleEditSubmit}
         isLoading={isFetchingBooks}
@@ -155,10 +200,14 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
       <Box sx={{ gap: 3 }}>
         {itemType && (
           <ChaarvyFlex className={{ justifyContent: 'space-between' }}>
-            <ItemTypeForm defaultValue={itemType} onValueChange={handleItemTypeChange} />
+            <ItemTypeForm defaultValue={itemType} onValueChange={setItemType} />
 
             {itemType === 'specific' && (
-              <CascadingSelectors onChange={handleCascadingChange} defaultValues={defaultData} />
+              <CascadingSelectors
+                onChange={setFilterData}
+                defaultValues={normalizedDefaultData}
+                isMultiProgram={true}
+              />
             )}
           </ChaarvyFlex>
         )}

@@ -1,3 +1,13 @@
+import {
+  Checkbox,
+  FormControl,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  OutlinedInput,
+  Select,
+  SelectChangeEvent
+} from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
 
 import { ProgramSegmentMediumsListResponse } from 'src/lib/types'
@@ -8,7 +18,7 @@ import { useGetProgramSegmentMediumsListByProgramIdQuery } from 'src/store/servi
 import ReusableSelect from './reusableSelect'
 
 export type CascadingSelectorState = {
-  program?: string
+  program?: string | string[]
   segment?: string
   medium?: string
 }
@@ -16,21 +26,25 @@ export type CascadingSelectorState = {
 interface CascadingSelectorsProps {
   onChange: (values: CascadingSelectorState) => void
   defaultValues?: CascadingSelectorState
+  isMultiProgram?: boolean // NEW: Enables multi-select for the Program dropdown
 }
 
-const CascadingSelectors = ({ onChange, defaultValues }: CascadingSelectorsProps) => {
-  const [values, setValues] = useState<CascadingSelectorState>(defaultValues ?? {})
+const CascadingSelectors = ({ onChange, defaultValues, isMultiProgram = false }: CascadingSelectorsProps) => {
+  const [values, setValues] = useState<CascadingSelectorState>(defaultValues ?? { program: isMultiProgram ? [] : '' })
 
   const { data: programsData, isLoading: isProgramsLoading } = useGetProgramsListQuery(true)
+
+  // Use the first program in the array to fetch dependent segments/mediums to prevent API errors
+  const firstProgramId = Array.isArray(values.program) ? values.program[0] : values.program
 
   const { data: programSegmentMediumsResponse, isFetching: isProgramSegmentMediumsLoading } =
     useGetProgramSegmentMediumsListByProgramIdQuery(
       {
-        program_id: values.program ?? '',
+        program_id: firstProgramId ?? '',
         only_active: true
       },
       {
-        skip: !values.program
+        skip: !firstProgramId
       }
     )
 
@@ -72,9 +86,21 @@ const CascadingSelectors = ({ onChange, defaultValues }: CascadingSelectorsProps
     }
   }, [defaultValues])
 
-  const handleProgramChange = (value: string) => {
+  const handleProgramChangeSingle = (value: string) => {
     setValues({
       program: value,
+      segment: undefined,
+      medium: undefined
+    })
+  }
+
+  const handleProgramChangeMulti = (event: SelectChangeEvent<string[]>) => {
+    const {
+      target: { value }
+    } = event
+    const newPrograms = typeof value === 'string' ? value.split(',') : value
+    setValues({
+      program: newPrograms,
       segment: undefined,
       medium: undefined
     })
@@ -94,17 +120,37 @@ const CascadingSelectors = ({ onChange, defaultValues }: CascadingSelectorsProps
 
   return (
     <ChaarvyFlex className={{ gap: 3 }}>
-      <ReusableSelect
-        label='Program'
-        value={values.program}
-        isLoading={isProgramsLoading}
-        options={(programsData ?? []).map(p => ({
-          value: p.program_id,
-          label: p.program_name
-        }))}
-        onChange={handleProgramChange}
-        fullWidth={false}
-      />
+      {isMultiProgram ? (
+        <FormControl size='small' sx={{ minWidth: 200 }}>
+          <InputLabel>Program</InputLabel>
+          <Select
+            multiple
+            value={(values.program as string[]) || []}
+            onChange={handleProgramChangeMulti}
+            input={<OutlinedInput label='Program' />}
+            renderValue={selected => `${selected.length} Selected`}
+          >
+            {(programsData ?? []).map(prog => (
+              <MenuItem key={prog.program_id} value={prog.program_id}>
+                <Checkbox checked={((values.program as string[]) || []).includes(prog.program_id)} />
+                <ListItemText primary={prog.program_name} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      ) : (
+        <ReusableSelect
+          label='Program'
+          value={values.program as string}
+          isLoading={isProgramsLoading}
+          options={(programsData ?? []).map(p => ({
+            value: p.program_id,
+            label: p.program_name
+          }))}
+          onChange={handleProgramChangeSingle}
+          fullWidth={false}
+        />
+      )}
 
       <ReusableSelect
         label='Segment'
