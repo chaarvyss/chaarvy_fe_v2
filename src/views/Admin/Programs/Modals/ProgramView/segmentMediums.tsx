@@ -22,6 +22,30 @@ const SegmentMediums = ({ program_id, segments, languages, isLoading }: ProgramV
     }
   )
 
+  //  program_id: string
+  // segment_id: string
+  // segment_name: string
+  // medium_id: string
+  // medium_name: string
+  // medium_status: number
+
+  // const defaultData = useMemo(() => {
+  //   segments?.map(segment => {
+  //     languages?.map(language => {
+  //       return {
+  //         program_id: program_id,
+  //         segment_id: segment.segment_id,
+  //         segment_name: segment.segment_name,
+  //         medium_id: language.languages_id,
+  //         medium_name: language.languages_name,
+  //         medium_status: 0
+  //       }
+  //     })
+  //   })
+  // }, [])
+
+  console.log(segments, languages)
+
   const columns: ChaarvyTableColumn[] = useMemo(() => {
     const languagesColumns: ChaarvyTableColumn[] = (languages ?? []).map(each => ({
       id: `lgid__${each.languages_id}`,

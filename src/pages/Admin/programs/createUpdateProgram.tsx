@@ -1,7 +1,7 @@
 'use client'
 
 import { LoadingButton } from '@mui/lab'
-import { TextField } from '@mui/material'
+import { Checkbox, FormControlLabel, TextField } from '@mui/material'
 import { ChangeEvent, useEffect, useState } from 'react'
 
 import { Box, Grid } from '@muiElements'
@@ -10,6 +10,7 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Program } from 'src/lib/types'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import { useCreateProgramMutation, useUpdateProgramMutation } from 'src/store/services/adminServices'
+import { useGetSegmentsListQuery } from 'src/store/services/listServices'
 
 export interface CreateProgram {
   program_name: string
@@ -30,16 +31,20 @@ const CreateOrUpdateProgramModal = ({ selectedProgram, isOpen, onClose }: Create
   const [CreateProgram, { isLoading: creatingProgram }] = useCreateProgramMutation()
   const [updateProgram, { isLoading: updatingProgram }] = useUpdateProgramMutation()
 
+  const { data: segmentsData } = useGetSegmentsListQuery()
+
+  const [segmentIds, setSegmentIds] = useState<string[]>([])
   const handleSubmit = () => {
     const action = selectedProgram
       ? updateProgram({ program_name: programDetails.program_name, id: selectedProgram.program_id })
-      : CreateProgram({ program_name: programDetails.program_name })
+      : CreateProgram({ program_name: programDetails.program_name, segment_ids: segmentIds })
 
     action
       .unwrap()
       .then(response => {
         selectedProgram && triggerToast(response, { variant: ToastVariants.SUCCESS })
         onClose()
+        setSegmentIds([])
       })
       .catch(e => triggerToast(e.data, { variant: ToastVariants.ERROR }))
   }
@@ -47,7 +52,12 @@ const CreateOrUpdateProgramModal = ({ selectedProgram, isOpen, onClose }: Create
   const createProgramFooter = () => {
     return (
       <Box display='flex' justifyContent='center'>
-        <LoadingButton loading={creatingProgram || updatingProgram} onClick={handleSubmit} variant='contained'>
+        <LoadingButton
+          loading={creatingProgram || updatingProgram}
+          disabled={!programDetails.program_name || segmentIds.length == 0}
+          onClick={handleSubmit}
+          variant='contained'
+        >
           {selectedProgram ? 'Edit' : 'Create'} Program
         </LoadingButton>
       </Box>
@@ -75,6 +85,16 @@ const CreateOrUpdateProgramModal = ({ selectedProgram, isOpen, onClose }: Create
     setLoading(showLoader)
   }, [showLoader])
 
+  const handleSegmentIds = (id: string) => {
+    setSegmentIds(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(segmentId => segmentId !== id)
+      } else {
+        return [...prev, id]
+      }
+    })
+  }
+
   return (
     <ChaarvyModal
       isOpen={isOpen}
@@ -84,16 +104,32 @@ const CreateOrUpdateProgramModal = ({ selectedProgram, isOpen, onClose }: Create
       shouldWarnOnClose
       shouldRestrictCloseOnOuterClick
     >
-      <Grid item sm={12} md={8} lg={6} gap={2}>
-        <TextField
-          onChange={handleChange('program_name')}
-          value={programDetails.program_name}
-          fullWidth
-          id='program_name'
-          label='Program name'
-          sx={{ marginBottom: 4 }}
-        />
-      </Grid>
+      <>
+        <Grid item sm={12} md={8} lg={6} gap={2}>
+          <TextField
+            onChange={handleChange('program_name')}
+            value={programDetails.program_name}
+            fullWidth
+            id='program_name'
+            label='Program name'
+            sx={{ marginBottom: 4 }}
+          />
+        </Grid>
+        {!selectedProgram &&
+          (segmentsData ?? []).map(each => {
+            return (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={segmentIds.includes(each.segment_id)}
+                    onChange={() => handleSegmentIds(each.segment_id)}
+                  />
+                }
+                label={each.segment_name}
+              />
+            )
+          })}
+      </>
     </ChaarvyModal>
   )
 }

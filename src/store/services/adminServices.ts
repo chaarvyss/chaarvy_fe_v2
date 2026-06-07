@@ -42,6 +42,7 @@ type CreateCollegeProfileRequest = {
 type UpdateProgramRequest = {
   id?: string
   program_name: string
+  segment_ids?: string[]
 }
 
 export type UpdateLanguageRequest = {
@@ -142,11 +143,12 @@ const adminServiceApi = api.injectEndpoints({
     }),
     createProgram: build.mutation<string, UpdateProgramRequest>({
       invalidatesTags: [CacheTag.ListPrograms],
-      query: params => {
+      query: ({ program_name, segment_ids }) => {
         return {
           method: HttpRequestMethods.POST,
           url: urlConstants.admin.add.program,
-          params
+          params: { program_name },
+          body: segment_ids
         }
       }
     }),

@@ -44,7 +44,7 @@ const SegmentSections = ({ program_id, isLoading }: ProgramViewTabProps) => {
   )
 
   useEffect(() => {
-    if (segmentMediums) setSelectedMedium(segmentMediums[0].medium_id)
+    if (segmentMediums) setSelectedMedium(segmentMediums[0]?.medium_id)
   }, [segmentMediums])
 
   const [createUpdateSegmentSection, { isLoading: isSubmitting }] = useCreateUpdateProgramSegmentSectionMutation()
@@ -155,8 +155,14 @@ const SegmentSections = ({ program_id, isLoading }: ProgramViewTabProps) => {
   }, [programSections, isLoadingData])
 
   const showDefaultSetButton = useMemo(
-    () => !isLoading && !isFetchingSections && !isLoadingData && data.length == 0,
-    [isLoading, isFetchingSections, isLoadingData, data]
+    () =>
+      !isLoading &&
+      !isFetchingSections &&
+      !isLoadingData &&
+      data.length === 0 && // Directly checking the computed data
+      defaultEntryData &&
+      defaultEntryData.length > 0,
+    [isLoading, isFetchingSections, isLoadingData, data, defaultEntryData] // 'data' is now a dependency
   )
 
   return (
