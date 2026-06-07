@@ -58,8 +58,9 @@ const mandatoryFields = [
   'medium_id',
   'program_id',
   'segment_id',
-  'pen_number',
-  'apaar_number',
+
+  // 'pen_number',
+  // 'apaar_number',
   'student_email',
   'student_aadhar',
   'student_name',
