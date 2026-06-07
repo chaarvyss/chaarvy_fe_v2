@@ -92,7 +92,7 @@ const SegmentSections = ({ program_id, isLoading }: ProgramViewTabProps) => {
       program_id,
       ...sectionDefaults
     }))
-  }, [segments, sectionsData])
+  }, [segments, sectionsData, segmentMediums])
 
   const handleSubmitClick = (data: EditedDataTableOnSubmitPayload) => {
     const { created, updated, deleted } = data
@@ -154,16 +154,16 @@ const SegmentSections = ({ program_id, isLoading }: ProgramViewTabProps) => {
     return Object.values(rowMap)
   }, [programSections, isLoadingData])
 
+  const showLoading = isLoading || isFetchingSections || isLoadingData || isFetchingSegments
+
+  console.log({ showLoading, data, defaultEntryData })
+
   const showDefaultSetButton = useMemo(
-    () =>
-      !isLoading &&
-      !isFetchingSections &&
-      !isLoadingData &&
-      data.length === 0 && // Directly checking the computed data
-      defaultEntryData &&
-      defaultEntryData.length > 0,
-    [isLoading, isFetchingSections, isLoadingData, data, defaultEntryData] // 'data' is now a dependency
+    () => !showLoading && data.length === 0 && defaultEntryData && defaultEntryData.length > 0,
+    [showLoading, data, defaultEntryData]
   )
+
+  console.log(showDefaultSetButton)
 
   return (
     <>
@@ -186,7 +186,7 @@ const SegmentSections = ({ program_id, isLoading }: ProgramViewTabProps) => {
         defaultEntryData={defaultEntryData}
         getRowKey={row => `${row?.segment_id}`}
         onSubmit={handleSubmitClick}
-        isLoading={isLoading || isFetchingSections || isLoadingData || isFetchingSegments}
+        isLoading={showLoading}
         loadingText='Fetching data...'
         isSubmitting={isSubmitting}
         emptyMessage={'No default data found. Please use default data'}

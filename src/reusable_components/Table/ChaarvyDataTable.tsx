@@ -73,6 +73,12 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   const [isDefaultDataSet, setIsDefaultDataSet] = useState(false)
 
   useEffect(() => {
+    if (!isLoading) {
+      setIsDefaultDataSet(false)
+    }
+  }, [isLoading])
+
+  useEffect(() => {
     const visible: Record<string, boolean> = {}
     columns.forEach(col => {
       visible[col.id] = !col.defaultHidden
