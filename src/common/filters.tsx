@@ -37,10 +37,11 @@ interface RenderFilterProps {
   onSubmit: (data?: FilterProps) => void
   fields: Array<FieldTypes>
   statusOptions?: StatusOption[]
-  defaultValues?: FilterProps // Add this to accept current URL state
+  defaultValues?: FilterProps
+  resetFilters?: () => void
 }
 
-const RenderFilterOptions = ({ onSubmit, fields, statusOptions, defaultValues }: RenderFilterProps) => {
+const RenderFilterOptions = ({ onSubmit, fields, statusOptions, defaultValues, resetFilters }: RenderFilterProps) => {
   // Initialize state with defaultValues so the form isn't blank
   const [filters, setFilters] = useState<FilterProps | undefined>(defaultValues)
   const { closeDrawer } = useSideDrawer()
@@ -94,6 +95,7 @@ const RenderFilterOptions = ({ onSubmit, fields, statusOptions, defaultValues }:
   }
 
   const handleReset = () => {
+    resetFilters?.()
     setFilters(undefined)
     setStartDate(null)
     setEndDate(null)

@@ -1,6 +1,6 @@
 import { LoadingButton } from '@mui/lab'
 import { Checkbox, FormControlLabel, TextField, Select, MenuItem, Tooltip } from '@mui/material'
-import { useEffect, useState, MouseEvent } from 'react'
+import { useEffect, useState, MouseEvent, useRef, useCallback } from 'react'
 import { ClipLoader } from 'react-spinners'
 
 import {
@@ -42,6 +42,10 @@ export interface ChaarvyDataTableProps<T = any> {
   showDefaultEntryButton?: boolean
   defaultEntryData?: T[]
   shouldHideActions?: boolean
+
+  // --- NEW: Infinite Scroll Props ---
+  hasMore?: boolean
+  onLoadMore?: () => void
 }
 
 const ChaarvyDataTable = <T extends Record<string, any>>({
@@ -58,7 +62,9 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   isSubmitting = false,
   showDefaultEntryButton = false,
   defaultEntryData,
-  shouldHideActions = false
+  shouldHideActions = false,
+  hasMore = false,
+  onLoadMore
 }: ChaarvyDataTableProps<T>) => {
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({})
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -72,6 +78,27 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   const [future, setFuture] = useState<T[][]>([])
 
   const [isDefaultDataSet, setIsDefaultDataSet] = useState(false)
+
+  // --- NEW: Intersection Observer for Infinite Scroll ---
+  const observer = useRef<IntersectionObserver | null>(null)
+
+  const lastElementRef = useCallback(
+    (node: HTMLTableRowElement | null) => {
+      // Don't trigger if it's currently loading, if there's no more data, or if we are in editable mode
+      if (isLoading || editable || !hasMore || !onLoadMore) return
+
+      if (observer.current) observer.current.disconnect()
+
+      observer.current = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) {
+          onLoadMore()
+        }
+      })
+
+      if (node) observer.current.observe(node)
+    },
+    [isLoading, hasMore, onLoadMore, editable]
+  )
 
   useEffect(() => {
     if (!isLoading) {
@@ -103,7 +130,6 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
 
   const handleCellChange = (rowIndex: number, columnId: string, value: any) => {
     setDraftData(prev => {
-      // Push exact previous state to history before changing
       setHistory(h => [...h, prev])
       setFuture([])
 
@@ -183,7 +209,6 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
 
       const nextDraft = prev.filter((_, i) => i !== index)
 
-      // Calculate deleted rows based on the guaranteed latest draft
       const newlyDeleted = originalData.filter(
         (origRow, oIndex) =>
           !nextDraft.some((draftRow, dIndex) => getRowKey(draftRow, dIndex) === getRowKey(origRow, oIndex))
@@ -193,7 +218,6 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
       return nextDraft
     })
 
-    // Shift the editing boolean flags down so they stay with the correct rows
     setEditingRowIndex(prev => {
       if (prev === index) return null
       if (prev !== null && prev > index) return prev - 1
@@ -285,8 +309,8 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   }
 
   const hidebleColumns = columns.filter(col => col.hideable)
-
   const hadChanges = Object.values(getDiffPayload()).find((arr: any) => arr.length > 0)
+  const totalColumnsCount = displayedColumns.length + (editable && !shouldHideActions ? 1 : 0)
 
   return (
     <Box position='relative' borderRadius={1} padding={2}>
@@ -370,8 +394,6 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
           overflow: 'auto',
           borderRadius: 1,
           position: 'relative'
-
-          // maxHeight: screen.availHeight - 490
         }}
       >
         <Table>
@@ -514,19 +536,49 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                 </TableRow>
               )
             })}
+
+            {/* --- NEW: Invisible Tripwire for Infinite Scroll --- */}
+            {!editable && hasMore && (
+              <TableRow ref={lastElementRef}>
+                <TableCell colSpan={totalColumnsCount} align='center' sx={{ borderBottom: 'none', py: 3 }}>
+                  {isLoading ? (
+                    <ClipLoader color={'#1976d2'} size={25} />
+                  ) : (
+                    <Typography variant='caption' color='textSecondary'>
+                      Scroll to load more
+                    </Typography>
+                  )}
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
 
-        {draftData.length === 0 && (
+        {draftData.length === 0 && !hasMore && (
           <Box
-            sx={{ height: screen.availHeight - 530, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            sx={{
+              height: screen.availHeight - 530,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
           >
+            <ClipLoader
+              color={'#1976d2'}
+              loading={isLoading}
+              size={35}
+              aria-label='Loading Spinner'
+              data-testid='loader'
+            />
             <Typography>{isLoading ? (loadingText ?? 'Loading...') : emptyMessage}</Typography>
           </Box>
         )}
       </TableContainer>
-      {draftData.length > 0 && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '90%' }}>
+
+      {/* Legacy loader box (Only shows if not using infinite scroll to prevent duplicate spinners) */}
+      {draftData.length > 0 && isLoading && !hasMore && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '90%', mt: 2 }}>
           <ClipLoader
             color={'#1976d2'}
             loading={isLoading}

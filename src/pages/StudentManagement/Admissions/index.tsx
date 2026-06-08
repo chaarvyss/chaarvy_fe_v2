@@ -5,11 +5,13 @@ import { Box, Chip, Typography } from '@muiElements'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import RenderFilterOptions from 'src/common/filters'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
+import { DEFAULT_PAGINATION_PROPS, DEFAULT_TABLE_ITEMS_LIMIT } from 'src/constants/constants'
 import { PagePath } from 'src/constants/pagePathConstants'
 import { FilterProps } from 'src/lib/interfaces'
 import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
 import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import {
+  Admissions,
   useGetProcessingFeesPendingEnrollmentsQuery,
   useLazyGetAdmissionsListQuery
 } from 'src/store/services/admisissionsService'
@@ -17,15 +19,32 @@ import { useGetApplicationFeesPaymentMutation } from 'src/store/services/feesSer
 import { statusColors } from 'src/utils/constants'
 import GetChaarvyIcons from 'src/utils/icons'
 
-const Admissions = () => {
+const AdmissionsList = () => {
   const router = useRouter()
   const { openDrawer } = useSideDrawer()
   const [fetchAdmissions, { data: admissionResponse, isFetching: isFetchingAdmissions }] =
     useLazyGetAdmissionsListQuery()
-  const [filterProps, setFilterProps] = useState<FilterProps>({ limit: 20, offset: 0 })
+  const [filterProps, setFilterProps] = useState<FilterProps>(DEFAULT_PAGINATION_PROPS)
 
   const [createPayment, { isLoading: isCreatingPaymentLink }] = useGetApplicationFeesPaymentMutation()
   const { data: processingFeesPendingEnrollments } = useGetProcessingFeesPendingEnrollmentsQuery()
+
+  const [admissionList, setAdmissionsList] = useState<Admissions[]>([])
+
+  useEffect(() => {
+    if (admissionResponse?.admissions) {
+      setAdmissionsList(prev => {
+        if (filterProps.offset === 0) {
+          return admissionResponse.admissions
+        }
+
+        const existingIds = new Set(prev.map(item => item.admission_number))
+        const newAdmissions = admissionResponse.admissions.filter(item => !existingIds.has(item.admission_number))
+
+        return [...prev, ...newAdmissions]
+      })
+    }
+  }, [admissionResponse?.admissions, filterProps.offset])
 
   useEffect(() => {
     fetchAdmissions(filterProps)
@@ -63,7 +82,12 @@ const Admissions = () => {
   }
 
   const handleFilteredAdmissions = (params?: FilterProps) => {
-    fetchAdmissions({ ...filterProps, ...params })
+    setAdmissionsList([])
+    setFilterProps(prev => ({
+      ...prev,
+      ...params,
+      offset: 0
+    }))
   }
 
   const onFilterButtonClick = () => {
@@ -73,7 +97,8 @@ const Admissions = () => {
         <RenderFilterOptions
           onSubmit={handleFilteredAdmissions}
           fields={['search', 'program', 'sections']}
-          defaultValues={filterProps} // Pass the state here!
+          defaultValues={filterProps}
+          resetFilters={() => setFilterProps(DEFAULT_PAGINATION_PROPS)}
         />
       )
     })
@@ -193,19 +218,21 @@ const Admissions = () => {
             : undefined,
         onOptionalButtonClick: handleCreatePayment
       }}
-      paginationProps={{
-        total: admissionResponse?.counts?.filtered ?? 0,
-        onChange: data => setFilterProps({ ...filterProps, ...data })
-      }}
       tableDataProps={{
         columns,
-        data: admissionResponse?.admissions ?? [],
+        data: admissionList,
         getRowKey: row => row.application_id,
         emptyMessage: 'No Admissions',
-        isLoading: showLoader
+        isLoading: showLoader,
+        hasMore: admissionList.length > 0 && admissionList.length < (admissionResponse?.counts?.filtered ?? 0),
+        onLoadMore: () =>
+          setFilterProps(prev => ({
+            ...prev,
+            offset: (prev?.offset ?? 0) + (prev?.limit ?? DEFAULT_TABLE_ITEMS_LIMIT)
+          }))
       }}
     />
   )
 }
 
-export default Admissions
+export default AdmissionsList
