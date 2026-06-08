@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.15.0...v1.16.0) (2026-06-08)
+
+
+### Features
+
+* **BooksToMultiProg:** AC-61: Adding books to multiple programs at a… ([#53](https://github.com/chaarvyss/chaarvy_fe_v2/issues/53)) ([3517f41](https://github.com/chaarvyss/chaarvy_fe_v2/commit/3517f41d51d0024cd1f5226afe5018608f021235))
+
 # [1.15.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.14.0...v1.15.0) (2026-06-06)
 
 
