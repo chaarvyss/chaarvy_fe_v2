@@ -10,8 +10,8 @@ type FormOneDetails = {
   contact_no_1: string
   student_email: string
   student_aadhar: string
-  pen_number: string
-  apaar_number: string
+  pen_number?: string
+  apaar_number?: string
 }
 
 type CreateUpdateAdmissionFormOneRequest = FormOneDetails & {

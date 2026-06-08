@@ -34,7 +34,7 @@ export type BooksListResponse = {
 }
 
 export type BooksListRequest = {
-  program_id?: string
+  program_id?: string | string[]
   medium_id?: string
   segment_id?: string
   isCommon?: boolean

@@ -75,8 +75,8 @@ const defaultFormData = {
   medium_id: '',
   program_id: '',
   segment_id: '',
-  pen_number: '',
-  apaar_number: '',
+  pen_number: undefined,
+  apaar_number: undefined,
   student_email: '',
   student_aadhar: '',
   student_name: '',
@@ -233,12 +233,22 @@ const StudentBaseDetails = ({
       return
     }
 
+    const get_value = value => {
+      if (value) {
+        return value.trim() === '' ? undefined : value
+      }
+
+      return value
+    }
+
     const finalData = { ...applicationDetails }
     if (applicationDetails) {
       if (student_id) finalData.student_id = student_id
       createUpdateAdmission({
         ...finalData,
-        dob: dateToString(dob, DateFormats.YearMonthDate) ?? ''
+        dob: dateToString(dob, DateFormats.YearMonthDate) ?? '',
+        apaar_number: get_value(finalData?.apaar_number),
+        pen_number: get_value(finalData?.pen_number)
       })
         .unwrap()
         .then(({ student_id, student_course_enrollment_id, message, application_fees_status }) => {
@@ -260,7 +270,9 @@ const StudentBaseDetails = ({
           }
           triggerToast(message, { variant: ToastVariants.SUCCESS })
         })
-        .catch(error_ => triggerToast(error_.data?.message, { variant: ToastVariants.ERROR }))
+        .catch(error => {
+          triggerToast(error.data, { variant: ToastVariants.ERROR })
+        })
     }
   }
 

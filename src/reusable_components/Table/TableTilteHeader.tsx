@@ -140,7 +140,7 @@ const TableTilteHeader = ({
   }, [stats])
 
   const showStats = useMemo(() => {
-    return stats && stats.length > 0 && window.outerHeight > 900
+    return stats && stats.length > 0 && window.outerHeight > 90
   }, [stats])
 
   return (

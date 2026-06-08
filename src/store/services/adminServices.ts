@@ -11,6 +11,7 @@ import { UserProfile } from './viewServices'
 
 export type CreateBookRequest = {
   book_id?: string
+  mapping_id?: string
   book_name: string
   price: number
   available_quantity: number
@@ -19,6 +20,7 @@ export type CreateBookRequest = {
   medium_id?: string
   status?: number
   isCommon?: number
+  had_change?: boolean
 }
 
 export type CreateProgramAddonRequest = {

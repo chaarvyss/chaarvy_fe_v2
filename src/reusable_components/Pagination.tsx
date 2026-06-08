@@ -34,13 +34,19 @@ const ChaarvyPagination = ({ total, onChange }: PaginationProps) => {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingX: 3,
+        padding: 3,
         width: '100%'
       }}
     >
       <FormControl sx={{ gap: 1 }}>
-        <small>Items per page</small>
-        <Select size='small' id='pagination-select' value={itemsPerPage} onChange={handlePageSizeChange}>
+        {/* <small>Items per page</small> */}
+        <Select
+          size='small'
+          id='pagination-select'
+          value={itemsPerPage}
+          onChange={handlePageSizeChange}
+          placeholder='Limit'
+        >
           {[2, 5, 10, 20, 50, 100].map(each => (
             <MenuItem key={each} value={each}>{`${each}`}</MenuItem>
           ))}

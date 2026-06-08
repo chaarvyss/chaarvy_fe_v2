@@ -14,7 +14,14 @@ const SideDrawer = () => {
   }
 
   return (
-    <Drawer open={isOpen} anchor='right' onClose={closeDrawer}>
+    <Drawer
+      open={isOpen}
+      anchor='right'
+      onClose={closeDrawer}
+      ModalProps={{
+        keepMounted: true
+      }}
+    >
       <Box sx={{ width: sizeMap[size], minWidth: '300px', padding: '1rem' }}>
         <Typography variant='h5' textAlign='center'>
           {title}

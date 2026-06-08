@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { Box, IconButton, Typography } from '@muiElements'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
@@ -10,6 +10,7 @@ import { useLazyGetBooksListQuery } from 'src/store/services/listServices'
 import GetChaarvyIcons from 'src/utils/icons'
 
 import AddUpdateBooks, { ItemType } from './add_books'
+import { getAggregatedBooks } from './helpers'
 
 const BooksList = () => {
   const { openDrawer } = useSideDrawer()
@@ -18,7 +19,6 @@ const BooksList = () => {
   const [isAddBooksModalOpen, setIsAddBookModalOpen] = useState<boolean>(false)
 
   const [selectedItemType, setSelectedItemType] = useState<ItemType>('specific')
-
   const [selectedDetails, setSelectedDetails] = useState<CascadingSelectorState>()
 
   const handleAddBook = () => {
@@ -47,63 +47,79 @@ const BooksList = () => {
     })
   }
 
-  const columns: ChaarvyTableColumn[] = [
-    {
-      id: 's.no',
-      label: '#',
-      hideable: false,
-      render: (row, index) => (
-        <Typography variant='body1'>{(filterProps?.limit ?? 0) * (filterProps?.offset ?? 0) + (index + 1)}</Typography>
-      )
-    },
-    {
-      id: 'book_name',
-      label: 'Book Name',
-      render: row => (
-        <Box>
-          <Typography variant='body1'>{row.book_name}</Typography>
-          <Typography variant='caption' color='textSecondary'>
-            {row.isCommon ? 'Common book' : `${row.program} - ${row.segment} - ${row.medium}`}
+  // --- NEW: Group books by book_id ---
+  const aggregatedBooks = useMemo(() => {
+    if (!booksResponse?.booksDetails) return []
+
+    return getAggregatedBooks(booksResponse.booksDetails)
+  }, [booksResponse?.booksDetails])
+
+  const columns: ChaarvyTableColumn[] = useMemo(
+    () => [
+      {
+        id: 's.no',
+        label: '#',
+        hideable: false,
+        render: (row, index) => (
+          <Typography variant='body1'>
+            {(filterProps?.limit ?? 0) * (filterProps?.offset ?? 0) + (index + 1)}
           </Typography>
-        </Box>
-      )
-    },
-    {
-      id: 'available_quantity',
-      label: 'Available qty',
-      hideable: true
-    },
-    {
-      id: 'price',
-      label: 'Price',
-      hideable: true
-    },
-    {
-      id: 'actions',
-      label: 'Actions',
-      width: '10px',
-      hideable: false,
-      render: row => (
-        <IconButton
-          onClick={() => {
-            if (row?.isCommon == 1) {
-              setSelectedItemType('common')
-            } else {
-              setSelectedDetails({
-                program: row.program_id,
-                segment: row.segment_id,
-                medium: row.medium_id
-              })
-            }
-            handleAddBook()
-          }}
-          sx={{ color: 'orange' }}
-        >
-          <GetChaarvyIcons fontSize='1.25rem' iconName='Pencil' />
-        </IconButton>
-      )
-    }
-  ]
+        )
+      },
+      {
+        id: 'book_name',
+        label: 'Book Name',
+        render: row => (
+          <Box>
+            <Typography variant='body1'>{row.book_name}</Typography>
+            <Typography variant='caption' color='textSecondary'>
+              {row.isCommon
+                ? 'Common book'
+                : // Join the array of program names with commas
+                  `(${row.program_names.join(', ')}) - ${row.segment} - ${row.medium}`}
+            </Typography>
+          </Box>
+        )
+      },
+      {
+        id: 'available_quantity',
+        label: 'Available qty',
+        hideable: true
+      },
+      {
+        id: 'price',
+        label: 'Price',
+        hideable: true
+      },
+      {
+        id: 'actions',
+        label: 'Actions',
+        width: '10px',
+        hideable: false,
+        render: row => (
+          <IconButton
+            onClick={() => {
+              if (row?.isCommon == 1) {
+                setSelectedItemType('common')
+              } else {
+                setSelectedItemType('specific')
+                setSelectedDetails({
+                  program: row.program_ids, // Pass the array of IDs!
+                  segment: row.segment_id,
+                  medium: row.medium_id
+                })
+              }
+              handleAddBook()
+            }}
+            sx={{ color: 'orange' }}
+          >
+            <GetChaarvyIcons fontSize='1.25rem' iconName='Pencil' />
+          </IconButton>
+        )
+      }
+    ],
+    [filterProps]
+  )
 
   return (
     <>
@@ -128,7 +144,7 @@ const BooksList = () => {
         }}
         tableDataProps={{
           columns,
-          data: booksResponse?.booksDetails ?? [],
+          data: aggregatedBooks, // Use the grouped data here
           getRowKey: row => row.book_id,
           emptyMessage: 'No Books available',
           isLoading

@@ -28,7 +28,7 @@ const DynamicHeightTableContainer = ({
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          minHeight: '60vh'
+          minHeight: '59vh'
         }}
       >
         <Box sx={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>{children}</Box>
