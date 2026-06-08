@@ -37,10 +37,12 @@ interface RenderFilterProps {
   onSubmit: (data?: FilterProps) => void
   fields: Array<FieldTypes>
   statusOptions?: StatusOption[]
+  defaultValues?: FilterProps // Add this to accept current URL state
 }
 
-const RenderFilterOptions = ({ onSubmit, fields, statusOptions }: RenderFilterProps) => {
-  const [filters, setFilters] = useState<FilterProps>()
+const RenderFilterOptions = ({ onSubmit, fields, statusOptions, defaultValues }: RenderFilterProps) => {
+  // Initialize state with defaultValues so the form isn't blank
+  const [filters, setFilters] = useState<FilterProps | undefined>(defaultValues)
   const { closeDrawer } = useSideDrawer()
 
   const { data: programsList, isFetching: isFetchingPrograms } = useGetProgramsListQuery(true, {
@@ -59,8 +61,11 @@ const RenderFilterOptions = ({ onSubmit, fields, statusOptions }: RenderFilterPr
     skip: !fields.includes('segment')
   })
 
-  const [startDate, setStartDate] = useState<Date | null>(null)
-  const [endDate, setEndDate] = useState<Date | null>(null)
+  // Initialize dates from strings if they exist in defaultValues
+  const [startDate, setStartDate] = useState<Date | null>(
+    defaultValues?.startDate ? new Date(defaultValues.startDate) : null
+  )
+  const [endDate, setEndDate] = useState<Date | null>(defaultValues?.endDate ? new Date(defaultValues.endDate) : null)
 
   const handleChange = (prop: keyof FilterProps) => (value: any) => {
     setFilters(prev => ({ ...prev, [prop]: value }))
@@ -69,24 +74,32 @@ const RenderFilterOptions = ({ onSubmit, fields, statusOptions }: RenderFilterPr
   const handleSubmit = (event?: any) => {
     event?.preventDefault()
 
+    // When searching, always reset pagination to page 1
     const finalFilters = { ...filters, offset: 0 }
 
     if (startDate) {
       finalFilters.startDate = dateToString(startDate, DateFormats.YearMonthDate)
+    } else {
+      delete finalFilters.startDate
     }
 
     if (endDate) {
       finalFilters.endDate = dateToString(endDate, DateFormats.YearMonthDate)
+    } else {
+      delete finalFilters.endDate
     }
 
     onSubmit(finalFilters)
+    closeDrawer() // Optional: Close drawer automatically on search
   }
 
   const handleReset = () => {
     setFilters(undefined)
     setStartDate(null)
     setEndDate(null)
-    onSubmit(undefined)
+
+    // Pass an object with offset: 0 to clear filters but maintain pagination structure
+    onSubmit({ limit: defaultValues?.limit ?? 20, offset: 0 })
     closeDrawer()
   }
 

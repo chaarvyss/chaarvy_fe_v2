@@ -39,9 +39,6 @@ export const SideDrawerProvider = ({ children }: { children: React.ReactNode }) 
 
   const closeDrawer = () => {
     setIsOpen(false)
-    setTitle('')
-    setDrawerChildren(null)
-    setClassName(undefined)
   }
 
   return (

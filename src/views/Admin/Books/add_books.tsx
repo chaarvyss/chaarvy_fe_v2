@@ -15,7 +15,7 @@ import BulkProcessStatusModal, {
   ProcessStatRow
 } from 'src/views/common/BulkProcessStatusModal'
 
-import { generateCommonBooksPayload, generateSpecificBooksPayload } from './helpers'
+import { generateCommonBooksPayload, generateSpecificBooksPayload, getAggregatedBooks } from './helpers'
 
 export type ItemType = 'common' | 'specific'
 
@@ -35,7 +35,6 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
 
   const [itemType, setItemType] = useState<ItemType>('specific')
 
-  // --- Normalize default data to guarantee `program` is an array for MUI ---
   const normalizedDefaultData = useMemo(() => {
     if (!defaultData) return { program: [], segment: '', medium: '' }
 
@@ -49,7 +48,6 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
     }
   }, [defaultData])
 
-  // Initialize state with the guaranteed array
   const [filterData, setFilterData] = useState<CascadingSelectorState>(normalizedDefaultData)
 
   const hasPrograms = Array.isArray(filterData.program) ? filterData.program.length > 0 : Boolean(filterData.program)
@@ -64,13 +62,12 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
           ? [filterData.program]
           : []
 
-      // 2. Filter out undefined/null/empty strings and cast to string[]
       const validPrograms = rawPrograms.filter((p): p is string => !!p && typeof p === 'string')
 
       return {
-        program: validPrograms,
-        segment: filterData.segment,
-        medium: filterData.medium,
+        program_id: validPrograms, // Assumes backend expects program_id parameter
+        segment_id: filterData.segment,
+        medium_id: filterData.medium,
         isCommon: false
       }
     }
@@ -83,31 +80,10 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
     { skip: itemType === 'specific' && !isFilterReady }
   )
 
-  // --- NEW: Group books by book_id to prevent duplicates in the modal table ---
   const aggregatedBooks = useMemo(() => {
     if (!booksListResponse?.booksDetails) return []
 
-    const map = new Map<string, any>()
-
-    booksListResponse.booksDetails.forEach((row: any) => {
-      if (!map.has(row.book_id)) {
-        map.set(row.book_id, {
-          ...row,
-          program_names: row.program ? [row.program] : [],
-          program_ids: row.program_id ? [row.program_id] : []
-        })
-      } else {
-        const existing = map.get(row.book_id)
-        if (row.program && !existing.program_names.includes(row.program)) {
-          existing.program_names.push(row.program)
-        }
-        if (row.program_id && !existing.program_ids.includes(row.program_id)) {
-          existing.program_ids.push(row.program_id)
-        }
-      }
-    })
-
-    return Array.from(map.values())
+    return getAggregatedBooks(booksListResponse.booksDetails)
   }, [booksListResponse?.booksDetails])
 
   const columns: ChaarvyTableColumn[] = useMemo(
@@ -119,8 +95,6 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
         editable: true,
         inputType: 'text',
         width: 250,
-
-        // Add the custom render here so it shows the beautiful caption in the modal!
         render: (row: any) => (
           <Box>
             <Typography variant='body1'>{row.book_name}</Typography>
@@ -180,7 +154,7 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
         showColumnToggle={false}
         editable
         columns={columns}
-        data={isFetchingBooks ? [] : aggregatedBooks} // Use aggregatedBooks here!
+        data={isFetchingBooks ? [] : aggregatedBooks}
         getRowKey={(row, index) => row.book_id || `temp-${index}`}
         onSubmit={handleEditSubmit}
         isLoading={isFetchingBooks}

@@ -20,7 +20,8 @@ import GetChaarvyIcons from 'src/utils/icons'
 const Admissions = () => {
   const router = useRouter()
   const { openDrawer } = useSideDrawer()
-  const [fetchAdmissions, { data: admissionResponse, isLoading }] = useLazyGetAdmissionsListQuery()
+  const [fetchAdmissions, { data: admissionResponse, isFetching: isFetchingAdmissions }] =
+    useLazyGetAdmissionsListQuery()
   const [filterProps, setFilterProps] = useState<FilterProps>({ limit: 20, offset: 0 })
 
   const [createPayment, { isLoading: isCreatingPaymentLink }] = useGetApplicationFeesPaymentMutation()
@@ -68,7 +69,13 @@ const Admissions = () => {
   const onFilterButtonClick = () => {
     openDrawer({
       title: 'Filters',
-      content: <RenderFilterOptions onSubmit={handleFilteredAdmissions} fields={['search', 'program', 'sections']} />
+      content: (
+        <RenderFilterOptions
+          onSubmit={handleFilteredAdmissions}
+          fields={['search', 'program', 'sections']}
+          defaultValues={filterProps} // Pass the state here!
+        />
+      )
     })
   }
 
@@ -164,8 +171,8 @@ const Admissions = () => {
   ]
 
   const showLoader = useMemo(() => {
-    return isLoading || processingFeesPendingEnrollments === undefined
-  }, [isLoading, processingFeesPendingEnrollments])
+    return isFetchingAdmissions || processingFeesPendingEnrollments === undefined
+  }, [isFetchingAdmissions, processingFeesPendingEnrollments])
 
   return (
     <ChaarvyTable

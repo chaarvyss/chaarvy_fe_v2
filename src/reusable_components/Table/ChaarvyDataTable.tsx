@@ -1,6 +1,7 @@
 import { LoadingButton } from '@mui/lab'
 import { Checkbox, FormControlLabel, TextField, Select, MenuItem, Tooltip } from '@mui/material'
 import { useEffect, useState, MouseEvent } from 'react'
+import { ClipLoader } from 'react-spinners'
 
 import {
   Box,
@@ -367,7 +368,8 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
       <TableContainer
         sx={{
           overflow: 'auto',
-          borderRadius: 1
+          borderRadius: 1,
+          position: 'relative'
 
           // maxHeight: screen.availHeight - 490
         }}
@@ -523,6 +525,17 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
           </Box>
         )}
       </TableContainer>
+      {draftData.length > 0 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '90%' }}>
+          <ClipLoader
+            color={'#1976d2'}
+            loading={isLoading}
+            size={35}
+            aria-label='Loading Spinner'
+            data-testid='loader'
+          />
+        </Box>
+      )}
 
       {editable && (
         <ChaarvyFlex className={{ flexDirection: 'column', alignItems: 'end', mt: 2 }}>

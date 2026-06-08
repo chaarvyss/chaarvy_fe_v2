@@ -10,6 +10,7 @@ import { useLazyGetBooksListQuery } from 'src/store/services/listServices'
 import GetChaarvyIcons from 'src/utils/icons'
 
 import AddUpdateBooks, { ItemType } from './add_books'
+import { getAggregatedBooks } from './helpers'
 
 const BooksList = () => {
   const { openDrawer } = useSideDrawer()
@@ -50,29 +51,7 @@ const BooksList = () => {
   const aggregatedBooks = useMemo(() => {
     if (!booksResponse?.booksDetails) return []
 
-    const map = new Map<string, any>()
-
-    booksResponse.booksDetails.forEach((row: any) => {
-      if (!map.has(row.book_id)) {
-        // First time seeing this book, initialize arrays for programs
-        map.set(row.book_id, {
-          ...row,
-          program_names: row.program ? [row.program] : [],
-          program_ids: row.program_id ? [row.program_id] : []
-        })
-      } else {
-        // Book exists, just push the new program names and IDs
-        const existing = map.get(row.book_id)
-        if (row.program && !existing.program_names.includes(row.program)) {
-          existing.program_names.push(row.program)
-        }
-        if (row.program_id && !existing.program_ids.includes(row.program_id)) {
-          existing.program_ids.push(row.program_id)
-        }
-      }
-    })
-
-    return Array.from(map.values())
+    return getAggregatedBooks(booksResponse.booksDetails)
   }, [booksResponse?.booksDetails])
 
   const columns: ChaarvyTableColumn[] = useMemo(
