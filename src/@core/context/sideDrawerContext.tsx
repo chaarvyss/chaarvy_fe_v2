@@ -18,6 +18,7 @@ interface SideDrawerContextProps {
   openDrawer: (params: OpenDrawerParams) => void
   closeDrawer: () => void
   setChildren: (content: ReactNode) => void
+  resetDrawer: () => void
 }
 
 const SideDrawerContext = createContext<SideDrawerContextProps | undefined>(undefined)
@@ -41,6 +42,10 @@ export const SideDrawerProvider = ({ children }: { children: React.ReactNode }) 
     setIsOpen(false)
   }
 
+  const resetDrawer = () => {
+    setDrawerChildren(undefined)
+  }
+
   return (
     <SideDrawerContext.Provider
       value={{
@@ -51,7 +56,8 @@ export const SideDrawerProvider = ({ children }: { children: React.ReactNode }) 
         className,
         closeDrawer,
         setChildren: setDrawerChildren,
-        size
+        size,
+        resetDrawer
       }}
     >
       {children}

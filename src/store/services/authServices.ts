@@ -11,6 +11,23 @@ export type ProfilePicUploadRequest = {
   photo: File
 }
 
+type ResetPasswordRequest = {
+  clcode: string
+  username: string
+  password: string
+}
+
+type VerifyResetCodeRequest = {
+  clcode: string
+  username: string
+  verification_code: string
+}
+
+type ResetLinkRequest = {
+  clcode: string
+  username: string
+}
+
 const authServiceApi = api.injectEndpoints({
   endpoints: build => ({
     login: build.mutation<LoginResponse, LoginProps>({
@@ -45,9 +62,45 @@ const authServiceApi = api.injectEndpoints({
           params: { user_id }
         }
       }
+    }),
+    resetPassword: build.mutation<void, ResetPasswordRequest>({
+      query: body => {
+        return {
+          url: '',
+          headers: { [httpHeaders.CLCODE]: body.clcode },
+          method: HttpRequestMethods.POST,
+          body
+        }
+      }
+    }),
+    verifyResetCode: build.mutation<void, VerifyResetCodeRequest>({
+      query: () => {
+        return {
+          url: '',
+          method: HttpRequestMethods.POST
+        }
+      }
+    }),
+
+    requestResetCode: build.query<void, ResetLinkRequest>({
+      query: ({ username, clcode }) => {
+        return {
+          url: '',
+          method: HttpRequestMethods.GET,
+          headers: { [httpHeaders.CLCODE]: clcode },
+          params: { username }
+        }
+      }
     })
   }),
   overrideExisting: true
 })
 
-export const { useLoginMutation, useChangePasswordMutation, useUploadProfilePicMutation } = authServiceApi
+export const {
+  useLoginMutation,
+  useChangePasswordMutation,
+  useUploadProfilePicMutation,
+  useResetPasswordMutation,
+  useVerifyResetCodeMutation,
+  useLazyRequestResetCodeQuery
+} = authServiceApi

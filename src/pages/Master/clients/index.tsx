@@ -1,6 +1,7 @@
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import TableTilteHeader from 'src/reusable_components/Table/TableTilteHeader'
 import { ClientsResponse, useGetClientsListQuery } from 'src/store/services/MasterServices/adminServices'
+import GetChaarvyIcons from 'src/utils/icons'
 import { Card, Paper, TableContainer, Table, TableBody, TableCell, TableHead, TableRow } from 'src/utils/muiElements'
 
 import CreateClient from './createClient'
@@ -18,7 +19,7 @@ const Clients = () => {
       {TableTilteHeader({
         title: 'Clients',
         buttonTitle: 'Add Client',
-        onButtonClick: () => openDrawer({ title: 'New Client', content: <CreateClient /> })
+        onButtonClick: () => openDrawer({ title: 'New Client', content: <CreateClient clientDetails={undefined} /> })
       })}
       <Paper>
         <Card>
@@ -46,7 +47,9 @@ const Clients = () => {
                     <TableCell>{row.db_name}</TableCell>
                     <TableCell>{row.inst_type}</TableCell>
                     <TableCell>{row.processing_fees}</TableCell>
-                    <TableCell onClick={() => handleEdit(row)}>edit</TableCell>
+                    <TableCell sx={{ cursor: 'pointer' }} onClick={() => handleEdit(row)}>
+                      <GetChaarvyIcons iconName='Pencil' fontSize='1.25rem' />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
