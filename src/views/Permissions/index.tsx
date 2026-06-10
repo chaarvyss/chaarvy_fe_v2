@@ -19,6 +19,7 @@ import PermissionNode from './permissionNode'
 import { extractAllPermissions, getFormattedName } from './utils'
 
 const permissionsData = PermissionLabels
+
 interface PermissionEditorProps {
   initialSelected: string[]
   isSubmitting: boolean
@@ -31,16 +32,25 @@ const PermissionsEditor = ({ initialSelected, onSubmit, isSubmitting }: Permissi
   const handleToggle = (permissionsToToggle: string | string[], isChecked: boolean) => {
     setSelectedPerms(prev => {
       const updated = new Set(prev)
+      const toToggleArray = Array.isArray(permissionsToToggle) ? permissionsToToggle : [permissionsToToggle]
 
-      if (typeof permissionsToToggle === 'string') {
-        if (isChecked) updated.add(permissionsToToggle)
-        else updated.delete(permissionsToToggle)
-      } else if (Array.isArray(permissionsToToggle)) {
-        permissionsToToggle.forEach(p => {
-          if (isChecked) updated.add(p)
-          else updated.delete(p)
-        })
-      }
+      toToggleArray.forEach(p => {
+        if (isChecked) {
+          updated.add(p)
+        } else {
+          updated.delete(p)
+          const navEntries = Object.entries(PermissionLabels.nav) as [string, string][]
+          const matchingNavEntry = navEntries.find(([_, value]) => value === p)
+          if (matchingNavEntry) {
+            const correspondingTopLevelKey = matchingNavEntry[0]
+            const subNode = PermissionLabels[correspondingTopLevelKey as keyof typeof PermissionLabels]
+            if (subNode) {
+              const allChildPerms = extractAllPermissions(subNode)
+              allChildPerms.forEach(childPerm => updated.delete(childPerm))
+            }
+          }
+        }
+      })
 
       return Array.from(updated)
     })
@@ -50,6 +60,16 @@ const PermissionsEditor = ({ initialSelected, onSubmit, isSubmitting }: Permissi
     <Box>
       <CardContent>
         {Object.entries(permissionsData).map(([topLevelKey, topLevelNode]) => {
+          if (topLevelKey !== 'nav') {
+            const navPermissionString = PermissionLabels.nav[topLevelKey as keyof typeof PermissionLabels.nav] as
+              | string
+              | undefined
+
+            if (!navPermissionString || !selectedPerms.includes(navPermissionString)) {
+              return null
+            }
+          }
+
           const allTopLevelPerms = extractAllPermissions(topLevelNode)
           const checkedCount = allTopLevelPerms.filter(p => selectedPerms.includes(p)).length
 
