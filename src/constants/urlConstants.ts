@@ -21,7 +21,10 @@ export const urlConstants = {
   auth: {
     login: `${interRoutePrefix.auth}/login`,
     changePassword: `${interRoutePrefix.auth}/change-password`,
-    updateProfilePic: `${interRoutePrefix.auth}/upload-profile-pic`
+    updateProfilePic: `${interRoutePrefix.auth}/upload-profile-pic`,
+    getResetPasswordCodeUrl: `${interRoutePrefix.auth}/get-reset-password-code`,
+    verifyResetCodeUrl: `${interRoutePrefix.auth}/verify-reset-code`,
+    resetPasswordUrl: `${interRoutePrefix.auth}/reset-password`
   },
   calender: {
     integrate: `${interRoutePrefix.calender}/login`,

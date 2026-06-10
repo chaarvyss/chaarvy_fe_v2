@@ -6,11 +6,10 @@ import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from 'react'
 import { useLoader } from 'src/@core/context/loaderContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
-import { sessionStorageKeys } from 'src/lib/enums'
 import {
-  useVerifyResetCodeMutation,
   useResetPasswordMutation,
-  useLazyRequestResetCodeQuery
+  useLazyRequestResetCodeQuery,
+  useLazyVerifyResetCodeQuery
 } from 'src/store/services/authServices'
 import { EyeOutline, EyeOffOutline } from 'src/utils/mdiElements'
 import {
@@ -47,8 +46,8 @@ const ResetPasswordPage = () => {
   const { triggerToast } = useToast()
 
   // ** API Hooks
-  const [requestCode, { isLoading: isRequesting }] = useLazyRequestResetCodeQuery()
-  const [verifyCode, { isLoading: isVerifying }] = useVerifyResetCodeMutation()
+  const [requestCode, { isFetching: isRequesting }] = useLazyRequestResetCodeQuery()
+  const [verifyCode, { isFetching: isVerifying }] = useLazyVerifyResetCodeQuery()
   const [resetPassword, { isLoading: isResetting }] = useResetPasswordMutation()
 
   // ** State
@@ -65,13 +64,7 @@ const ResetPasswordPage = () => {
   const [showNewPassword, setShowNewPassword] = useState<boolean>(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false)
 
-  // Pre-fill client code if it exists in local storage
-  useEffect(() => {
-    const savedClcode = localStorage.getItem(sessionStorageKeys.clientCode)
-    if (savedClcode) {
-      setValues(prev => ({ ...prev, clcode: savedClcode }))
-    }
-  }, [])
+  const [blockingError, setBlockingError] = useState<string>()
 
   // Sync loading state with context for all API calls
   useEffect(() => {
@@ -83,6 +76,7 @@ const ResetPasswordPage = () => {
     if (errors.includes(prop)) {
       setErrors(errors.filter(err => err !== prop))
     }
+    setBlockingError(undefined)
   }
 
   // ** Step 1: Request Code Handler
@@ -105,12 +99,12 @@ const ResetPasswordPage = () => {
       username: values.username
     })
       .unwrap()
-      .then(() => {
-        triggerToast('Reset code sent to your email.', { variant: ToastVariants.SUCCESS })
+      .then(e => {
+        triggerToast(e, { variant: ToastVariants.SUCCESS })
         setStep(2)
       })
       .catch(e => {
-        triggerToast(e?.data || 'Failed to send reset request.', { variant: ToastVariants.ERROR })
+        setBlockingError(e?.data)
       })
   }
 
@@ -138,7 +132,7 @@ const ResetPasswordPage = () => {
         setStep(3)
       })
       .catch(e => {
-        triggerToast(e?.data || 'Invalid verification code.', { variant: ToastVariants.ERROR })
+        setBlockingError(e?.data)
       })
   }
 
@@ -291,11 +285,11 @@ const ResetPasswordPage = () => {
                 </FormControl>
               </>
             )}
-
-            <Button fullWidth size='large' variant='contained' type='submit'>
-              {step === 1 ? 'Request Code' : step === 2 ? 'Verify Code' : 'Set New Password'}
-            </Button>
-
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <Button size='small' variant='contained' type='submit'>
+                {step === 1 ? 'Request Code' : step === 2 ? 'Verify Code' : 'Set New Password'}
+              </Button>
+            </Box>
             <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
               <Button
                 variant='text'
@@ -309,6 +303,9 @@ const ResetPasswordPage = () => {
               </Button>
             </Box>
           </form>
+          <Typography color='red' fontSize='14px'>
+            {blockingError}
+          </Typography>
         </CardContent>
       </Card>
       <FooterIllustrationsV1 />

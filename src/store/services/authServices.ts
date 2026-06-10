@@ -64,28 +64,30 @@ const authServiceApi = api.injectEndpoints({
       }
     }),
     resetPassword: build.mutation<void, ResetPasswordRequest>({
-      query: body => {
+      query: ({ clcode, username, password }) => {
         return {
-          url: '',
-          headers: { [httpHeaders.CLCODE]: body.clcode },
+          url: urlConstants.auth.resetPasswordUrl,
+          headers: { [httpHeaders.CLCODE]: clcode },
           method: HttpRequestMethods.POST,
-          body
+          body: { username, password }
         }
       }
     }),
-    verifyResetCode: build.mutation<void, VerifyResetCodeRequest>({
-      query: () => {
+    verifyResetCode: build.query<void, VerifyResetCodeRequest>({
+      query: ({ verification_code, clcode, username }) => {
         return {
-          url: '',
-          method: HttpRequestMethods.POST
+          url: urlConstants.auth.verifyResetCodeUrl,
+          headers: { [httpHeaders.CLCODE]: clcode },
+          method: HttpRequestMethods.GET,
+          params: { verification_code, username }
         }
       }
     }),
 
-    requestResetCode: build.query<void, ResetLinkRequest>({
+    requestResetCode: build.query<string, ResetLinkRequest>({
       query: ({ username, clcode }) => {
         return {
-          url: '',
+          url: urlConstants.auth.getResetPasswordCodeUrl,
           method: HttpRequestMethods.GET,
           headers: { [httpHeaders.CLCODE]: clcode },
           params: { username }
@@ -101,6 +103,6 @@ export const {
   useChangePasswordMutation,
   useUploadProfilePicMutation,
   useResetPasswordMutation,
-  useVerifyResetCodeMutation,
+  useLazyVerifyResetCodeQuery,
   useLazyRequestResetCodeQuery
 } = authServiceApi
