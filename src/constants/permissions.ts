@@ -21,7 +21,6 @@ export const PermissionLabels = {
     booksAndStationary: 'nav:books_and_stationary',
     addonCourses: 'nav:addon_courses',
     payments: 'nav:payments',
-    admissionForm: 'nav:admission_form',
     admissions: 'nav:admissions',
     collectPayment: 'nav:collect_payment'
   },
@@ -182,10 +181,6 @@ export const PermissionLabels = {
       view: 'payments:payment_details:view',
       printReceipt: 'payments:payment_details:print_receipt'
     }
-  },
-  admissionForm: {
-    view: 'admission_form:view',
-    update: 'admission_form:update'
   },
   admissions: {
     list: {
