@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.16.0...v1.17.0) (2026-06-11)
+
+
+### Features
+
+* **emailSending:** AC-64: FE: Forgot password, client code from query param, master add client loader ([#54](https://github.com/chaarvyss/chaarvy_fe_v2/issues/54)) ([600df09](https://github.com/chaarvyss/chaarvy_fe_v2/commit/600df091739ba574f023cb94b0f18c7d57c44eef))
+
 # [1.16.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.15.0...v1.16.0) (2026-06-08)
 
 
