@@ -86,12 +86,12 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Student Management',
       icon: 'School' as const,
       children: [
-        {
-          key: PermissionLabels.nav.admissionForm,
-          title: 'Admission form',
-          path: PagePath.ADMISSION_FORM,
-          icon: 'FormSelect' as const
-        },
+        // {
+        //   key: PermissionLabels.nav.admissionForm,
+        //   title: 'Admission form',
+        //   path: PagePath.ADMISSION_FORM,
+        //   icon: 'FormSelect' as const
+        // },
         {
           key: PermissionLabels.nav.admissions,
           title: 'Admissions',

@@ -40,7 +40,7 @@ const PermissionsEditor = ({ initialSelected, onSubmit, isSubmitting }: Permissi
         } else {
           updated.delete(p)
           const navEntries = Object.entries(PermissionLabels.nav) as [string, string][]
-          const matchingNavEntry = navEntries.find(([_, value]) => value === p)
+          const matchingNavEntry = navEntries.find(([, value]) => value === p)
           if (matchingNavEntry) {
             const correspondingTopLevelKey = matchingNavEntry[0]
             const subNode = PermissionLabels[correspondingTopLevelKey as keyof typeof PermissionLabels]

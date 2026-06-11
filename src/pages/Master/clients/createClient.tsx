@@ -1,5 +1,6 @@
-import { Button, SelectChangeEvent } from '@mui/material'
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import { LoadingButton } from '@mui/lab'
+import { SelectChangeEvent } from '@mui/material'
+import { ChangeEvent, useEffect, useState } from 'react'
 
 import { Box, Grid, TextField } from '@muiElements'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
@@ -43,7 +44,7 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
 
   const { closeDrawer } = useSideDrawer()
 
-  const [handleCreateClient] = useCreateClientMutation()
+  const [handleCreateClient, { isLoading: isCreatingClient }] = useCreateClientMutation()
 
   const { triggerToast } = useToast()
   const [clientData, setClientData] = useState<ClientData>(defaultClientData)
@@ -53,8 +54,8 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
       setClientData(prev => ({ ...prev, [prop]: event?.target?.value ?? event }))
 
   useEffect(() => {
-    if (clientDetails) setClientData(clientDetails)
-  }, [])
+    setClientData(clientDetails ?? defaultClientData)
+  }, [clientDetails])
 
   const handleSubmit = () => {
     const errors: string[] = []
@@ -124,9 +125,9 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
         ))}
 
         <Grid item>
-          <Button variant='contained' onClick={handleSubmit}>
+          <LoadingButton loading={isCreatingClient} variant='contained' onClick={handleSubmit}>
             {clientDetails ? 'Update' : 'Add'} Client
-          </Button>
+          </LoadingButton>
         </Grid>
       </Grid>
     </Box>

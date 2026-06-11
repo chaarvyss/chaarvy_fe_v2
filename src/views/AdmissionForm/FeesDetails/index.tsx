@@ -1,6 +1,7 @@
+import { LoadingButton } from '@mui/lab'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { Box, Button, TextField, Typography } from '@muiElements'
+import { Box, TextField, Typography } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { InputVariants } from 'src/lib/enums'
 import LoadingSpinner from 'src/reusable_components/LoadingSpinner'
@@ -83,7 +84,7 @@ const FeesDetails = ({ student_id }: FeesDetailsProps) => {
 
   const [data, setData] = useState<FeesState>(initialState)
 
-  const [submitPayableFees] = useSetStudentPayableFeesMutation()
+  const [submitPayableFees, { isLoading: isSubmitting }] = useSetStudentPayableFeesMutation()
 
   const { data: feesDetails, isFetching: isFeesDetailsFetching } = useGetRawFeesDetailsQuery(
     student_course_enrollment_id ?? '',
@@ -235,6 +236,8 @@ const FeesDetails = ({ student_id }: FeesDetailsProps) => {
       })
   }
 
+  const showLoader = isFeesDetailsFetching || !student_course_enrollment_id
+
   return (
     <Box>
       <Box
@@ -268,14 +271,21 @@ const FeesDetails = ({ student_id }: FeesDetailsProps) => {
           {
             title: 'Discount%',
             value: stats.discountPercent,
-            color: 'error',
+            color: 'warning',
             icon: <GetChaarvyIcons iconName='CurrencyInr' />
           }
         ])}
 
-        <Button color='success' size='small' variant='contained' disabled={stats.discount < 0} onClick={handleSubmit}>
+        <LoadingButton
+          color='success'
+          size='small'
+          variant='contained'
+          loading={isSubmitting}
+          disabled={stats.discount < 0 || showLoader}
+          onClick={handleSubmit}
+        >
           Finalize
-        </Button>
+        </LoadingButton>
       </Box>
 
       <Box
@@ -287,7 +297,7 @@ const FeesDetails = ({ student_id }: FeesDetailsProps) => {
         height='65vh'
         overflow='auto'
       >
-        {isFeesDetailsFetching ? (
+        {showLoader ? (
           <LoadingSpinner />
         ) : (
           <>

@@ -1,5 +1,6 @@
 import { CardProps } from '@mui/material'
 import { styled } from '@mui/material/styles'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from 'react'
 
@@ -167,9 +168,10 @@ const LoginPage = () => {
               />
             </FormControl>
             <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'end' }}>
-              {/* <Link passHref href='/'>
-                <LinkStyled onClick={() => (window.location.href = '/reset-password')}>Forgot Password?</LinkStyled>
-              </Link> */}
+              <Link passHref href='/forgot_password'>
+                Forgot Password
+                {/* <LinkStyled onClick={() => (window.location.href = '/reset-password')}>Forgot Password?</LinkStyled> */}
+              </Link>
             </Box>
             <Button fullWidth size='large' variant='contained' sx={{ marginBottom: 7 }} type='submit'>
               Login

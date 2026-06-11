@@ -43,7 +43,7 @@ const BooksFees = ({ books, handleBooksChange }: BooksFeeProps) => {
         columns,
         data: books,
         getRowKey: row => row.book_id,
-        emptyMessage: 'No Admissions',
+        emptyMessage: 'No Books available',
         isLoading: false,
         shouldHideActions: true
       }}

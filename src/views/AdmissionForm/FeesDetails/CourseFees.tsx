@@ -18,7 +18,7 @@ const CourseFees = ({ courseFees, handleCourseFeesChange }: CourseFeesProps) => 
         columns: getColumns('course', handleCourseFeesChange),
         data: courseFees ?? [],
         getRowKey: row => row.application_id,
-        emptyMessage: 'No Admissions',
+        emptyMessage: 'No Fees details available',
         isLoading: false,
         shouldHideActions: true
       }}
