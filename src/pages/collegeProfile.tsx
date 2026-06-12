@@ -88,7 +88,7 @@ const ViewCollegeProfile = () => {
 
   const BaseDetailsTab = () => (
     <Grid container spacing={7}>
-      {['college_code', 'college_name', 'campus_name', 'contact_numbers', 'UDISE_number', 'jananabhumi_number'].map(
+      {['college_code', 'college_name', 'campus_name', 'contact_numbers', 'udise_number', 'jananabhumi_number'].map(
         field => (
           <Grid item xs={12} md={6} key={field}>
             <Box display='flex' flexDirection='column'>

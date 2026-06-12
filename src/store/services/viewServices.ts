@@ -25,7 +25,7 @@ export interface CollegeDetailResponse {
   contact_numbers?: string
   address_id?: string
   jananabhumi_number?: string
-  UDISE_number?: string
+  udise_number?: string
 }
 
 export interface UserProfile {
