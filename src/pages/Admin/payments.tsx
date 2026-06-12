@@ -19,6 +19,7 @@ import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import RenderFilterOptions from 'src/common/filters'
 import { FilterProps, StudentPayment, TableHeaderStatCardProps } from 'src/lib/interfaces'
+import { LoadingSpinner } from 'src/reusable_components'
 import ChaarvyModal from 'src/reusable_components/chaarvyModal'
 import ChaarvyPagination from 'src/reusable_components/Pagination'
 import TableTilteHeader, { TableTitleHeaderProps } from 'src/reusable_components/Table/TableTilteHeader'
@@ -34,7 +35,7 @@ const Payments = () => {
 
   const router = useRouter()
 
-  const [fetchPaymentsList, { data: PaymentsList }] = useLazyGetPaymentsListQuery()
+  const [fetchPaymentsList, { data: PaymentsList, isFetching: isFetchingPayments }] = useLazyGetPaymentsListQuery()
 
   const [fetchPaymentDetail, { data: paymentDetailResponse }] = useLazyGetPaymentDetailQuery()
 
@@ -112,6 +113,8 @@ const Payments = () => {
       title: 'Payments',
       stats: paymentStats,
       showFilterIcon: true,
+      buttonTitle: 'Collect Payment',
+      onButtonClick: () => router.push('/StudentManagement/Payments/pendingPayments'),
       handleFilterButtonClick: onFilterButtonClick
     }
 
@@ -202,6 +205,7 @@ const Payments = () => {
                   <TableCell>Action</TableCell>
                 </TableRow>
               </TableHead>
+
               <TableBody>
                 {Payments.map((payment, index) => (
                   <TableRow
@@ -233,13 +237,13 @@ const Payments = () => {
                       </TableCell>
                     ) : (
                       <TableCell>
-                        <Tooltip title='Collect Payment' placement='top'>
+                        <Tooltip title='Payment Reciept' placement='top'>
                           <IconButton
                             onClick={() =>
                               router.push(`/StudentManagement/Payments/collectPayment/?id=${payment.admission_number}`)
                             }
                           >
-                            <GetChaarvyIcons iconName='BankTransferIn' fontSize='1.75rem' />
+                            <GetChaarvyIcons iconName='FileDocument' color='info' fontSize='1.25rem' />
                           </IconButton>
                         </Tooltip>
                       </TableCell>
@@ -248,7 +252,8 @@ const Payments = () => {
                 ))}
               </TableBody>
             </Table>
-            {Payments.length == 0 && (
+            {isFetchingPayments && <LoadingSpinner />}
+            {Payments.length == 0 && !isFetchingPayments && (
               <Box justifyContent='center' alignItems='center' paddingBottom='2rem'>
                 <Typography variant='h6' textAlign='center'>
                   No Payments Available
