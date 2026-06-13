@@ -14,9 +14,10 @@ import {
   Divider
 } from '@mui/material'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import ReusableVideoPlayer from 'src/components/VideoPlayer'
+import { useGetPageHelpVideosQuery } from 'src/store/services/MasterServices/helpServices'
 import GetChaarvyIcons from 'src/utils/icons'
 
 interface ActiveVideo {
@@ -32,16 +33,21 @@ export type Video = {
 
 const ContextualHelp = () => {
   const router = useRouter()
-  const [videos, setVideos] = useState<Video[]>([])
+
+  //   const [videos, setVideos] = useState<Video[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [activeVideo, setActiveVideo] = useState<ActiveVideo>()
 
-  useEffect(() => {
-    // Fetch videos based on the current page route
-    fetch(`/api/help-videos?page_route=${router.pathname}`)
-      .then(res => res.json())
-      .then(data => setVideos(data))
-  }, [router.pathname])
+  const { data: videos = [] } = useGetPageHelpVideosQuery(router.pathname, {
+    skip: !router.pathname
+  })
+
+  //   useEffect(() => {
+  //     // Fetch videos based on the current page route
+  //     fetch(`http://127.0.0.1:8004/master/help/help-videos?page_route=${router.pathname}`)
+  //       .then(res => res.json())
+  //       .then(data => setVideos(data))
+  //   }, [router.pathname])
 
   if (videos.length === 0) return null
 

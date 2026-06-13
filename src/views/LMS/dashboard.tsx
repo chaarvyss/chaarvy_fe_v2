@@ -19,13 +19,13 @@ import {
 import axios from 'axios' // Essential for tracking upload progress
 import React, { useState } from 'react'
 
-import { useGetAllHelpVideosQuery, useRequestUploadUrlMutation } from 'src/store/services/MasterServices/helpServices'
+import { useGetAllHelpVideosQuery, useRequestUploadMutation } from 'src/store/services/MasterServices/helpServices'
 import GetChaarvyIcons from 'src/utils/icons'
 
 export default function VideoDashboard() {
   // RTK Query: Fetch videos and auto-poll every 15 seconds to check for "READY" status
   const { data: videos = [], refetch } = useGetAllHelpVideosQuery(undefined, { pollingInterval: 15000 })
-  const [requestUploadUrl] = useRequestUploadUrlMutation()
+  const [requestUploadUrl] = useRequestUploadMutation()
 
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)

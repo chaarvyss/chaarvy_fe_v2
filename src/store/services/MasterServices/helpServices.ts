@@ -1,5 +1,6 @@
 import { urlConstants } from 'src/constants/urlConstants'
 import { HttpRequestMethods } from 'src/store'
+import { Video } from 'src/views/LMS/help'
 
 import api from '../api'
 import { MasterCacheTag } from '../cacheTag'
@@ -24,14 +25,21 @@ const helpServiceApi = api.injectEndpoints({
         }
       }
     }),
-    requestUploadUrl: build.mutation<{ videoId: string; uploadUrl: string }, any>({
+    requestUpload: build.mutation<{ videoId: string; uploadUrl: string }, any>({
       query: payload => ({
         url: urlConstants.master.help.getUploadUrl,
         method: HttpRequestMethods.POST,
         body: payload
       })
+    }),
+    getPageHelpVideos: build.query<Video[], string>({
+      query: page_route => ({
+        url: urlConstants.master.help.getPageHelpVideosUrl,
+        method: HttpRequestMethods.GET,
+        params: { page_route }
+      })
     })
   })
 })
 
-export const { useGetAllHelpVideosQuery, useRequestUploadUrlMutation } = helpServiceApi
+export const { useGetAllHelpVideosQuery, useRequestUploadMutation, useGetPageHelpVideosQuery } = helpServiceApi

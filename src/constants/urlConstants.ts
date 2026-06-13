@@ -173,7 +173,8 @@ export const urlConstants = {
     },
     help: {
       getAllVideos: `${masterRoutePrefix.help}/get-all-help-videos`,
-      getUploadUrl: `${masterRoutePrefix.help}/videos/upload-url`
+      getUploadUrl: `${masterRoutePrefix.help}/videos/upload-url`,
+      getPageHelpVideosUrl: `${masterRoutePrefix.help}/help-videos`
     }
   }
 }
