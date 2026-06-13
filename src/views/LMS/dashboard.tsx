@@ -24,7 +24,7 @@ import GetChaarvyIcons from 'src/utils/icons'
 
 export default function VideoDashboard() {
   // RTK Query: Fetch videos and auto-poll every 15 seconds to check for "READY" status
-  const { data: videos = [], refetch } = useGetAllHelpVideosQuery(undefined, { pollingInterval: 15000 })
+  const { data: videos = [], refetch } = useGetAllHelpVideosQuery()
   const [requestUploadUrl] = useRequestUploadMutation()
 
   const [isUploading, setIsUploading] = useState(false)
@@ -95,7 +95,7 @@ export default function VideoDashboard() {
       // STEP 3: Cleanup and Refresh
       setFormData({ title: '', course: '' })
 
-      refetch() // Trigger RTK Query to update the table immediately showing "PROCESSING"
+      refetch()
     } catch (error) {
       console.error('Upload failed', error)
       alert('Failed to upload video to the server. Please check your connection.')
@@ -106,7 +106,7 @@ export default function VideoDashboard() {
   }
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toUpperCase()) {
       case 'READY':
         return 'success'
       case 'PROCESSING':
@@ -216,10 +216,20 @@ export default function VideoDashboard() {
 
         {/* Video Library Table */}
         <Paper elevation={0} variant='outlined' sx={{ borderRadius: 2, overflow: 'hidden' }}>
-          <Box sx={{ p: 3, borderBottom: 1, borderColor: 'grey.200' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              p: 3,
+              borderBottom: 1,
+              borderColor: 'grey.200'
+            }}
+          >
             <Typography variant='h6' fontWeight='600'>
               Media Library
             </Typography>
+            <Button onClick={refetch}>Refresh</Button>
           </Box>
 
           <TableContainer>
@@ -272,7 +282,7 @@ export default function VideoDashboard() {
                       <TableCell align='right'>
                         <Button
                           startIcon={<GetChaarvyIcons iconName='PlayCircle' fontSize='1.25rem' />}
-                          disabled={video.status !== 'READY'}
+                          disabled={video.status.toUpperCase() !== 'READY'}
                           size='small'
                           sx={{ mr: 1 }}
                         >
