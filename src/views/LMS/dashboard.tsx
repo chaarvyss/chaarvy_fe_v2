@@ -16,52 +16,21 @@ import {
   LinearProgress,
   Grid
 } from '@mui/material'
-import React, { useState, useEffect } from 'react'
+import axios from 'axios' // Essential for tracking upload progress
+import React, { useState } from 'react'
 
+import { useGetAllHelpVideosQuery, useRequestUploadUrlMutation } from 'src/store/services/MasterServices/helpServices'
 import GetChaarvyIcons from 'src/utils/icons'
 
-interface Video {
-  id: string
-  title: string
-  course: string
-  duration: string
-  status: 'Processing' | 'Ready' | 'Failed'
-  uploadDate: string
-}
-
 export default function VideoDashboard() {
-  const [videos, setVideos] = useState<Video[]>([
-    {
-      id: '1',
-      title: 'Introduction to Database Normalization',
-      course: 'Class 10 - Computer Science',
-      duration: '45:12',
-      status: 'Ready',
-      uploadDate: '2026-06-10'
-    },
-    {
-      id: '2',
-      title: 'Quadratic Equations Ex 3.2',
-      course: 'Class 10 - Mathematics',
-      duration: '32:40',
-      status: 'Processing',
-      uploadDate: '2026-06-12'
-    }
-  ])
+  // RTK Query: Fetch videos and auto-poll every 15 seconds to check for "READY" status
+  const { data: videos = [], refetch } = useGetAllHelpVideosQuery(undefined, { pollingInterval: 15000 })
+  const [requestUploadUrl] = useRequestUploadUrlMutation()
 
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [dragActive, setDragActive] = useState(false)
   const [formData, setFormData] = useState({ title: '', course: '' })
-
-  // Simulate polling backend for transcoding status updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVideos(prev => prev.map(v => (v.status === 'Processing' ? { ...v, status: 'Ready' } : v)))
-    }, 15000)
-
-    return () => clearInterval(interval)
-  }, [])
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
@@ -91,63 +60,58 @@ export default function VideoDashboard() {
   const handleFileUpload = async (file: File) => {
     if (!formData.title || !formData.course) {
       alert('Please fill in the Video Title and Course before uploading.')
-      console.log(file)
 
       return
     }
 
     setIsUploading(true)
-    setUploadProgress(10)
+    setUploadProgress(0)
 
     try {
-      // Step 1: Request SAS token from FastAPI backend here
-      setUploadProgress(40)
-
-      // Step 2: Upload directly to Azure Blob Storage using the SAS URL here
-
-      // Simulated Upload Progress
-      const progInterval = setInterval(() => {
-        setUploadProgress(old => {
-          if (old >= 100) {
-            clearInterval(progInterval)
-
-            return 100
-          }
-
-          return old + 20
-        })
-      }, 400)
-
-      await new Promise(resolve => setTimeout(resolve, 2000))
-
-      // Step 3: Add to local state as "Processing"
-      const newVideo: Video = {
-        id: Math.random().toString(),
+      // STEP 1: Get the secure SAS URL from FastAPI via RTK Mutation
+      const response = await requestUploadUrl({
+        filename: file.name,
+        contentType: file.type,
         title: formData.title,
         course: formData.course,
-        duration: '--:--',
-        status: 'Processing',
-        uploadDate: new Date().toISOString().split('T')[0]
-      }
+        page_route: window.location.pathname // Or let user select a route
+      }).unwrap()
 
-      setVideos([newVideo, ...videos])
+      const { uploadUrl } = response
+
+      await axios.put(uploadUrl, file, {
+        headers: {
+          'x-ms-blob-type': 'BlockBlob',
+          'Content-Type': file.type
+        },
+        onUploadProgress: progressEvent => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            setUploadProgress(percentCompleted)
+          }
+        }
+      })
+
+      // STEP 3: Cleanup and Refresh
       setFormData({ title: '', course: '' })
+
+      refetch() // Trigger RTK Query to update the table immediately showing "PROCESSING"
     } catch (error) {
       console.error('Upload failed', error)
+      alert('Failed to upload video to the server. Please check your connection.')
     } finally {
       setIsUploading(false)
       setUploadProgress(0)
     }
   }
 
-  // Helper for Chip colors based on status
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Ready':
+      case 'READY':
         return 'success'
-      case 'Processing':
+      case 'PROCESSING':
         return 'warning'
-      case 'Failed':
+      case 'FAILED':
         return 'error'
       default:
         return 'default'
@@ -182,6 +146,7 @@ export default function VideoDashboard() {
                 placeholder='e.g., Introduction to Calculus'
                 value={formData.title}
                 onChange={e => setFormData({ ...formData, title: e.target.value })}
+                disabled={isUploading}
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -192,6 +157,7 @@ export default function VideoDashboard() {
                 placeholder='e.g., Class 11 - Mathematics'
                 value={formData.course}
                 onChange={e => setFormData({ ...formData, course: e.target.value })}
+                disabled={isUploading}
               />
             </Grid>
           </Grid>
@@ -213,13 +179,13 @@ export default function VideoDashboard() {
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'all 0.2s ease',
-              '&:hover': { bgcolor: 'grey.100' }
+              ...(isUploading ? {} : { '&:hover': { bgcolor: 'grey.100' } })
             }}
           >
             {isUploading ? (
               <Box sx={{ width: '100%', maxWidth: 400, textAlign: 'center' }}>
                 <Typography variant='body2' color='text.secondary' gutterBottom>
-                  Uploading directly to storage...
+                  Uploading directly to secure storage...
                 </Typography>
                 <LinearProgress
                   variant='determinate'
@@ -270,51 +236,59 @@ export default function VideoDashboard() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {videos.map(video => (
-                  <TableRow key={video.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell>
-                      <Typography variant='body2' fontWeight='500'>
-                        {video.title}
-                      </Typography>
-                      <Typography variant='caption' color='text.secondary'>
-                        Duration: {video.duration}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant='body2'>{video.course}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant='body2' color='text.secondary'>
-                        {video.uploadDate}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={video.status}
-                        color={getStatusColor(video.status)}
-                        size='small'
-                        variant={video.status === 'Processing' ? 'outlined' : 'filled'}
-                      />
-                    </TableCell>
-                    <TableCell align='right'>
-                      <Button
-                        startIcon={<GetChaarvyIcons iconName='PlayCircle' fontSize='1.25rem' />}
-                        disabled={video.status !== 'Ready'}
-                        size='small'
-                        sx={{ mr: 1 }}
-                      >
-                        Preview
-                      </Button>
-                      <Button
-                        startIcon={<GetChaarvyIcons iconName='DeleteAlertOutline' fontSize='1.25rem' />}
-                        color='error'
-                        size='small'
-                      >
-                        Delete
-                      </Button>
+                {videos.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} align='center' sx={{ py: 4, color: 'text.secondary' }}>
+                      No videos uploaded yet.
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  videos.map(video => (
+                    <TableRow key={video.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell>
+                        <Typography variant='body2' fontWeight='500'>
+                          {video.title}
+                        </Typography>
+                        <Typography variant='caption' color='text.secondary'>
+                          Duration: {video.duration || '--:--'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant='body2'>{video.course}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant='body2' color='text.secondary'>
+                          {video.uploadDate}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={video.status}
+                          color={getStatusColor(video.status)}
+                          size='small'
+                          variant={video.status === 'PROCESSING' ? 'outlined' : 'filled'}
+                        />
+                      </TableCell>
+                      <TableCell align='right'>
+                        <Button
+                          startIcon={<GetChaarvyIcons iconName='PlayCircle' fontSize='1.25rem' />}
+                          disabled={video.status !== 'READY'}
+                          size='small'
+                          sx={{ mr: 1 }}
+                        >
+                          Preview
+                        </Button>
+                        <Button
+                          startIcon={<GetChaarvyIcons iconName='DeleteAlertOutline' fontSize='1.25rem' />}
+                          color='error'
+                          size='small'
+                        >
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>

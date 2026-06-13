@@ -24,7 +24,7 @@ interface ActiveVideo {
   title: string
 }
 
-interface Video {
+export type Video = {
   title: string
   id: string
   blob_url: string

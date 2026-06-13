@@ -14,7 +14,8 @@ const interRoutePrefix = {
 }
 
 const masterRoutePrefix = {
-  admin: `${masterPrefix}/admin`
+  admin: `${masterPrefix}/admin`,
+  help: `${masterPrefix}/help`
 }
 
 export const urlConstants = {
@@ -169,6 +170,10 @@ export const urlConstants = {
     admin: {
       clientsList: `${masterRoutePrefix.admin}/clients-list`,
       addClient: `${masterRoutePrefix.admin}/add_client?inst_type=inter`
+    },
+    help: {
+      getAllVideos: `${masterRoutePrefix.help}/get-all-help-videos`,
+      getUploadUrl: `${masterRoutePrefix.help}/videos/upload-url`
     }
   }
 }
