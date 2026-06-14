@@ -14,12 +14,17 @@ import {
   TableRow,
   Chip,
   LinearProgress,
-  Grid
+  Grid,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  FormControl
 } from '@mui/material'
 import axios from 'axios' // Essential for tracking upload progress
 import React, { useState } from 'react'
 
 import ReusableVideoPlayer from 'src/components/VideoPlayer'
+import { PagePath } from 'src/constants/pagePathConstants'
 import { ChaarvyModal, LoadingSpinner } from 'src/reusable_components'
 import { useGetAllHelpVideosQuery, useRequestUploadMutation } from 'src/store/services/MasterServices/helpServices'
 import { formatDuration } from 'src/utils/helpers'
@@ -33,7 +38,7 @@ export default function VideoDashboard() {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [dragActive, setDragActive] = useState(false)
-  const [formData, setFormData] = useState({ title: '', course: '' })
+  const [formData, setFormData] = useState({ title: '', course: '', page_route: '' })
 
   const [selectedVideo, setSelectedVideo] = useState<VideoResponse>()
 
@@ -63,7 +68,7 @@ export default function VideoDashboard() {
   }
 
   const handleFileUpload = async (file: File) => {
-    if (!formData.title || !formData.course) {
+    if (!formData.title || !formData.course || !formData.page_route) {
       alert('Please fill in the Video Title and Course before uploading.')
 
       return
@@ -79,7 +84,7 @@ export default function VideoDashboard() {
         contentType: file.type,
         title: formData.title,
         course: formData.course,
-        page_route: window.location.pathname // Or let user select a route
+        page_route: formData.page_route
       }).unwrap()
 
       const { uploadUrl } = response
@@ -98,7 +103,7 @@ export default function VideoDashboard() {
       })
 
       // STEP 3: Cleanup and Refresh
-      setFormData({ title: '', course: '' })
+      setFormData({ title: '', course: '', page_route: '' })
 
       refetch()
     } catch (error) {
@@ -122,6 +127,18 @@ export default function VideoDashboard() {
         return 'default'
     }
   }
+
+  const menuOptions = Object.entries(PagePath)
+    .map(([key, value]) => {
+      const loweredWithSpaces = key.replace(/_/g, ' ').toLowerCase()
+      const label = loweredWithSpaces.charAt(0).toUpperCase() + loweredWithSpaces.slice(1)
+
+      return {
+        label,
+        value
+      }
+    })
+    .sort((a, b) => a.label.localeCompare(b.label))
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50', p: { xs: 3, md: 6 } }}>
@@ -164,6 +181,25 @@ export default function VideoDashboard() {
                 onChange={e => setFormData({ ...formData, course: e.target.value })}
                 disabled={isUploading}
               />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl sx={{ gap: 1 }} fullWidth>
+                <small>Select page path</small>
+
+                <Select
+                  id='select-path'
+                  value={formData.page_route}
+                  onChange={(e: SelectChangeEvent) => setFormData({ ...formData, page_route: e.target.value })}
+                  disabled={isUploading}
+                  placeholder='Select Path'
+                >
+                  {(menuOptions ?? []).map(({ value, label }) => (
+                    <MenuItem key={value} value={value}>
+                      {label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
 
