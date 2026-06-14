@@ -5,15 +5,6 @@ import { Video } from 'src/views/LMS/help'
 import api from '../api'
 import { MasterCacheTag } from '../cacheTag'
 
-type VideoResponse = {
-  id: string
-  title: string
-  course: string
-  duration: string
-  status: 'PROCESSING' | 'READY' | 'FAILED'
-  uploadDate: string
-}
-
 const helpServiceApi = api.injectEndpoints({
   endpoints: build => ({
     getAllHelpVideos: build.query<VideoResponse[], void>({
@@ -38,8 +29,16 @@ const helpServiceApi = api.injectEndpoints({
         method: HttpRequestMethods.GET,
         params: { page_route }
       })
+    }),
+    getVideoLink: build.query<string, string>({
+      query: file_name => ({
+        url: urlConstants.master.help.getVideoLinkUrl,
+        method: HttpRequestMethods.GET,
+        params: { file_name }
+      })
     })
   })
 })
 
-export const { useGetAllHelpVideosQuery, useRequestUploadMutation, useGetPageHelpVideosQuery } = helpServiceApi
+export const { useGetAllHelpVideosQuery, useRequestUploadMutation, useGetPageHelpVideosQuery, useGetVideoLinkQuery } =
+  helpServiceApi

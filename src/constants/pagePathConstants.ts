@@ -31,5 +31,6 @@ export const PagePath = {
 
 export const MasterPagePath = {
   DASHBOARD: '/Master/dashboard',
-  CLIENTS_LIST: '/Master/clients'
+  CLIENTS_LIST: '/Master/clients',
+  HELP_VIDEOS: '/Master/help_videos'
 }

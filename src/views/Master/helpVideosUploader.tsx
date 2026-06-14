@@ -19,18 +19,23 @@ import {
 import axios from 'axios' // Essential for tracking upload progress
 import React, { useState } from 'react'
 
+import ReusableVideoPlayer from 'src/components/VideoPlayer'
+import { ChaarvyModal, LoadingSpinner } from 'src/reusable_components'
 import { useGetAllHelpVideosQuery, useRequestUploadMutation } from 'src/store/services/MasterServices/helpServices'
+import { formatDuration } from 'src/utils/helpers'
 import GetChaarvyIcons from 'src/utils/icons'
 
 export default function VideoDashboard() {
   // RTK Query: Fetch videos and auto-poll every 15 seconds to check for "READY" status
-  const { data: videos = [], refetch } = useGetAllHelpVideosQuery()
+  const { data: videos = [], refetch, isFetching: isLoadingVideos } = useGetAllHelpVideosQuery()
   const [requestUploadUrl] = useRequestUploadMutation()
 
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [dragActive, setDragActive] = useState(false)
   const [formData, setFormData] = useState({ title: '', course: '' })
+
+  const [selectedVideo, setSelectedVideo] = useState<VideoResponse>()
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
@@ -232,75 +237,93 @@ export default function VideoDashboard() {
             <Button onClick={refetch}>Refresh</Button>
           </Box>
 
+          <ChaarvyModal
+            modalSize='col-12 col-md-10 col-xl-8'
+            isOpen={!!selectedVideo}
+            onClose={() => setSelectedVideo(undefined)}
+          >
+            <>
+              {selectedVideo && <ReusableVideoPlayer title={selectedVideo?.title} videoPath={selectedVideo.blob_url} />}
+            </>
+          </ChaarvyModal>
+
           <TableContainer>
-            <Table sx={{ minWidth: 650 }} aria-label='video library table'>
-              <TableHead sx={{ bgcolor: 'grey.50' }}>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Video Details</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Course</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Uploaded</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Status</TableCell>
-                  <TableCell align='right' sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {videos.length === 0 ? (
+            {isLoadingVideos ? (
+              <LoadingSpinner loadingText='Loading videos...' />
+            ) : (
+              <Table sx={{ minWidth: 650 }} aria-label='video library table'>
+                <TableHead sx={{ bgcolor: 'grey.50' }}>
                   <TableRow>
-                    <TableCell colSpan={5} align='center' sx={{ py: 4, color: 'text.secondary' }}>
-                      No videos uploaded yet.
+                    <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Video Details</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Course</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Uploaded</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Status</TableCell>
+                    <TableCell align='right' sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
+                      Actions
                     </TableCell>
                   </TableRow>
-                ) : (
-                  videos.map(video => (
-                    <TableRow key={video.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                      <TableCell>
-                        <Typography variant='body2' fontWeight='500'>
-                          {video.title}
-                        </Typography>
-                        <Typography variant='caption' color='text.secondary'>
-                          Duration: {video.duration || '--:--'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant='body2'>{video.course}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant='body2' color='text.secondary'>
-                          {video.uploadDate}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={video.status}
-                          color={getStatusColor(video.status)}
-                          size='small'
-                          variant={video.status === 'PROCESSING' ? 'outlined' : 'filled'}
-                        />
-                      </TableCell>
-                      <TableCell align='right'>
-                        <Button
-                          startIcon={<GetChaarvyIcons iconName='PlayCircle' fontSize='1.25rem' />}
-                          disabled={video.status.toUpperCase() !== 'READY'}
-                          size='small'
-                          sx={{ mr: 1 }}
-                        >
-                          Preview
-                        </Button>
-                        <Button
-                          startIcon={<GetChaarvyIcons iconName='DeleteAlertOutline' fontSize='1.25rem' />}
-                          color='error'
-                          size='small'
-                        >
-                          Delete
-                        </Button>
+                </TableHead>
+
+                <TableBody>
+                  {videos.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} align='center' sx={{ py: 4, color: 'text.secondary' }}>
+                        No videos uploaded yet.
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : (
+                    videos.map(video => (
+                      <TableRow key={video.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                        <TableCell>
+                          <Typography variant='body2' fontWeight='500'>
+                            {video.title}
+                          </Typography>
+                          <Typography variant='caption' color='text.secondary'>
+                            Duration: {formatDuration(video.duration_seconds)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant='body2'>{video.course}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant='body2' color='text.secondary'>
+                            {video.uploadDate}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={video.status}
+                            color={getStatusColor(video.status)}
+                            size='small'
+                            variant={video.status === 'PROCESSING' ? 'outlined' : 'filled'}
+                          />
+                        </TableCell>
+                        <TableCell align='right'>
+                          <Button
+                            startIcon={<GetChaarvyIcons iconName='PlayCircle' fontSize='1.25rem' />}
+                            disabled={video.status.toUpperCase() !== 'READY'}
+                            size='small'
+                            sx={{ mr: 1 }}
+                            onClick={() => {
+                              setSelectedVideo(video)
+                            }}
+                          >
+                            Preview
+                          </Button>
+                          <Button
+                            startIcon={<GetChaarvyIcons iconName='DeleteAlertOutline' fontSize='1.25rem' />}
+                            color='error'
+                            size='small'
+                          >
+                            Delete
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            )}
           </TableContainer>
         </Paper>
       </Box>

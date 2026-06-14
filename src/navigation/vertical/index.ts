@@ -157,6 +157,12 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Clients',
       path: MasterPagePath.CLIENTS_LIST,
       icon: 'FormatListGroup' as const
+    },
+    {
+      key: Permissions.MASTER.CLIENTS.VIEW_LIST,
+      title: 'Help videos',
+      path: MasterPagePath.HELP_VIDEOS,
+      icon: 'Video' as const
     }
   ]
 

@@ -42,13 +42,6 @@ const ContextualHelp = () => {
     skip: !router.pathname
   })
 
-  //   useEffect(() => {
-  //     // Fetch videos based on the current page route
-  //     fetch(`http://127.0.0.1:8004/master/help/help-videos?page_route=${router.pathname}`)
-  //       .then(res => res.json())
-  //       .then(data => setVideos(data))
-  //   }, [router.pathname])
-
   if (videos.length === 0) return null
 
   return (
@@ -96,14 +89,17 @@ const ContextualHelp = () => {
                 >
                   Back to list
                 </Button>
-                <ReusableVideoPlayer videoUrl={activeVideo?.blob_url} title={activeVideo.title} />
+                <ReusableVideoPlayer videoPath={activeVideo?.blob_url} title={activeVideo.title} />
               </Box>
             ) : (
               <List disablePadding>
                 {videos.map((vid, index) => (
                   <Box key={vid.id}>
                     <ListItem disablePadding>
-                      <ListItemButton onClick={() => setActiveVideo(vid)} sx={{ borderRadius: 1, py: 1.5 }}>
+                      <ListItemButton
+                        onClick={() => setActiveVideo(vid)}
+                        sx={{ display: 'flex', gap: 4, borderRadius: 1, py: 1.5 }}
+                      >
                         <GetChaarvyIcons iconName='PlayCircle' />
                         <ListItemText
                           primary={vid.title}

@@ -1,12 +1,16 @@
 import { Box, Button } from '@mui/material'
 import { useRef, useState } from 'react'
 
+import { useGetVideoLinkQuery } from 'src/store/services/MasterServices/helpServices'
 import GetChaarvyIcons from 'src/utils/icons'
 
-const ReusableVideoPlayer = ({ videoUrl, title }) => {
-  console.log(title)
+const ReusableVideoPlayer = ({ videoPath, title }) => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPip, setIsPip] = useState(false)
+
+  const { data: videoLink } = useGetVideoLinkQuery(videoPath, {
+    skip: !videoPath
+  })
 
   const togglePiP = async () => {
     try {
@@ -39,8 +43,9 @@ const ReusableVideoPlayer = ({ videoUrl, title }) => {
       <Box
         component='video'
         ref={videoRef}
-        src={videoUrl}
+        src={videoLink}
         controls
+        title={title}
         controlsList='nodownload'
         preload='metadata' // Helps with faster initial load
         sx={{
