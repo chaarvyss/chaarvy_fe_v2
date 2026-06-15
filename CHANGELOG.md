@@ -1,3 +1,10 @@
+## [1.17.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.17.0...v1.17.1) (2026-06-15)
+
+
+### Bug Fixes
+
+* **TemplateDesigner:** AC-76 - template-designer-bugs fixed ([#56](https://github.com/chaarvyss/chaarvy_fe_v2/issues/56)) ([e487094](https://github.com/chaarvyss/chaarvy_fe_v2/commit/e4870946c5dd4d6da68aee3d789a46becee61a4b))
+
 # [1.17.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.16.0...v1.17.0) (2026-06-11)
 
 

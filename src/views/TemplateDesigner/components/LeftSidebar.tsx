@@ -91,7 +91,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
     <div
       style={{
         width: showSidebar ? 260 : 60,
-        maxHeight: '90vh',
+        maxHeight: '95vh',
         overflowY: 'auto',
         position: 'relative',
         paddingRight: 10
