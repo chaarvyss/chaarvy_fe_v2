@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Card, Typography, TextField, Box, Grid } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
+import { getAllQueryParams } from 'src/lib/util/common_helpers'
 import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
 import LoadingSpinner from 'src/reusable_components/LoadingSpinner'
 import { StudentPendingFeesDetails, useLazyGetStudentPendingFeesDetailsQuery } from 'src/store/services/feesServices'
@@ -22,6 +23,14 @@ const CollectPayment = () => {
 
   const [fetchDetails, { data: studentPendingFeesDetails, isFetching: isFetchingData }] =
     useLazyGetStudentPendingFeesDetailsQuery()
+
+  useEffect(() => {
+    const query_params = getAllQueryParams()
+
+    if (query_params && query_params['id']) {
+      fetchDetails(query_params['id'])
+    }
+  }, [])
 
   const handleSearch = async () => {
     try {
