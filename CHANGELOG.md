@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.17.1...v1.18.0) (2026-06-15)
+
+
+### Features
+
+* **HelpVideos:** AC-66 Help videos base setup ([#55](https://github.com/chaarvyss/chaarvy_fe_v2/issues/55)) ([b2abd8e](https://github.com/chaarvyss/chaarvy_fe_v2/commit/b2abd8e85b3aa568aaaedaf1e85ecbc548d68ccc))
+
 ## [1.17.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.17.0...v1.17.1) (2026-06-15)
 
 
