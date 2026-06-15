@@ -27,7 +27,7 @@ const CollectPayment = () => {
   useEffect(() => {
     const query_params = getAllQueryParams()
 
-    if (query_params && query_params['id']) {
+    if (query_params?.['id']) {
       fetchDetails(query_params['id'])
     }
   }, [])
