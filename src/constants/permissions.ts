@@ -1,7 +1,8 @@
 export const Permissions = {
   MASTER: {
     NAV: {
-      DASHBOARD: 'a07d2d6e-8431-4527-9857-c7d155715002'
+      DASHBOARD: 'a07d2d6e-8431-4527-9857-c7d155715002',
+      HELP_VIDEOS: '49e4596b-0888-4a9d-931f-d03352c56536'
     },
     CLIENTS: {
       VIEW_LIST: '49e4596b-0888-4a9d-931f-d03352c56536'

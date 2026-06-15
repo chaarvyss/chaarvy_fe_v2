@@ -8,6 +8,7 @@ import { FilterProps } from 'src/lib/interfaces'
 import { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
 import { useLazyGetBooksListQuery } from 'src/store/services/listServices'
 import GetChaarvyIcons from 'src/utils/icons'
+import ContextualHelp from 'src/views/LMS/help'
 
 import AddUpdateBooks, { ItemType } from './add_books'
 import { getAggregatedBooks } from './helpers'
@@ -123,6 +124,8 @@ const BooksList = () => {
 
   return (
     <>
+      <ContextualHelp />
+
       <AddUpdateBooks
         isOpen={isAddBooksModalOpen}
         onClose={handleAddBooksModalClose}
