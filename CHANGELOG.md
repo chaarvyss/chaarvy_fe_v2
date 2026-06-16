@@ -1,3 +1,10 @@
+## [1.18.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.0...v1.18.1) (2026-06-16)
+
+
+### Bug Fixes
+
+* **PaymentsPage:** AC-68: List now updated, all issues fixed  ([#57](https://github.com/chaarvyss/chaarvy_fe_v2/issues/57)) ([d9669c6](https://github.com/chaarvyss/chaarvy_fe_v2/commit/d9669c639e86586aa0bb245ccb386c79611e207b))
+
 # [1.18.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.17.1...v1.18.0) (2026-06-15)
 
 
