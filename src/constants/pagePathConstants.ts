@@ -1,4 +1,5 @@
 export const PagePath = {
+  UNAUTHORIZED: '/401',
   COLLEGE_PROFILE: '/collegeProfile',
   DASHBOARD: '/dashboard',
   CHANGE_PASSWORD: '/changePassword',

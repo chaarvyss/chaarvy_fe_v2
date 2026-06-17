@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { Typography } from '@muiElements'
@@ -5,11 +6,19 @@ import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import RenderFilterOptions from 'src/common/filters'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import { DEFAULT_PAGINATION_PROPS, DEFAULT_TABLE_ITEMS_LIMIT } from 'src/constants/constants'
+import { PagePath } from 'src/constants/pagePathConstants'
+import { PermissionLabels } from 'src/constants/permissions'
 import { FilterProps } from 'src/lib/interfaces'
+import { isAuthorised } from 'src/lib/util/permissionCheck'
 import { useGetReferrelSummaryQuery } from 'src/store/services/adminServices'
 import GetChaarvyIcons from 'src/utils/icons'
 
 const ReferrelsList = () => {
+  const router = useRouter()
+  if (!isAuthorised(PermissionLabels.nav.referrels)) {
+    router.replace(PagePath.UNAUTHORIZED)
+  }
+
   const { openDrawer } = useSideDrawer()
   const [filterProps, setFilterProps] = useState<FilterProps>(DEFAULT_PAGINATION_PROPS)
   const { data: referralSummary, isFetching: isFetchingAdmissions } = useGetReferrelSummaryQuery(filterProps)
