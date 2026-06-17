@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { InputTypes } from 'src/lib/enums'
 import { ErrorObject, InputFields } from 'src/lib/types'
 
 export type ValidationRule =
@@ -15,13 +16,15 @@ export type ValidationRule =
 export type FieldConfig<T> = {
   key: keyof T
   label: string
-  type: any
+  type: InputTypes
   variant?: any
   rules?: ValidationRule[]
   dependsOn?: keyof T
   fetchOptions?: (value: any) => Promise<any>
   mapOptions?: (data: any) => { label: string; value: any }[]
   staticOptions?: any[]
+  searchable?: boolean
+  onSearch?: (searchText: string) => Promise<{ label: string; value: any }[]>
 }
 
 export type FormConfig<T> = {

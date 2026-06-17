@@ -115,6 +115,8 @@ export type InputFields = {
   showMonthDropdown?: boolean
   isLoading?: boolean
   checked?: boolean
+  searchable?: boolean
+  onSearch?: (searchText: string) => Promise<{ label: string; value: any }[]>
 }
 
 export type ErrorObject = {

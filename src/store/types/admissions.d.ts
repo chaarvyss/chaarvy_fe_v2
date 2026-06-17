@@ -12,6 +12,7 @@ type FormOneDetails = {
   student_aadhar: string
   pen_number?: string
   apaar_number?: string
+  referred_by?: string
 }
 
 type CreateUpdateAdmissionFormOneRequest = FormOneDetails & {

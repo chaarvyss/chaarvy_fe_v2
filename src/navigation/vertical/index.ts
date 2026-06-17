@@ -93,6 +93,12 @@ const navigation = (): VerticalNavItemsType => {
         //   icon: 'FormSelect' as const
         // },
         {
+          key: PermissionLabels.nav.referrels,
+          title: 'Referrels',
+          path: PagePath.REFERRELS,
+          icon: 'AccountSchoolOutline' as const
+        },
+        {
           key: PermissionLabels.nav.admissions,
           title: 'Admissions',
           path: PagePath.ADMISSIONS,

@@ -26,7 +26,8 @@ export const PagePath = {
   ROUTES: '/Admin/routes',
   BOARDING_POINTS: '/Admin/boardingPoints',
   VEHICLE_MOMENTS: '/Transportation/vehicleMoments',
-  VEHICLE_VENDORS: '/Transportation/vendors'
+  VEHICLE_VENDORS: '/Transportation/vendors',
+  REFERRELS: '/Admin/referrels'
 }
 
 export const MasterPagePath = {
