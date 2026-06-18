@@ -10,6 +10,7 @@ import ScrollToTop from 'src/@core/components/scroll-to-top'
 import { LayoutProps } from 'src/@core/layouts/types'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import themeConfig from 'src/configs/themeConfig'
+import ContextualHelp from 'src/views/LMS/help'
 
 import AppBar from './components/vertical/appBar'
 import Navigation from './components/vertical/navigation'
@@ -73,6 +74,7 @@ const VerticalLayout = (props: LayoutProps) => {
           <DatePickerWrapper sx={{ zIndex: 11 }}>
             <Box id='react-datepicker-portal'></Box>
           </DatePickerWrapper>
+          <ContextualHelp />
         </Box>
       </VerticalLayoutWrapper>
 

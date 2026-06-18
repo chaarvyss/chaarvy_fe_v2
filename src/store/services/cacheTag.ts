@@ -29,5 +29,6 @@ export enum CacheTag {
 }
 
 export enum MasterCacheTag {
-  ClientsList = 'clientsList'
+  ClientsList = 'clientsList',
+  HelpVideos = 'HelpVideos'
 }

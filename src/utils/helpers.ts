@@ -5,6 +5,27 @@ type Event = {
 
 export const GetSumOfNumbers = (arr?: number[]) => arr?.reduce((acc, val) => acc + val, 0) || 0
 
+export const formatDuration = (durationSeconds?: string | number): string => {
+  if (durationSeconds === undefined || durationSeconds === null || durationSeconds === '') {
+    return '--:--:--'
+  }
+
+  const seconds = typeof durationSeconds === 'string' ? Number(durationSeconds) : durationSeconds
+  if (Number.isNaN(seconds) || seconds < 0) {
+    return '--:--:--'
+  }
+
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = seconds % 60
+
+  const paddedHours = String(hours).padStart(2, '0')
+  const paddedMinutes = String(minutes).padStart(2, '0')
+  const paddedSeconds = String(secs).padStart(2, '0')
+
+  return `${paddedHours}:${paddedMinutes}:${paddedSeconds}`
+}
+
 export const convertDateStringToDate = (dateStr?: string) => {
   if (!dateStr) return undefined
 

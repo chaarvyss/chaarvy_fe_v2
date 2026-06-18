@@ -1,3 +1,31 @@
+## [1.18.2](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.1...v1.18.2) (2026-06-18)
+
+
+### Bug Fixes
+
+* **AdmissionReferrals:** AC-70 ([#58](https://github.com/chaarvyss/chaarvy_fe_v2/issues/58)) ([e692f5e](https://github.com/chaarvyss/chaarvy_fe_v2/commit/e692f5e296f4c5412eee8b3ae0c64575d1beafcc))
+
+## [1.18.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.0...v1.18.1) (2026-06-16)
+
+
+### Bug Fixes
+
+* **PaymentsPage:** AC-68: List now updated, all issues fixed  ([#57](https://github.com/chaarvyss/chaarvy_fe_v2/issues/57)) ([d9669c6](https://github.com/chaarvyss/chaarvy_fe_v2/commit/d9669c639e86586aa0bb245ccb386c79611e207b))
+
+# [1.18.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.17.1...v1.18.0) (2026-06-15)
+
+
+### Features
+
+* **HelpVideos:** AC-66 Help videos base setup ([#55](https://github.com/chaarvyss/chaarvy_fe_v2/issues/55)) ([b2abd8e](https://github.com/chaarvyss/chaarvy_fe_v2/commit/b2abd8e85b3aa568aaaedaf1e85ecbc548d68ccc))
+
+## [1.17.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.17.0...v1.17.1) (2026-06-15)
+
+
+### Bug Fixes
+
+* **TemplateDesigner:** AC-76 - template-designer-bugs fixed ([#56](https://github.com/chaarvyss/chaarvy_fe_v2/issues/56)) ([e487094](https://github.com/chaarvyss/chaarvy_fe_v2/commit/e4870946c5dd4d6da68aee3d789a46becee61a4b))
+
 # [1.17.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.16.0...v1.17.0) (2026-06-11)
 
 

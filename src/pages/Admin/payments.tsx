@@ -1,44 +1,32 @@
-import {
-  Card,
-  Grid,
-  IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
-} from '@mui/material'
+import { Chip, IconButton, Tooltip, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import RenderFilterOptions from 'src/common/filters'
-import { FilterProps, StudentPayment, TableHeaderStatCardProps } from 'src/lib/interfaces'
-import ChaarvyModal from 'src/reusable_components/chaarvyModal'
-import ChaarvyPagination from 'src/reusable_components/Pagination'
-import TableTilteHeader, { TableTitleHeaderProps } from 'src/reusable_components/Table/TableTilteHeader'
+import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
+import { PagePath } from 'src/constants/pagePathConstants'
+import { FilterProps, TableHeaderStatCardProps } from 'src/lib/interfaces'
+import Spinner from 'src/reusable_components/spinner'
+import { TableTitleHeaderProps } from 'src/reusable_components/Table/TableTilteHeader'
+import { useGetPaymentRecieptByPaymentIdMutation } from 'src/store/services/feesServices'
 import { useLazyGetPaymentsListQuery } from 'src/store/services/listServices'
-import { useLazyGetPaymentDetailQuery } from 'src/store/services/viewServices'
 import { ChaarvyIconFontSize, ThemeColorEnum } from 'src/utils/enums'
+import { printDocument } from 'src/utils/helpers'
 import GetChaarvyIcons from 'src/utils/icons'
-import { Box } from 'src/utils/muiElements'
 
 const Payments = () => {
   const { triggerToast } = useToast()
   const { openDrawer } = useSideDrawer()
 
+  const [loadingPaymentId, setLoadingPaymentId] = useState<string>()
+
+  const [fetchPaymentReciept] = useGetPaymentRecieptByPaymentIdMutation()
+
   const router = useRouter()
 
-  const [fetchPaymentsList, { data: PaymentsList }] = useLazyGetPaymentsListQuery()
-
-  const [fetchPaymentDetail, { data: paymentDetailResponse }] = useLazyGetPaymentDetailQuery()
-
-  const [selectedPayment, setSelectedPayment] = useState<StudentPayment>()
+  const [fetchPaymentsList, { data: PaymentsList, isFetching: isFetchingPayments }] = useLazyGetPaymentsListQuery()
 
   const [filterProps, setFilterProps] = useState<FilterProps>({ limit: 20, offset: 0, status_: '1' })
 
@@ -48,11 +36,11 @@ const Payments = () => {
 
   const statusOptions = [
     {
-      label: 'Paid',
+      label: 'Successful',
       value: '1'
     },
     {
-      label: 'Unpaid',
+      label: 'Failed',
       value: '0'
     }
   ]
@@ -71,12 +59,6 @@ const Payments = () => {
   }
 
   useEffect(() => {
-    if (selectedPayment) {
-      fetchPaymentDetail(selectedPayment.payment_id)
-    }
-  }, [selectedPayment?.payment_id])
-
-  useEffect(() => {
     fetchPaymentsList(filterProps)
       .unwrap()
       .catch(e => {
@@ -84,7 +66,23 @@ const Payments = () => {
       })
   }, [filterProps])
 
-  const Payments = PaymentsList?.payments || []
+  const handleRecieptDownload = async (payment_id: string) => {
+    setLoadingPaymentId(payment_id)
+    fetchPaymentReciept(payment_id)
+      .unwrap()
+      .then(pdfBlob => {
+        if (!pdfBlob) return
+
+        const url = globalThis.window.URL.createObjectURL(pdfBlob)
+        printDocument(url)
+      })
+      .catch(() => {
+        triggerToast('Failed to generate reciept', {
+          variant: ToastVariants.ERROR
+        })
+      })
+      .finally(() => setLoadingPaymentId(undefined))
+  }
 
   const paymentStats: TableHeaderStatCardProps[] = [
     {
@@ -112,157 +110,85 @@ const Payments = () => {
       title: 'Payments',
       stats: paymentStats,
       showFilterIcon: true,
+      buttonTitle: 'Collect Payment',
+      onButtonClick: () => router.push('/StudentManagement/Payments/pendingPayments'),
       handleFilterButtonClick: onFilterButtonClick
     }
 
     return props
   }
 
-  const handleModalClose = () => {
-    setSelectedPayment(undefined)
-  }
-
-  const PaymentDetail = () => {
-    const {
-      admission_number,
-      amount,
-      college_name,
-      payment_mode,
-      receipt_number,
-      payment_datetime,
-      student_name,
-      father_name,
-      campus_name,
-      group,
-      medium,
-      transaction_id
-    } = paymentDetailResponse ?? {}
-
-    const items = [
-      { label: 'Admission Number', value: admission_number },
-      { label: 'Reciept Number', value: receipt_number },
-      { label: 'Student Name', value: student_name },
-      { label: 'Father Name', value: father_name },
-      { label: 'College Name', value: college_name },
-      { label: 'Campus Name', value: campus_name },
-      { label: 'Group', value: group },
-      { label: 'Medium', value: medium },
-      { label: 'Payment Mode', value: payment_mode },
-      { label: 'Payment Date', value: payment_datetime },
-      { label: 'Transaction Number', value: transaction_id },
-      { label: 'Amount', value: amount }
-    ]
-
-    if (selectedPayment == undefined) return
-
-    return (
-      <ChaarvyModal
-        modalSize='col-12 col-md-10 col-xl-8'
-        isOpen={true}
-        onClose={handleModalClose}
-        title='Payment Details'
-      >
+  const columns: ChaarvyTableColumn[] = [
+    {
+      id: 'sno',
+      label: 'S#',
+      render: (row, index) => <Typography>{(filterProps?.offset ?? 0) + index + 1}</Typography>
+    },
+    {
+      id: 'admission_number',
+      label: 'Admission number'
+    },
+    {
+      id: 'student_name',
+      label: 'Student Name'
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      render: row => (
+        <Chip
+          size='small'
+          color={row.status == 1 ? 'success' : 'error'}
+          label={row.status == 1 ? 'Success' : 'Failed'}
+        />
+      )
+    },
+    {
+      id: 'amount',
+      label: 'Amount'
+    },
+    {
+      id: 'created_date',
+      label: 'Payment Date'
+    },
+    {
+      id: 'action',
+      label: 'Action',
+      render: row => (
         <>
-          <Grid container spacing={7}>
-            {items.map(each => {
-              return (
-                <>
-                  <Grid item xs={6} md={3}>
-                    <Typography>{each.label}</Typography>
-                  </Grid>
-                  <Grid item xs={6} md={3}>
-                    <Typography flexWrap='wrap'>: {each.value}</Typography>
-                  </Grid>
-                </>
-              )
-            })}
-          </Grid>
+          <Tooltip title='Payment Reciept' placement='top'>
+            <IconButton disabled={!!loadingPaymentId} onClick={() => handleRecieptDownload(row.payment_id)}>
+              {loadingPaymentId == row.payment_id ? (
+                <Spinner size={20} />
+              ) : (
+                <GetChaarvyIcons iconName='FileDocument' color='success' fontSize='1.25rem' />
+              )}
+            </IconButton>
+          </Tooltip>
+          <Tooltip title='Payments' placement='top'>
+            <IconButton onClick={() => router.push(`${PagePath.COLLECT_PAYMENT}?id=${row.admission_number}`)}>
+              <GetChaarvyIcons iconName='BankTransferIn' color='info' fontSize='1.25rem' />
+            </IconButton>
+          </Tooltip>
         </>
-      </ChaarvyModal>
-    )
-  }
+      )
+    }
+  ]
 
   return (
-    <>
-      <PaymentDetail />
-      {TableTilteHeader(getUserTableHeader())}
-      <Paper>
-        <Card>
-          <TableContainer>
-            <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
-              <TableHead>
-                <TableRow>
-                  <TableCell>S#</TableCell>
-                  <TableCell>Admission number</TableCell>
-                  <TableCell>Student Name</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Transaction Number</TableCell>
-                  <TableCell>Amount</TableCell>
-                  <TableCell>Payment Date</TableCell>
-                  <TableCell>Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {Payments.map((payment, index) => (
-                  <TableRow
-                    hover
-                    key={payment?.payment_id}
-                    sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}
-                  >
-                    <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
-                      {index + 1 + (filterProps?.offset ?? 0)}
-                    </TableCell>
-                    <TableCell>{payment.admission_number}</TableCell>
-                    <TableCell>{payment.student_name}</TableCell>
-                    <TableCell>{payment.status}</TableCell>
-                    <TableCell>{payment.transaction_number}</TableCell>
-                    <TableCell>{payment.amount}</TableCell>
-                    <TableCell>{payment.created_date}</TableCell>
-                    {payment.status == 1 ? (
-                      <TableCell>
-                        <Tooltip title='Fees Details' placement='top'>
-                          <IconButton onClick={() => setSelectedPayment(payment)}>
-                            <GetChaarvyIcons iconName='Eye' fontSize='1.25rem' />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title='Fees Reciept' placement='top'>
-                          <IconButton onClick={() => console.log(payment)}>
-                            <GetChaarvyIcons iconName='Download' fontSize='1.25rem' />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    ) : (
-                      <TableCell>
-                        <Tooltip title='Collect Payment' placement='top'>
-                          <IconButton
-                            onClick={() =>
-                              router.push(`/StudentManagement/Payments/collectPayment/?id=${payment.admission_number}`)
-                            }
-                          >
-                            <GetChaarvyIcons iconName='BankTransferIn' fontSize='1.75rem' />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {Payments.length == 0 && (
-              <Box justifyContent='center' alignItems='center' paddingBottom='2rem'>
-                <Typography variant='h6' textAlign='center'>
-                  No Payments Available
-                </Typography>
-              </Box>
-            )}
-          </TableContainer>
-        </Card>
-        <ChaarvyPagination
-          total={PaymentsList?.counts?.filtered ?? 0}
-          onChange={data => setFilterProps({ ...filterProps, ...data })}
-        />
-      </Paper>
-    </>
+    <ChaarvyTable
+      tableTitleHeaderProps={getUserTableHeader()}
+      tableDataProps={{
+        columns,
+        data: PaymentsList?.payments ?? [],
+        getRowKey: each => each.payment_id,
+        isLoading: isFetchingPayments
+      }}
+      paginationProps={{
+        total: PaymentsList?.counts.filtered ?? 0,
+        onChange: data => setFilterProps({ ...filterProps, ...data })
+      }}
+    />
   )
 }
 

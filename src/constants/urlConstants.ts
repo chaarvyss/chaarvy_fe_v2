@@ -14,7 +14,8 @@ const interRoutePrefix = {
 }
 
 const masterRoutePrefix = {
-  admin: `${masterPrefix}/admin`
+  admin: `${masterPrefix}/admin`,
+  help: `${masterPrefix}/help`
 }
 
 export const urlConstants = {
@@ -68,6 +69,8 @@ export const urlConstants = {
     createUpdateBook: `${interRoutePrefix.admin}/v2/create-update-books`,
     createUpdateFeesType: `${interRoutePrefix.admin}/create-update-fees-type`,
     createUpdateProgramAddonCourse: `${interRoutePrefix.admin}/create-update-program-addon-course`,
+    getReferrelSummaryUrl: `${interRoutePrefix.admin}/get_referrals_summary`,
+
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
       language: `${interRoutePrefix.admin}/add-language`,
@@ -169,6 +172,12 @@ export const urlConstants = {
     admin: {
       clientsList: `${masterRoutePrefix.admin}/clients-list`,
       addClient: `${masterRoutePrefix.admin}/add_client?inst_type=inter`
+    },
+    help: {
+      getAllVideos: `${masterRoutePrefix.help}/get-all-help-videos`,
+      getUploadUrl: `${masterRoutePrefix.help}/videos/upload-url`,
+      getPageHelpVideosUrl: `${masterRoutePrefix.help}/help-videos`,
+      getVideoLinkUrl: `${masterRoutePrefix.help}/get-video-url`
     }
   }
 }

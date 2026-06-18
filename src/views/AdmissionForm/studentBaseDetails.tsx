@@ -37,7 +37,7 @@ import {
   useGetAdmissionFormOneDetailQuery
 } from 'src/store/services/admisissionsService'
 import { useGetApplicationFeesPaymentMutation } from 'src/store/services/feesServices'
-import { useGetProgramsListQuery, useGetGendersListQuery } from 'src/store/services/listServices'
+import { useGetProgramsListQuery, useGetGendersListQuery, useGetUsersListQuery } from 'src/store/services/listServices'
 import { convertDateStringToDate, isValidAadhar, isValidEmail, isValidPhone } from 'src/utils/helpers'
 
 import ApplicationFeesModal from './application_fees_modal'
@@ -83,7 +83,8 @@ const defaultFormData = {
   student_name: '',
   dob: '',
   section_id: '',
-  gender_id: ''
+  gender_id: '',
+  referred_by: ''
 }
 
 const StudentBaseDetails = ({
@@ -101,6 +102,9 @@ const StudentBaseDetails = ({
   const [isCompressing, setIsCompressing] = useState<boolean>(false)
 
   const [studentCourseEnrollmentId, setStudentCourseEnrollmentId] = useState<string>()
+  const { data: usersList } = useGetUsersListQuery({
+    limit: 100
+  })
 
   const { triggerToast } = useToast()
   const router = useRouter()
@@ -414,6 +418,18 @@ const StudentBaseDetails = ({
       label: 'Student Aadhar',
       value: applicationDetails?.student_aadhar,
       onChange: handleChange('student_aadhar')
+    },
+    {
+      type: InputTypes.SELECT,
+      id: `${TOP_LEVEL_ID}__referred_by`,
+      label: 'Referred by',
+      key: 'referred_by',
+      value: applicationDetails?.referred_by,
+      isLoading: isGendersLoading,
+      onChange: handleChange('referred_by'),
+      menuOptions: (usersList?.users ?? []).map(each => {
+        return { value: each.user_id, label: each.name }
+      })
     }
   ]
 

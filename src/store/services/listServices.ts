@@ -293,6 +293,7 @@ export const {
   useGetQualifiedExamsListQuery,
   useGetReligionsListQuery,
   useGetStateListQuery,
+  useGetUsersListQuery,
   useLazyGetUsersListQuery,
   useGetPaymentModesListQuery,
   useLazyGetPaymentsListQuery,

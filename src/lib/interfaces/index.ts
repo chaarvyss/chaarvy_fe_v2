@@ -40,6 +40,7 @@ export interface FilterProps {
   status_?: string
   startDate?: string
   endDate?: string
+  referred_by?: string
   program?: string
   segment?: string
   medium?: string
