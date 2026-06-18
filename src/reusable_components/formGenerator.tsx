@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Box,
   Button,
   Checkbox,
@@ -10,6 +11,7 @@ import {
   RadioGroup,
   Select
 } from '@mui/material'
+import { Fragment, useEffect, useState } from 'react'
 import DatePicker from 'react-datepicker'
 
 import { FormControl, Grid, TextField } from '@muiElements'
@@ -18,6 +20,124 @@ import { ErrorObject, InputFields } from 'src/lib/types'
 
 import CustomDateElement from './dateInputElement'
 import OverlaySpinner from './overlaySpinner'
+
+// --- NEW COMPONENT: Extracted to safely use hooks for async searching ---
+const SelectInputField = ({
+  field,
+  mandatoryFields,
+  errorObj
+}: {
+  field: InputFields
+  mandatoryFields: string[]
+  errorObj?: ErrorObject
+}) => {
+  const { id, label, key, value, onChange, isDisabled, menuOptions = [], isLoading, searchable, onSearch } = field
+
+  const [inputValue, setInputValue] = useState('')
+  const [fetchedOptions, setFetchedOptions] = useState<{ label: string; value: any }[]>([])
+  const [isFetching, setIsFetching] = useState(false)
+
+  useEffect(() => {
+    if (!searchable || !onSearch) return
+
+    const fetchSearchData = async () => {
+      setIsFetching(true)
+      try {
+        const results = await onSearch(inputValue)
+        setFetchedOptions(results || [])
+      } catch (e) {
+        console.error('Error fetching search options', e)
+      } finally {
+        setIsFetching(false)
+      }
+    }
+
+    const timer = setTimeout(() => {
+      if (inputValue) {
+        fetchSearchData()
+      } else {
+        setFetchedOptions([])
+      }
+    }, 300) // 300ms debounce to prevent spamming the API
+
+    return () => clearTimeout(timer)
+  }, [inputValue, searchable, onSearch])
+
+  // Combine original options with fetched options, removing exact duplicates
+  const combinedOptions = [...menuOptions]
+  fetchedOptions.forEach(fetchedOpt => {
+    if (!combinedOptions.find(opt => opt.value === fetchedOpt.value)) {
+      combinedOptions.push(fetchedOpt)
+    }
+  })
+
+  // === NEW BEHAVIOR: Searchable Autocomplete ===
+  if (searchable) {
+    return (
+      <FormControl fullWidth required={mandatoryFields.includes(key)}>
+        <small>
+          {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
+        </small>
+        <Autocomplete
+          id={id}
+          disabled={isDisabled}
+          options={combinedOptions}
+          getOptionLabel={option => option.label || ''}
+          value={combinedOptions.find(opt => opt.value === value) || null}
+          onChange={(_, newValue) => {
+            // Mimic standard event format so existing onChange handlers don't break
+            if (onChange) {
+              onChange({ target: { value: newValue ? newValue.value : '' } } as any)
+            }
+          }}
+          inputValue={inputValue}
+          onInputChange={(_, newInputValue) => {
+            setInputValue(newInputValue)
+          }}
+          loading={isLoading || isFetching}
+          renderInput={params => (
+            <TextField
+              {...params}
+              error={!!errorObj}
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <Fragment>
+                    {isLoading || isFetching ? <CircularProgress color='inherit' size={20} /> : null}
+                    {params.InputProps.endAdornment}
+                  </Fragment>
+                )
+              }}
+            />
+          )}
+        />
+        {errorObj && <small style={{ color: 'red' }}>{errorObj.error}</small>}
+      </FormControl>
+    )
+  }
+
+  return (
+    <FormControl fullWidth required={mandatoryFields.includes(key)}>
+      <small>
+        {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
+      </small>
+      <Select id={id} value={value ?? ''} onChange={onChange} disabled={isDisabled} error={!!errorObj}>
+        {isLoading ? (
+          <MenuItem disabled>
+            <CircularProgress size={24} />
+          </MenuItem>
+        ) : (
+          menuOptions.map(({ value, label }) => (
+            <MenuItem key={value} value={value}>
+              {label}
+            </MenuItem>
+          ))
+        )}
+      </Select>
+      {errorObj && <small style={{ color: 'red' }}>{errorObj.error}</small>}
+    </FormControl>
+  )
+}
 
 interface FormGeneratorProps {
   fields: InputFields[]
@@ -58,9 +178,10 @@ const FormGenerator = ({
           value,
           variant,
           menuOptions,
-          isLoading,
           showYearDropdown,
-          showMonthDropdown
+          showMonthDropdown,
+          onSearch,
+          searchable
         }) => (
           <Grid item {...columnSize} key={id}>
             {type === InputTypes.INPUT ? (
@@ -83,31 +204,28 @@ const FormGenerator = ({
                 {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
               </>
             ) : type === InputTypes.SELECT ? (
-              <FormControl fullWidth required={mandatoryFields.includes(key)}>
-                <small>
-                  {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
-                </small>
-                <Select
-                  id={id}
-                  value={value ?? ''}
-                  onChange={onChange}
-                  disabled={isDisabled}
-                  error={!!getHadError(key)}
-                >
-                  {isLoading ? (
-                    <MenuItem disabled>
-                      <CircularProgress size={24} />
-                    </MenuItem>
-                  ) : (
-                    (menuOptions ?? []).map(({ value, label }) => (
-                      <MenuItem key={value} value={value}>
-                        {label}
-                      </MenuItem>
-                    ))
-                  )}
-                </Select>
-                {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-              </FormControl>
+              <SelectInputField
+                field={{
+                  type,
+                  id,
+                  customInput,
+                  isDisabled,
+                  label,
+                  placeholder,
+                  onChange,
+                  key,
+                  caption,
+                  value,
+                  variant,
+                  menuOptions,
+                  showYearDropdown,
+                  showMonthDropdown,
+                  searchable,
+                  onSearch
+                }}
+                mandatoryFields={mandatoryFields}
+                errorObj={getHadError(key)}
+              />
             ) : type === InputTypes.RADIO ? (
               <FormControl required={mandatoryFields.includes(key)} error={!!getHadError(key)} fullWidth>
                 <FormLabel id={id}>

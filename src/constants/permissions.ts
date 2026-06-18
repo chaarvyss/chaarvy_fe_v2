@@ -23,7 +23,8 @@ export const PermissionLabels = {
     addonCourses: 'nav:addon_courses',
     payments: 'nav:payments',
     admissions: 'nav:admissions',
-    collectPayment: 'nav:collect_payment'
+    collectPayment: 'nav:collect_payment',
+    referrels: 'nav:referrels'
   },
   dashboard: {
     studentCount: 'dashboard:student_count',
@@ -215,5 +216,8 @@ export const PermissionLabels = {
     acceptPayment: 'collect_payment:accept_payment',
     viewPaymentDetails: 'collect_payment:view_payment_details',
     printReceipt: 'collect_payment:print_receipt'
+  },
+  referrels: {
+    viewList: 'referrels:view:list'
   }
 }

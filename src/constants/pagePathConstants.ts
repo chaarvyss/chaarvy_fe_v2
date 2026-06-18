@@ -1,4 +1,5 @@
 export const PagePath = {
+  UNAUTHORIZED: '/401',
   COLLEGE_PROFILE: '/collegeProfile',
   DASHBOARD: '/dashboard',
   CHANGE_PASSWORD: '/changePassword',
@@ -26,7 +27,8 @@ export const PagePath = {
   ROUTES: '/Admin/routes',
   BOARDING_POINTS: '/Admin/boardingPoints',
   VEHICLE_MOMENTS: '/Transportation/vehicleMoments',
-  VEHICLE_VENDORS: '/Transportation/vendors'
+  VEHICLE_VENDORS: '/Transportation/vendors',
+  REFERRELS: '/Admin/referrels'
 }
 
 export const MasterPagePath = {

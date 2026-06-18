@@ -69,6 +69,8 @@ export const urlConstants = {
     createUpdateBook: `${interRoutePrefix.admin}/v2/create-update-books`,
     createUpdateFeesType: `${interRoutePrefix.admin}/create-update-fees-type`,
     createUpdateProgramAddonCourse: `${interRoutePrefix.admin}/create-update-program-addon-course`,
+    getReferrelSummaryUrl: `${interRoutePrefix.admin}/get_referrals_summary`,
+
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
       language: `${interRoutePrefix.admin}/add-language`,

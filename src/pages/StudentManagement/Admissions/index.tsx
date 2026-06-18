@@ -96,7 +96,7 @@ const AdmissionsList = () => {
       content: (
         <RenderFilterOptions
           onSubmit={handleFilteredAdmissions}
-          fields={['search', 'program', 'sections']}
+          fields={['search', 'program', 'sections', 'referred_by']}
           defaultValues={filterProps}
           resetFilters={() => setFilterProps(DEFAULT_PAGINATION_PROPS)}
         />

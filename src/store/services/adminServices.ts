@@ -109,6 +109,19 @@ type ProgramSegmentStatusUpdateRequest = {
   status: number
 }
 
+type ReferrelSummaryRequest = {
+  referred_by?: string
+  startDate?: string
+  endDate?: string
+}
+
+type ReferrelSummaryResponse = {
+  user_id: string
+  referred_by: string
+  total_admissions: number
+  total_fees: number
+}
+
 const adminServiceApi = api.injectEndpoints({
   endpoints: build => ({
     createAddonCourse: build.mutation<string, string>({
@@ -378,6 +391,16 @@ const adminServiceApi = api.injectEndpoints({
           body
         }
       }
+    }),
+
+    getReferrelSummary: build.query<ReferrelSummaryResponse[], ReferrelSummaryRequest>({
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admin.getReferrelSummaryUrl,
+          params
+        }
+      }
     })
   })
 })
@@ -408,5 +431,6 @@ export const {
   useCreateUpdateBookMutation,
   useCreateUpdateFeesTypeMutation,
   useCreateUpdateProgramAddonCourseMutation,
-  useUpdateProgramSegmentStatusMutation
+  useUpdateProgramSegmentStatusMutation,
+  useGetReferrelSummaryQuery
 } = adminServiceApi
