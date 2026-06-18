@@ -1,3 +1,10 @@
+## [1.18.2](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.1...v1.18.2) (2026-06-18)
+
+
+### Bug Fixes
+
+* **AdmissionReferrals:** AC-70 ([#58](https://github.com/chaarvyss/chaarvy_fe_v2/issues/58)) ([e692f5e](https://github.com/chaarvyss/chaarvy_fe_v2/commit/e692f5e296f4c5412eee8b3ae0c64575d1beafcc))
+
 ## [1.18.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.0...v1.18.1) (2026-06-16)
 
 
