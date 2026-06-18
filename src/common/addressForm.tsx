@@ -52,7 +52,6 @@ const AddressForm = ({ student_id, address_id, user_id, user_type, isLoading, ha
         type: InputTypes.SELECT,
         rules: ['required'],
         staticOptions: statesList,
-
         mapOptions: (data: any[]) =>
           data?.map(s => ({
             label: s.state_name,

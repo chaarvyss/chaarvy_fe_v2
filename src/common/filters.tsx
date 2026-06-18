@@ -13,7 +13,8 @@ import {
   useGetProgramsListQuery,
   useGetRolesListQuery,
   useGetSectionsListQuery,
-  useGetSegmentsListQuery
+  useGetSegmentsListQuery,
+  useGetUsersListQuery
 } from 'src/store/services/listServices'
 
 type FieldTypes =
@@ -27,6 +28,7 @@ type FieldTypes =
   | 'sections'
   | 'status'
   | 'role'
+  | 'referred_by'
 
 interface StatusOption {
   label: string
@@ -61,6 +63,13 @@ const RenderFilterOptions = ({ onSubmit, fields, statusOptions, defaultValues, r
   const { data: segments, isFetching: isFetchingSegments } = useGetSegmentsListQuery(undefined, {
     skip: !fields.includes('segment')
   })
+
+  const { data: usersList, isFetching: isFetchingUsers } = useGetUsersListQuery(
+    { limit: 100 },
+    {
+      skip: !fields.includes('referred_by')
+    }
+  )
 
   // Initialize dates from strings if they exist in defaultValues
   const [startDate, setStartDate] = useState<Date | null>(
@@ -201,6 +210,20 @@ const RenderFilterOptions = ({ onSubmit, fields, statusOptions, defaultValues, r
               label: r.role_name
             }))}
             onChange={handleChange('role')}
+          />
+        )}
+
+        {/* 👤 Role */}
+        {fields.includes('referred_by') && (
+          <ReusableSelect
+            label='Referred by'
+            value={filters?.referred_by}
+            isLoading={isFetchingUsers}
+            options={(usersList?.users ?? []).map(r => ({
+              value: r.user_id,
+              label: r.name
+            }))}
+            onChange={handleChange('referred_by')}
           />
         )}
 

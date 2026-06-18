@@ -1,3 +1,4 @@
+import { Button, Card } from '@mui/material'
 import React, { useState, useEffect, useRef, ReactNode, useCallback, useMemo } from 'react'
 
 import { useToast, ToastVariants } from 'src/@core/context/toastContext'
@@ -52,6 +53,174 @@ const RESIZE_HANDLES: ResizeHandleConfig[] = [
   { handle: 'se', bottom: -4, right: -4, cursor: 'se-resize' }
 ]
 
+// --- NEW ELEMENTS LIST COMPONENT ---
+const ElementsList = ({
+  placed,
+  selectedItems,
+  handleSelect,
+  updateItemProperty
+}: {
+  placed: PlacedField[]
+  selectedItems: string[]
+  handleSelect: (id: string) => void
+  updateItemProperty: (id: string, prop: string, val: any) => void
+}) => {
+  const getIcon = (item: PlacedField) => {
+    if (item.type === 'text') return '📝'
+    if (item.type === 'field' || item.type === 'image_field') return '⭐'
+    if (item.type === 'image') return '🖼️'
+    if (item.type === 'shape') {
+      if (item.shapeType === 'rectangle') return '▭'
+      if (item.shapeType === 'circle') return '◯'
+      if (item.shapeType === 'line') return '━'
+      if (item.shapeType === 'dynamic_table') return '📊'
+    }
+
+    return '🔹'
+  }
+
+  const getLabel = (item: PlacedField) => {
+    if (item.type === 'text') {
+      const temp = document.createElement('div')
+      temp.innerHTML = item.content || ''
+
+      return temp.textContent || 'Empty Text'
+    }
+    if (item.fieldKey) return `Field: ${item.fieldKey}`
+    if (item.type === 'shape') return `Shape: ${item.shapeType}`
+    if (item.type === 'image') return 'Image'
+
+    return 'Element'
+  }
+
+  return (
+    <Card
+      style={{
+        background: 'white',
+        border: '1px solid #e0e0e0',
+        borderRadius: 8,
+        display: 'flex',
+        flexDirection: 'column',
+        height: '95vh',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+      }}
+    >
+      <div
+        style={{
+          padding: '12px 16px',
+          borderBottom: '1px solid #e0e0e0',
+          fontWeight: 'bold',
+          background: '#fafafa',
+          borderRadius: '8px 8px 0 0'
+        }}
+      >
+        Layers & Elements
+      </div>
+      <div style={{ overflowY: 'auto', padding: 8, flex: 1 }}>
+        {placed.length === 0 && (
+          <div style={{ padding: 16, textAlign: 'center', color: '#999', fontSize: 12 }}>Canvas is empty</div>
+        )}
+
+        {/* Reverse array so top layers show at the top of the list */}
+        {[...placed].reverse().map(item => {
+          const isSelected = selectedItems.includes(item.id)
+
+          return (
+            <div
+              key={item.id}
+              style={{
+                marginBottom: 8,
+                border: `1px solid ${isSelected ? '#2196F3' : '#eee'}`,
+                borderRadius: 4,
+                overflow: 'hidden'
+              }}
+            >
+              <div
+                onClick={() => handleSelect(item.id)}
+                style={{
+                  padding: '8px 12px',
+                  background: isSelected ? '#e3f2fd' : '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  cursor: 'pointer'
+                }}
+              >
+                <span style={{ fontSize: 14 }}>{getIcon(item)}</span>
+                <span
+                  style={{
+                    fontSize: 12,
+                    flex: 1,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    color: isSelected ? '#1565C0' : '#333'
+                  }}
+                >
+                  {getLabel(item)}
+                </span>
+              </div>
+
+              {/* Inline Text Editor for Selected Text Items */}
+              {isSelected && item.type === 'text' && (
+                <div
+                  style={{
+                    padding: 8,
+                    background: '#fafafa',
+                    borderTop: `1px solid ${isSelected ? '#90CAF9' : '#eee'}`
+                  }}
+                >
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: 10,
+                      color: '#666',
+                      marginBottom: 4,
+                      textTransform: 'uppercase'
+                    }}
+                  >
+                    Edit Content
+                  </label>
+                  <textarea
+                    style={{
+                      width: '100%',
+                      fontSize: 12,
+                      padding: 6,
+                      minHeight: 60,
+                      border: '1px solid #ccc',
+                      borderRadius: 4,
+                      resize: 'vertical',
+                      fontFamily: 'inherit'
+                    }}
+                    value={(() => {
+                      // Extract plain text and convert <br/> back to newlines for the textarea
+                      let html = item.content || ''
+                      html = html.replace(/<br\s*[\/]?>/gi, '\n')
+                      const temp = document.createElement('div')
+                      temp.innerHTML = html
+
+                      return temp.textContent || ''
+                    })()}
+                    onChange={e => {
+                      const rawText = e.target.value
+
+                      // Convert newlines back to <br/> and apply variable formatting
+                      const htmlText = rawText.replace(/\n/g, '<br/>')
+                      const finalHtml = formatHtmlVariables(htmlText)
+                      updateItemProperty(item.id, 'content', finalHtml)
+                    }}
+                    placeholder='Enter text...'
+                  />
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </Card>
+  )
+}
+
 // --- UTILS ---
 const formatHtmlVariables = (html: string) => {
   const temp = document.createElement('div')
@@ -102,7 +271,7 @@ type ResizeState = {
 
 const DesignerPage = () => {
   // --- API ---
-  const { data: pdfTemplates } = useGetPdfTemplatesQuery(undefined, { refetchOnMountOrArgChange: true })
+  const { data: pdfTemplates, refetch } = useGetPdfTemplatesQuery(undefined, { refetchOnMountOrArgChange: true })
   const [savePdfTemplate, { isLoading: isSaving }] = useAddUpdatePdfTemplateMutation()
   const { triggerToast } = useToast()
 
@@ -180,7 +349,7 @@ const DesignerPage = () => {
       { key: 'logo', label: 'Logo/Image', type: 'image' },
       ...get_available_fields()
     ],
-    [selectedTemplateId]
+    [selectedTemplateId, pdfTemplates]
   )
 
   // --- MATH & DIMENSIONS ---
@@ -660,6 +829,17 @@ const DesignerPage = () => {
     setPlaced(p => p.map(item => (item.id === id ? { ...item, content } : item)))
   }, [])
 
+  // NEW FIX: Helper to explicitly capture and commit DOM text values
+  const commitActiveTextEdit = useCallback(() => {
+    if (editingItem) {
+      const el = document.getElementById(`text-edit-${editingItem}`)
+      if (el) {
+        const cleanHtml = formatHtmlVariables(el.innerHTML)
+        setPlaced(p => p.map(item => (item.id === editingItem ? { ...item, content: cleanHtml } : item)))
+      }
+    }
+  }, [editingItem])
+
   const insertDynamicSpan = (itemId: string, fieldKey: string) => {
     const selection = window.getSelection()
     if (!selection || selection.rangeCount === 0) return
@@ -862,6 +1042,17 @@ const DesignerPage = () => {
   }, [])
 
   const saveTemplate = async () => {
+    // Synchronously flush any active text edits to local state before constructing the payload
+    let currentPlaced = [...placed]
+    if (editingItem) {
+      const el = document.getElementById(`text-edit-${editingItem}`)
+      if (el) {
+        const cleanHtml = formatHtmlVariables(el.innerHTML)
+        currentPlaced = currentPlaced.map(item => (item.id === editingItem ? { ...item, content: cleanHtml } : item))
+        setPlaced(currentPlaced)
+      }
+    }
+
     const payload = {
       clientId: 'clientId',
       templateType: 'admission_acknowledgement',
@@ -874,8 +1065,9 @@ const DesignerPage = () => {
         backgroundImage,
         backgroundOpacity
       },
-      placed
+      placed: currentPlaced
     }
+
     savePdfTemplate({
       template_id: selectedTemplateId,
       template_name: templateName,
@@ -883,8 +1075,30 @@ const DesignerPage = () => {
       available_fields: get_available_fields()
     })
       .unwrap()
-      .then(() => {
+      .then(async () => {
         triggerToast('Template saved successfully', { variants: ToastVariants.SUCCESS })
+
+        try {
+          // Fetch the new list directly from the server
+          const fetchResult = await refetch()
+
+          // Fallback to the first available template in the fresh data
+          if (fetchResult.data && fetchResult.data.length > 0) {
+            const firstTemplate = fetchResult.data[0]
+
+            setSelectedTemplateId(firstTemplate.template_id)
+            setTemplateName(firstTemplate.template_name)
+
+            const templateHtml =
+              typeof firstTemplate.template_html === 'string'
+                ? JSON.parse(firstTemplate.template_html)
+                : firstTemplate.template_html
+
+            handleSetData(templateHtml)
+          }
+        } catch (err) {
+          console.error('Failed to refetch and update canvas state: ', err)
+        }
       })
       .catch(e => triggerToast(e, { variants: ToastVariants.ERROR }))
   }
@@ -939,6 +1153,16 @@ const DesignerPage = () => {
     }
     reader.readAsText(file)
   }, [])
+
+  const showRightSidebar = !isPreviewMode
+
+  const [selectedRightTab, setSelectedRightTab] = useState<'properties' | 'layers'>('layers')
+
+  useEffect(() => {
+    if (selectedItems.length !== 1) {
+      setSelectedRightTab('layers')
+    }
+  }, [selectedItems])
 
   return (
     <>
@@ -1073,6 +1297,7 @@ const DesignerPage = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button
                 onClick={() => {
+                  commitActiveTextEdit() // FIX: Flush prior to clearing edit state
                   setIsPreviewMode(!isPreviewMode)
                   setSelectedItems([])
                   setEditingItem(null)
@@ -1140,7 +1365,7 @@ const DesignerPage = () => {
           <div
             style={{
               overflow: 'auto',
-              maxHeight: 'calc(90vh - 80px)',
+              height: 'calc(99vh - 80px)',
               border: '1px solid #e0e0e0',
               padding: 20,
               background: '#f0f2f5'
@@ -1154,6 +1379,7 @@ const DesignerPage = () => {
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
               onMouseDown={() => {
+                commitActiveTextEdit() // FIX: Flush when user clicks elsewhere on the canvas wrapper
                 setSelectedItems([])
                 setEditingItem(null)
                 setEditingSpan(null)
@@ -1276,6 +1502,11 @@ const DesignerPage = () => {
                         if (isPreviewMode) return
                         e.stopPropagation()
                         if (editingItem === p.id) return
+
+                        if (editingItem) {
+                          commitActiveTextEdit()
+                          setEditingItem(null)
+                        }
 
                         // --- MULTI-SELECT CLICK LOGIC ---
                         let newSelection = [...selectedItems]
@@ -1623,16 +1854,50 @@ const DesignerPage = () => {
             </div>
           </div>
         </div>
+        {showRightSidebar && (
+          <div style={{ width: 300, height: '95vh', display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <Card sx={{ display: 'flex', gap: 1, p: 2 }}>
+              <Button
+                variant={selectedRightTab === 'layers' ? 'contained' : 'outlined'}
+                onClick={() => setSelectedRightTab('layers')}
+                size='small'
+              >
+                Layers
+              </Button>
+              <Button
+                variant={selectedRightTab === 'properties' ? 'contained' : 'outlined'}
+                onClick={() => setSelectedRightTab('properties')}
+                disabled={selectedItems.length !== 1}
+                size='small'
+              >
+                Properties
+              </Button>
+            </Card>
+            {/* 1. Layers & Elements List */}
 
-        {/* Show Properties panel ONLY if exactly ONE item is selected */}
-        {selectedItems.length === 1 && !isPreviewMode && (
-          <PropertiesPanel
-            item={placed.find(p => p.id === selectedItems[0])!}
-            updateItemProperty={updateItemProperty}
-            bringToFront={bringToFront}
-            sendToBack={sendToBack}
-            deleteItem={id => deleteItems([id])}
-          />
+            {selectedRightTab === 'layers' ? (
+              <ElementsList
+                placed={placed}
+                selectedItems={selectedItems}
+                handleSelect={id => {
+                  commitActiveTextEdit()
+                  setSelectedItems([id])
+                  setEditingItem(null)
+                }}
+                updateItemProperty={updateItemProperty}
+              />
+            ) : (
+              selectedItems.length === 1 && (
+                <PropertiesPanel
+                  item={placed.find(p => p.id === selectedItems[0])!}
+                  updateItemProperty={updateItemProperty}
+                  bringToFront={bringToFront}
+                  sendToBack={sendToBack}
+                  deleteItem={id => deleteItems([id])}
+                />
+              )
+            )}
+          </div>
         )}
       </div>
     </>

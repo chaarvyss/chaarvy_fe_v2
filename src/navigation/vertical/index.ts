@@ -93,6 +93,12 @@ const navigation = (): VerticalNavItemsType => {
         //   icon: 'FormSelect' as const
         // },
         {
+          key: PermissionLabels.nav.referrels,
+          title: 'Referrels',
+          path: PagePath.REFERRELS,
+          icon: 'AccountSchoolOutline' as const
+        },
+        {
           key: PermissionLabels.nav.admissions,
           title: 'Admissions',
           path: PagePath.ADMISSIONS,
@@ -157,6 +163,12 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Clients',
       path: MasterPagePath.CLIENTS_LIST,
       icon: 'FormatListGroup' as const
+    },
+    {
+      key: Permissions.MASTER.CLIENTS.VIEW_LIST,
+      title: 'Help videos',
+      path: MasterPagePath.HELP_VIDEOS,
+      icon: 'Video' as const
     }
   ]
 
