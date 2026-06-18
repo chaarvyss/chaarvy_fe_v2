@@ -551,13 +551,13 @@ const StudentBaseDetails = ({
         const file = await imageCompression(originalFile, options)
         const sizeInKB = file.size / 1024
 
-        if (file.size > 512000 || sizeInKB < 300) {
+        if (file.size > 512000 || sizeInKB < 50) {
           triggerToast(`Resulting file size is ${sizeInKB.toFixed(2)} KB`, { variant: ToastVariants.ERROR })
 
           // Use a functional state update and filter out existing errors to prevent duplicates
           setErrors(prevErrors => [
             ...prevErrors.filter(err => err.errorkey !== 'student_image'),
-            { errorkey: 'student_image', error: 'Allowed File size must be between 300 KB and 500 KB.' }
+            { errorkey: 'student_image', error: 'Allowed File size must be between 50 KB and 500 KB.' }
           ])
 
           return
