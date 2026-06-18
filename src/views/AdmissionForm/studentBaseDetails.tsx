@@ -617,7 +617,7 @@ const StudentBaseDetails = ({
                     hidden
                     type='file'
                     onChange={handleImageUpload}
-                    accept='image/png, image/jpeg'
+                    accept='image/*, image/png, image/jpeg'
                     id='account-settings-upload-image'
                   />
                 </Button>
@@ -632,7 +632,7 @@ const StudentBaseDetails = ({
                 </Typography>
 
                 {/* Optional: Show the preview of the processed student image */}
-                {image && (
+                {/* {image && (
                   <Box sx={{ mt: 2 }}>
                     <img
                       src={image}
@@ -640,7 +640,7 @@ const StudentBaseDetails = ({
                       style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '8px' }}
                     />
                   </Box>
-                )}
+                )} */}
               </Box>
             </Box>
           </Grid>
