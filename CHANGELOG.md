@@ -1,3 +1,10 @@
+## [1.18.3](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.2...v1.18.3) (2026-06-20)
+
+
+### Bug Fixes
+
+* **ApplicationForm:** AC-00 upload image from mobile cam ([#59](https://github.com/chaarvyss/chaarvy_fe_v2/issues/59)) ([ba2e6b8](https://github.com/chaarvyss/chaarvy_fe_v2/commit/ba2e6b8c222b694bcff4307ea4d2020a45d1e028))
+
 ## [1.18.2](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.1...v1.18.2) (2026-06-18)
 
 
