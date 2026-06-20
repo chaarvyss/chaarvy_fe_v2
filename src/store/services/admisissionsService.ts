@@ -25,6 +25,7 @@ export type Admissions = {
   father_name: string
   dob: string
   city: string
+  application_status: number
   student_name: string
   contact_no_1: string
   program_name: string
@@ -133,6 +134,7 @@ const admissionServiceApi = api.injectEndpoints({
       }
     }),
     getAdmissionsList: build.query<AdmissionsListResponse, FilterProps | undefined>({
+      providesTags: [CacheTag.ListAdmissions],
       query: params => {
         return {
           method: HttpRequestMethods.GET,
@@ -230,6 +232,7 @@ const admissionServiceApi = api.injectEndpoints({
     }),
 
     updateStudentDetailsF2: build.mutation<string, StudentDetailsRequest>({
+      invalidatesTags: [CacheTag.ListAdmissions],
       query: body => {
         return {
           method: HttpRequestMethods.POST,
@@ -291,7 +294,7 @@ const admissionServiceApi = api.injectEndpoints({
     }),
 
     setStudentPayableFees: build.mutation<string, SetFeesDetailsRequest>({
-      invalidatesTags: [CacheTag.StudentPayableFees],
+      invalidatesTags: [CacheTag.StudentPayableFees, CacheTag.ListAdmissions],
       query: body => {
         return {
           method: HttpRequestMethods.POST,
@@ -319,6 +322,17 @@ const admissionServiceApi = api.injectEndpoints({
           url: urlConstants.admissions.getProcessingFeesPendingEnrollmentsUrl
         }
       }
+    }),
+
+    getTabsStatus: build.query<TabStatusResponse, string>({
+      providesTags: [CacheTag.ListAdmissions],
+      query: student_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.getTabsStatusUrl,
+          params: { student_id }
+        }
+      }
     })
   })
 })
@@ -343,5 +357,6 @@ export const {
   useGetRawFeesDetailsQuery,
   useSetStudentPayableFeesMutation,
   useGetStudentPayableFeesDetailsQuery,
-  useGetProcessingFeesPendingEnrollmentsQuery
+  useGetProcessingFeesPendingEnrollmentsQuery,
+  useGetTabsStatusQuery
 } = admissionServiceApi

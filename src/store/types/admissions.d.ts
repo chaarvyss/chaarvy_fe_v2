@@ -120,3 +120,11 @@ type SetFeesDetailsRequest = {
   payment_aggrement?: number
   no_of_terms?: number
 }
+
+type TabStatusResponse = {
+  student_base_details: number
+  student_details: number
+  address: number
+  addon_course: number
+  fees: number
+}

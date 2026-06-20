@@ -406,10 +406,11 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                     position: 'sticky',
                     top: 0,
                     backgroundColor: 'background.paper',
+                    textTransform: 'none',
                     zIndex: 2
                   }}
                 >
-                  {col.label}
+                  <Typography sx={{ fontSize: '13px', color: 'grey', fontWeight: 'bolder' }}>{col.label}</Typography>
                 </TableCell>
               ))}
 
@@ -419,6 +420,7 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                   sx={{
                     position: 'sticky',
                     top: 0,
+                    textTransform: 'none',
                     backgroundColor: 'background.paper',
                     zIndex: 2
                   }}

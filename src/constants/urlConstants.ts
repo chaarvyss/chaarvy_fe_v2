@@ -120,7 +120,8 @@ export const urlConstants = {
     getRawFeesDetailsUrl: `${interRoutePrefix.admisions}/get-raw-fees`,
     setStudentPayableFeesUrl: `${interRoutePrefix.admisions}/set-student-payable-fees`,
     getStudentPayableFeesDetailsUrl: `${interRoutePrefix.admisions}/student-payable-fees`,
-    getProcessingFeesPendingEnrollmentsUrl: `${interRoutePrefix.admisions}/processing-fees-pending-enrollments`
+    getProcessingFeesPendingEnrollmentsUrl: `${interRoutePrefix.admisions}/processing-fees-pending-enrollments`,
+    getTabsStatusUrl: `${interRoutePrefix.admisions}/get-application-tab-status`
   },
   dashboard: {
     studentsCount: `${interRoutePrefix.dashboard}/students_count`,
