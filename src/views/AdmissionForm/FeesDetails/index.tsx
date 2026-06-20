@@ -97,6 +97,21 @@ const FeesDetails = ({ student_id }: FeesDetailsProps) => {
     skip: !student_course_enrollment_id
   })
 
+  const hasChanges = useMemo(() => {
+    if (!savedFeesJson) return true
+
+    const courseFeesChanged = data.courseFees.some(
+      item => Number(item.final_fees) !== savedFeesJson.courseFees?.[item.program_fees_id]
+    )
+    const booksChanged = data.booksDetails.some(item => item.is_required !== savedFeesJson.booksDetails?.[item.book_id])
+
+    const addonsChanged = data.addonCourseDetails.some(
+      item => Number(item.final_fees) !== savedFeesJson.addonCourseDetails?.[item.addon_course_id]
+    )
+
+    return courseFeesChanged || booksChanged || addonsChanged
+  }, [data, savedFeesJson])
+
   const mergeData = (initialData: FeesState, savedData?: SavedFeesJson): FeesState => {
     return {
       courseFees: initialData.courseFees.map(item => ({
@@ -281,10 +296,12 @@ const FeesDetails = ({ student_id }: FeesDetailsProps) => {
           size='small'
           variant='contained'
           loading={isSubmitting}
-          disabled={stats.discount < 0 || showLoader}
+          disabled={
+            stats.discount < 0 || showLoader || (!!savedFeesJson && !hasChanges) // Disable if updating and no changes made
+          }
           onClick={handleSubmit}
         >
-          Finalize
+          {savedFeesJson ? 'Update Fees details' : 'Finalize'}
         </LoadingButton>
       </Box>
 

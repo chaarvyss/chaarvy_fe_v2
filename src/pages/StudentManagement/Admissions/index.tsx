@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 
-import { Box, Chip, Typography } from '@muiElements'
+import { Box, Chip, IconButton, Typography } from '@muiElements'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import RenderFilterOptions from 'src/common/filters'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
@@ -9,14 +9,13 @@ import { DEFAULT_PAGINATION_PROPS, DEFAULT_TABLE_ITEMS_LIMIT } from 'src/constan
 import { PagePath } from 'src/constants/pagePathConstants'
 import { FilterProps } from 'src/lib/interfaces'
 import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
-import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import {
   Admissions,
   useGetProcessingFeesPendingEnrollmentsQuery,
   useLazyGetAdmissionsListQuery
 } from 'src/store/services/admisissionsService'
 import { useGetApplicationFeesPaymentMutation } from 'src/store/services/feesServices'
-import { statusColors } from 'src/utils/constants'
+import { ThemeColorEnum } from 'src/utils/enums'
 import GetChaarvyIcons from 'src/utils/icons'
 
 const AdmissionsList = () => {
@@ -70,17 +69,6 @@ const AdmissionsList = () => {
     }
   }
 
-  const getKebabOptions = (application_id: string) => {
-    return [
-      {
-        id: 'edit application',
-        label: 'Edit Application',
-        icon: <GetChaarvyIcons iconName='GreasePencil' />,
-        onOptionClick: () => router.push(`${PagePath.CREATE_ADMISSION}?id=${application_id}`)
-      }
-    ]
-  }
-
   const handleFilteredAdmissions = (params?: FilterProps) => {
     setAdmissionsList([])
     setFilterProps(prev => ({
@@ -118,6 +106,17 @@ const AdmissionsList = () => {
       icon: <GetChaarvyIcons iconName='FilterCheckOutline' />
     }
   ]
+
+  const getAdmissionStatus = (status: number): { label: string; color: ThemeColorEnum } => {
+    switch (status) {
+      case 0:
+        return { label: 'Enrolled', color: ThemeColorEnum.Error }
+      case 3:
+        return { label: 'Confirmed', color: ThemeColorEnum.Success }
+      default:
+        return { label: 'under process', color: ThemeColorEnum.Warning }
+    }
+  }
 
   const columns: ChaarvyTableColumn[] = [
     {
@@ -164,13 +163,13 @@ const AdmissionsList = () => {
     },
 
     {
-      id: 'status',
+      id: 'application_status',
       label: 'Status',
       hideable: true,
-      render: () => (
+      render: row => (
         <Chip
-          label='Active'
-          color={statusColors.active}
+          label={getAdmissionStatus(row.application_status).label}
+          color={getAdmissionStatus(row.application_status).color}
           sx={{
             height: 24,
             fontSize: '0.75rem',
@@ -191,7 +190,17 @@ const AdmissionsList = () => {
       label: 'Actions',
       width: '10px',
       hideable: false, // Keep actions always visible
-      render: row => <DropDownMenu dropDownMenuOptions={getKebabOptions(row.student_id)} />
+      render: row => (
+        <Box>
+          <IconButton
+            sx={{ '&:hover': { color: 'red' } }}
+            color='info'
+            onClick={() => router.push(`${PagePath.CREATE_ADMISSION}?id=${row.student_id}`)}
+          >
+            <GetChaarvyIcons iconName='GreasePencil' fontSize='1.25rem' />
+          </IconButton>
+        </Box>
+      )
     }
   ]
 
