@@ -605,22 +605,6 @@ const StudentBaseDetails = ({
                 alt='add photo'
                 style={{ cursor: 'pointer' }}
               />
-              {/* <Box>
-                <Button component='label' variant='contained' htmlFor='account-settings-upload-image'>
-                  Upload Photo
-                  <input
-                    hidden
-                    type='file'
-                    onChange={handleImageUpload}
-                    accept='image/png, image/jpeg'
-                    id='account-settings-upload-image'
-                  />
-                </Button>
-                <Typography variant='body2' color={getHadError('student_image') ? 'red' : ''} sx={{ marginTop: 5 }}>
-                  {(getHadError('student_image') ? getHadError('student_image')?.error : null) ??
-                    'Allowed File size must be between 300 KB and 500 KB.'}
-                </Typography>
-              </Box> */}
               <Box>
                 <Button
                   component='label'
@@ -644,7 +628,7 @@ const StudentBaseDetails = ({
                   sx={{ marginTop: 5 }}
                 >
                   {(getHadError('student_image') ? getHadError('student_image')?.error : null) ??
-                    'Allowed File size must be between 300 KB and 500 KB.'}
+                    'Allowed File size must be between 50 KB and 500 KB.'}
                 </Typography>
 
                 {/* Optional: Show the preview of the processed student image */}
