@@ -617,7 +617,7 @@ const StudentBaseDetails = ({
                     hidden
                     type='file'
                     onChange={handleImageUpload}
-                    accept='image/*, image/png, image/jpeg'
+                    accept='image/*'
                     id='account-settings-upload-image'
 
                     // capture='environment'
