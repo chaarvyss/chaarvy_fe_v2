@@ -12,6 +12,7 @@ import {
   SelectChangeEvent,
   Typography
 } from '@mui/material'
+import imageCompression from 'browser-image-compression'
 import { useRouter } from 'next/router'
 import React, { ChangeEvent, useState, useEffect } from 'react'
 import DatePicker from 'react-datepicker'
@@ -98,6 +99,7 @@ const StudentBaseDetails = ({
   const [applicationDetails, setApplicationDetails] = useState<CreateUpdateAdmissionFormOneRequest>(defaultFormData)
   const [dob, setDob] = useState<Date>()
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false)
+  const [isCompressing, setIsCompressing] = useState<boolean>(false)
 
   const [studentCourseEnrollmentId, setStudentCourseEnrollmentId] = useState<string>()
   const { data: usersList } = useGetUsersListQuery({
@@ -531,22 +533,47 @@ const StudentBaseDetails = ({
       )
     )
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      if (file.size > 512000) {
-        triggerToast(`Given file size is ${file.size / 1024}kb `, { variant: ToastVariants.ERROR })
-        setErrors([
-          ...errors,
-          { errorkey: 'student_image', error: 'Allowed File size must be between 300 KB and 500 KB.' }
-        ])
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const originalFile = event.target.files?.[0]
 
-        return
-      } else {
-        setErrors(errors.filter(({ errorkey }) => errorkey !== 'student_image'))
+    // Reset the input value so the same file can be re-selected if an error occurs
+    event.target.value = ''
+
+    if (originalFile) {
+      try {
+        // 1. Intercept and compress the heavy mobile camera file
+        const options = {
+          maxSizeMB: 0.5, // Instructs the library to target a max of 500 KB
+          maxWidthOrHeight: 1920,
+          useWebWorker: true
+        }
+        setIsCompressing(true)
+        const file = await imageCompression(originalFile, options)
+        const sizeInKB = file.size / 1024
+
+        if (file.size > 512000 || sizeInKB < 50) {
+          triggerToast(`Resulting file size is ${sizeInKB.toFixed(2)} KB`, { variant: ToastVariants.ERROR })
+
+          // Use a functional state update and filter out existing errors to prevent duplicates
+          setErrors(prevErrors => [
+            ...prevErrors.filter(err => err.errorkey !== 'student_image'),
+            { errorkey: 'student_image', error: 'Allowed File size must be between 50 KB and 500 KB.' }
+          ])
+
+          return
+        } else {
+          setErrors(prevErrors => prevErrors.filter(err => err.errorkey !== 'student_image'))
+        }
+
+        // 3. Update your state with the final, compressed file
+        setStudentImg(file)
+        setImage(URL.createObjectURL(file))
+      } catch (error) {
+        console.error('Error compressing image:', error)
+        triggerToast('Failed to process image. Please try again.', { variant: ToastVariants.ERROR })
+      } finally {
+        setIsCompressing(false)
       }
-      setStudentImg(file)
-      setImage(URL.createObjectURL(file))
     }
   }
 
@@ -579,20 +606,43 @@ const StudentBaseDetails = ({
                 style={{ cursor: 'pointer' }}
               />
               <Box>
-                <Button component='label' variant='contained' htmlFor='account-settings-upload-image'>
-                  Upload Photo
+                <Button
+                  component='label'
+                  variant='contained'
+                  htmlFor='account-settings-upload-image'
+                  disabled={isCompressing}
+                >
+                  {isCompressing ? 'Processing...' : 'Upload Photo'}
                   <input
                     hidden
                     type='file'
                     onChange={handleImageUpload}
-                    accept='image/png, image/jpeg'
+                    accept='image/*'
                     id='account-settings-upload-image'
+
+                    // capture='environment'
                   />
                 </Button>
-                <Typography variant='body2' color={getHadError('student_image') ? 'red' : ''} sx={{ marginTop: 5 }}>
+
+                <Typography
+                  variant='body2'
+                  color={getHadError('student_image') ? 'error' : 'textSecondary'}
+                  sx={{ marginTop: 5 }}
+                >
                   {(getHadError('student_image') ? getHadError('student_image')?.error : null) ??
-                    'Allowed File size must be between 300 KB and 500 KB.'}
+                    'Allowed File size must be between 50 KB and 500 KB.'}
                 </Typography>
+
+                {/* Optional: Show the preview of the processed student image */}
+                {/* {image && (
+                  <Box sx={{ mt: 2 }}>
+                    <img
+                      src={image}
+                      alt='Student Preview'
+                      style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '8px' }}
+                    />
+                  </Box>
+                )} */}
               </Box>
             </Box>
           </Grid>
