@@ -1,3 +1,10 @@
+## [1.18.4](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.3...v1.18.4) (2026-06-20)
+
+
+### Bug Fixes
+
+* **AdmissionsEnhancement:** AC-73:  ([#60](https://github.com/chaarvyss/chaarvy_fe_v2/issues/60)) ([2166384](https://github.com/chaarvyss/chaarvy_fe_v2/commit/2166384e3bb5ded143982a9ddc376427d9f3d828))
+
 ## [1.18.3](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.2...v1.18.3) (2026-06-20)
 
 
