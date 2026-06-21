@@ -96,33 +96,16 @@ export const Card1 = ({
   )
 }
 
-interface DashboardTableProps extends ChaarvyDataTableProps {
-  cardTitle: string
-}
-
-export const DashboardTable = ({ cardTitle, ...rest }: DashboardTableProps) => {
+export const DashboardTable = ({ ...rest }: ChaarvyDataTableProps) => {
   return (
-    <Card
+    <Box
       sx={{
         p: 3,
         cursor: 'pointer',
-        width: {
-          xs: '100%',
-          sm: '98%',
-          md: '63%',
-          lg: '65%'
-        },
-
-        borderRadius: '1rem',
-        boxShadow: 3,
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+        borderRadius: '1rem'
       }}
     >
-      <Typography variant='h5' sx={{ mb: 2 }}>
-        {cardTitle}
-      </Typography>
-
       <ChaarvyDataTable {...rest} />
-    </Card>
+    </Box>
   )
 }
