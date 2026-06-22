@@ -1,3 +1,10 @@
+## [1.18.5](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.4...v1.18.5) (2026-06-22)
+
+
+### Bug Fixes
+
+* **MasterDashboard:** AC-00: Master dashboard ([#61](https://github.com/chaarvyss/chaarvy_fe_v2/issues/61)) ([1d9673d](https://github.com/chaarvyss/chaarvy_fe_v2/commit/1d9673d224f350367aebf0f42541685e2e1d850d))
+
 ## [1.18.4](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.3...v1.18.4) (2026-06-20)
 
 
