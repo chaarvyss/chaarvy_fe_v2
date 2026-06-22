@@ -11,13 +11,10 @@ import {
   Paper,
   Stack
 } from '@mui/material'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import GetChaarvyIcons from 'src/utils/icons'
 
-// Note: You will need @mui/icons-material installed for these
-
-// Define the priority types and their associated MUI theme colors
 type Priority = 'High' | 'Medium' | 'Low'
 
 interface Todo {

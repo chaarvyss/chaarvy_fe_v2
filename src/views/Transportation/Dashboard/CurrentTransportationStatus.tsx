@@ -86,10 +86,10 @@ const CurrentTransportationStatus = () => {
     }
   ]
 
+  // cardTitle='Current Transportation Status'
   return (
     <>
       <DashboardTable
-        cardTitle='Current Transportation Status'
         columns={columns}
         data={[
           {
