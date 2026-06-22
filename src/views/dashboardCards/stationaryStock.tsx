@@ -1,6 +1,5 @@
 import { useTheme } from '@mui/material'
 import { blue, grey, lightBlue } from '@mui/material/colors'
-import React from 'react'
 
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@muiElements'
 import { useSettings } from 'src/@core/hooks/useSettings'

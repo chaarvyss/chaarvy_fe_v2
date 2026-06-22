@@ -9,7 +9,11 @@ import { isAuthorised } from 'src/lib/util/permissionCheck'
 import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
 import GetChaarvyIcons from 'src/utils/icons'
 
+import ActiveClients from './ActiveClients'
 import ClientsList from './clientsList'
+import CollectionsDashboard from './collections'
+import DropClients from './DropClients'
+import DashboardTodoList from './Todo'
 
 type DashboardCardProps = {
   item: any
@@ -109,18 +113,56 @@ const MasterDashboard: React.FC = () => {
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({})
   const defaultLayout: LayoutCards[] = [
     {
-      i: 'Clients',
+      i: 'Active clients',
       x: 0,
       y: 0,
+      w: 4,
+      h: 3,
+      shouldHide: false,
+      hadSearch: false,
+      permission_key: 'a07d2d6e-8431-4527-9857-c7d155715002'
+    },
+    {
+      i: 'Droped clients',
+      x: 4,
+      y: 0,
+      w: 4,
+      h: 3,
+      shouldHide: false,
+      hadSearch: false,
+      permission_key: 'a07d2d6e-8431-4527-9857-c7d155715002'
+    },
+    {
+      i: 'Todo',
+      x: 8,
+      y: 0,
+      w: 4,
+      h: 7,
+      shouldHide: false,
+      hadSearch: false,
+      permission_key: 'a07d2d6e-8431-4527-9857-c7d155715002'
+    },
+    {
+      i: 'Collections',
+      x: 0,
+      y: 3,
       w: 8,
-      h: 2,
+      h: 4,
+      shouldHide: false,
+      hadSearch: false,
+      permission_key: 'a07d2d6e-8431-4527-9857-c7d155715002'
+    },
+    {
+      i: 'Clients',
+      x: 0,
+      y: 8,
+      w: 12,
+      h: 4,
       shouldHide: false,
       hadSearch: true,
       permission_key: 'a07d2d6e-8431-4527-9857-c7d155715002'
     }
   ]
-
-  console.log(searchQueries, 'searchQueries')
 
   const [layout, setLayout] = useState<LayoutCards[]>([])
   const [isGridReady, setIsGridReady] = useState(false)
@@ -200,7 +242,11 @@ const MasterDashboard: React.FC = () => {
   }, [layout, isGridReady])
 
   const components: { [key: string]: React.ElementType } = {
-    Clients: ClientsList
+    Clients: ClientsList,
+    'Active clients': ActiveClients,
+    'Droped clients': DropClients,
+    Collections: CollectionsDashboard,
+    Todo: DashboardTodoList
   }
 
   // Remove (Hide) Component
