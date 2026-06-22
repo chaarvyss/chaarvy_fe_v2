@@ -66,6 +66,12 @@ const navigation = (): VerticalNavItemsType => {
           title: 'Payments',
           path: PagePath.PAYMENTS,
           icon: 'AccountCreditCardOutline' as const
+        },
+        {
+          key: PermissionLabels.nav.reports,
+          title: 'Reports',
+          path: PagePath.REPORTS,
+          icon: 'AccountCreditCardOutline' as const
         }
       ]
     },

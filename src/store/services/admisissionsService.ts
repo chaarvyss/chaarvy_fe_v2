@@ -333,6 +333,16 @@ const admissionServiceApi = api.injectEndpoints({
           params: { student_id }
         }
       }
+    }),
+    dropAdmission: build.mutation<string, string>({
+      invalidatesTags: [CacheTag.ListAdmissions],
+      query: student_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admissions.dropAdmissionUrl,
+          params: { student_id }
+        }
+      }
     })
   })
 })
@@ -358,5 +368,6 @@ export const {
   useSetStudentPayableFeesMutation,
   useGetStudentPayableFeesDetailsQuery,
   useGetProcessingFeesPendingEnrollmentsQuery,
-  useGetTabsStatusQuery
+  useGetTabsStatusQuery,
+  useDropAdmissionMutation
 } = admissionServiceApi

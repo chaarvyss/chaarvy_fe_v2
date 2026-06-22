@@ -14,6 +14,7 @@ export const PagePath = {
   ADDON_COURSE: '/Admin/addonCourse',
   PROGRAMS: '/Admin/programs',
   PAYMENTS: '/Admin/payments',
+  REPORTS: '/Admin/reports',
   ADMISSION_FORM: '/StudentManagement/AdmissionForm',
   ADMISSIONS: '/StudentManagement/Admissions',
   COLLECT_PAYMENT: '/StudentManagement/Payments/pendingPayments',

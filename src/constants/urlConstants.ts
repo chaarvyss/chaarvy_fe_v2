@@ -8,6 +8,7 @@ const interRoutePrefix = {
   fees: `${interPrefix}/fees`,
   list: `${interPrefix}/list`,
   program: `${interPrefix}/program`,
+  report: `${interPrefix}/report`,
   view: `${interPrefix}/view`,
   dashboard: `${interPrefix}/dash_board`,
   template: `${interPrefix}/template`
@@ -122,7 +123,8 @@ export const urlConstants = {
     setStudentPayableFeesUrl: `${interRoutePrefix.admisions}/set-student-payable-fees`,
     getStudentPayableFeesDetailsUrl: `${interRoutePrefix.admisions}/student-payable-fees`,
     getProcessingFeesPendingEnrollmentsUrl: `${interRoutePrefix.admisions}/processing-fees-pending-enrollments`,
-    getTabsStatusUrl: `${interRoutePrefix.admisions}/get-application-tab-status`
+    getTabsStatusUrl: `${interRoutePrefix.admisions}/get-application-tab-status`,
+    dropAdmissionUrl: `${interRoutePrefix.admisions}/drop-admission`
   },
   dashboard: {
     studentsCount: `${interRoutePrefix.dashboard}/students_count`,
@@ -156,6 +158,10 @@ export const urlConstants = {
     createUpdateProgramSegmentSection: `${interRoutePrefix.program}/create-update-program-segment-section`,
     getProgramFeesHeaderDataUrl: `${interRoutePrefix.program}/program-fees-header-data`
   },
+  reports: {
+    studentAdmissionsReport: `${interRoutePrefix.report}/admission-report`
+  },
+
   view: {
     programSegments: `${interRoutePrefix.view}/program-segment`,
     myDetails: `${interRoutePrefix.view}/my-details`,
