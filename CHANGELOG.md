@@ -1,3 +1,10 @@
+## [1.18.6](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.5...v1.18.6) (2026-06-22)
+
+
+### Bug Fixes
+
+* **AdmissionsAndReports:** AC-74: Dropping and excel reports ([#62](https://github.com/chaarvyss/chaarvy_fe_v2/issues/62)) ([e4930ef](https://github.com/chaarvyss/chaarvy_fe_v2/commit/e4930ef3ba707318c5808e29dc557d777f3258d9))
+
 ## [1.18.5](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.4...v1.18.5) (2026-06-22)
 
 
