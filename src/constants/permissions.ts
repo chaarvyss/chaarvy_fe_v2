@@ -24,7 +24,8 @@ export const PermissionLabels = {
     payments: 'nav:payments',
     admissions: 'nav:admissions',
     collectPayment: 'nav:collect_payment',
-    referrels: 'nav:referrels'
+    referrels: 'nav:referrels',
+    reports: 'nav:reports'
   },
   dashboard: {
     studentCount: 'dashboard:student_count',
@@ -219,5 +220,10 @@ export const PermissionLabels = {
   },
   referrels: {
     viewList: 'referrels:view:list'
+  },
+  reports: {
+    download: {
+      studentAdmissionsReport: 'reports:download:studentAdmissionsReport'
+    }
   }
 }
