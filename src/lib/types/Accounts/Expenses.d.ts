@@ -11,5 +11,6 @@ type Expense = {
 type ExpensesListResponse = {
   filtered: number
   total: number
+  amount_total: number
   expenses: Expense[]
 }

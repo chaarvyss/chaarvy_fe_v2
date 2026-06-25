@@ -83,23 +83,10 @@ const ExpensesList = () => {
     }
   }, [expensesResponse?.expenses])
 
-  const statusOptions = [
-    {
-      label: 'Successful',
-      value: '1'
-    },
-    {
-      label: 'Failed',
-      value: '0'
-    }
-  ]
-
   const onFilterButtonClick = () => {
     openDrawer({
       title: 'Filters',
-      content: (
-        <RenderFilterOptions onSubmit={onSubmit} fields={['dateRange', 'status']} statusOptions={statusOptions} />
-      )
+      content: <RenderFilterOptions onSubmit={onSubmit} fields={['dateRange']} />
     })
   }
 
@@ -112,7 +99,7 @@ const ExpensesList = () => {
 
   const expensesStats: TableHeaderStatCardProps[] = [
     {
-      value: 0,
+      value: expensesResponse?.amount_total ?? 0,
       title: 'Total Expenses',
       color: ThemeColorEnum.Primary,
       icon: <GetChaarvyIcons iconName='Transfer' fontSize={ChaarvyIconFontSize.lg} />

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 type AddExpenseRequest = {
   expense_id?: string
@@ -15,7 +15,11 @@ type AddExpenseRequest = {
 }
 
 const AddExpense = () => {
-  const [expense, setExpense] = useState<AddExpenseRequest>()
+  const [expense, setExpense] = useState<AddExpenseRequest | undefined>(undefined)
+
+  useEffect(() => {
+    setExpense(undefined)
+  }, [expense])
 
   return <div>AddExpense</div>
 }
