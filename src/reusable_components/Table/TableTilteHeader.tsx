@@ -185,7 +185,6 @@ const TableTilteHeader = ({
             )}
             {onSearch && (
               <TextField
-                fullWidth
                 size='small'
                 value={searchValue ?? ''}
                 type='search'

@@ -1,5 +1,3 @@
-import React from 'react'
-
 import ChaarvyPagination, { PaginationProps } from 'src/reusable_components/Pagination'
 import ChaarvyDataTable, { ChaarvyDataTableProps } from 'src/reusable_components/Table/ChaarvyDataTable'
 import DynamicHeightTableContainer from 'src/reusable_components/Table/DynamicHeightTableContainer'

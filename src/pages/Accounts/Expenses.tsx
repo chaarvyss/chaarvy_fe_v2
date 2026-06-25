@@ -1,3 +1,3 @@
-import Expenses from 'src/views/Accounts/Expenses'
+import ExpensesList from 'src/views/Accounts/Expenses'
 
-export default Expenses
+export default ExpensesList

@@ -1,22 +1,23 @@
 import { useEffect, useState } from 'react'
 
+import { Typography } from '@muiElements'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import RenderFilterOptions from 'src/common/filters'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import { DEFAULT_TABLE_ITEMS_LIMIT } from 'src/constants/constants'
 import { FilterProps, TableHeaderStatCardProps } from 'src/lib/interfaces'
+import { useGetExpensesListQuery } from 'src/store/services/common/listServices'
 import { ChaarvyIconFontSize, ThemeColorEnum } from 'src/utils/enums'
+import { useDebounce } from 'src/utils/hooks/useDebounce'
 import GetChaarvyIcons from 'src/utils/icons'
 
-const Expenses = () => {
+import AddExpense from './addExpense'
+
+const ExpensesList = () => {
   const { openDrawer } = useSideDrawer()
-
   const [expensesData, setExpensesData] = useState<any[]>([])
-
-  const expesnsesResponse = {
-    filtered: 2
-  }
-
+  const [searchText, setSearchText] = useState<string>('')
+  const debouncedSearchText = useDebounce(searchText)
   const [filterProps, setFilterProps] = useState<FilterProps>({
     searchText: undefined,
     limit: DEFAULT_TABLE_ITEMS_LIMIT,
@@ -26,41 +27,61 @@ const Expenses = () => {
     endDate: undefined
   })
 
+  const { data: expensesResponse, isFetching: isFetchingExpenses } = useGetExpensesListQuery(filterProps)
+
   const onSubmit = (params?: FilterProps) => {
-    console.log('Filter params submitted:', params)
+    if (params) {
+      setFilterProps(params)
+    }
   }
 
-  const columns = [
+  useEffect(() => {
+    setFilterProps(prev => ({
+      ...prev,
+      offset: 0,
+      searchText: debouncedSearchText
+    }))
+  }, [debouncedSearchText])
+
+  const columns: ChaarvyTableColumn[] = [
     {
       id: 'id',
-      label: 'ID'
+      label: 'S#',
+      render: (row, index) => <Typography variant='body1'>{index + 1 + (filterProps?.offset ?? 0)}</Typography>
     },
     {
-      id: 'benficiary',
-      label: 'Beneficiary'
+      id: 'benficery',
+      label: 'Beneficiary name'
     },
     {
       id: 'amount',
       label: 'Amount'
-    }
-  ]
-
-  const data = [
-    {
-      id: 1,
-      benficiary: 'John Doe',
-      amount: '$100'
     },
     {
-      id: 2,
-      benficiary: 'Jane Smith',
-      amount: '$200'
+      id: 'expense_date',
+      label: 'Payment date'
+    },
+    {
+      id: 'category',
+      label: 'Expense category'
+    },
+    {
+      id: 'benficery_type',
+      label: 'Beneficiary type'
+    },
+    {
+      id: 'payment_mode',
+      label: 'Payment mode'
     }
   ]
 
   useEffect(() => {
-    setExpensesData(data)
-  }, [filterProps])
+    if (filterProps.offset == 0) {
+      setExpensesData(expensesResponse?.expenses ?? [])
+    } else {
+      setExpensesData(prev => [...prev, ...(expensesResponse?.expenses ?? [])])
+    }
+  }, [expensesResponse?.expenses])
 
   const statusOptions = [
     {
@@ -82,6 +103,13 @@ const Expenses = () => {
     })
   }
 
+  const onAddExpenseButtonClick = () => {
+    openDrawer({
+      title: 'Add expense',
+      content: <AddExpense />
+    })
+  }
+
   const expensesStats: TableHeaderStatCardProps[] = [
     {
       value: 0,
@@ -98,21 +126,19 @@ const Expenses = () => {
         stats: expensesStats,
         showFilterIcon: true,
         handleFilterButtonClick: onFilterButtonClick,
-        onSearch: (searchText: string) => {
-          setExpensesData([]) // Clear existing data when a new search is initiated
-          setFilterProps(prev => ({
-            ...prev,
-            searchText: searchText,
-            offset: 0
-          }))
-        },
-        searchValue: filterProps.searchText
+        onSearch: setSearchText,
+        searchValue: searchText,
+        buttonTitle: 'Add expense',
+        iconName: 'Plus',
+        onButtonClick: onAddExpenseButtonClick
       }}
       tableDataProps={{
         columns: columns,
         data: expensesData,
         getRowKey: row => row.id,
-        hasMore: expensesData.length > 0 && expensesData.length < (expesnsesResponse?.filtered ?? 0),
+        isLoading: isFetchingExpenses,
+        hasMore: expensesData.length > 0 && expensesData.length < (expensesResponse?.filtered ?? 0),
+        emptyMessage: 'No expenses found',
         onLoadMore: () => () => {
           setFilterProps(prev => ({
             ...prev,
@@ -124,4 +150,4 @@ const Expenses = () => {
   )
 }
 
-export default Expenses
+export default ExpensesList

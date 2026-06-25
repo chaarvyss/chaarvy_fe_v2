@@ -1,5 +1,10 @@
 const interPrefix = 'inter'
 const masterPrefix = 'master'
+
+const commonRoutePrefix = {
+  list: '/list'
+}
+
 const interRoutePrefix = {
   admin: `${interPrefix}/admin`,
   admisions: `${interPrefix}/admissions`,
@@ -21,6 +26,10 @@ const masterRoutePrefix = {
 }
 
 export const urlConstants = {
+  common: {
+    list: { expensesUrl: `${commonRoutePrefix.list}/expenses` }
+  },
+
   auth: {
     login: `${interRoutePrefix.auth}/login`,
     changePassword: `${interRoutePrefix.auth}/change-password`,
