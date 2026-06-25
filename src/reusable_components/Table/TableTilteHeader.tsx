@@ -1,4 +1,4 @@
-import { IconButton, Tooltip } from '@mui/material'
+import { IconButton, TextField, Tooltip } from '@mui/material'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { TableHeaderStatCardProps } from 'src/lib/interfaces'
@@ -20,6 +20,8 @@ export interface TableTitleHeaderProps {
   optionalButtonText?: string
   onOptionalButtonClick?: () => void
   optionalButtonColor?: 'primary' | 'success' | 'error' | 'info' | 'warning'
+  onSearch?: (searchText: string) => void
+  searchValue?: string
 }
 
 export const renderStats = (statData: TableHeaderStatCardProps[]) => {
@@ -61,7 +63,9 @@ const TableTilteHeader = ({
   handleFilterButtonClick,
   optionalButtonText,
   onOptionalButtonClick,
-  optionalButtonColor
+  optionalButtonColor,
+  onSearch,
+  searchValue
 }: TableTitleHeaderProps) => {
   const titleRef = useRef<HTMLElement | null>(null)
   const [isTruncated, setIsTruncated] = useState(false)
@@ -179,6 +183,16 @@ const TableTilteHeader = ({
                 label={optionalButtonText}
               />
             )}
+            {onSearch && (
+              <TextField
+                fullWidth
+                size='small'
+                value={searchValue ?? ''}
+                type='search'
+                placeholder='Search...'
+                onChange={onSearch ? e => onSearch(e.target.value) : undefined}
+              />
+            )}
             {buttonTitle && (
               <>
                 <ChaarvyButton
@@ -206,7 +220,6 @@ const TableTilteHeader = ({
                 </Tooltip>
               </>
             )}
-
             {showFilterIcon && (
               <Tooltip title='Filter' placement='top'>
                 <IconButton onClick={handleFilterButtonClick} color={buttonColor ?? 'secondary'}>
