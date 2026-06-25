@@ -93,7 +93,8 @@ const ExpensesList = () => {
   const onAddExpenseButtonClick = () => {
     openDrawer({
       title: 'Add expense',
-      content: <AddExpense />
+      content: <AddExpense />,
+      size: 'large'
     })
   }
 

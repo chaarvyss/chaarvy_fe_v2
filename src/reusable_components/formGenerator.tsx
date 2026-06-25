@@ -9,7 +9,8 @@ import {
   MenuItem,
   Radio,
   RadioGroup,
-  Select
+  Select,
+  TextField as MuiTextField
 } from '@mui/material'
 import { Fragment, useEffect, useState } from 'react'
 import DatePicker from 'react-datepicker'
@@ -22,6 +23,8 @@ import CustomDateElement from './dateInputElement'
 import OverlaySpinner from './overlaySpinner'
 
 // --- NEW COMPONENT: Extracted to safely use hooks for async searching ---
+const ADD_NEW_OPTION_VALUE = '__chaarvy_add_new_option__'
+
 const SelectInputField = ({
   field,
   mandatoryFields,
@@ -31,14 +34,33 @@ const SelectInputField = ({
   mandatoryFields: string[]
   errorObj?: ErrorObject
 }) => {
-  const { id, label, key, value, onChange, isDisabled, menuOptions = [], isLoading, searchable, onSearch } = field
+  const {
+    id,
+    label,
+    key,
+    value,
+    onChange,
+    isDisabled,
+    menuOptions = [],
+    isLoading,
+    searchable,
+    onSearch,
+    onAddNew,
+    addNewLabel,
+    canEdit,
+    onEdit
+  } = field
 
   const [inputValue, setInputValue] = useState('')
+  const [editingOption, setEditingOption] = useState<string | number | null>(null)
+  const [editLabel, setEditLabel] = useState('')
   const [fetchedOptions, setFetchedOptions] = useState<{ label: string; value: any }[]>([])
   const [isFetching, setIsFetching] = useState(false)
 
   useEffect(() => {
-    if (!searchable || !onSearch) return
+    if (!searchable || !onSearch) {
+      return
+    }
 
     const fetchSearchData = async () => {
       setIsFetching(true)
@@ -71,6 +93,33 @@ const SelectInputField = ({
     }
   })
 
+  let addNewOptionLabel = ''
+  if (addNewLabel) {
+    if (inputValue.trim()) {
+      addNewOptionLabel = `${addNewLabel}: "${inputValue.trim()}"`
+    } else {
+      addNewOptionLabel = addNewLabel
+    }
+  }
+
+  let customAddOption: { label: string; value: string } | null = null
+  if (onAddNew && addNewLabel && inputValue.trim()) {
+    customAddOption = { label: addNewOptionLabel, value: ADD_NEW_OPTION_VALUE }
+  }
+  const noOptionsText = onAddNew ? (inputValue.trim() ? `Add "${inputValue.trim()}"` : 'Type to search') : 'No options'
+
+  const filterOptions = (options: any[], state: any) => {
+    const filtered = options.filter(option => {
+      return typeof option.label === 'string' && option.label.toLowerCase().includes(state.inputValue.toLowerCase())
+    })
+
+    if (customAddOption) {
+      return [...filtered, customAddOption]
+    }
+
+    return filtered
+  }
+
   // === NEW BEHAVIOR: Searchable Autocomplete ===
   if (searchable) {
     return (
@@ -82,19 +131,129 @@ const SelectInputField = ({
           id={id}
           disabled={isDisabled}
           options={combinedOptions}
-          getOptionLabel={option => option.label || ''}
-          value={combinedOptions.find(opt => opt.value === value) || null}
-          onChange={(_, newValue) => {
-            // Mimic standard event format so existing onChange handlers don't break
-            if (onChange) {
-              onChange({ target: { value: newValue ? newValue.value : '' } } as any)
+          filterOptions={filterOptions}
+          freeSolo={!!onAddNew}
+          openOnFocus
+          disableCloseOnSelect={canEdit}
+          clearOnBlur={false}
+          isOptionEqualToValue={(option, val) => {
+            if (typeof option === 'string' || typeof val === 'string') {
+              return option === val
             }
+
+            return option.value === val.value
+          }}
+          getOptionLabel={option => (typeof option === 'string' ? option : option.label || '')}
+          value={combinedOptions.find(opt => opt.value === value || String(opt.value) === String(value)) || null}
+          onChange={(_, newValue) => {
+            if (!newValue) {
+              onChange?.({ target: { value: '' } } as any)
+              setInputValue('')
+
+              return
+            }
+
+            if (typeof newValue === 'string') {
+              onAddNew?.(newValue.trim() || undefined)
+              setInputValue('')
+
+              return
+            }
+
+            if (newValue.value === ADD_NEW_OPTION_VALUE) {
+              onAddNew?.(inputValue.trim() || undefined)
+              setInputValue('')
+
+              return
+            }
+
+            const selectedValue = newValue.value
+            const selectedLabel = newValue.label || ''
+
+            if (onChange) {
+              onChange({ target: { value: selectedValue } } as any)
+            }
+
+            setInputValue(selectedLabel)
           }}
           inputValue={inputValue}
           onInputChange={(_, newInputValue) => {
             setInputValue(newInputValue)
           }}
           loading={isLoading || isFetching}
+          size='small'
+          noOptionsText={noOptionsText}
+          renderOption={(props, option) => {
+            if (option.value === ADD_NEW_OPTION_VALUE) {
+              return (
+                <li {...props} key={option.value}>
+                  {option.label}
+                </li>
+              )
+            }
+
+            const isEditing = editingOption === option.value
+
+            return (
+              <li {...props} key={option.value}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  {isEditing ? (
+                    <Box
+                      sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <MuiTextField
+                        fullWidth
+                        size='small'
+                        value={editLabel}
+                        onChange={e => setEditLabel(e.target.value)}
+                        onClick={e => e.stopPropagation()}
+                      />
+                      <Button
+                        size='small'
+                        onClick={e => {
+                          e.stopPropagation()
+                          if (editLabel.trim()) {
+                            onEdit?.(option.value, editLabel.trim())
+                          }
+                          setEditingOption(null)
+                          setEditLabel('')
+                        }}
+                      >
+                        ✔
+                      </Button>
+                      <Button
+                        size='small'
+                        onClick={e => {
+                          e.stopPropagation()
+                          setEditingOption(null)
+                          setEditLabel('')
+                        }}
+                      >
+                        ✕
+                      </Button>
+                    </Box>
+                  ) : (
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                      <span>{option.label}</span>
+                      {canEdit ? (
+                        <Button
+                          size='small'
+                          onClick={e => {
+                            e.stopPropagation()
+                            setEditingOption(option.value)
+                            setEditLabel(option.label)
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      ) : null}
+                    </Box>
+                  )}
+                </Box>
+              </li>
+            )
+          }}
           renderInput={params => (
             <TextField
               {...params}
@@ -121,7 +280,7 @@ const SelectInputField = ({
       <small>
         {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
       </small>
-      <Select id={id} value={value ?? ''} onChange={onChange} disabled={isDisabled} error={!!errorObj}>
+      <Select size='small' id={id} value={value ?? ''} onChange={onChange} disabled={isDisabled} error={!!errorObj}>
         {isLoading ? (
           <MenuItem disabled>
             <CircularProgress size={24} />
@@ -181,7 +340,11 @@ const FormGenerator = ({
           showYearDropdown,
           showMonthDropdown,
           onSearch,
-          searchable
+          searchable,
+          addNewLabel,
+          onAddNew,
+          canEdit,
+          onEdit
         }) => (
           <Grid item {...columnSize} key={id}>
             {type === InputTypes.INPUT ? (
@@ -192,6 +355,7 @@ const FormGenerator = ({
                 <TextField
                   fullWidth
                   id={id}
+                  size='small'
                   error={!!getHadError(key)}
                   value={value ?? ''}
                   defaultValue={value}
@@ -221,7 +385,11 @@ const FormGenerator = ({
                   showYearDropdown,
                   showMonthDropdown,
                   searchable,
-                  onSearch
+                  onSearch,
+                  onAddNew,
+                  addNewLabel,
+                  canEdit,
+                  onEdit
                 }}
                 mandatoryFields={mandatoryFields}
                 errorObj={getHadError(key)}
@@ -253,7 +421,7 @@ const FormGenerator = ({
                 <DatePicker
                   selected={value as Date}
                   required={mandatoryFields.includes(key)}
-                  customInput={customInput}
+                  customInput={customInput ?? <CustomDateElement label='' />}
                   id={id}
                   onChange={onChange}
                   disabled={isDisabled}
@@ -281,7 +449,7 @@ const FormGenerator = ({
               <FormControl fullWidth>
                 <small style={{ color: 'transparent' }}>.</small>
                 <Box display='flex' alignItems='end'>
-                  <Button color='success' disabled={isDisabled} variant='contained' onClick={onChange}>
+                  <Button color='success' disabled={isDisabled} variant='contained' onClick={onChange} size='small'>
                     {label}
                   </Button>
                 </Box>

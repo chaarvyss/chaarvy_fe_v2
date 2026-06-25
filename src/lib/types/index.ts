@@ -117,6 +117,10 @@ export type InputFields = {
   checked?: boolean
   searchable?: boolean
   onSearch?: (searchText: string) => Promise<{ label: string; value: any }[]>
+  onAddNew?: (text?: string) => void
+  addNewLabel?: string
+  canEdit?: boolean
+  onEdit?: (value: string | number, label: string) => void
 }
 
 export type ErrorObject = {
