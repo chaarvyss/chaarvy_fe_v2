@@ -29,6 +29,10 @@ export enum CacheTag {
   PDFTemplates = 'pdfTemplates'
 }
 
+export enum CommonCacheTag {
+  EXPENSES_LIST = 'expenses-list'
+}
+
 export enum MasterCacheTag {
   ClientsList = 'clientsList',
   HelpVideos = 'HelpVideos'

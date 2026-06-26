@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { InputTypes } from 'src/lib/enums'
+import { dateToString } from 'src/lib/helpers'
 import { ErrorObject, InputFields } from 'src/lib/types'
 
 export type ValidationRule =
@@ -279,9 +280,11 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
 
   const handleChange = (key: keyof T) => (input: any) => {
     const value = getValue(input)
+    const normalizedValue = value instanceof Date ? dateToString(value, 'yyyy-MM-dd') : value
+
     updateErrors(key, value)
 
-    setValues(prev => ({ ...prev, [key]: value }))
+    setValues(prev => ({ ...prev, [key]: normalizedValue }))
   }
 
   // ✅ FORM VALIDATION

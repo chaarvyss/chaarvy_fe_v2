@@ -1,30 +1,30 @@
 import { LoadingButton } from '@mui/lab'
 import { useMemo } from 'react'
 
+import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { FieldConfig, getMandatoryFieldsList, mapToFields, useFormBuilder } from 'src/hooks/useFormBuilder'
 import { InputTypes } from 'src/lib/enums'
 import FormGenerator from 'src/reusable_components/formGenerator'
-
-type AddExpenseRequest = {
-  expense_id?: string
-  benficery_type_id: string
-  category_id: string
-  description: string
-  amount: string
-  expense_date: string
-  expense_by: string
-  benficery: string
-  payment_mode: string
-  reference_id: string
-  remarks: string
-}
+import { useCreateUpdateExpenseMutation } from 'src/store/services/common/expenseServices'
+import {
+  useGetBenificeryTypesListQuery,
+  useGetExpenseCategoryTypesListQuery
+} from 'src/store/services/common/listServices'
+import { useGetPaymentModesListQuery } from 'src/store/services/listServices'
 
 const AddExpense = () => {
-  const benficerTypes: any[] = [{ benName: 'test-ben', benType: 't-ben' }]
-  const expenseCategoies = [{ label: 'test', value: 'tset' }]
-  const paymentModes = [{ label: 'test', value: 1 }]
+  const { closeDrawer } = useSideDrawer()
 
-  const expenseFormConfig: FieldConfig<AddExpenseRequest>[] = useMemo(
+  const { triggerToast } = useToast()
+
+  const { data: benficerTypes } = useGetBenificeryTypesListQuery()
+  const { data: expenseCategoies } = useGetExpenseCategoryTypesListQuery()
+  const { data: paymentModes } = useGetPaymentModesListQuery()
+
+  const [addExpenseRecord] = useCreateUpdateExpenseMutation()
+
+  const expenseFormConfig: FieldConfig<ExpenseRequest>[] = useMemo(
     () => [
       { key: 'description', label: 'Description', type: InputTypes.INPUT, rules: ['required'] },
       { key: 'expense_date', label: 'Date', type: InputTypes.DATE, rules: ['required'] },
@@ -50,8 +50,8 @@ const AddExpense = () => {
         onEdit: (a, b) => console.log(a, b),
         mapOptions: (data: any[]) =>
           data?.map(s => ({
-            label: s.benName,
-            value: s.benType
+            label: s.benficery_type_name,
+            value: s.benficery_type_id
           })) ?? []
       },
 
@@ -67,14 +67,13 @@ const AddExpense = () => {
 
           // TODO: save `text` to your backend and refresh optionsMap
         },
-        addNewLabel: 'Add new beneficiary',
-        searchable: true
-
-        // mapOptions: (data: any[]) =>
-        //   data?.map(s => ({
-        //     label: s.state_name,
-        //     value: s.state_id
-        //   })) ?? []
+        addNewLabel: 'Add expense category',
+        searchable: true,
+        mapOptions: (data: any[]) =>
+          data?.map(s => ({
+            label: s.category_name,
+            value: s.category_id
+          })) ?? []
       },
 
       {
@@ -90,13 +89,13 @@ const AddExpense = () => {
 
           // TODO: save `text` to your backend and refresh optionsMap
         },
-        addNewLabel: 'Add new payment type'
+        addNewLabel: 'Add new payment type',
 
-        // mapOptions: (data: any[]) =>
-        //   data?.map(s => ({
-        //     label: s.state_name,
-        //     value: s.state_id
-        //   })) ?? []
+        mapOptions: (data: any[]) =>
+          data?.map(s => ({
+            label: s.payment_mode,
+            value: s.payment_mode_id
+          })) ?? []
       },
 
       {
@@ -106,10 +105,10 @@ const AddExpense = () => {
         rules: ['required']
       }
     ],
-    []
+    [paymentModes, benficerTypes, expenseCategoies]
   )
 
-  const { values, errors, handleChange, handleSubmit, optionsMap, loadingMap } = useFormBuilder<AddExpenseRequest>({
+  const { values, errors, handleChange, handleSubmit, optionsMap, loadingMap } = useFormBuilder<ExpenseRequest>({
     fields: expenseFormConfig,
     initialValues: {
       expense_id: '',
@@ -134,8 +133,20 @@ const AddExpense = () => {
     loadingMap
   })
 
-  const onSubmit = (data: AddExpenseRequest) => {
-    console.log(data)
+  const onSubmit = (data: ExpenseRequest) => {
+    addExpenseRecord(data)
+      .unwrap()
+      .then(() => {
+        triggerToast('Expense record added successfully', {
+          variant: ToastVariants.SUCCESS
+        })
+        closeDrawer()
+      })
+      .catch(e =>
+        triggerToast(e, {
+          variant: ToastVariants.ERROR
+        })
+      )
   }
 
   return (

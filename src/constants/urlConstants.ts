@@ -2,7 +2,8 @@ const interPrefix = 'inter'
 const masterPrefix = 'master'
 
 const commonRoutePrefix = {
-  list: '/list'
+  list: '/list',
+  expense: '/expenses'
 }
 
 const interRoutePrefix = {
@@ -27,7 +28,14 @@ const masterRoutePrefix = {
 
 export const urlConstants = {
   common: {
-    list: { expensesUrl: `${commonRoutePrefix.list}/expenses` }
+    list: {
+      expensesUrl: `${commonRoutePrefix.list}/expenses`,
+      benificeryTypesUrl: `${commonRoutePrefix.list}/benificery-types`,
+      expenseCategoryTypesUrl: `${commonRoutePrefix.list}/expense-category-types`
+    },
+    expenses: {
+      createUpdateExpenseUrl: `${commonRoutePrefix.expense}/add-update-expense`
+    }
   },
 
   auth: {
