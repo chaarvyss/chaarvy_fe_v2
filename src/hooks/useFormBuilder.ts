@@ -54,7 +54,7 @@ export const mapToFields = ({ config, values, handleChange, optionsMap, loadingM
       value: values[field.key],
       onChange: handleChange(field.key),
       menuOptions: optionsMap[key] ?? [],
-      isLoading: loadingMap[key] ?? false,
+      isLoading: loadingMap[key] ?? field.isLoading ?? false,
       searchable: field.searchable,
       onSearch: field.onSearch,
       onAddNew: field.onAddNew,

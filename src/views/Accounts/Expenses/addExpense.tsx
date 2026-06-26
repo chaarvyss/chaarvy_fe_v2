@@ -1,4 +1,5 @@
 import { LoadingButton } from '@mui/lab'
+import { Stack } from '@mui/material'
 import { useMemo } from 'react'
 
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
@@ -48,6 +49,7 @@ const AddExpense = () => {
         searchable: true,
         canEdit: true,
         onEdit: (a, b) => console.log(a, b),
+        isLoading: true,
         mapOptions: (data: any[]) =>
           data?.map(s => ({
             label: s.benficery_type_name,
@@ -69,6 +71,7 @@ const AddExpense = () => {
         },
         addNewLabel: 'Add expense category',
         searchable: true,
+        isLoading: true,
         mapOptions: (data: any[]) =>
           data?.map(s => ({
             label: s.category_name,
@@ -82,7 +85,7 @@ const AddExpense = () => {
         type: InputTypes.SELECT,
         rules: ['required'],
         staticOptions: paymentModes,
-
+        isLoading: true,
         onAddNew: async (text?: string) => {
           if (!text) return
           console.log('adding new beneficiary type:', text)
@@ -156,18 +159,19 @@ const AddExpense = () => {
         errors={errors}
         mandatoryFields={getMandatoryFieldsList(expenseFormConfig)}
         isLoading={false}
-
-        // columnSize={{ xs: 12 }}
       />
-      <LoadingButton
-        onClick={handleSubmit(onSubmit)}
-        variant='contained'
-        color='primary'
-        sx={{ mt: 2 }}
-        loading={false}
-      >
-        Submit
-      </LoadingButton>
+      <Stack direction='row' justifyContent='end'>
+        <LoadingButton
+          onClick={handleSubmit(onSubmit)}
+          variant='contained'
+          color='primary'
+          size='small'
+          sx={{ mt: 5, textTransform: 'none' }}
+          loading={false}
+        >
+          Add expense
+        </LoadingButton>
+      </Stack>
     </>
   )
 }

@@ -377,6 +377,7 @@ const FormGenerator = ({
                   label,
                   placeholder,
                   onChange,
+                  isLoading,
                   key,
                   caption,
                   value,
