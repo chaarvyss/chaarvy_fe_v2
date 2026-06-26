@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { InputTypes } from 'src/lib/enums'
 import { dateToString } from 'src/lib/helpers'
@@ -33,7 +33,7 @@ export type FieldConfig<T> = {
 }
 
 export type FormConfig<T> = {
-  fields: FieldConfig<T>[]
+  formConfig: FieldConfig<T>[]
   initialValues: T
 }
 
@@ -69,7 +69,7 @@ export const getMandatoryFieldsList = (config: FieldConfig<any>[]): string[] => 
   return config.filter(f => f.rules?.includes('required')).map(f => String(f.key))
 }
 
-export const useFormBuilder = <T extends Record<string, any>>({ fields, initialValues }: FormConfig<T>) => {
+export const useFormBuilder = <T extends Record<string, any>>({ formConfig, initialValues }: FormConfig<T>) => {
   const [values, setValues] = useState<T>(initialValues)
   const [errors, setErrors] = useState<ErrorObject[]>([])
   const [optionsMap, setOptionsMap] = useState<Record<string, any[]>>({})
@@ -82,7 +82,7 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
   useEffect(() => {
     const initialOptions: Record<string, any[]> = {}
 
-    fields.forEach(field => {
+    formConfig.forEach(field => {
       const key = String(field.key)
 
       if (Array.isArray(field.staticOptions) && field.staticOptions.length > 0) {
@@ -95,12 +95,12 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
     if (Object.keys(initialOptions).length) {
       setOptionsMap(prev => ({ ...prev, ...initialOptions }))
     }
-  }, [fields])
+  }, [formConfig])
 
   // ✅ DEPENDENCY ENGINE (handles both initial values & user changes)
   useEffect(() => {
     const runDependencies = async () => {
-      for (const field of fields) {
+      for (const field of formConfig) {
         if (!field.dependsOn || !field.fetchOptions) continue
 
         const parentKey = field.dependsOn
@@ -152,7 +152,7 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
     }
 
     runDependencies()
-  }, [values, fields])
+  }, [values, formConfig])
 
   // ✅ VALIDATION
 
@@ -243,7 +243,7 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
   }
 
   const validateField = (key: keyof T, value: any) => {
-    const field = fields.find(f => f.key === key)
+    const field = formConfig.find(f => f.key === key)
     if (!field?.rules) return null
 
     const keyStr = String(key)
@@ -287,11 +287,23 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
     setValues(prev => ({ ...prev, [key]: normalizedValue }))
   }
 
+  const generatedFields = useMemo(
+    () =>
+      mapToFields({
+        config: formConfig,
+        values,
+        handleChange,
+        optionsMap,
+        loadingMap
+      }),
+    [formConfig, values, handleChange, optionsMap, loadingMap]
+  )
+
   // ✅ FORM VALIDATION
   const validateForm = () => {
     const newErrors: ErrorObject[] = []
 
-    fields.forEach(field => {
+    formConfig.forEach(field => {
       const error = validateField(field.key, values[field.key])
       if (error) newErrors.push(error)
     })
@@ -313,6 +325,7 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
     errors,
     optionsMap,
     loadingMap,
+    fields: generatedFields,
     handleChange,
     handleSubmit,
     setValues,

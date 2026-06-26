@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 
 import { Grid } from '@muiElements'
 import AddressForm, { AddressType } from 'src/common/addressForm'
-import { FieldConfig, getMandatoryFieldsList, mapToFields, useFormBuilder } from 'src/hooks/useFormBuilder'
+import { FieldConfig, getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
 import { InputTypes } from 'src/lib/enums'
 import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
 import FormGenerator from 'src/reusable_components/formGenerator'
@@ -24,22 +24,14 @@ const AddAndUpdateVehicleVendor = ({ address_id }) => {
     []
   )
 
-  const { values, errors, handleChange, handleSubmit, optionsMap, loadingMap } = useFormBuilder<VehicleVendorRequest>({
-    fields: vendorVehicleConfig,
+  const { fields, errors, handleSubmit } = useFormBuilder<VehicleVendorRequest>({
+    formConfig: vendorVehicleConfig,
     initialValues: {
       vendor_id: '',
       vendor_name: '',
       contact_number: undefined,
       email: ''
     }
-  })
-
-  const fields = mapToFields({
-    config: vendorVehicleConfig,
-    values,
-    handleChange,
-    optionsMap,
-    loadingMap
   })
 
   const onSubmit = value => {

@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { FieldConfig, getMandatoryFieldsList, mapToFields, useFormBuilder } from 'src/hooks/useFormBuilder'
+import { FieldConfig, getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
 import { InputTypes } from 'src/lib/enums'
 import FormGenerator from 'src/reusable_components/formGenerator'
 import { useCreateUpdateExpenseMutation } from 'src/store/services/common/expenseServices'
@@ -111,8 +111,8 @@ const AddExpense = () => {
     [paymentModes, benficerTypes, expenseCategoies]
   )
 
-  const { values, errors, handleChange, handleSubmit, optionsMap, loadingMap } = useFormBuilder<ExpenseRequest>({
-    fields: expenseFormConfig,
+  const { errors, handleSubmit, fields } = useFormBuilder<ExpenseRequest>({
+    formConfig: expenseFormConfig,
     initialValues: {
       expense_id: '',
       benficery_type_id: '',
@@ -126,14 +126,6 @@ const AddExpense = () => {
       reference_id: '',
       remarks: ''
     }
-  })
-
-  const fields = mapToFields({
-    config: expenseFormConfig,
-    values,
-    handleChange,
-    optionsMap,
-    loadingMap
   })
 
   const onSubmit = (data: ExpenseRequest) => {
