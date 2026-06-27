@@ -524,6 +524,10 @@ const StudentBaseDetails = ({
                   customInput={customInput}
                   id={id}
                   onChange={onChange}
+                  showMonthDropdown
+                  showYearDropdown
+                  scrollableYearDropdown
+                  yearDropdownItemNumber={40}
                 />
                 {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
               </Box>

@@ -329,7 +329,22 @@ export const useFormBuilder = <T extends Record<string, any>>({ formConfig, init
   const handleSubmit = (onSubmit: (values: T) => void) => async () => {
     const { isValid } = validateForm()
     if (!isValid) return
-    onSubmit(values)
+
+    // Fix: Assert as Record<string, any> so we can index it dynamically
+    const processedValues = { ...values } as Record<string, any>
+
+    Object.keys(processedValues).forEach(key => {
+      const val = processedValues[key]
+
+      if (typeof val === 'string' && /^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
+        const [day, month, year] = val.split('/')
+        processedValues[key] = `${year}-${month}-${day}`
+      } else if (val instanceof Date) {
+        processedValues[key] = dateToString(val, 'yyyy-MM-dd')
+      }
+    })
+
+    onSubmit(processedValues as T)
   }
 
   return {

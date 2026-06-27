@@ -25,7 +25,8 @@ export const PermissionLabels = {
     admissions: 'nav:admissions',
     collectPayment: 'nav:collect_payment',
     referrels: 'nav:referrels',
-    reports: 'nav:reports'
+    reports: 'nav:reports',
+    expenses: 'nav:expenses'
   },
   dashboard: {
     studentCount: 'dashboard:student_count',
@@ -224,6 +225,13 @@ export const PermissionLabels = {
   reports: {
     download: {
       studentAdmissionsReport: 'reports:download:studentAdmissionsReport'
+    }
+  },
+  expenses: {
+    add: 'expenses:add',
+    edit: 'expenses:edit',
+    view: {
+      list: 'expenses:view:list'
     }
   }
 }

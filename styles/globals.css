@@ -47,3 +47,7 @@ code[class*='language-'] {
   cursor: grab;
   font-weight: bold;
 }
+
+.date-picker-popper {
+  z-index: 9999 !important; /* Force it to appear above everything else */
+}

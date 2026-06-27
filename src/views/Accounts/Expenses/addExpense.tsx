@@ -1,17 +1,18 @@
 import { LoadingButton } from '@mui/lab'
 import { Stack } from '@mui/material'
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { FieldConfig, getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
-import { InputTypes } from 'src/lib/enums'
+import { InputTypes, InputVariants } from 'src/lib/enums'
 import FormGenerator from 'src/reusable_components/formGenerator'
 import {
   useCreateUpdateBenficeryTypeMutation,
   useCreateUpdateExpenseCategoryTypeMutation,
   useCreateUpdateExpenseMutation,
-  useCreateUpdatePaymentModeMutation
+  useCreateUpdatePaymentModeMutation,
+  useGetExpenseDetailQuery
 } from 'src/store/services/common/expenseServices'
 import {
   useGetBenificeryTypesListQuery,
@@ -19,10 +20,19 @@ import {
 } from 'src/store/services/common/listServices'
 import { useGetPaymentModesListQuery } from 'src/store/services/listServices'
 
-const AddExpense = () => {
+interface AddExpenseProps {
+  expenseId?: string
+  onSuccess: () => void
+}
+
+const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
   const { closeDrawer } = useSideDrawer()
 
   const { triggerToast } = useToast()
+
+  const { data: expenseDetail, isFetching: isFetchingExpenseDetail } = useGetExpenseDetailQuery(expenseId ?? '', {
+    skip: !expenseId
+  })
 
   const { data: benficerTypes, isFetching: isFetchingBenficieryTypes } = useGetBenificeryTypesListQuery()
   const { data: expenseCategoies, isFetching: isFetchingExpenseCategories } = useGetExpenseCategoryTypesListQuery()
@@ -33,7 +43,7 @@ const AddExpense = () => {
     useCreateUpdateExpenseCategoryTypeMutation()
   const [createUpdatePaymentMode, { isLoading: isUpdatingPaymentModes }] = useCreateUpdatePaymentModeMutation()
 
-  const [addExpenseRecord] = useCreateUpdateExpenseMutation()
+  const [addExpenseRecord, { isLoading: isUpdatingRecord }] = useCreateUpdateExpenseMutation()
 
   const expenseFormConfig: FieldConfig<ExpenseRequest>[] = useMemo(
     () => [
@@ -130,6 +140,7 @@ const AddExpense = () => {
         key: 'amount',
         label: 'Amount',
         type: InputTypes.INPUT,
+        variant: InputVariants.NUMBER,
         rules: ['required']
       }
     ],
@@ -146,7 +157,7 @@ const AddExpense = () => {
     ]
   )
 
-  const { errors, handleSubmit, fields } = useFormBuilder<ExpenseRequest>({
+  const { errors, handleSubmit, fields, setValues } = useFormBuilder<ExpenseRequest>({
     formConfig: expenseFormConfig,
     initialValues: {
       expense_id: '',
@@ -163,13 +174,20 @@ const AddExpense = () => {
     }
   })
 
+  useEffect(() => {
+    if (expenseDetail) {
+      setValues(expenseDetail)
+    }
+  }, [expenseDetail])
+
   const onSubmit = (data: ExpenseRequest) => {
-    addExpenseRecord(data)
+    addExpenseRecord({ ...data, ...(expenseId ? { expense_id: expenseId } : {}) })
       .unwrap()
       .then(() => {
-        triggerToast('Expense record added successfully', {
+        triggerToast(`Expense record ${expenseId ? 'updated' : 'added'} successfully`, {
           variant: ToastVariants.SUCCESS
         })
+        onSuccess()
         closeDrawer()
       })
       .catch(e =>
@@ -179,14 +197,8 @@ const AddExpense = () => {
       )
   }
 
-  return (
-    <>
-      <FormGenerator
-        fields={fields}
-        errors={errors}
-        mandatoryFields={getMandatoryFieldsList(expenseFormConfig)}
-        isLoading={false}
-      />
+  const renderFooter = () => {
+    return (
       <Stack direction='row' justifyContent='end'>
         <LoadingButton
           onClick={handleSubmit(onSubmit)}
@@ -194,11 +206,23 @@ const AddExpense = () => {
           color='primary'
           size='small'
           sx={{ mt: 5, textTransform: 'none' }}
-          loading={false}
+          loading={isUpdatingRecord}
         >
-          Add expense
+          {expenseId ? 'Update' : 'Add'} expense
         </LoadingButton>
       </Stack>
+    )
+  }
+
+  return (
+    <>
+      <FormGenerator
+        fields={fields}
+        errors={errors}
+        mandatoryFields={getMandatoryFieldsList(expenseFormConfig)}
+        isLoading={isFetchingExpenseDetail}
+        footer={renderFooter()}
+      />
     </>
   )
 }

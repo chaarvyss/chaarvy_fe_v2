@@ -45,6 +45,15 @@ const commonExpensesServiceApi = api.injectEndpoints({
           body
         }
       }
+    }),
+    getExpenseDetail: build.query<ExpenseRequest, string>({
+      query: expense_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.common.expenses.getExpenseDetailUrl,
+          params: { expense_id }
+        }
+      }
     })
   })
 })
@@ -53,5 +62,6 @@ export const {
   useCreateUpdateExpenseMutation,
   useCreateUpdateBenficeryTypeMutation,
   useCreateUpdateExpenseCategoryTypeMutation,
-  useCreateUpdatePaymentModeMutation
+  useCreateUpdatePaymentModeMutation,
+  useGetExpenseDetailQuery
 } = commonExpensesServiceApi

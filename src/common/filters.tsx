@@ -1,4 +1,4 @@
-import { Button, Box } from '@mui/material'
+import { Button, Box, Stack } from '@mui/material'
 import { ChangeEvent, ReactNode, useState } from 'react'
 import DatePicker from 'react-datepicker'
 
@@ -21,6 +21,7 @@ import {
   useGetUsersListQuery,
   useGetPaymentModesListQuery
 } from 'src/store/services/listServices'
+import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 
 type FieldTypes =
   | 'search'
@@ -371,7 +372,12 @@ const RenderFilterOptions = ({
                 setEndDate(end)
               }}
               isClearable
+              popperClassName='date-picker-popper'
               placeholderText='Select date range'
+              showMonthDropdown
+              showYearDropdown
+              scrollableYearDropdown
+              yearDropdownItemNumber={40}
             />
             {renderChildren}
           </Grid>
@@ -383,30 +389,34 @@ const RenderFilterOptions = ({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      onKeyDown={e => {
-        if (e.key === 'Enter') {
-          e.preventDefault()
-          handleSubmit(e)
-        }
-      }}
-    >
-      <Grid container gap={4} flexDirection='column'>
-        {normalizedFields.map((field, index) => renderFilterField(field, index))}
+    <DatePickerWrapper>
+      <form
+        onSubmit={handleSubmit}
+        onKeyDown={e => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            handleSubmit(e)
+          }
+        }}
+      >
+        <Grid container gap={4} flexDirection='column'>
+          <Stack direction='column' gap={4} width={'95%'}>
+            {normalizedFields.map((field, index) => renderFilterField(field, index))}
 
-        {/* 🔘 Actions */}
-        <Box display='flex' justifyContent='space-between'>
-          <Button variant='outlined' onClick={handleReset}>
-            Reset
-          </Button>
+            {/* 🔘 Actions */}
+            <Box display='flex' justifyContent='space-between'>
+              <Button variant='outlined' onClick={handleReset}>
+                Reset
+              </Button>
 
-          <Button variant='contained' onClick={handleSubmit}>
-            Search
-          </Button>
-        </Box>
-      </Grid>
-    </form>
+              <Button variant='contained' onClick={handleSubmit}>
+                Search
+              </Button>
+            </Box>
+          </Stack>
+        </Grid>
+      </form>
+    </DatePickerWrapper>
   )
 }
 

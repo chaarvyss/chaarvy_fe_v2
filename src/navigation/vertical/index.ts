@@ -4,6 +4,8 @@ import { MasterPagePath, PagePath } from 'src/constants/pagePathConstants'
 import { PermissionLabels, Permissions } from 'src/constants/permissions'
 import { isAuthorised } from 'src/lib/util/permissionCheck'
 
+import { ChaarvyIcon } from 'src/utils/icons'
+
 const navigation = (): VerticalNavItemsType => {
   const navItems: VerticalNavItemsType = []
 
@@ -12,7 +14,7 @@ const navigation = (): VerticalNavItemsType => {
       key: PermissionLabels.nav.dashboard,
       title: 'Dashboard',
       path: PagePath.DASHBOARD,
-      icon: 'ViewDashboard' as const
+      icon: ChaarvyIcon.ViewDashboard
     },
     {
       title: 'Administration',
@@ -22,56 +24,51 @@ const navigation = (): VerticalNavItemsType => {
           key: PermissionLabels.nav.collegeProfile,
           title: 'College Profile',
           path: PagePath.COLLEGE_PROFILE,
-          icon: 'TownHall' as const
+          icon: ChaarvyIcon.TownHall
         },
         { key: PermissionLabels.nav.users, title: 'Users', path: PagePath.USERS_LIST, icon: 'AccountGroup' as const },
         {
           key: PermissionLabels.nav.roles,
           title: 'Roles',
           path: PagePath.ROLES_LIST,
-          icon: 'ArrangeBringToFront' as const
+          icon: ChaarvyIcon.AccessPoint
         },
         {
           key: PermissionLabels.nav.feesTypes,
           title: 'Fees types',
           path: PagePath.FEES_TYPES,
-          icon: 'FormatListGroup' as const
+          icon: ChaarvyIcon.FormatListGroup
         },
         {
           key: PermissionLabels.nav.sections,
           title: 'Sections',
           path: PagePath.SECTIONS,
-          icon: 'ArrangeBringToFront' as const
+          icon: ChaarvyIcon.ArrangeBringToFront
         },
         {
           key: PermissionLabels.nav.programs,
           title: 'Programs',
           path: PagePath.PROGRAMS,
-          icon: 'BullseyeArrow' as const
+          icon: ChaarvyIcon.BullseyeArrow
         },
         {
           key: PermissionLabels.nav.booksAndStationary,
           title: 'Books & Stationary',
           path: PagePath.BOOKS,
-          icon: 'Bookshelf' as const
+          icon: ChaarvyIcon.Bookshelf
         },
         {
           key: PermissionLabels.nav.addonCourses,
           title: 'Addon Courses',
           path: PagePath.ADDON_COURSE,
-          icon: 'Offer' as const
+          icon: ChaarvyIcon.Offer
         },
-        {
-          key: PermissionLabels.nav.payments,
-          title: 'Payments',
-          path: PagePath.PAYMENTS,
-          icon: 'AccountCreditCardOutline' as const
-        },
+
         {
           key: PermissionLabels.nav.reports,
           title: 'Reports',
           path: PagePath.REPORTS,
-          icon: 'AccountCreditCardOutline' as const
+          icon: ChaarvyIcon.DataMatrix
         }
       ]
     },
@@ -92,29 +89,41 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Student Management',
       icon: 'School' as const,
       children: [
-        // {
-        //   key: PermissionLabels.nav.admissionForm,
-        //   title: 'Admission form',
-        //   path: PagePath.ADMISSION_FORM,
-        //   icon: 'FormSelect' as const
-        // },
         {
           key: PermissionLabels.nav.referrels,
           title: 'Referrels',
           path: PagePath.REFERRELS,
-          icon: 'AccountSchoolOutline' as const
+          icon: ChaarvyIcon.Handshake
         },
         {
           key: PermissionLabels.nav.admissions,
           title: 'Admissions',
           path: PagePath.ADMISSIONS,
-          icon: 'AccountSchoolOutline' as const
+          icon: ChaarvyIcon.AccountSchoolOutline
         },
         {
           key: PermissionLabels.nav.collectPayment,
           title: 'Collect Payment',
           path: PagePath.COLLECT_PAYMENT,
-          icon: 'BankTransferIn' as const
+          icon: ChaarvyIcon.BankTransferIn
+        }
+      ]
+    },
+    {
+      title: 'Accounts',
+      icon: ChaarvyIcon.Finance,
+      children: [
+        {
+          key: PermissionLabels.nav.expenses,
+          title: 'Expenses',
+          path: PagePath.EXPENSES,
+          icon: ChaarvyIcon.BankTransferOut
+        },
+        {
+          key: PermissionLabels.nav.payments,
+          title: 'Payments',
+          path: PagePath.PAYMENTS,
+          icon: ChaarvyIcon.AccountCreditCardOutline
         }
       ]
     }

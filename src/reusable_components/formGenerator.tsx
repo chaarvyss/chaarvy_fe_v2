@@ -12,7 +12,7 @@ import {
   Select,
   IconButton
 } from '@mui/material'
-import { Fragment, useEffect, useState, useRef } from 'react'
+import { Fragment, useEffect, useState, useRef, ReactNode } from 'react'
 import DatePicker from 'react-datepicker'
 
 import { FormControl, Grid, TextField } from '@muiElements'
@@ -22,6 +22,8 @@ import GetChaarvyIcons from 'src/utils/icons'
 
 import CustomDateElement from './dateInputElement'
 import OverlaySpinner from './overlaySpinner'
+import { ensureDate } from 'src/lib/util/common_helpers'
+import LoadingSpinner from './LoadingSpinner'
 
 const ADD_NEW_OPTION_VALUE = '__chaarvy_add_new_option__'
 
@@ -436,6 +438,7 @@ interface FormGeneratorProps {
   gridSpacing?: number
   columnSize?: { xs?: number; sm?: number; md?: number; lg?: number }
   isLoading?: boolean
+  footer?: JSX.Element
 }
 
 const FormGenerator = ({
@@ -444,169 +447,173 @@ const FormGenerator = ({
   errors = [],
   gridSpacing = 7,
   columnSize = { xs: 12, sm: 6 },
-  isLoading = false
+  isLoading = false,
+  footer
 }: FormGeneratorProps) => {
   const getHadError = (key: string) => {
     return errors.find(each => each.errorkey === key)
   }
 
-  if (isLoading) return <OverlaySpinner />
+  if (isLoading) return <LoadingSpinner />
 
   return (
-    <Grid container spacing={gridSpacing}>
-      {fields.map(
-        ({
-          type,
-          id,
-          customInput,
-          isDisabled,
-          label,
-          placeholder,
-          onChange,
-          key,
-          caption,
-          value,
-          variant,
-          menuOptions,
-          showYearDropdown,
-          showMonthDropdown,
-          onSearch,
-          searchable,
-          addNewLabel,
-          onAddNew,
-          onEdit,
-          onEditSuccess,
-          isOptionsLoading,
-          isUpdating
-        }) => (
-          <Grid item {...columnSize} key={id}>
-            {type === InputTypes.INPUT ? (
-              <>
-                <small>
-                  {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
-                </small>
-                <TextField
-                  fullWidth
-                  id={id}
-                  size='small'
-                  error={!!getHadError(key)}
-                  value={value ?? ''}
-                  defaultValue={value}
-                  type={variant}
-                  disabled={isDisabled}
-                  placeholder={placeholder ?? ''}
-                  onChange={onChange}
+    <>
+      <Grid container spacing={gridSpacing}>
+        {fields.map(
+          ({
+            type,
+            id,
+            customInput,
+            isDisabled,
+            label,
+            placeholder,
+            onChange,
+            key,
+            caption,
+            value,
+            variant,
+            menuOptions,
+            showYearDropdown,
+            showMonthDropdown,
+            onSearch,
+            searchable,
+            addNewLabel,
+            onAddNew,
+            onEdit,
+            onEditSuccess,
+            isOptionsLoading,
+            isUpdating
+          }) => (
+            <Grid item {...columnSize} key={id}>
+              {type === InputTypes.INPUT ? (
+                <>
+                  <small>
+                    {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
+                  </small>
+                  <TextField
+                    fullWidth
+                    id={id}
+                    size='small'
+                    error={!!getHadError(key)}
+                    value={value ?? ''}
+                    defaultValue={value}
+                    type={variant}
+                    disabled={isDisabled}
+                    placeholder={placeholder ?? ''}
+                    onChange={onChange}
+                  />
+                  {caption && <small>{caption}</small>}
+                  {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+                </>
+              ) : type === InputTypes.SELECT ? (
+                <SelectInputField
+                  field={{
+                    type,
+                    id,
+                    customInput,
+                    isDisabled,
+                    label,
+                    placeholder,
+                    onChange,
+                    isLoading,
+                    key,
+                    caption,
+                    value,
+                    variant,
+                    menuOptions,
+                    showYearDropdown,
+                    showMonthDropdown,
+                    searchable,
+                    onSearch,
+                    onAddNew,
+                    addNewLabel,
+                    onEdit,
+                    onEditSuccess,
+                    isOptionsLoading,
+                    isUpdating
+                  }}
+                  mandatoryFields={mandatoryFields}
+                  errorObj={getHadError(key)}
                 />
-                {caption && <small>{caption}</small>}
-                {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-              </>
-            ) : type === InputTypes.SELECT ? (
-              <SelectInputField
-                field={{
-                  type,
-                  id,
-                  customInput,
-                  isDisabled,
-                  label,
-                  placeholder,
-                  onChange,
-                  isLoading,
-                  key,
-                  caption,
-                  value,
-                  variant,
-                  menuOptions,
-                  showYearDropdown,
-                  showMonthDropdown,
-                  searchable,
-                  onSearch,
-                  onAddNew,
-                  addNewLabel,
-                  onEdit,
-                  onEditSuccess,
-                  isOptionsLoading,
-                  isUpdating
-                }}
-                mandatoryFields={mandatoryFields}
-                errorObj={getHadError(key)}
-              />
-            ) : type === InputTypes.RADIO ? (
-              <FormControl required={mandatoryFields.includes(key)} error={!!getHadError(key)} fullWidth>
-                <FormLabel id={id}>
-                  {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
-                </FormLabel>
-                <RadioGroup
-                  row
-                  aria-labelledby={id}
-                  name={id}
-                  id={id}
-                  value={value ?? ''}
-                  onChange={(_, val) => onChange({ target: { value: val } } as any)}
-                >
-                  {(menuOptions ?? []).map(each => (
-                    <FormControlLabel key={each.value} value={each.value} control={<Radio />} label={each.label} />
-                  ))}
-                </RadioGroup>
-                {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-              </FormControl>
-            ) : type === InputTypes.DATE ? (
-              <Box display='flex' flexDirection='column'>
-                <small>
-                  {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
-                </small>
-                <DatePicker
-                  selected={value as Date}
-                  required={mandatoryFields.includes(key)}
-                  customInput={customInput ?? <CustomDateElement label='' />}
-                  id={id}
-                  onChange={onChange}
-                  disabled={isDisabled}
-                  showYearDropdown={showYearDropdown}
-                  showMonthDropdown={showMonthDropdown}
-                />
-                {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-              </Box>
-            ) : type === InputTypes.DATE_RANGE ? (
-              <Box display='flex' flexDirection='column'>
-                <small>{label}</small>
-
-                <DatePicker
-                  selectsRange
-                  startDate={value?.[0] || null}
-                  endDate={value?.[1] || null}
-                  onChange={(dates: [Date | null, Date | null]) => onChange(dates)}
-                  customInput={<CustomDateElement label='' />}
-                  isClearable
-                />
-
-                {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-              </Box>
-            ) : type === InputTypes.BUTTON ? (
-              <FormControl fullWidth>
-                <small style={{ color: 'transparent' }}>.</small>
-                <Box display='flex' alignItems='end'>
-                  <Button color='success' disabled={isDisabled} variant='contained' onClick={onChange} size='small'>
-                    {label}
-                  </Button>
+              ) : type === InputTypes.RADIO ? (
+                <FormControl required={mandatoryFields.includes(key)} error={!!getHadError(key)} fullWidth>
+                  <FormLabel id={id}>
+                    {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
+                  </FormLabel>
+                  <RadioGroup
+                    row
+                    aria-labelledby={id}
+                    name={id}
+                    id={id}
+                    value={value ?? ''}
+                    onChange={(_, val) => onChange({ target: { value: val } } as any)}
+                  >
+                    {(menuOptions ?? []).map(each => (
+                      <FormControlLabel key={each.value} value={each.value} control={<Radio />} label={each.label} />
+                    ))}
+                  </RadioGroup>
+                  {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+                </FormControl>
+              ) : type === InputTypes.DATE ? (
+                <Box display='flex' flexDirection='column'>
+                  <small>
+                    {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
+                  </small>
+                  <DatePicker
+                    selected={ensureDate(value)}
+                    required={mandatoryFields.includes(key)}
+                    customInput={customInput ?? <CustomDateElement label='' />}
+                    id={id}
+                    onChange={onChange}
+                    disabled={isDisabled}
+                    showYearDropdown={showYearDropdown}
+                    showMonthDropdown={showMonthDropdown}
+                  />
+                  {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
                 </Box>
-              </FormControl>
-            ) : type === InputTypes.CHECKBOX ? (
-              <FormControl fullWidth>
-                <FormControlLabel
-                  control={<Checkbox id={id} checked={value as boolean} onChange={onChange} disabled={isDisabled} />}
-                  label={
-                    <>
-                      {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
-                    </>
-                  }
-                />
-                {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-              </FormControl>
-            ) : null}
-          </Grid>
-        )
-      )}
-    </Grid>
+              ) : type === InputTypes.DATE_RANGE ? (
+                <Box display='flex' flexDirection='column'>
+                  <small>{label}</small>
+
+                  <DatePicker
+                    selectsRange
+                    startDate={value?.[0] || null}
+                    endDate={value?.[1] || null}
+                    onChange={(dates: [Date | null, Date | null]) => onChange(dates)}
+                    customInput={<CustomDateElement label='' />}
+                    isClearable
+                  />
+
+                  {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+                </Box>
+              ) : type === InputTypes.BUTTON ? (
+                <FormControl fullWidth>
+                  <small style={{ color: 'transparent' }}>.</small>
+                  <Box display='flex' alignItems='end'>
+                    <Button color='success' disabled={isDisabled} variant='contained' onClick={onChange} size='small'>
+                      {label}
+                    </Button>
+                  </Box>
+                </FormControl>
+              ) : type === InputTypes.CHECKBOX ? (
+                <FormControl fullWidth>
+                  <FormControlLabel
+                    control={<Checkbox id={id} checked={value as boolean} onChange={onChange} disabled={isDisabled} />}
+                    label={
+                      <>
+                        {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
+                      </>
+                    }
+                  />
+                  {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+                </FormControl>
+              ) : null}
+            </Grid>
+          )
+        )}
+      </Grid>
+      {!isLoading && footer && footer}
+    </>
   )
 }
 

@@ -98,6 +98,8 @@ export type MenuOptions = {
   value: string | number
 }
 
+type FormValueTypes = string | number | boolean | Date
+
 export type InputFields = {
   type: 'input' | 'select' | 'radio' | 'date' | 'button' | 'checkbox' | 'date_range'
   variant?: 'number' | 'string' | 'email'
@@ -105,7 +107,7 @@ export type InputFields = {
   id: string
   label: string
   key: string
-  value?: string | number | boolean | Date
+  value?: FormValueTypes
   customInput?: ReactElement
   placeholder?: string
   onChange: (e: any) => void
