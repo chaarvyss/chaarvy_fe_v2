@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { InputTypes } from 'src/lib/enums'
 import { dateToString } from 'src/lib/helpers'
@@ -28,8 +28,13 @@ export type FieldConfig<T> = {
   onSearch?: (searchText: string) => Promise<{ label: string; value: any }[]>
   onAddNew?: (text?: string) => void
   addNewLabel?: string
-  canEdit?: boolean
   onEdit?: (value: string | number, label: string) => void
+
+  // --- ADD THESE MISSING PROPS ---
+  canEdit?: boolean
+  isUpdating?: boolean
+  isLoading?: boolean
+  isEditingLoading?: boolean
 }
 
 export type FormConfig<T> = {
@@ -60,7 +65,9 @@ export const mapToFields = ({ config, values, handleChange, optionsMap, loadingM
       onAddNew: field.onAddNew,
       addNewLabel: field.addNewLabel,
       canEdit: field.canEdit,
-      onEdit: field.onEdit
+      onEdit: field.onEdit,
+      isUpdating: field.isUpdating,
+      isOptionsLoading: field.isOptionsLoading
     }
   })
 }
@@ -267,25 +274,30 @@ export const useFormBuilder = <T extends Record<string, any>>({ formConfig, init
 
   // ✅ HANDLE CHANGE (pure, no side-effects)
 
-  const updateErrors = (key: keyof T, value: any) => {
-    const keyStr = String(key)
-    const error = validateField(key, value)
-    const updatedErrors = (prev: ErrorObject[]) => {
-      const filtered = prev.filter(e => e.errorkey !== keyStr)
+  const updateErrors = useCallback(
+    (key: keyof T, value: any) => {
+      const keyStr = String(key)
+      const error = validateField(key, value)
+      setErrors(prev => {
+        const filtered = prev.filter(e => e.errorkey !== keyStr)
 
-      return error ? [...filtered, error] : filtered
-    }
-    setErrors(updatedErrors)
-  }
+        return error ? [...filtered, error] : filtered
+      })
+    },
+    [formConfig]
+  )
 
-  const handleChange = (key: keyof T) => (input: any) => {
-    const value = getValue(input)
-    const normalizedValue = value instanceof Date ? dateToString(value, 'yyyy-MM-dd') : value
+  const handleChange = useCallback(
+    (key: keyof T) => (input: any) => {
+      const value = getValue(input)
+      const normalizedValue = value instanceof Date ? dateToString(value, 'yyyy-MM-dd') : value
 
-    updateErrors(key, value)
+      updateErrors(key, value)
 
-    setValues(prev => ({ ...prev, [key]: normalizedValue }))
-  }
+      setValues(prev => ({ ...prev, [key]: normalizedValue }))
+    },
+    [updateErrors]
+  )
 
   const generatedFields = useMemo(
     () =>

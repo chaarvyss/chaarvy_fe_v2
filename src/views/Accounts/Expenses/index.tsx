@@ -50,24 +50,25 @@ const ExpensesList = () => {
       render: (row, index) => <Typography variant='body1'>{index + 1 + (filterProps?.offset ?? 0)}</Typography>
     },
     {
-      id: 'benficery',
-      label: 'Beneficiary name'
-    },
-    {
-      id: 'amount',
-      label: 'Amount'
-    },
-    {
       id: 'expense_date',
       label: 'Payment date'
     },
+
     {
       id: 'category',
       label: 'Expense category'
     },
     {
+      id: 'benficery',
+      label: 'Beneficiary name'
+    },
+    {
       id: 'benficery_type',
       label: 'Beneficiary type'
+    },
+    {
+      id: 'amount',
+      label: 'Amount'
     },
     {
       id: 'payment_mode',
@@ -86,7 +87,17 @@ const ExpensesList = () => {
   const onFilterButtonClick = () => {
     openDrawer({
       title: 'Filters',
-      content: <RenderFilterOptions onSubmit={onSubmit} fields={['dateRange']} />
+      content: (
+        <RenderFilterOptions
+          onSubmit={onSubmit}
+          fields={[
+            'dateRange',
+            { fieldType: 'benficery_types', isMultiselect: true },
+            { fieldType: 'payment_modes', isMultiselect: true },
+            { fieldType: 'expense_category_types', isMultiselect: true }
+          ]}
+        />
+      )
     })
   }
 

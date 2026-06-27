@@ -7,7 +7,12 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { FieldConfig, getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
 import { InputTypes } from 'src/lib/enums'
 import FormGenerator from 'src/reusable_components/formGenerator'
-import { useCreateUpdateExpenseMutation } from 'src/store/services/common/expenseServices'
+import {
+  useCreateUpdateBenficeryTypeMutation,
+  useCreateUpdateExpenseCategoryTypeMutation,
+  useCreateUpdateExpenseMutation,
+  useCreateUpdatePaymentModeMutation
+} from 'src/store/services/common/expenseServices'
 import {
   useGetBenificeryTypesListQuery,
   useGetExpenseCategoryTypesListQuery
@@ -19,9 +24,14 @@ const AddExpense = () => {
 
   const { triggerToast } = useToast()
 
-  const { data: benficerTypes } = useGetBenificeryTypesListQuery()
-  const { data: expenseCategoies } = useGetExpenseCategoryTypesListQuery()
-  const { data: paymentModes } = useGetPaymentModesListQuery()
+  const { data: benficerTypes, isFetching: isFetchingBenficieryTypes } = useGetBenificeryTypesListQuery()
+  const { data: expenseCategoies, isFetching: isFetchingExpenseCategories } = useGetExpenseCategoryTypesListQuery()
+  const { data: paymentModes, isFetching: isFetchingPaymentModes } = useGetPaymentModesListQuery()
+
+  const [createUpdateBenficeryType, { isLoading: isUpdatingBenficaryTypes }] = useCreateUpdateBenficeryTypeMutation()
+  const [createUpdateExpenceCategoryType, { isLoading: isUpdatingExpenseCategories }] =
+    useCreateUpdateExpenseCategoryTypeMutation()
+  const [createUpdatePaymentMode, { isLoading: isUpdatingPaymentModes }] = useCreateUpdatePaymentModeMutation()
 
   const [addExpenseRecord] = useCreateUpdateExpenseMutation()
 
@@ -41,15 +51,21 @@ const AddExpense = () => {
         staticOptions: benficerTypes,
         onAddNew: async (text?: string) => {
           if (!text) return
-          console.log('adding new beneficiary type:', text)
-
-          // TODO: save `text` to your backend and refresh optionsMap
+          createUpdateBenficeryType({
+            benficery_type_name: text
+          })
         },
+        isOptionsLoading: isFetchingBenficieryTypes,
         addNewLabel: 'Add new beneficiary',
         searchable: true,
+        isUpdating: isUpdatingBenficaryTypes,
         canEdit: true,
-        onEdit: (a, b) => console.log(a, b),
-        isLoading: true,
+        onEdit: (id, value) => {
+          createUpdateBenficeryType({
+            benficery_type_id: String(id),
+            benficery_type_name: value
+          })
+        },
         mapOptions: (data: any[]) =>
           data?.map(s => ({
             label: s.benficery_type_name,
@@ -65,13 +81,20 @@ const AddExpense = () => {
         staticOptions: expenseCategoies,
         onAddNew: async (text?: string) => {
           if (!text) return
-          console.log('adding new beneficiary type:', text)
-
-          // TODO: save `text` to your backend and refresh optionsMap
+          createUpdateExpenceCategoryType({
+            category_name: text
+          })
         },
+        isOptionsLoading: isFetchingExpenseCategories,
         addNewLabel: 'Add expense category',
         searchable: true,
-        isLoading: true,
+        isUpdating: isUpdatingExpenseCategories,
+        onEdit: (id, value) => {
+          createUpdateExpenceCategoryType({
+            category_id: String(id),
+            category_name: value
+          })
+        },
         mapOptions: (data: any[]) =>
           data?.map(s => ({
             label: s.category_name,
@@ -85,15 +108,17 @@ const AddExpense = () => {
         type: InputTypes.SELECT,
         rules: ['required'],
         staticOptions: paymentModes,
-        isLoading: true,
+        searchable: true,
+        isOptionsLoading: isFetchingPaymentModes,
+        isUpdating: isUpdatingPaymentModes,
         onAddNew: async (text?: string) => {
           if (!text) return
-          console.log('adding new beneficiary type:', text)
-
-          // TODO: save `text` to your backend and refresh optionsMap
+          createUpdatePaymentMode({ payment_mode: text })
         },
-        addNewLabel: 'Add new payment type',
-
+        addNewLabel: 'Add new payment mode',
+        onEdit: (id, value) => {
+          createUpdatePaymentMode({ payment_mode_id: Number(id), payment_mode: value })
+        },
         mapOptions: (data: any[]) =>
           data?.map(s => ({
             label: s.payment_mode,
@@ -108,7 +133,17 @@ const AddExpense = () => {
         rules: ['required']
       }
     ],
-    [paymentModes, benficerTypes, expenseCategoies]
+    [
+      paymentModes,
+      benficerTypes,
+      expenseCategoies,
+      isUpdatingBenficaryTypes,
+      isUpdatingExpenseCategories,
+      isUpdatingPaymentModes,
+      isFetchingBenficieryTypes,
+      isFetchingPaymentModes,
+      isFetchingExpenseCategories
+    ]
   )
 
   const { errors, handleSubmit, fields } = useFormBuilder<ExpenseRequest>({

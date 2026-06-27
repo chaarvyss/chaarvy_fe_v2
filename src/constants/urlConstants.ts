@@ -34,7 +34,10 @@ export const urlConstants = {
       expenseCategoryTypesUrl: `${commonRoutePrefix.list}/expense-category-types`
     },
     expenses: {
-      createUpdateExpenseUrl: `${commonRoutePrefix.expense}/add-update-expense`
+      createUpdateExpenseUrl: `${commonRoutePrefix.expense}/add-update-expense`,
+      createUpdateBenficeryTypeUrl: `${commonRoutePrefix.expense}/add-update-benificery-type`,
+      createUpdateExpenseCategoryTypeUrl: `${commonRoutePrefix.expense}/add-update-expense-category`,
+      createUpdatePaymentModeUrl: `${commonRoutePrefix.expense}/create-update-payment-mode`
     }
   },
 

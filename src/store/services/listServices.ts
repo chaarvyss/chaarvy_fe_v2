@@ -32,7 +32,7 @@ import { HttpRequestMethods } from '..'
 
 import { AddonCourseDetails } from './adminServices'
 import api from './api'
-import { CacheTag } from './cacheTag'
+import { CacheTag, CommonCacheTag } from './cacheTag'
 import { ProgramMediumRequest } from './programServices'
 
 type ProgramCommonMediumsResponse = {
@@ -189,6 +189,7 @@ const listServicesApi = api.injectEndpoints({
       }
     }),
     getPaymentModesList: build.query<PaymentModes[], void>({
+      providesTags: [CommonCacheTag.PAYMENT_MODES],
       query: () => {
         return {
           method: HttpRequestMethods.GET,

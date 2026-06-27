@@ -22,6 +22,22 @@ type ExpenseRequest = {
   remarks?: string
 }
 
+type BenficeryTypeRequest = {
+  benficery_type_id?: string
+  benficery_type_name: str
+  description?: string
+}
+
+type ExpenseCategoryRequest = {
+  category_id?: string
+  category_name: string
+  category_description?: string
+}
+
+type PaymentModeRequest = {
+  payment_mode_id?: number
+  payment_mode: string
+}
 type ExpensesListResponse = {
   filtered: number
   total: number

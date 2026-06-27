@@ -46,6 +46,9 @@ export interface FilterProps {
   medium?: string
   section?: string
   role?: string
+  expense_category_id?: string[]
+  payment_mode?: string[]
+  benficery_type_id?: string[]
 }
 
 export interface User {

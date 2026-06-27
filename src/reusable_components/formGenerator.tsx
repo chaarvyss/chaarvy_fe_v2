@@ -10,19 +10,19 @@ import {
   Radio,
   RadioGroup,
   Select,
-  TextField as MuiTextField
+  IconButton
 } from '@mui/material'
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useState, useRef } from 'react'
 import DatePicker from 'react-datepicker'
 
 import { FormControl, Grid, TextField } from '@muiElements'
 import { InputTypes } from 'src/lib/enums'
 import { ErrorObject, InputFields } from 'src/lib/types'
+import GetChaarvyIcons from 'src/utils/icons'
 
 import CustomDateElement from './dateInputElement'
 import OverlaySpinner from './overlaySpinner'
 
-// --- NEW COMPONENT: Extracted to safely use hooks for async searching ---
 const ADD_NEW_OPTION_VALUE = '__chaarvy_add_new_option__'
 
 const SelectInputField = ({
@@ -47,15 +47,37 @@ const SelectInputField = ({
     onSearch,
     onAddNew,
     addNewLabel,
-    canEdit,
-    onEdit
-  } = field
+    onEdit,
+    onEditSuccess,
+    isOptionsLoading = false,
+    isUpdating
+  } = field as any
 
   const [inputValue, setInputValue] = useState('')
   const [editingOption, setEditingOption] = useState<string | number | null>(null)
   const [editLabel, setEditLabel] = useState('')
   const [fetchedOptions, setFetchedOptions] = useState<{ label: string; value: any }[]>([])
   const [isFetching, setIsFetching] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+
+  // Local lock guarantees the spinner shows INSTANTLY on click,
+  // bridging the gap until the parent's API state catches up.
+  const [localIsUpdating, setLocalIsUpdating] = useState(false)
+
+  const isCurrentlyUpdating = isUpdating === true || localIsUpdating
+
+  // --- STRICT AUTO-RESET: Only close when parent's isUpdating finishes ---
+  const prevUpdating = useRef(isUpdating)
+  useEffect(() => {
+    // If parent state goes from TRUE -> FALSE, the API call is done. Close the editor.
+    if (prevUpdating.current === true && isUpdating === false) {
+      setEditingOption(null)
+      setEditLabel('')
+      setLocalIsUpdating(false)
+      onEditSuccess?.()
+    }
+    prevUpdating.current = isUpdating
+  }, [isUpdating, onEditSuccess])
 
   useEffect(() => {
     if (!searchable || !onSearch) {
@@ -80,7 +102,7 @@ const SelectInputField = ({
       } else {
         setFetchedOptions([])
       }
-    }, 300) // 300ms debounce to prevent spamming the API
+    }, 300)
 
     return () => clearTimeout(timer)
   }, [inputValue, searchable, onSearch])
@@ -109,18 +131,21 @@ const SelectInputField = ({
   const noOptionsText = onAddNew ? (inputValue.trim() ? `Add "${inputValue.trim()}"` : 'Type to search') : 'No options'
 
   const filterOptions = (options: any[], state: any) => {
+    const inputValue = state.inputValue.trim().toLowerCase()
+
     const filtered = options.filter(option => {
       return typeof option.label === 'string' && option.label.toLowerCase().includes(state.inputValue.toLowerCase())
     })
 
-    if (customAddOption) {
+    const isDuplicate = options.some(option => option.label.toLowerCase() === inputValue)
+
+    if (customAddOption && editingOption === null && inputValue !== '' && !isDuplicate) {
       return [...filtered, customAddOption]
     }
 
     return filtered
   }
 
-  // === NEW BEHAVIOR: Searchable Autocomplete ===
   if (searchable) {
     return (
       <FormControl fullWidth required={mandatoryFields.includes(key)}>
@@ -134,8 +159,30 @@ const SelectInputField = ({
           filterOptions={filterOptions}
           freeSolo={!!onAddNew}
           openOnFocus
-          disableCloseOnSelect={canEdit}
+          disableCloseOnSelect={!!onEdit || editingOption !== null}
           clearOnBlur={false}
+          open={isOpen || editingOption !== null}
+          onOpen={() => setIsOpen(true)}
+          onClose={() => {
+            if (editingOption !== null) {
+              return
+            }
+            setIsOpen(false)
+            setEditingOption(null)
+            setEditLabel('')
+          }}
+          getOptionDisabled={option => {
+            return editingOption !== null && option.value !== editingOption
+          }}
+          slotProps={{
+            paper: {
+              onMouseDown: (e: any) => {
+                if (editingOption !== null) {
+                  e.preventDefault()
+                }
+              }
+            }
+          }}
           isOptionEqualToValue={(option, val) => {
             if (typeof option === 'string' || typeof val === 'string') {
               return option === val
@@ -144,8 +191,19 @@ const SelectInputField = ({
             return option.value === val.value
           }}
           getOptionLabel={option => (typeof option === 'string' ? option : option.label || '')}
+          loadingText={
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1 }}>
+              <CircularProgress size={16} />
+              <span>Loading options...</span>
+            </Box>
+          }
+          loading={isLoading || isFetching || isOptionsLoading}
           value={combinedOptions.find(opt => opt.value === value || String(opt.value) === String(value)) || null}
           onChange={(_, newValue) => {
+            if (editingOption !== null) {
+              return
+            }
+
             if (!newValue) {
               onChange?.({ target: { value: '' } } as any)
               setInputValue('')
@@ -180,12 +238,11 @@ const SelectInputField = ({
           onInputChange={(_, newInputValue) => {
             setInputValue(newInputValue)
           }}
-          loading={isLoading || isFetching}
           size='small'
           noOptionsText={noOptionsText}
           renderOption={(props, option) => {
             if (option.value === ADD_NEW_OPTION_VALUE) {
-              return (
+              return editingOption !== null ? null : (
                 <li {...props} key={option.value}>
                   {option.label}
                 </li>
@@ -193,6 +250,9 @@ const SelectInputField = ({
             }
 
             const isEditing = editingOption === option.value
+            const hasChanges = editLabel.trim() && editLabel !== option.label
+
+            const shouldDisableEditIcon = editingOption !== null && editingOption !== option.value
 
             return (
               <li {...props} key={option.value}>
@@ -201,52 +261,122 @@ const SelectInputField = ({
                     <Box
                       sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}
                       onClick={e => e.stopPropagation()}
+                      onMouseDown={e => e.stopPropagation()}
                     >
-                      <MuiTextField
+                      <TextField
+                        autoFocus
                         fullWidth
                         size='small'
                         value={editLabel}
+                        disabled={isCurrentlyUpdating}
                         onChange={e => setEditLabel(e.target.value)}
-                        onClick={e => e.stopPropagation()}
-                      />
-                      <Button
-                        size='small'
-                        onClick={e => {
+                        onKeyDown={async e => {
+                          if (isCurrentlyUpdating) return
                           e.stopPropagation()
-                          if (editLabel.trim()) {
-                            onEdit?.(option.value, editLabel.trim())
+
+                          if (e.key === 'Enter' && hasChanges) {
+                            setLocalIsUpdating(true) // 1. Force spinner instantly
+                            try {
+                              await onEdit?.(option.value, editLabel.trim())
+                            } catch (err) {
+                              console.error(err)
+                            } finally {
+                              if (isUpdating === undefined) {
+                                // 2a. If parent isn't tracking state, close manually
+                                setEditingOption(null)
+                                setEditLabel('')
+                                setLocalIsUpdating(false)
+                                onEditSuccess?.()
+                              } else {
+                                // 2b. If parent is tracking, drop local lock after 600ms
+                                //     to give parent time to set isUpdating = true
+                                setTimeout(() => setLocalIsUpdating(false), 600)
+                              }
+                            }
+                          } else if (e.key === 'Escape') {
+                            setEditingOption(null)
+                            setEditLabel('')
                           }
-                          setEditingOption(null)
-                          setEditLabel('')
                         }}
-                      >
-                        ✔
-                      </Button>
-                      <Button
+                        onMouseDown={e => e.stopPropagation()}
+                      />
+
+                      {isCurrentlyUpdating ? (
+                        <IconButton size='small' disabled>
+                          <CircularProgress size={20} />
+                        </IconButton>
+                      ) : (
+                        <IconButton
+                          size='small'
+                          disabled={!hasChanges}
+                          onMouseDown={e => e.stopPropagation()}
+                          onClick={async e => {
+                            e.stopPropagation()
+                            if (hasChanges) {
+                              setLocalIsUpdating(true) // 1. Force spinner instantly
+                              try {
+                                await onEdit?.(option.value, editLabel.trim())
+                              } catch (err) {
+                                console.error(err)
+                              } finally {
+                                if (isUpdating === undefined) {
+                                  // 2a. If parent isn't tracking state, close manually
+                                  setEditingOption(null)
+                                  setEditLabel('')
+                                  setLocalIsUpdating(false)
+                                  onEditSuccess?.()
+                                } else {
+                                  // 2b. If parent is tracking, drop local lock after 600ms
+                                  //     to give parent time to set isUpdating = true
+                                  setTimeout(() => setLocalIsUpdating(false), 600)
+                                }
+                              }
+                            } else {
+                              setEditingOption(null)
+                              setEditLabel('')
+                            }
+                          }}
+                        >
+                          <GetChaarvyIcons iconName='Check' color='success' fontSize='1.25rem' />
+                        </IconButton>
+                      )}
+
+                      <IconButton
                         size='small'
+                        disabled={isCurrentlyUpdating}
+                        onMouseDown={e => e.stopPropagation()}
                         onClick={e => {
                           e.stopPropagation()
                           setEditingOption(null)
                           setEditLabel('')
                         }}
                       >
-                        ✕
-                      </Button>
+                        <GetChaarvyIcons iconName='Close' color='error' fontSize='1.25rem' />
+                      </IconButton>
                     </Box>
                   ) : (
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                       <span>{option.label}</span>
-                      {canEdit ? (
-                        <Button
+                      {onEdit && !isOptionsLoading ? (
+                        <IconButton
                           size='small'
+                          disabled={shouldDisableEditIcon}
+                          onMouseDown={e => {
+                            e.stopPropagation()
+                            e.preventDefault()
+                          }}
                           onClick={e => {
                             e.stopPropagation()
                             setEditingOption(option.value)
                             setEditLabel(option.label)
                           }}
                         >
-                          Edit
-                        </Button>
+                          <GetChaarvyIcons
+                            iconName='Pencil'
+                            color={shouldDisableEditIcon ? 'secondary' : 'primary'}
+                            fontSize='1.25rem'
+                          />
+                        </IconButton>
                       ) : null}
                     </Box>
                   )}
@@ -262,6 +392,7 @@ const SelectInputField = ({
                 ...params.InputProps,
                 endAdornment: (
                   <Fragment>
+                    {/* Maintain inline fetching spinner as well */}
                     {isLoading || isFetching ? <CircularProgress color='inherit' size={20} /> : null}
                     {params.InputProps.endAdornment}
                   </Fragment>
@@ -343,8 +474,10 @@ const FormGenerator = ({
           searchable,
           addNewLabel,
           onAddNew,
-          canEdit,
-          onEdit
+          onEdit,
+          onEditSuccess,
+          isOptionsLoading,
+          isUpdating
         }) => (
           <Grid item {...columnSize} key={id}>
             {type === InputTypes.INPUT ? (
@@ -389,8 +522,10 @@ const FormGenerator = ({
                   onSearch,
                   onAddNew,
                   addNewLabel,
-                  canEdit,
-                  onEdit
+                  onEdit,
+                  onEditSuccess,
+                  isOptionsLoading,
+                  isUpdating
                 }}
                 mandatoryFields={mandatoryFields}
                 errorObj={getHadError(key)}

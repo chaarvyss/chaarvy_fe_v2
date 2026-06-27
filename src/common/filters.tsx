@@ -1,5 +1,5 @@
 import { Button, Box } from '@mui/material'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, ReactNode, useState } from 'react'
 import DatePicker from 'react-datepicker'
 
 import { Grid, TextField } from '@muiElements'
@@ -10,11 +10,16 @@ import { FilterProps } from 'src/lib/interfaces'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
 import ReusableSelect from 'src/reusable_components/reusableSelect'
 import {
+  useGetBenificeryTypesListQuery,
+  useGetExpenseCategoryTypesListQuery
+} from 'src/store/services/common/listServices'
+import {
   useGetProgramsListQuery,
   useGetRolesListQuery,
   useGetSectionsListQuery,
   useGetSegmentsListQuery,
-  useGetUsersListQuery
+  useGetUsersListQuery,
+  useGetPaymentModesListQuery
 } from 'src/store/services/listServices'
 
 type FieldTypes =
@@ -29,6 +34,16 @@ type FieldTypes =
   | 'status'
   | 'role'
   | 'referred_by'
+  | 'benficery_types'
+  | 'expense_category_types'
+  | 'payment_modes'
+
+interface FilterFieldConfig {
+  fieldType: FieldTypes
+  isMultiselect?: boolean
+}
+
+type FilterField = FieldTypes | FilterFieldConfig
 
 interface StatusOption {
   label: string
@@ -37,39 +52,60 @@ interface StatusOption {
 
 interface RenderFilterProps {
   onSubmit: (data?: FilterProps) => void
-  fields: Array<FieldTypes>
+  fields: Array<FilterField>
   statusOptions?: StatusOption[]
   defaultValues?: FilterProps
   resetFilters?: () => void
+  children?: Array<ReactNode>
 }
 
-const RenderFilterOptions = ({ onSubmit, fields, statusOptions, defaultValues, resetFilters }: RenderFilterProps) => {
+const RenderFilterOptions = ({
+  onSubmit,
+  fields,
+  statusOptions,
+  defaultValues,
+  resetFilters,
+  children = []
+}: RenderFilterProps) => {
   // Initialize state with defaultValues so the form isn't blank
   const [filters, setFilters] = useState<FilterProps | undefined>(defaultValues)
   const { closeDrawer } = useSideDrawer()
+  const normalizedFields = fields.map(field => (typeof field === 'string' ? { fieldType: field } : field))
+
+  const hasField = (fieldType: FieldTypes) => normalizedFields.some(field => field.fieldType === fieldType)
 
   const { data: programsList, isFetching: isFetchingPrograms } = useGetProgramsListQuery(true, {
-    skip: !fields.includes('program')
+    skip: !hasField('program')
   })
 
   const { data: sections, isFetching: isFetchingSections } = useGetSectionsListQuery(undefined, {
-    skip: !fields.includes('sections')
+    skip: !hasField('sections')
   })
 
   const { data: roles, isFetching: isFetchingRoles } = useGetRolesListQuery(undefined, {
-    skip: !fields.includes('role')
+    skip: !hasField('role')
   })
 
   const { data: segments, isFetching: isFetchingSegments } = useGetSegmentsListQuery(undefined, {
-    skip: !fields.includes('segment')
+    skip: !hasField('segment')
   })
 
   const { data: usersList, isFetching: isFetchingUsers } = useGetUsersListQuery(
     { limit: 100 },
     {
-      skip: !fields.includes('referred_by')
+      skip: !hasField('referred_by')
     }
   )
+
+  const { data: benficerTypes } = useGetBenificeryTypesListQuery(undefined, {
+    skip: !hasField('benficery_types')
+  })
+  const { data: expenseCategoies } = useGetExpenseCategoryTypesListQuery(undefined, {
+    skip: !hasField('expense_category_types')
+  })
+  const { data: paymentModes } = useGetPaymentModesListQuery(undefined, {
+    skip: !hasField('payment_modes')
+  })
 
   // Initialize dates from strings if they exist in defaultValues
   const [startDate, setStartDate] = useState<Date | null>(
@@ -114,6 +150,238 @@ const RenderFilterOptions = ({ onSubmit, fields, statusOptions, defaultValues, r
     closeDrawer()
   }
 
+  const renderFilterField = (field: FilterFieldConfig, index: number) => {
+    const { fieldType, isMultiselect = false } = field
+
+    const renderChildren =
+      children.length > 0 ? (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, ml: 2 }}>{children}</Box>
+      ) : null
+
+    switch (fieldType) {
+      case 'search':
+        return (
+          <Grid item key={`${fieldType}-${index}`}>
+            <TextField
+              fullWidth
+              type={InputVariants.STRING}
+              label='Search'
+              size='small'
+              value={filters?.searchText ?? ''}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange('searchText')(e.target.value)}
+            />
+            {renderChildren}
+          </Grid>
+        )
+
+      case 'program':
+        return (
+          <Grid item key={`${fieldType}-${index}`}>
+            <ReusableSelect
+              label='Program'
+              value={isMultiselect ? (Array.isArray(filters?.program) ? filters.program : []) : filters?.program}
+              multiple={isMultiselect}
+              isLoading={isFetchingPrograms}
+              options={(programsList ?? []).map(p => ({
+                value: p.program_id,
+                label: p.program_name
+              }))}
+              onChange={handleChange('program')}
+            />
+            {renderChildren}
+          </Grid>
+        )
+
+      case 'segment':
+        return (
+          <Grid item key={`${fieldType}-${index}`}>
+            <ReusableSelect
+              label='Segment'
+              value={isMultiselect ? (Array.isArray(filters?.segment) ? filters.segment : []) : filters?.segment}
+              multiple={isMultiselect}
+              isLoading={isFetchingSegments}
+              options={(segments ?? []).map(s => ({
+                value: s.segment_id,
+                label: s.segment_name
+              }))}
+              onChange={handleChange('segment')}
+            />
+            {renderChildren}
+          </Grid>
+        )
+
+      case 'sections':
+        return (
+          <Grid item key={`${fieldType}-${index}`}>
+            <ReusableSelect
+              label='Section'
+              value={isMultiselect ? (Array.isArray(filters?.section) ? filters.section : []) : filters?.section}
+              multiple={isMultiselect}
+              isLoading={isFetchingSections}
+              options={(sections ?? [])
+                .filter(
+                  (each): each is { section_id: string; section_name: string } =>
+                    typeof each.section_id === 'string' && each.section_id !== ''
+                )
+                .map(s => ({
+                  value: s.section_id,
+                  label: s.section_name
+                }))}
+              onChange={handleChange('section')}
+            />
+            {renderChildren}
+          </Grid>
+        )
+
+      case 'status':
+        return (
+          <Grid item key={`${fieldType}-${index}`}>
+            <ReusableSelect
+              label='Status'
+              value={isMultiselect ? (Array.isArray(filters?.status_) ? filters.status_ : []) : filters?.status_}
+              multiple={isMultiselect}
+              options={(statusOptions ?? []).map(s => ({
+                value: s.value,
+                label: s.label
+              }))}
+              onChange={handleChange('status_')}
+            />
+            {renderChildren}
+          </Grid>
+        )
+
+      case 'role':
+        return (
+          <Grid item key={`${fieldType}-${index}`}>
+            <ReusableSelect
+              label='Role'
+              value={isMultiselect ? (Array.isArray(filters?.role) ? filters.role : []) : filters?.role}
+              multiple={isMultiselect}
+              isLoading={isFetchingRoles}
+              options={(roles ?? []).map(r => ({
+                value: r.role_id,
+                label: r.role_name
+              }))}
+              onChange={handleChange('role')}
+            />
+            {renderChildren}
+          </Grid>
+        )
+
+      case 'referred_by':
+        return (
+          <Grid item key={`${fieldType}-${index}`}>
+            <ReusableSelect
+              label='Referred by'
+              value={
+                isMultiselect ? (Array.isArray(filters?.referred_by) ? filters.referred_by : []) : filters?.referred_by
+              }
+              multiple={isMultiselect}
+              isLoading={isFetchingUsers}
+              options={(usersList?.users ?? []).map(r => ({
+                value: r.user_id,
+                label: r.name
+              }))}
+              onChange={handleChange('referred_by')}
+            />
+            {renderChildren}
+          </Grid>
+        )
+
+      case 'benficery_types':
+        return (
+          <Grid item key={`${fieldType}-${index}`}>
+            <ReusableSelect
+              label='Beneficiary type'
+              value={
+                isMultiselect
+                  ? Array.isArray(filters?.benficery_type_id)
+                    ? filters.benficery_type_id
+                    : []
+                  : filters?.benficery_type_id
+              }
+              multiple={isMultiselect}
+              options={(benficerTypes ?? []).map(item => ({
+                value: item.benficery_type_id ?? '',
+                label: item.benficery_type_name ?? ''
+              }))}
+              onChange={handleChange('benficery_type_id')}
+            />
+            {renderChildren}
+          </Grid>
+        )
+
+      case 'expense_category_types':
+        return (
+          <Grid item key={`${fieldType}-${index}`}>
+            <ReusableSelect
+              label='Expense category'
+              value={
+                isMultiselect
+                  ? Array.isArray(filters?.expense_category_id)
+                    ? filters.expense_category_id
+                    : []
+                  : filters?.expense_category_id
+              }
+              multiple={isMultiselect}
+              options={(expenseCategoies ?? []).map(item => ({
+                value: String(item.category_id ?? ''),
+                label: String(item.category_name ?? '')
+              }))}
+              onChange={handleChange('expense_category_id')}
+            />
+            {renderChildren}
+          </Grid>
+        )
+
+      case 'payment_modes':
+        return (
+          <Grid item key={`${fieldType}-${index}`}>
+            <ReusableSelect
+              label='Payment mode'
+              value={
+                isMultiselect
+                  ? Array.isArray(filters?.payment_mode)
+                    ? filters.payment_mode
+                    : []
+                  : filters?.payment_mode
+              }
+              multiple={isMultiselect}
+              options={(paymentModes ?? []).map(item => ({
+                value: item.payment_mode_id,
+                label: item.payment_mode
+              }))}
+              onChange={handleChange('payment_mode')}
+            />
+            {renderChildren}
+          </Grid>
+        )
+
+      case 'dateRange':
+        return (
+          <Grid item key={`${fieldType}-${index}`}>
+            <DatePicker
+              selectsRange
+              startDate={startDate}
+              endDate={endDate}
+              customInput={<CustomDateElement label='' />}
+              onChange={dates => {
+                const [start, end] = dates
+                setStartDate(start)
+                setEndDate(end)
+              }}
+              isClearable
+              placeholderText='Select date range'
+            />
+            {renderChildren}
+          </Grid>
+        )
+
+      default:
+        return null
+    }
+  }
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -125,124 +393,7 @@ const RenderFilterOptions = ({ onSubmit, fields, statusOptions, defaultValues, r
       }}
     >
       <Grid container gap={4} flexDirection='column'>
-        {/* 🔍 Search */}
-        {fields.includes('search') && (
-          <Grid item>
-            <TextField
-              fullWidth
-              type={InputVariants.STRING}
-              label='Search'
-              size='small'
-              value={filters?.searchText ?? ''}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange('searchText')(e.target.value)}
-            />
-          </Grid>
-        )}
-
-        {/* 📘 Program */}
-        {fields.includes('program') && (
-          <ReusableSelect
-            label='Program'
-            value={filters?.program}
-            isLoading={isFetchingPrograms}
-            options={(programsList ?? []).map(p => ({
-              value: p.program_id,
-              label: p.program_name
-            }))}
-            onChange={handleChange('program')}
-          />
-        )}
-
-        {/* 📚 Segment */}
-        {fields.includes('segment') && (
-          <ReusableSelect
-            label='Segment'
-            value={filters?.segment}
-            isLoading={isFetchingSegments}
-            options={(segments ?? []).map(s => ({
-              value: s.segment_id,
-              label: s.segment_name
-            }))}
-            onChange={handleChange('segment')}
-          />
-        )}
-
-        {/* 🏫 Section */}
-        {fields.includes('sections') && (
-          <ReusableSelect
-            label='Section'
-            value={filters?.section}
-            isLoading={isFetchingSections}
-            options={(sections ?? [])
-              .filter(
-                (each): each is { section_id: string; section_name: string } =>
-                  typeof each.section_id === 'string' && each.section_id !== ''
-              )
-              .map(s => ({
-                value: s.section_id,
-                label: s.section_name
-              }))}
-            onChange={handleChange('section')}
-          />
-        )}
-
-        {/* 📊 Status */}
-        {fields.includes('status') && (
-          <ReusableSelect
-            label='Status'
-            value={filters?.status_}
-            options={(statusOptions ?? []).map(s => ({
-              value: s.value,
-              label: s.label
-            }))}
-            onChange={handleChange('status_')}
-          />
-        )}
-
-        {/* 👤 Role */}
-        {fields.includes('role') && (
-          <ReusableSelect
-            label='Role'
-            value={filters?.role}
-            isLoading={isFetchingRoles}
-            options={(roles ?? []).map(r => ({
-              value: r.role_id,
-              label: r.role_name
-            }))}
-            onChange={handleChange('role')}
-          />
-        )}
-
-        {/* 👤 Role */}
-        {fields.includes('referred_by') && (
-          <ReusableSelect
-            label='Referred by'
-            value={filters?.referred_by}
-            isLoading={isFetchingUsers}
-            options={(usersList?.users ?? []).map(r => ({
-              value: r.user_id,
-              label: r.name
-            }))}
-            onChange={handleChange('referred_by')}
-          />
-        )}
-
-        {/* 📅 Date Range */}
-        {fields.includes('dateRange') && (
-          <DatePicker
-            selectsRange
-            startDate={startDate}
-            endDate={endDate}
-            customInput={<CustomDateElement label='' />}
-            onChange={dates => {
-              const [start, end] = dates
-              setStartDate(start)
-              setEndDate(end)
-            }}
-            isClearable
-            placeholderText='Select date range'
-          />
-        )}
+        {normalizedFields.map((field, index) => renderFilterField(field, index))}
 
         {/* 🔘 Actions */}
         <Box display='flex' justifyContent='space-between'>

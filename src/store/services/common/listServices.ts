@@ -18,6 +18,7 @@ const commonListServiceApi = api.injectEndpoints({
       }
     }),
     getBenificeryTypesList: build.query<BenificeryType[], void>({
+      providesTags: [CommonCacheTag.BENFICERY_TYPES_LIST],
       query: () => {
         return {
           method: HttpRequestMethods.GET,
@@ -26,6 +27,7 @@ const commonListServiceApi = api.injectEndpoints({
       }
     }),
     getExpenseCategoryTypesList: build.query<ExpenseCategoryType[], void>({
+      providesTags: [CommonCacheTag.EXPENSE_CATEGORIES_LIST],
       query: () => {
         return {
           method: HttpRequestMethods.GET,
