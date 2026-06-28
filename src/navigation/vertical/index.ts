@@ -3,7 +3,6 @@ import { VerticalNavItemsType } from 'src/@core/layouts/types'
 import { MasterPagePath, PagePath } from 'src/constants/pagePathConstants'
 import { PermissionLabels, Permissions } from 'src/constants/permissions'
 import { isAuthorised } from 'src/lib/util/permissionCheck'
-
 import { ChaarvyIcon } from 'src/utils/icons'
 
 const navigation = (): VerticalNavItemsType => {

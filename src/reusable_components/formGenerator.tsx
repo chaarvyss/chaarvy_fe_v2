@@ -12,17 +12,16 @@ import {
   Select,
   IconButton
 } from '@mui/material'
-import { Fragment, useEffect, useState, useRef, ReactNode } from 'react'
+import { Fragment, useEffect, useState, useRef } from 'react'
 import DatePicker from 'react-datepicker'
 
 import { FormControl, Grid, TextField } from '@muiElements'
 import { InputTypes } from 'src/lib/enums'
 import { ErrorObject, InputFields } from 'src/lib/types'
+import { ensureDate } from 'src/lib/util/common_helpers'
 import GetChaarvyIcons from 'src/utils/icons'
 
 import CustomDateElement from './dateInputElement'
-import OverlaySpinner from './overlaySpinner'
-import { ensureDate } from 'src/lib/util/common_helpers'
 import LoadingSpinner from './LoadingSpinner'
 
 const ADD_NEW_OPTION_VALUE = '__chaarvy_add_new_option__'

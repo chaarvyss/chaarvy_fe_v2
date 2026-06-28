@@ -24,6 +24,7 @@ export const ensureDate = (value: string | Date | null | undefined | number | bo
   if (typeof value === 'string' && /^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
     const [day, month, year] = value.split('/').map(Number)
     const date = new Date(year, month - 1, day)
+
     return isNaN(date.getTime()) ? null : date
   }
 

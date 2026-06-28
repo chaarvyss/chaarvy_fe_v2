@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { IconButton, Typography } from '@muiElements'
@@ -5,23 +6,24 @@ import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import RenderFilterOptions from 'src/common/filters'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import { DEFAULT_TABLE_ITEMS_LIMIT } from 'src/constants/constants'
+import { PagePath } from 'src/constants/pagePathConstants'
+import { PermissionLabels } from 'src/constants/permissions'
 import { FilterProps, TableHeaderStatCardProps } from 'src/lib/interfaces'
+import { isAuthorised } from 'src/lib/util/permissionCheck'
 import { useGetExpensesListQuery } from 'src/store/services/common/listServices'
 import { ChaarvyIconFontSize, ThemeColorEnum } from 'src/utils/enums'
 import { useDebounce } from 'src/utils/hooks/useDebounce'
 import GetChaarvyIcons, { ChaarvyIcon } from 'src/utils/icons'
 
 import AddExpense from './addExpense'
-import { isAuthorised } from 'src/lib/util/permissionCheck'
-import { PermissionLabels } from 'src/constants/permissions'
-import { PagePath } from 'src/constants/pagePathConstants'
-import { useRouter } from 'next/navigation'
 
 const ExpensesList = () => {
   const router = useRouter()
   const { openDrawer } = useSideDrawer()
   const [expensesData, setExpensesData] = useState<any[]>([])
-  const [searchText, setSearchText] = useState<string>('')
+
+  // const [searchText, setSearchText] = useState<string>('')
+  const searchText = ''
   const [selectedExpenseId, setSelectedSectionId] = useState<string>()
   const debouncedSearchText = useDebounce(searchText)
   const [filterProps, setFilterProps] = useState<FilterProps>({
@@ -157,6 +159,7 @@ const ExpensesList = () => {
         stats: expensesStats,
         showFilterIcon: true,
         handleFilterButtonClick: onFilterButtonClick,
+
         // onSearch: setSearchText,
         // searchValue: searchText,
         buttonTitle: isAuthorised(PermissionLabels.expenses.add) ? 'Add expense' : undefined,

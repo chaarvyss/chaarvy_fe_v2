@@ -4,6 +4,7 @@ import DatePicker from 'react-datepicker'
 
 import { Grid, TextField } from '@muiElements'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
+import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DateFormats, InputVariants } from 'src/lib/enums'
 import { dateToString } from 'src/lib/helpers'
 import { FilterProps } from 'src/lib/interfaces'
@@ -21,7 +22,6 @@ import {
   useGetUsersListQuery,
   useGetPaymentModesListQuery
 } from 'src/store/services/listServices'
-import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 
 type FieldTypes =
   | 'search'
