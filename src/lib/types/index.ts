@@ -1,6 +1,6 @@
 import { ReactElement } from 'react'
-import { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
 
+import { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
 import { AdmissionCounts } from 'src/store/services/admisissionsService'
 
 export type ProgramSegmentMedium = {
