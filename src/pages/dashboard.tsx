@@ -4,7 +4,7 @@ import { PermissionLabels } from 'src/constants/permissions'
 import { GridDashboard, LayoutCard } from 'src/reusable_components/GridDashboard'
 import Attendence from 'src/views/dashboardCards/attendence'
 import MyCalendar from 'src/views/dashboardCards/calendar'
-import Payments2 from 'src/views/dashboardCards/payments2'
+import Payments from 'src/views/dashboardCards/payments'
 import Population from 'src/views/dashboardCards/population'
 import StationaryStock from 'src/views/dashboardCards/stationaryStock'
 import StudentEnrollmentChart from 'src/views/dashboardCards/studentsByCourse'
@@ -13,7 +13,7 @@ const dashboardComponents = {
   Calender: MyCalendar,
   Students: Population,
   Attendence: Attendence,
-  Payments: Payments2,
+  Payments: Payments,
   Stationary_stock: StationaryStock,
   Student_enrollments: StudentEnrollmentChart
 }
