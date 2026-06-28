@@ -65,9 +65,9 @@ const AddUpdateBooks = ({ isOpen, onClose, defaultData, selectedItemType }: AddU
       const validPrograms = rawPrograms.filter((p): p is string => !!p && typeof p === 'string')
 
       return {
-        program_id: validPrograms, // Assumes backend expects program_id parameter
-        segment_id: filterData.segment,
-        medium_id: filterData.medium,
+        program: validPrograms, // Assumes backend expects program_id parameter
+        segment: filterData.segment,
+        medium: filterData.medium,
         isCommon: false
       }
     }

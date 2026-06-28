@@ -19,18 +19,92 @@ import ReusableSelect from './reusableSelect'
 
 export type CascadingSelectorState = {
   program?: string | string[]
-  segment?: string
-  medium?: string
+  segment?: string | string[]
+  medium?: string | string[]
 }
 
 interface CascadingSelectorsProps {
   onChange: (values: CascadingSelectorState) => void
   defaultValues?: CascadingSelectorState
-  isMultiProgram?: boolean // NEW: Enables multi-select for the Program dropdown
+  isMultiProgram?: boolean
+  isMultiSegment?: boolean
+  isMultiMedium?: boolean
 }
 
-const CascadingSelectors = ({ onChange, defaultValues, isMultiProgram = false }: CascadingSelectorsProps) => {
-  const [values, setValues] = useState<CascadingSelectorState>(defaultValues ?? { program: isMultiProgram ? [] : '' })
+// Helper component to handle rendering Multi-Select vs Single-Select
+const DynamicSelect = ({
+  label,
+  value,
+  options,
+  isLoading,
+  isMulti,
+  onChange
+}: {
+  label: string
+  value: string | string[] | undefined
+  options: { value: string; label: string }[]
+  isLoading: boolean
+  isMulti: boolean
+  onChange: (val: string | string[]) => void
+}) => {
+  if (isMulti) {
+    const handleMultiChange = (event: SelectChangeEvent<string[]>) => {
+      const {
+        target: { value: selectedValue }
+      } = event
+      onChange(typeof selectedValue === 'string' ? selectedValue.split(',') : selectedValue)
+    }
+
+    const arrayValue = (value as string[]) || []
+
+    return (
+      <FormControl size='small' sx={{ minWidth: 200 }}>
+        <InputLabel>{label}</InputLabel>
+        <Select
+          multiple
+          value={arrayValue}
+          onChange={handleMultiChange}
+          input={<OutlinedInput label={label} />}
+          renderValue={selected => `${selected.length} Selected`}
+        >
+          {options.map(opt => (
+            <MenuItem key={opt.value} value={opt.value}>
+              <Checkbox checked={arrayValue.includes(opt.value)} />
+              <ListItemText primary={opt.label} />
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    )
+  }
+
+  // Fallback to your custom single select
+  return (
+    <ReusableSelect
+      label={label}
+      value={(value as string) || ''}
+      isLoading={isLoading}
+      options={options}
+      onChange={onChange as (value: string | string[]) => void}
+      fullWidth={false}
+    />
+  )
+}
+
+const CascadingSelectors = ({
+  onChange,
+  defaultValues,
+  isMultiProgram = false,
+  isMultiSegment = false,
+  isMultiMedium = false
+}: CascadingSelectorsProps) => {
+  const [values, setValues] = useState<CascadingSelectorState>(
+    defaultValues ?? {
+      program: isMultiProgram ? [] : '',
+      segment: isMultiSegment ? [] : '',
+      medium: isMultiMedium ? [] : ''
+    }
+  )
 
   const { data: programsData, isLoading: isProgramsLoading } = useGetProgramsListQuery(true)
 
@@ -86,31 +160,19 @@ const CascadingSelectors = ({ onChange, defaultValues, isMultiProgram = false }:
     }
   }, [defaultValues])
 
-  const handleProgramChangeSingle = (value: string) => {
+  const handleProgramChange = (value: string | string[]) => {
     setValues({
       program: value,
-      segment: undefined,
-      medium: undefined
+      segment: isMultiSegment ? [] : undefined,
+      medium: isMultiMedium ? [] : undefined
     })
   }
 
-  const handleProgramChangeMulti = (event: SelectChangeEvent<string[]>) => {
-    const {
-      target: { value }
-    } = event
-    const newPrograms = typeof value === 'string' ? value.split(',') : value
-    setValues({
-      program: newPrograms,
-      segment: undefined,
-      medium: undefined
-    })
-  }
-
-  const handleSegmentChange = (value: string) => {
+  const handleSegmentChange = (value: string | string[]) => {
     setValues(prev => ({ ...prev, segment: value }))
   }
 
-  const handleMediumChange = (value: string) => {
+  const handleMediumChange = (value: string | string[]) => {
     setValues(prev => ({ ...prev, medium: value }))
   }
 
@@ -120,60 +182,40 @@ const CascadingSelectors = ({ onChange, defaultValues, isMultiProgram = false }:
 
   return (
     <ChaarvyFlex className={{ gap: 3 }}>
-      {isMultiProgram ? (
-        <FormControl size='small' sx={{ minWidth: 200 }}>
-          <InputLabel>Program</InputLabel>
-          <Select
-            multiple
-            value={(values.program as string[]) || []}
-            onChange={handleProgramChangeMulti}
-            input={<OutlinedInput label='Program' />}
-            renderValue={selected => `${selected.length} Selected`}
-          >
-            {(programsData ?? []).map(prog => (
-              <MenuItem key={prog.program_id} value={prog.program_id}>
-                <Checkbox checked={((values.program as string[]) || []).includes(prog.program_id)} />
-                <ListItemText primary={prog.program_name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      ) : (
-        <ReusableSelect
-          label='Program'
-          value={values.program as string}
-          isLoading={isProgramsLoading}
-          options={(programsData ?? []).map(p => ({
-            value: p.program_id,
-            label: p.program_name
-          }))}
-          onChange={handleProgramChangeSingle}
-          fullWidth={false}
-        />
-      )}
+      <DynamicSelect
+        label='Program'
+        value={values.program}
+        isLoading={isProgramsLoading}
+        isMulti={isMultiProgram}
+        onChange={handleProgramChange}
+        options={(programsData ?? []).map(p => ({
+          value: p.program_id,
+          label: p.program_name
+        }))}
+      />
 
-      <ReusableSelect
+      <DynamicSelect
         label='Segment'
         value={values.segment}
         isLoading={isProgramSegmentMediumsLoading}
+        isMulti={isMultiSegment}
+        onChange={handleSegmentChange}
         options={(segmentData ?? []).map(s => ({
           value: s.segment_id,
           label: s.segment_name
         }))}
-        onChange={handleSegmentChange}
-        fullWidth={false}
       />
 
-      <ReusableSelect
+      <DynamicSelect
         label='Medium'
         value={values.medium}
         isLoading={isProgramSegmentMediumsLoading}
+        isMulti={isMultiMedium}
+        onChange={handleMediumChange}
         options={(mediumsData ?? []).map(m => ({
           value: m.medium_id ?? '',
           label: m.medium_name
         }))}
-        onChange={handleMediumChange}
-        fullWidth={false}
       />
     </ChaarvyFlex>
   )

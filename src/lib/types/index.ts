@@ -1,4 +1,5 @@
 import { ReactElement } from 'react'
+import { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
 
 import { AdmissionCounts } from 'src/store/services/admisissionsService'
 
@@ -33,10 +34,7 @@ export type BooksListResponse = {
   counts: AdmissionCounts
 }
 
-export type BooksListRequest = {
-  program_id?: string | string[]
-  medium_id?: string
-  segment_id?: string
+export type BooksListRequest = CascadingSelectorState & {
   isCommon?: boolean
   offset?: number
   limit?: number
