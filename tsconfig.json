@@ -22,8 +22,7 @@
       "apexcharts/*": ["./node_modules/apexcharts-clevision/*"],
       "@core/*": ["src/core/*"],
       "@muiElements": ["src/utils/muiElements"],
-      "@mdiElements": ["src/utils/mdiElements"],
-      "@views": ["src/views"]
+      "@mdiElements": ["src/utils/mdiElements"]
     }
   },
   "include": ["src"],

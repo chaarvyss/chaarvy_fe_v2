@@ -1,4 +1,13 @@
-import { CircularProgress, FormControl, MenuItem, Select, SelectChangeEvent, InputLabel } from '@mui/material'
+import {
+  Checkbox,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  Select,
+  SelectChangeEvent
+} from '@mui/material'
 
 type Option = {
   label: string
@@ -7,12 +16,13 @@ type Option = {
 
 interface ReusableSelectProps {
   label: string
-  value?: string
+  value?: string | string[]
   options: Option[]
   isLoading?: boolean
   disabled?: boolean
   fullWidth?: boolean
-  onChange: (value: string) => void
+  multiple?: boolean
+  onChange: (value: string | string[]) => void
 }
 
 const ReusableSelect = ({
@@ -22,18 +32,29 @@ const ReusableSelect = ({
   isLoading,
   disabled,
   fullWidth = true,
+  multiple = false,
   onChange
 }: ReusableSelectProps) => {
+  const selectedValue = multiple ? (Array.isArray(value) ? value : []) : (value ?? '')
+
   return (
     <FormControl fullWidth={fullWidth} size='small' disabled={disabled}>
       <InputLabel>{label}</InputLabel>
 
       <Select
         label={label}
-        value={value ?? ''}
+        multiple={multiple}
+        value={selectedValue as string | string[]}
         displayEmpty
-        onChange={(e: SelectChangeEvent<string>) => onChange(e.target.value)}
+        onChange={(e: SelectChangeEvent<string | string[]>) => onChange(e.target.value as string | string[])}
         renderValue={selected => {
+          if (multiple && Array.isArray(selected)) {
+            return selected
+              .map(item => options.find(o => o.value === item)?.label)
+              .filter(Boolean)
+              .join(', ')
+          }
+
           return options.find(o => o.value === selected)?.label
         }}
       >
@@ -44,11 +65,17 @@ const ReusableSelect = ({
         ) : options.length === 0 ? (
           <MenuItem disabled>No Data</MenuItem>
         ) : (
-          options.map(opt => (
-            <MenuItem key={opt.value} value={opt.value}>
-              {opt.label}
-            </MenuItem>
-          ))
+          options.map(opt => {
+            const isSelected =
+              multiple && Array.isArray(selectedValue) ? selectedValue.includes(opt.value) : selectedValue === opt.value
+
+            return (
+              <MenuItem key={opt.value} value={opt.value}>
+                {multiple ? <Checkbox checked={isSelected} /> : null}
+                <ListItemText primary={opt.label} />
+              </MenuItem>
+            )
+          })
         )}
       </Select>
     </FormControl>

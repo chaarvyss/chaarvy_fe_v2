@@ -3,7 +3,7 @@ import { Box, Card } from '@mui/material'
 import { useEffect, useMemo } from 'react'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { FieldConfig, getMandatoryFieldsList, mapToFields, useFormBuilder } from 'src/hooks/useFormBuilder'
+import { FieldConfig, getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
 import { InputTypes, InputVariants } from 'src/lib/enums'
 import FormGenerator from 'src/reusable_components/formGenerator'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -157,37 +157,28 @@ const StudentDetails = ({ student_id, handleNext }: studentBaseDetailsProps) => 
     [occupationsList, qualifiedExams, communities, religions]
   )
 
-  const { values, errors, handleChange, handleSubmit, optionsMap, loadingMap, setValues } =
-    useFormBuilder<StudentDetailsRequest>({
-      fields: studentDetailConfig,
-      initialValues: {
-        student_id: student_id,
-        qualified_exam: '',
-        qualified_exam_year_of_pass: '',
-        father_occupation: '',
-        mother_occupation: '',
-        contact_no_2: '',
-        father_aadhar: '',
-        mother_aadhar: '',
-        religion: '',
-        community: '',
-        subcaste: ''
-      }
-    })
+  const { fields, errors, handleSubmit, setValues } = useFormBuilder<StudentDetailsRequest>({
+    formConfig: studentDetailConfig,
+    initialValues: {
+      student_id: student_id,
+      qualified_exam: '',
+      qualified_exam_year_of_pass: '',
+      father_occupation: '',
+      mother_occupation: '',
+      contact_no_2: '',
+      father_aadhar: '',
+      mother_aadhar: '',
+      religion: '',
+      community: '',
+      subcaste: ''
+    }
+  })
 
   useEffect(() => {
     if (applicationDetails) {
       setValues(applicationDetails)
     }
   }, [applicationDetails])
-
-  const fields = mapToFields({
-    config: studentDetailConfig,
-    values,
-    handleChange,
-    optionsMap,
-    loadingMap
-  })
 
   const onSubmit = async (data: StudentDetailsRequest) => {
     updateStudentDetails({ ...data, student_id })

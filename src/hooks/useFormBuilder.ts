@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { InputTypes } from 'src/lib/enums'
+import { dateToString } from 'src/lib/helpers'
 import { ErrorObject, InputFields } from 'src/lib/types'
 
 export type ValidationRule =
@@ -25,10 +26,19 @@ export type FieldConfig<T> = {
   staticOptions?: any[]
   searchable?: boolean
   onSearch?: (searchText: string) => Promise<{ label: string; value: any }[]>
+  onAddNew?: (text?: string) => void
+  addNewLabel?: string
+  onEdit?: (value: string | number, label: string) => void
+
+  // --- ADD THESE MISSING PROPS ---
+  canEdit?: boolean
+  isUpdating?: boolean
+  isLoading?: boolean
+  isEditingLoading?: boolean
 }
 
 export type FormConfig<T> = {
-  fields: FieldConfig<T>[]
+  formConfig: FieldConfig<T>[]
   initialValues: T
 }
 
@@ -49,7 +59,15 @@ export const mapToFields = ({ config, values, handleChange, optionsMap, loadingM
       value: values[field.key],
       onChange: handleChange(field.key),
       menuOptions: optionsMap[key] ?? [],
-      isLoading: loadingMap[key] ?? false
+      isLoading: loadingMap[key] ?? field.isLoading ?? false,
+      searchable: field.searchable,
+      onSearch: field.onSearch,
+      onAddNew: field.onAddNew,
+      addNewLabel: field.addNewLabel,
+      canEdit: field.canEdit,
+      onEdit: field.onEdit,
+      isUpdating: field.isUpdating,
+      isOptionsLoading: field.isOptionsLoading
     }
   })
 }
@@ -58,7 +76,7 @@ export const getMandatoryFieldsList = (config: FieldConfig<any>[]): string[] => 
   return config.filter(f => f.rules?.includes('required')).map(f => String(f.key))
 }
 
-export const useFormBuilder = <T extends Record<string, any>>({ fields, initialValues }: FormConfig<T>) => {
+export const useFormBuilder = <T extends Record<string, any>>({ formConfig, initialValues }: FormConfig<T>) => {
   const [values, setValues] = useState<T>(initialValues)
   const [errors, setErrors] = useState<ErrorObject[]>([])
   const [optionsMap, setOptionsMap] = useState<Record<string, any[]>>({})
@@ -71,7 +89,7 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
   useEffect(() => {
     const initialOptions: Record<string, any[]> = {}
 
-    fields.forEach(field => {
+    formConfig.forEach(field => {
       const key = String(field.key)
 
       if (Array.isArray(field.staticOptions) && field.staticOptions.length > 0) {
@@ -84,12 +102,12 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
     if (Object.keys(initialOptions).length) {
       setOptionsMap(prev => ({ ...prev, ...initialOptions }))
     }
-  }, [fields])
+  }, [formConfig])
 
   // ✅ DEPENDENCY ENGINE (handles both initial values & user changes)
   useEffect(() => {
     const runDependencies = async () => {
-      for (const field of fields) {
+      for (const field of formConfig) {
         if (!field.dependsOn || !field.fetchOptions) continue
 
         const parentKey = field.dependsOn
@@ -141,7 +159,7 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
     }
 
     runDependencies()
-  }, [values, fields])
+  }, [values, formConfig])
 
   // ✅ VALIDATION
 
@@ -232,7 +250,7 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
   }
 
   const validateField = (key: keyof T, value: any) => {
-    const field = fields.find(f => f.key === key)
+    const field = formConfig.find(f => f.key === key)
     if (!field?.rules) return null
 
     const keyStr = String(key)
@@ -256,29 +274,48 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
 
   // ✅ HANDLE CHANGE (pure, no side-effects)
 
-  const updateErrors = (key: keyof T, value: any) => {
-    const keyStr = String(key)
-    const error = validateField(key, value)
-    const updatedErrors = (prev: ErrorObject[]) => {
-      const filtered = prev.filter(e => e.errorkey !== keyStr)
+  const updateErrors = useCallback(
+    (key: keyof T, value: any) => {
+      const keyStr = String(key)
+      const error = validateField(key, value)
+      setErrors(prev => {
+        const filtered = prev.filter(e => e.errorkey !== keyStr)
 
-      return error ? [...filtered, error] : filtered
-    }
-    setErrors(updatedErrors)
-  }
+        return error ? [...filtered, error] : filtered
+      })
+    },
+    [formConfig]
+  )
 
-  const handleChange = (key: keyof T) => (input: any) => {
-    const value = getValue(input)
-    updateErrors(key, value)
+  const handleChange = useCallback(
+    (key: keyof T) => (input: any) => {
+      const value = getValue(input)
+      const normalizedValue = value instanceof Date ? dateToString(value, 'yyyy-MM-dd') : value
 
-    setValues(prev => ({ ...prev, [key]: value }))
-  }
+      updateErrors(key, value)
+
+      setValues(prev => ({ ...prev, [key]: normalizedValue }))
+    },
+    [updateErrors]
+  )
+
+  const generatedFields = useMemo(
+    () =>
+      mapToFields({
+        config: formConfig,
+        values,
+        handleChange,
+        optionsMap,
+        loadingMap
+      }),
+    [formConfig, values, handleChange, optionsMap, loadingMap]
+  )
 
   // ✅ FORM VALIDATION
   const validateForm = () => {
     const newErrors: ErrorObject[] = []
 
-    fields.forEach(field => {
+    formConfig.forEach(field => {
       const error = validateField(field.key, values[field.key])
       if (error) newErrors.push(error)
     })
@@ -292,7 +329,22 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
   const handleSubmit = (onSubmit: (values: T) => void) => async () => {
     const { isValid } = validateForm()
     if (!isValid) return
-    onSubmit(values)
+
+    // Fix: Assert as Record<string, any> so we can index it dynamically
+    const processedValues = { ...values } as Record<string, any>
+
+    Object.keys(processedValues).forEach(key => {
+      const val = processedValues[key]
+
+      if (typeof val === 'string' && /^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
+        const [day, month, year] = val.split('/')
+        processedValues[key] = `${year}-${month}-${day}`
+      } else if (val instanceof Date) {
+        processedValues[key] = dateToString(val, 'yyyy-MM-dd')
+      }
+    })
+
+    onSubmit(processedValues as T)
   }
 
   return {
@@ -300,6 +352,7 @@ export const useFormBuilder = <T extends Record<string, any>>({ fields, initialV
     errors,
     optionsMap,
     loadingMap,
+    fields: generatedFields,
     handleChange,
     handleSubmit,
     setValues,

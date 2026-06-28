@@ -5,7 +5,7 @@ import * as MdiIcons from 'mdi-material-ui'
 export const iconNames = Object.keys(MdiIcons) as (keyof typeof MdiIcons)[]
 
 // Step 2: Generate the Enum dynamically
-const ChaarvyIcon = Object.freeze(Object.fromEntries(iconNames.map(name => [name, name]))) as {
+export const ChaarvyIcon = Object.freeze(Object.fromEntries(iconNames.map(name => [name, name]))) as {
   [K in keyof typeof MdiIcons]: K
 }
 

@@ -1,6 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 
-import { CacheTag, MasterCacheTag } from '../cacheTag'
+import { CacheTag, MasterCacheTag, CommonCacheTag } from '../cacheTag'
 
 import baseQueryWithOptions, { serializeQueryArgsGlobal } from './baseQueryWithOptions'
 
@@ -12,7 +12,7 @@ const api = createApi({
   serializeQueryArgs: serializeQueryArgsGlobal,
   endpoints: () => ({}),
   keepUnusedDataFor: baseCacheTimeInSeconds,
-  tagTypes: [...Object.values(CacheTag), ...Object.values(MasterCacheTag)]
+  tagTypes: [...Object.values(CacheTag), ...Object.values(MasterCacheTag), ...Object.values(CommonCacheTag)]
 })
 
 export default api

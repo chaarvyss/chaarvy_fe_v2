@@ -1,5 +1,11 @@
 const interPrefix = 'inter'
 const masterPrefix = 'master'
+
+const commonRoutePrefix = {
+  list: '/list',
+  expense: '/expenses'
+}
+
 const interRoutePrefix = {
   admin: `${interPrefix}/admin`,
   admisions: `${interPrefix}/admissions`,
@@ -21,6 +27,21 @@ const masterRoutePrefix = {
 }
 
 export const urlConstants = {
+  common: {
+    list: {
+      expensesUrl: `${commonRoutePrefix.list}/expenses`,
+      benificeryTypesUrl: `${commonRoutePrefix.list}/benificery-types`,
+      expenseCategoryTypesUrl: `${commonRoutePrefix.list}/expense-category-types`
+    },
+    expenses: {
+      createUpdateExpenseUrl: `${commonRoutePrefix.expense}/add-update-expense`,
+      createUpdateBenficeryTypeUrl: `${commonRoutePrefix.expense}/add-update-benificery-type`,
+      createUpdateExpenseCategoryTypeUrl: `${commonRoutePrefix.expense}/add-update-expense-category`,
+      createUpdatePaymentModeUrl: `${commonRoutePrefix.expense}/create-update-payment-mode`,
+      getExpenseDetailUrl: `${commonRoutePrefix.expense}/get-expense-detail`
+    }
+  },
+
   auth: {
     login: `${interRoutePrefix.auth}/login`,
     changePassword: `${interRoutePrefix.auth}/change-password`,

@@ -1,5 +1,6 @@
 import { ReactElement } from 'react'
 
+import { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
 import { AdmissionCounts } from 'src/store/services/admisissionsService'
 
 export type ProgramSegmentMedium = {
@@ -33,10 +34,7 @@ export type BooksListResponse = {
   counts: AdmissionCounts
 }
 
-export type BooksListRequest = {
-  program_id?: string | string[]
-  medium_id?: string
-  segment_id?: string
+export type BooksListRequest = CascadingSelectorState & {
   isCommon?: boolean
   offset?: number
   limit?: number
@@ -98,6 +96,8 @@ export type MenuOptions = {
   value: string | number
 }
 
+type FormValueTypes = string | number | boolean | Date
+
 export type InputFields = {
   type: 'input' | 'select' | 'radio' | 'date' | 'button' | 'checkbox' | 'date_range'
   variant?: 'number' | 'string' | 'email'
@@ -105,7 +105,7 @@ export type InputFields = {
   id: string
   label: string
   key: string
-  value?: string | number | boolean | Date
+  value?: FormValueTypes
   customInput?: ReactElement
   placeholder?: string
   onChange: (e: any) => void
@@ -117,6 +117,12 @@ export type InputFields = {
   checked?: boolean
   searchable?: boolean
   onSearch?: (searchText: string) => Promise<{ label: string; value: any }[]>
+  onAddNew?: (text?: string) => void
+  addNewLabel?: string
+  onEdit?: (value: string | number, label: string) => void
+  onEditSuccess?: () => void
+  isOptionsLoading?: boolean
+  isUpdating?: boolean
 }
 
 export type ErrorObject = {

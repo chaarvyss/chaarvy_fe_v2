@@ -6,7 +6,7 @@ type CustomDateElementProps = TextFieldProps & {
 }
 
 const CustomDateElement = forwardRef<HTMLInputElement, CustomDateElementProps>(({ label, ...props }, ref) => {
-  return <TextField fullWidth {...props} inputRef={ref} label={label} autoComplete='off' />
+  return <TextField fullWidth size='small' {...props} inputRef={ref} label={label} autoComplete='off' />
 })
 
 export default CustomDateElement

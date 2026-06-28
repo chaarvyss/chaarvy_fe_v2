@@ -236,7 +236,7 @@ const formatHtmlVariables = (html: string) => {
     if (regex.test(text)) {
       const spanWrap = document.createElement('span')
       spanWrap.innerHTML = text.replace(regex, match => {
-        const uniqueId = `span_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        const uniqueId = `span_${crypto.randomUUID()}`
 
         return `<span id="${uniqueId}" data-dynamic="true" style="color: #e91e63; font-weight: bold; cursor: pointer; padding: 0 2px;">${match}</span>`
       })
@@ -472,7 +472,7 @@ const DesignerPage = () => {
     if (clipboard.length > 0 && !editingItem) {
       const newItems = clipboard.map(c => ({
         ...c,
-        id: `${c.type}_${Date.now()}_${Math.random()}`,
+        id: `${c.type}_${Date.now()}_${crypto.randomUUID()}`,
         x: c.x + 20,
         y: c.y + 20
       }))

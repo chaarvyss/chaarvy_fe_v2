@@ -3,7 +3,7 @@ import { useEffect, useMemo } from 'react'
 
 import { Typography } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { FieldConfig, getMandatoryFieldsList, mapToFields, useFormBuilder } from 'src/hooks/useFormBuilder'
+import { FieldConfig, getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
 import { InputTypes } from 'src/lib/enums'
 import FormGenerator from 'src/reusable_components/formGenerator'
 import { useCreateUpdateAddressMutation } from 'src/store/services/adminServices'
@@ -94,8 +94,8 @@ const AddressForm = ({ student_id, address_id, user_id, user_type, isLoading, ha
     [statesList]
   )
 
-  const { values, errors, handleChange, handleSubmit, optionsMap, loadingMap, setValues } = useFormBuilder<Address>({
-    fields: addressFormConfig,
+  const { fields, errors, handleSubmit, setValues } = useFormBuilder<Address>({
+    formConfig: addressFormConfig,
     initialValues: {
       door_no: '',
       house_apartment_name: '',
@@ -113,14 +113,6 @@ const AddressForm = ({ student_id, address_id, user_id, user_type, isLoading, ha
       setValues(address)
     }
   }, [address])
-
-  const fields = mapToFields({
-    config: addressFormConfig,
-    values,
-    handleChange,
-    optionsMap,
-    loadingMap
-  })
 
   const onSubmit = async (data: Address) => {
     const address_payload = { ...data, student_id, address_id }
