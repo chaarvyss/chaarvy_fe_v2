@@ -1,3 +1,10 @@
+## [1.18.7](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.6...v1.18.7) (2026-06-28)
+
+
+### Bug Fixes
+
+* **Expenses:** AC-76 Expenses list ([#63](https://github.com/chaarvyss/chaarvy_fe_v2/issues/63)) ([1f209a3](https://github.com/chaarvyss/chaarvy_fe_v2/commit/1f209a3d7486b1beeb04917407a2bc6e42054056))
+
 ## [1.18.6](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.5...v1.18.6) (2026-06-22)
 
 
