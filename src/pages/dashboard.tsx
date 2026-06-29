@@ -4,6 +4,8 @@ import { PermissionLabels } from 'src/constants/permissions'
 import { GridDashboard, LayoutCard } from 'src/reusable_components/GridDashboard'
 import Attendence from 'src/views/dashboardCards/attendence'
 import MyCalendar from 'src/views/dashboardCards/calendar'
+import FinancePage from 'src/views/dashboardCards/FinancialStatus'
+import OverallExpensesDashboardCard from 'src/views/dashboardCards/OverallExpenses'
 import Payments from 'src/views/dashboardCards/payments'
 import Population from 'src/views/dashboardCards/population'
 import StationaryStock from 'src/views/dashboardCards/stationaryStock'
@@ -15,7 +17,9 @@ const dashboardComponents = {
   Attendence: Attendence,
   Payments: Payments,
   Stationary_stock: StationaryStock,
-  Student_enrollments: StudentEnrollmentChart
+  Student_enrollments: StudentEnrollmentChart,
+  CashFlow: FinancePage,
+  Expenses: OverallExpensesDashboardCard
 }
 
 const dashboardLayout: LayoutCard[] = [
@@ -60,6 +64,26 @@ const dashboardLayout: LayoutCard[] = [
     h: 4,
     shouldHide: false,
     permission_key: PermissionLabels.dashboard.studentEnrollments,
+    hadSearch: false
+  },
+  {
+    i: 'CashFlow',
+    x: 0,
+    y: 10,
+    w: 6,
+    h: 4,
+    shouldHide: false,
+    permission_key: PermissionLabels.dashboard.cashFlow,
+    hadSearch: false
+  },
+  {
+    i: 'Expenses',
+    x: 6,
+    y: 10,
+    w: 6,
+    h: 4,
+    shouldHide: false,
+    permission_key: PermissionLabels.dashboard.expenses,
     hadSearch: false
   }
 ]

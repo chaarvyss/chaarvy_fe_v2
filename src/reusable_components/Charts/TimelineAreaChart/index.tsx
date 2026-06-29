@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 
 import DynamicTimelineChart, { TimelineChartData, TimeFrequency, TooltipParams } from './TimelineChart'
 
@@ -13,13 +13,14 @@ interface TimelineDashboardProps<T> {
   records: T[]
   getDate: (record: T) => Date | string
   seriesConfig: SeriesConfig<T>[]
+  startDate: string
+  endDate: string
+  frequency: TimeFrequency
   valueFormatter?: (val: number) => string
   tooltipFormatter?: (params: TooltipParams<T>) => string
-  onRequestChange?: (newProps: { startDate: string; endDate: string; unit: TimeFrequency }) => void
-  initialFrequency?: TimeFrequency // NEW: Sync initial load
+  onRequestChange: (newProps: { startDate: string; endDate: string; unit: TimeFrequency }) => void
 }
 
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 const formatDate = (date: Date) => {
@@ -30,152 +31,149 @@ const formatDate = (date: Date) => {
   return `${year}-${month}-${day}`
 }
 
-// NEW: Extracted date logic so both UI and API requests can share it instantly
-const getDateRange = (referenceDate: Date, frequency: TimeFrequency) => {
-  let startDate = new Date(referenceDate)
-  let endDate = new Date(referenceDate)
-  let categories: string[] = []
-  let dateRangeLabel = ''
-
-  if (frequency === 'week') {
-    startDate.setDate(referenceDate.getDate() - referenceDate.getDay())
-    startDate.setHours(0, 0, 0, 0)
-    endDate = new Date(startDate)
-    endDate.setDate(startDate.getDate() + 6)
-    endDate.setHours(23, 59, 59, 999)
-    categories = DAY_NAMES
-    dateRangeLabel = `${MONTH_NAMES[startDate.getMonth()]} ${startDate.getDate()} - ${MONTH_NAMES[endDate.getMonth()]} ${endDate.getDate()}, ${startDate.getFullYear()}`
-  } else if (frequency === 'month') {
-    startDate = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), 1)
-    endDate = new Date(referenceDate.getFullYear(), referenceDate.getMonth() + 1, 0, 23, 59, 59, 999)
-    categories = Array.from({ length: endDate.getDate() }, (_, i) => (i + 1).toString())
-    dateRangeLabel = `${MONTH_NAMES[startDate.getMonth()]} ${startDate.getFullYear()}`
-  } else if (frequency === 'year') {
-    startDate = new Date(referenceDate.getFullYear(), 0, 1)
-    endDate = new Date(referenceDate.getFullYear(), 11, 31, 23, 59, 59, 999)
-    categories = MONTH_NAMES
-    dateRangeLabel = `${startDate.getFullYear()}`
-  }
-
-  return { startDate, endDate, categories, dateRangeLabel }
-}
-
 const TimelineDashboard = <T,>({
   records,
   getDate,
   seriesConfig,
+  startDate,
+  endDate,
+  frequency,
   valueFormatter,
   tooltipFormatter,
-  onRequestChange,
-  initialFrequency = 'month' // Defaulting to month to match your FinancePage
+  onRequestChange
 }: TimelineDashboardProps<T>) => {
-  const [frequency, setFrequency] = useState<TimeFrequency>(initialFrequency)
-  const [referenceDate, setReferenceDate] = useState<Date>(new Date())
+  // Shift start and end dates synchronously
+  const shiftDates = (direction: 1 | -1) => {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
 
-  // NEW: Instantly formats and fires the API request
-  const notifyChange = (date: Date, freq: TimeFrequency) => {
-    if (!onRequestChange) return
-    const { startDate, endDate } = getDateRange(date, freq)
+    if (frequency === 'week') {
+      start.setDate(start.getDate() + 7 * direction)
+      end.setDate(end.getDate() + 7 * direction)
+    } else if (frequency === 'month') {
+      start.setMonth(start.getMonth() + 1 * direction)
+      end.setMonth(end.getMonth() + 1 * direction)
+    } else if (frequency === 'year') {
+      // Retains exactly custom academic/financial dates by shifting exactly 1 year
+      start.setFullYear(start.getFullYear() + 1 * direction)
+      end.setFullYear(end.getFullYear() + 1 * direction)
+    }
 
-    onRequestChange({
-      startDate: formatDate(startDate),
-      endDate: formatDate(endDate),
-      unit: freq
-    })
-  }
-
-  const handlePrevious = () => {
-    // 1. Calculate the new date safely outside the updater
-    const newDate = new Date(referenceDate)
-    if (frequency === 'week') newDate.setDate(newDate.getDate() - 7)
-    if (frequency === 'month') newDate.setMonth(newDate.getMonth() - 1)
-    if (frequency === 'year') newDate.setFullYear(newDate.getFullYear() - 1)
-
-    // 2. Update local state
-    setReferenceDate(newDate)
-
-    // 3. Instantly notify the parent (FinancePage) with the correct dates
-    notifyChange(newDate, frequency)
-  }
-
-  const handleNext = () => {
-    // 1. Calculate the new date safely outside the updater
-    const newDate = new Date(referenceDate)
-    if (frequency === 'week') newDate.setDate(newDate.getDate() + 7)
-    if (frequency === 'month') newDate.setMonth(newDate.getMonth() + 1)
-    if (frequency === 'year') newDate.setFullYear(newDate.getFullYear() + 1)
-
-    // 2. Update local state
-    setReferenceDate(newDate)
-
-    // 3. Instantly notify the parent (FinancePage) with the correct dates
-    notifyChange(newDate, frequency)
+    onRequestChange({ startDate: formatDate(start), endDate: formatDate(end), unit: frequency })
   }
 
   const handleFrequencyChange = (newFreq: TimeFrequency) => {
-    setFrequency(newFreq)
-    const newDate = new Date() // Reset to today on freq change
-    setReferenceDate(newDate)
-    notifyChange(newDate, newFreq)
+    // Reset to sensible defaults based on dropdown selection
+    const today = new Date()
+    let newStart = new Date(today)
+    let newEnd = new Date(today)
+
+    if (newFreq === 'week') {
+      newStart.setDate(today.getDate() - today.getDay())
+      newEnd = new Date(newStart)
+      newEnd.setDate(newStart.getDate() + 6)
+    } else if (newFreq === 'month') {
+      newStart = new Date(today.getFullYear(), today.getMonth(), 1)
+      newEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+    } else if (newFreq === 'year') {
+      newStart = new Date(today.getFullYear(), 0, 1)
+      newEnd = new Date(today.getFullYear(), 11, 31)
+    }
+
+    onRequestChange({ startDate: formatDate(newStart), endDate: formatDate(newEnd), unit: newFreq })
   }
 
   const chartData = useMemo<TimelineChartData<T> | null>(() => {
-    const { startDate, endDate, categories, dateRangeLabel } = getDateRange(referenceDate, frequency)
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24))
 
+    // 1. Dynamic X-Axis Generation based purely on date difference
+    const buckets: { label: string; start: Date; end: Date }[] = []
+
+    if (diffDays <= 60) {
+      // Daily Buckets
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const dStart = new Date(d)
+        dStart.setHours(0, 0, 0, 0)
+        const dEnd = new Date(d)
+        dEnd.setHours(23, 59, 59, 999)
+        buckets.push({ label: `${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`, start: dStart, end: dEnd })
+      }
+    } else if (diffDays <= 366) {
+      // Monthly Buckets
+      const current = new Date(start.getFullYear(), start.getMonth(), 1)
+      const endMonth = new Date(end.getFullYear(), end.getMonth(), 1)
+      while (current <= endMonth) {
+        const mStart = new Date(current)
+        const mEnd = new Date(current.getFullYear(), current.getMonth() + 1, 0, 23, 59, 59, 999)
+        buckets.push({ label: `${MONTH_NAMES[current.getMonth()]} ${current.getFullYear()}`, start: mStart, end: mEnd })
+        current.setMonth(current.getMonth() + 1)
+      }
+    } else {
+      // Yearly Buckets
+      let currentYear = start.getFullYear()
+      while (currentYear <= end.getFullYear()) {
+        const yStart = new Date(currentYear, 0, 1)
+        const yEnd = new Date(currentYear, 11, 31, 23, 59, 59, 999)
+        buckets.push({ label: `${currentYear}`, start: yStart, end: yEnd })
+        currentYear++
+      }
+    }
+
+    // 2. Filter valid records
     const validRecords = records.filter(r => {
       const d = new Date(getDate(r))
 
-      return d >= startDate && d <= endDate
+      return d >= start && d <= new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59, 999)
     })
 
+    // 3. Initialize series and bucketed arrays
     const seriesData = seriesConfig.map(config => ({
       name: config.name,
       color: config.color,
-      data: new Array(categories.length).fill(0),
+      data: new Array(buckets.length).fill(0),
       total: 0
     }))
+    const bucketedRecords: T[][] = Array.from({ length: buckets.length }, () => [])
 
-    const bucketedRecords: T[][] = Array.from({ length: categories.length }, () => [])
-
+    // 4. Map records into their correct dynamic buckets
     validRecords.forEach(record => {
       const d = new Date(getDate(record))
-      let bucketIndex = 0
 
-      if (frequency === 'week') bucketIndex = d.getDay()
-      if (frequency === 'month') bucketIndex = d.getDate() - 1
-      if (frequency === 'year') bucketIndex = d.getMonth()
+      // Find which bucket this date belongs to
+      const bucketIndex = buckets.findIndex(b => d >= b.start && d <= b.end)
 
-      bucketedRecords[bucketIndex].push(record)
-
-      seriesConfig.forEach((config, idx) => {
-        if (config.matchRecord(record)) {
-          const val = config.getValue(record)
-          seriesData[idx].data[bucketIndex] += val
-          seriesData[idx].total += val
-        }
-      })
+      if (bucketIndex !== -1) {
+        bucketedRecords[bucketIndex].push(record)
+        seriesConfig.forEach((config, idx) => {
+          if (config.matchRecord(record)) {
+            const val = config.getValue(record)
+            seriesData[idx].data[bucketIndex] += val
+            seriesData[idx].total += val
+          }
+        })
+      }
     })
 
     return {
-      dateRangeLabel,
-      startDate: formatDate(startDate),
-      endDate: formatDate(endDate),
-      categories,
+      categories: buckets.map(b => b.label),
       series: seriesData.map(s => ({ name: s.name, data: s.data, color: s.color })),
       summary: seriesData.map(s => ({ label: s.name, value: s.total, color: s.color })),
       bucketedRecords
     }
-  }, [referenceDate, frequency, records, getDate, seriesConfig])
-
-  // NOTE: The nasty useEffect has been entirely deleted!
+  }, [startDate, endDate, records, getDate, seriesConfig])
 
   return (
     <DynamicTimelineChart<T>
       data={chartData}
+      startDate={startDate}
+      endDate={endDate}
       frequency={frequency}
       onFrequencyChange={handleFrequencyChange}
-      onNext={handleNext}
-      onPrevious={handlePrevious}
+      onDateChange={(start, end) => onRequestChange({ startDate: start, endDate: end, unit: frequency })}
+      onNext={() => shiftDates(1)}
+      onPrevious={() => shiftDates(-1)}
       valueFormatter={valueFormatter}
       tooltipFormatter={tooltipFormatter}
     />

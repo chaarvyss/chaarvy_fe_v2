@@ -3,7 +3,6 @@ import React, { useCallback, useState, useMemo } from 'react'
 import { LoadingSpinner } from 'src/reusable_components'
 import TimelineDashboard from 'src/reusable_components/Charts/TimelineAreaChart'
 import { useGetCashflowDetailsQuery } from 'src/store/services/dashboardServices'
-import { normalizeDateInput } from 'src/utils/helpers'
 
 type FinanceFilters = {
   startDate: string
@@ -17,38 +16,34 @@ const FinancePage: React.FC = () => {
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
     const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
 
+    // Formatting directly as 'YYYY-MM-DD' for native date inputs
+    const format = (d: Date) => d.toISOString().split('T')[0]
+
     return {
-      startDate: normalizeDateInput(startOfMonth, '', today.getFullYear()),
-      endDate: normalizeDateInput(endOfMonth, '', today.getFullYear()),
-      unit: 'month' as 'week' | 'month' | 'year'
+      startDate: format(startOfMonth),
+      endDate: format(endOfMonth),
+      unit: 'month'
     }
   })
 
-  const handleRequestChange: React.Dispatch<React.SetStateAction<FinanceFilters>> = useCallback(updater => {
+  // Fixed updater: Removed 'normalizeDateInput' which was likely locking the year.
+  // The chart now controls exact date strings reliably.
+  const handleRequestChange = useCallback((newFilters: FinanceFilters) => {
     setProps(prev => {
-      const next = typeof updater === 'function' ? updater(prev) : updater
-      const referenceYear = new Date().getFullYear()
-      const normalizedNext: FinanceFilters = {
-        ...next,
-        startDate: normalizeDateInput(next.startDate, prev.startDate, referenceYear),
-        endDate: normalizeDateInput(next.endDate, prev.endDate, referenceYear)
-      }
-
       if (
-        normalizedNext.startDate === prev.startDate &&
-        normalizedNext.endDate === prev.endDate &&
-        normalizedNext.unit === prev.unit
+        newFilters.startDate === prev.startDate &&
+        newFilters.endDate === prev.endDate &&
+        newFilters.unit === prev.unit
       ) {
         return prev
       }
 
-      return normalizedNext
+      return newFilters
     })
   }, [])
 
   const { data: cashflowData, isFetching: isLoadingCashflow } = useGetCashflowDetailsQuery(props)
 
-  // NEW: Memoizing this prevents React from thinking the config changes on every render.
   const chartSeriesConfig = useMemo(
     () => [
       {
@@ -106,10 +101,12 @@ const FinancePage: React.FC = () => {
       records={cashflowData ?? []}
       getDate={record => record.date}
       seriesConfig={chartSeriesConfig}
+      startDate={props.startDate} // Prop drilled explicitly
+      endDate={props.endDate} // Prop drilled explicitly
+      frequency={props.unit} // Prop drilled explicitly
       valueFormatter={val => `₹${(val ?? 0).toLocaleString('en-IN')}`}
       tooltipFormatter={renderTooltip}
       onRequestChange={handleRequestChange}
-      initialFrequency='month' // Ensure it starts exactly as the FinanceFilters state does above
     />
   )
 }

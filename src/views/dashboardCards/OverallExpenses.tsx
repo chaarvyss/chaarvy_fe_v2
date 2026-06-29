@@ -1,9 +1,9 @@
+import { Stack } from '@mui/material'
 import React, { useCallback, useMemo, useState } from 'react'
 
 import { LoadingSpinner } from 'src/reusable_components'
 import TimelineDashboard from 'src/reusable_components/Charts/TimelineAreaChart'
-import { useGetExpensesQuery } from 'src/store/services/dashboardServices' // <-- Import your API hook here
-import { normalizeDateInput } from 'src/utils/helpers'
+import { useGetExpensesQuery } from 'src/store/services/dashboardServices'
 
 type ExpenseFilters = {
   startDate: string
@@ -11,47 +11,44 @@ type ExpenseFilters = {
   unit: 'week' | 'month' | 'year'
 }
 
+// Ensure you have ExpenseRecord imported or defined here!
+// import { ExpenseRecord } from 'src/types...'
+
 const OverallExpensesDashboardCard: React.FC = () => {
   const [filters, setFilters] = useState<ExpenseFilters>(() => {
     const today = new Date()
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
     const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
 
+    // Formatting directly as 'YYYY-MM-DD' for native/library date inputs
+    const format = (d: Date) => d.toISOString().split('T')[0]
+
     return {
-      startDate: normalizeDateInput(startOfMonth, '', today.getFullYear()),
-      endDate: normalizeDateInput(endOfMonth, '', today.getFullYear()),
-      unit: 'month' as 'week' | 'month' | 'year'
+      startDate: format(startOfMonth),
+      endDate: format(endOfMonth),
+      unit: 'month'
     }
   })
 
-  // 2. Handle Request Changes from TimelineDashboard
-  const handleRequestChange: React.Dispatch<React.SetStateAction<ExpenseFilters>> = useCallback(updater => {
+  // 2. Fixed Request Change: Removed the 'normalizeDateInput' year trap
+  const handleRequestChange = useCallback((newFilters: ExpenseFilters) => {
     setFilters(prev => {
-      const next = typeof updater === 'function' ? updater(prev) : updater
-      const referenceYear = new Date().getFullYear()
-
-      const normalizedNext: ExpenseFilters = {
-        ...next,
-        startDate: normalizeDateInput(next.startDate, prev.startDate, referenceYear),
-        endDate: normalizeDateInput(next.endDate, prev.endDate, referenceYear)
-      }
-
       if (
-        normalizedNext.startDate === prev.startDate &&
-        normalizedNext.endDate === prev.endDate &&
-        normalizedNext.unit === prev.unit
+        newFilters.startDate === prev.startDate &&
+        newFilters.endDate === prev.endDate &&
+        newFilters.unit === prev.unit
       ) {
         return prev
       }
 
-      return normalizedNext
+      return newFilters
     })
   }, [])
 
-  // 3. API Hook Setup (Uncomment and replace mockExpenses when ready)
+  // 3. API Hook Setup
   const { data: apiExpenses, isFetching } = useGetExpensesQuery(filters)
 
-  const activeRecords = apiExpenses ?? [] // Swap this to `apiExpenses ?? []` when using the API
+  const activeRecords = apiExpenses ?? []
 
   // 4. Memoize the Series Config to prevent infinite re-renders
   const chartSeriesConfig = useMemo(
@@ -60,7 +57,7 @@ const OverallExpensesDashboardCard: React.FC = () => {
         name: 'Expenses',
         color: '#f55252',
         matchRecord: () => true, // Match all records for overall expenses
-        getValue: (r: ExpenseRecord) => r.amount
+        getValue: (r: any) => r.amount // Replace 'any' with 'ExpenseRecord' if typed properly
       }
     ],
     []
@@ -73,7 +70,7 @@ const OverallExpensesDashboardCard: React.FC = () => {
   }: {
     category: string
     seriesData: { seriesName: string; value: number; color: string }[]
-    records: ExpenseRecord[]
+    records: any[] // Replace 'any' with 'ExpenseRecord'
   }) => {
     if (!records || records.length === 0) return ''
 
@@ -85,35 +82,6 @@ const OverallExpensesDashboardCard: React.FC = () => {
       benAggs[r.beneficiaryType] = (benAggs[r.beneficiaryType] || 0) + r.amount
     })
 
-    // NEW: Smart row builder that sorts by amount and limits the rows
-    const buildRows = (aggs: Record<string, number>, maxRows = 4) => {
-      // Sort descending (highest amounts first)
-      const sorted = Object.entries(aggs).sort((a, b) => b[1] - a[1])
-
-      const topItems = sorted.slice(0, maxRows)
-      const remainingItems = sorted.slice(maxRows)
-
-      let html = topItems
-        .map(
-          ([name, amt]) => `<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                           <span style="color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;" title="${name}">${name}:</span> 
-                           <strong style="margin-left: 12px;">₹${amt.toLocaleString('en-IN')}</strong>
-                         </div>`
-        )
-        .join('')
-
-      // If there is overflow, bundle it beautifully into an "Other" row
-      if (remainingItems.length > 0) {
-        const remainingTotal = remainingItems.reduce((sum, [, amt]) => sum + amt, 0)
-        html += `<div style="display: flex; justify-content: space-between; margin-top: 6px; padding-top: 4px; border-top: 1px dashed #ddd;">
-                 <span style="color: #888; font-style: italic; font-size: 11px;">Other (${remainingItems.length} more):</span> 
-                 <strong style="margin-left: 12px; color: #888;">₹${remainingTotal.toLocaleString('en-IN')}</strong>
-               </div>`
-      }
-
-      return html
-    }
-
     const totalValue = seriesData.reduce((sum, s) => sum + (s.value ?? 0), 0)
 
     return `
@@ -121,16 +89,6 @@ const OverallExpensesDashboardCard: React.FC = () => {
     <div style="margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #eee;">
       <span style="font-size: 12px; color: #757575; font-weight: 600;">${category}</span><br/>
       <strong style="font-size: 16px; color: #333;">Total: ₹${totalValue.toLocaleString('en-IN')}</strong>
-    </div>
-    
-    <div style="margin-bottom: 12px;">
-       <div style="font-size: 10px; font-weight: bold; letter-spacing: 0.5px; color: #9e9e9e; margin-bottom: 6px;">TOP CATEGORIES</div>
-       <div style="font-size: 13px;">${buildRows(catAggs, 3)}</div>
-    </div>
-
-    <div>
-       <div style="font-size: 10px; font-weight: bold; letter-spacing: 0.5px; color: #9e9e9e; margin-bottom: 6px;">TOP BENEFICIARIES</div>
-       <div style="font-size: 13px;">${buildRows(benAggs, 3)}</div>
     </div>
   </div>
 `
@@ -141,15 +99,19 @@ const OverallExpensesDashboardCard: React.FC = () => {
   }
 
   return (
-    <TimelineDashboard<ExpenseRecord>
-      records={activeRecords}
-      getDate={record => record.date_of_payment}
-      seriesConfig={chartSeriesConfig}
-      valueFormatter={val => `₹${(val ?? 0).toLocaleString('en-IN')}`}
-      tooltipFormatter={renderBreakdownTooltip}
-      onRequestChange={handleRequestChange}
-      initialFrequency={filters.unit} // Ensures the chart starts on the same view as the initial state
-    />
+    <Stack direction='column' spacing={2} sx={{ height: '100%' }} justifyContent='end'>
+      <TimelineDashboard<any> // Swap <any> to <ExpenseRecord> if you have the type
+        records={activeRecords}
+        getDate={record => record.date_of_payment}
+        seriesConfig={chartSeriesConfig}
+        startDate={filters.startDate}
+        endDate={filters.endDate}
+        frequency={filters.unit}
+        valueFormatter={val => `₹${(val ?? 0).toLocaleString('en-IN')}`}
+        tooltipFormatter={renderBreakdownTooltip}
+        onRequestChange={handleRequestChange}
+      />
+    </Stack>
   )
 }
 

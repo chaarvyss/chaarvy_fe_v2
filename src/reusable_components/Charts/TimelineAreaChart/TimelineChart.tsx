@@ -10,9 +10,12 @@ import {
   IconButton
 } from '@mui/material'
 import { ApexOptions } from 'apexcharts'
-import React from 'react'
+import { useEffect, useState } from 'react'
 import Chart from 'react-apexcharts'
+import DatePicker from 'react-datepicker'
 
+import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
+import CustomDateElement from 'src/reusable_components/dateInputElement'
 import GetChaarvyIcons from 'src/utils/icons'
 
 export type TimeFrequency = 'week' | 'month' | 'year'
@@ -29,15 +32,11 @@ export interface SummaryMetric {
   color: string
 }
 
-// <T> makes this interface aware of your specific data records
 export interface TimelineChartData<T> {
-  dateRangeLabel: string
-  startDate: string
-  endDate: string
   categories: string[]
   series: ChartSeries[]
   summary: SummaryMetric[]
-  bucketedRecords: T[][] // NEW: Stores raw records for each time bucket
+  bucketedRecords: T[][]
 }
 
 export interface TooltipParams<T> {
@@ -52,24 +51,49 @@ export interface TooltipParams<T> {
 
 interface DynamicTimelineChartProps<T> {
   data: TimelineChartData<T> | null
+  startDate: string
+  endDate: string
   frequency: TimeFrequency
   onFrequencyChange: (freq: TimeFrequency) => void
+  onDateChange: (start: string, end: string) => void
   onNext: () => void
   onPrevious: () => void
   valueFormatter?: (val: number) => string
-  tooltipFormatter?: (params: TooltipParams<T>) => string // NEW: Custom Tooltip renderer
+  tooltipFormatter?: (params: TooltipParams<T>) => string
 }
 
 const DynamicTimelineChart = <T,>({
   data,
+  startDate,
+  endDate,
   frequency,
   onFrequencyChange,
+  onDateChange,
   onNext,
   onPrevious,
   valueFormatter,
   tooltipFormatter
 }: DynamicTimelineChartProps<T>) => {
   const formatValue = valueFormatter || ((val: number) => val.toLocaleString('en-IN'))
+
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
+    startDate ? new Date(startDate) : null,
+    endDate ? new Date(endDate) : null
+  ])
+
+  // --- NEW: Sync local state if Next/Prev buttons are clicked from the parent ---
+  useEffect(() => {
+    setDateRange([startDate ? new Date(startDate) : null, endDate ? new Date(endDate) : null])
+  }, [startDate, endDate])
+
+  // --- NEW: Safe local date formatter (prevents timezone bugs from toISOString) ---
+  const formatLocal = (d: Date) => {
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+
+    return `${year}-${month}-${day}`
+  }
 
   const handleSelectChange = (event: SelectChangeEvent) => {
     onFrequencyChange(event.target.value as TimeFrequency)
@@ -99,20 +123,14 @@ const DynamicTimelineChart = <T,>({
       shared: true,
       intersect: false,
       custom: function ({ dataPointIndex, w }) {
-        // 1. Get the category label for this data point
         const category = data?.categories[dataPointIndex] || ''
-
-        // 2. Gather data from ALL series for this specific index
         const seriesData = w.globals.seriesNames.map((name: string, index: number) => ({
           seriesName: name,
           value: w.globals.series[index][dataPointIndex],
           color: w.globals.colors[index]
         }))
-
-        // 3. Get the raw records for this time bucket
         const records = data?.bucketedRecords[dataPointIndex] || []
 
-        // 4. Pass the correct structure to your formatter
         if (tooltipFormatter) {
           return tooltipFormatter({ category, seriesData, records })
         }
@@ -149,18 +167,39 @@ const DynamicTimelineChart = <T,>({
         </Box>
 
         <Stack direction='row' alignItems='center' spacing={2}>
-          <Stack
-            direction='row'
-            alignItems='center'
-            spacing={1}
-            sx={{ bgcolor: '#f5f5f5', borderRadius: 2, px: 1, py: 0.5 }}
-          >
+          {/* NEW DATE RANGE SELECTOR UI */}
+
+          <Stack direction='row' alignItems='center' spacing={1}>
             <IconButton size='small' onClick={onPrevious}>
               <GetChaarvyIcons iconName='ChevronLeft' />
             </IconButton>
-            <Typography variant='body2' fontWeight='600' sx={{ minWidth: 140, textAlign: 'center' }}>
-              {data?.dateRangeLabel || 'Loading...'}
-            </Typography>
+
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <DatePicker
+                selectsRange
+                startDate={dateRange[0]}
+                endDate={dateRange[1]}
+                onChange={(dates: [Date | null, Date | null]) => {
+                  // 2. Update local state instantly so the UI highlights the first click
+                  setDateRange(dates)
+
+                  const [start, end] = dates
+
+                  // 3. Only notify the parent (and trigger API) when BOTH are selected
+                  if (start && end) {
+                    onDateChange(formatLocal(start), formatLocal(end))
+                  }
+                }}
+                customInput={<CustomDateElement label='' />}
+                dateFormat='dd MMM yyyy'
+                showMonthDropdown
+                showYearDropdown
+                portalId='root-portal'
+                dropdownMode='select'
+                popperContainer={({ children }) => <DatePickerWrapper>{children}</DatePickerWrapper>}
+              />
+            </Box>
+
             <IconButton size='small' onClick={onNext}>
               <GetChaarvyIcons iconName='ChevronRight' />
             </IconButton>
@@ -172,9 +211,9 @@ const DynamicTimelineChart = <T,>({
               onChange={handleSelectChange}
               sx={{ fontWeight: 600, bgcolor: 'white', borderRadius: 1 }}
             >
-              <MenuItem value='week'>Weekly</MenuItem>
-              <MenuItem value='month'>Monthly</MenuItem>
-              <MenuItem value='year'>Yearly</MenuItem>
+              <MenuItem value='week'>Weekly Step</MenuItem>
+              <MenuItem value='month'>Monthly Step</MenuItem>
+              <MenuItem value='year'>Yearly Step</MenuItem>
             </Select>
           </FormControl>
         </Stack>
