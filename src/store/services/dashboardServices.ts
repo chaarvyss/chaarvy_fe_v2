@@ -21,6 +21,15 @@ export type StudentData = {
   }
 }
 
+type DateRange = {
+  startDate: string
+  endDate: string
+}
+
+type CashflowRequest = DateRange & {
+  unit: 'week' | 'month' | 'year'
+}
+
 const adminServiceApi = api.injectEndpoints({
   endpoints: build => ({
     getLowStationaryStockDetails: build.query<StationaryStockResponse[], void>({
@@ -54,6 +63,25 @@ const adminServiceApi = api.injectEndpoints({
           url: urlConstants.dashboard.paymentCountDetails
         }
       }
+    }),
+
+    getCashflowDetails: build.query<FinancialRecord[], CashflowRequest>({
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.dashboard.cashflowDetailsUrl,
+          params
+        }
+      }
+    }),
+    getExpenses: build.query<ExpenseRecord[], DateRange>({
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.dashboard.expensesDetailsUrl,
+          params
+        }
+      }
     })
   })
 })
@@ -62,5 +90,7 @@ export const {
   useGetLowStationaryStockDetailsQuery,
   useGetStudentEnrollmentCountDetailsQuery,
   useGetStudentsCountQuery,
-  useGetPaymentsCountQuery
+  useGetPaymentsCountQuery,
+  useGetCashflowDetailsQuery,
+  useGetExpensesQuery
 } = adminServiceApi

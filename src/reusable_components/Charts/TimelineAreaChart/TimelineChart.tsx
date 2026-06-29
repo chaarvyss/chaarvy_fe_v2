@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Box,
   CardContent,
@@ -10,8 +9,10 @@ import {
   SelectChangeEvent,
   IconButton
 } from '@mui/material'
-import Chart from 'react-apexcharts'
 import { ApexOptions } from 'apexcharts'
+import React from 'react'
+import Chart from 'react-apexcharts'
+
 import GetChaarvyIcons from 'src/utils/icons'
 
 export type TimeFrequency = 'week' | 'month' | 'year'
@@ -31,6 +32,8 @@ export interface SummaryMetric {
 // <T> makes this interface aware of your specific data records
 export interface TimelineChartData<T> {
   dateRangeLabel: string
+  startDate: string
+  endDate: string
   categories: string[]
   series: ChartSeries[]
   summary: SummaryMetric[]

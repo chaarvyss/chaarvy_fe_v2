@@ -131,10 +131,79 @@ export const isValidEmail = (email: string): boolean => {
   return true
 }
 
-export const isValidPhone = phone => {
+export const isValidPhone = (phone: string): boolean => {
   return phoneRegex.test(phone)
 }
 
-export const isValidAadhar = aadhar => {
+export const isValidAadhar = (aadhar: string): boolean => {
   return aadharRegex.test(aadhar)
+}
+
+const formatDate = (date: Date): string => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+const monthMap: Record<string, number> = {
+  jan: 0,
+  feb: 1,
+  mar: 2,
+  apr: 3,
+  may: 4,
+  jun: 5,
+  jul: 6,
+  aug: 7,
+  sep: 8,
+  oct: 9,
+  nov: 10,
+  dec: 11
+}
+
+export const normalizeDateInput = (
+  value: string | Date | undefined,
+  fallback: string,
+  referenceYear: number
+): string => {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return formatDate(value)
+  }
+
+  if (typeof value !== 'string') {
+    return fallback
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return fallback
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return trimmed
+  }
+
+  const shortMonthMatch = trimmed.match(/^([A-Za-z]{3})\s+(\d{1,2})(?:,\s*(\d{4}))?$/)
+  if (shortMonthMatch) {
+    const [, monthToken, dayToken, yearToken] = shortMonthMatch
+    const monthIndex = monthMap[monthToken.toLowerCase()]
+    const day = Number(dayToken)
+    const year = yearToken ? Number(yearToken) : referenceYear
+
+    if (monthIndex !== undefined) {
+      const normalizedDate = new Date(year, monthIndex, day)
+      if (
+        normalizedDate.getFullYear() === year &&
+        normalizedDate.getMonth() === monthIndex &&
+        normalizedDate.getDate() === day
+      ) {
+        return formatDate(normalizedDate)
+      }
+    }
+  }
+
+  const parsed = new Date(trimmed)
+
+  return Number.isNaN(parsed.getTime()) ? fallback : formatDate(parsed)
 }

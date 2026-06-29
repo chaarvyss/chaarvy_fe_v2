@@ -1,32 +1,77 @@
-import React from 'react'
-import TimelineDashboard from 'src/reusable_components/Charts/TimelineAreaChart'
-import { TooltipParams } from 'src/reusable_components/Charts/TimelineAreaChart/TimelineChart'
+import React, { useCallback, useState, useMemo } from 'react'
 
-// Your specific data type
-interface FinancialRecord {
-  id: string
-  amount: number
-  type: 'payment' | 'expense'
-  date: string
+import { LoadingSpinner } from 'src/reusable_components'
+import TimelineDashboard from 'src/reusable_components/Charts/TimelineAreaChart'
+import { useGetCashflowDetailsQuery } from 'src/store/services/dashboardServices'
+import { normalizeDateInput } from 'src/utils/helpers'
+
+type FinanceFilters = {
+  startDate: string
+  endDate: string
+  unit: 'week' | 'month' | 'year'
 }
 
-// Your raw data (from API)
-const myApiRecords: FinancialRecord[] = [
-  { id: '1', amount: 5000, type: 'payment', date: '2026-06-21T10:00:00Z' },
-  { id: '2', amount: 2000, type: 'expense', date: '2026-06-22T14:00:00Z' },
-  { id: '3', amount: 12000, type: 'payment', date: '2026-06-29T11:00:00Z' },
-  { id: '4', amount: 3000, type: 'payment', date: '2026-06-29T14:00:00Z' } // Added a second payment to demonstrate grouping
-]
-
 const FinancePage: React.FC = () => {
-  // Custom Tooltip Formatter (Totals Only)
+  const [props, setProps] = useState<FinanceFilters>(() => {
+    const today = new Date()
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+
+    return {
+      startDate: normalizeDateInput(startOfMonth, '', today.getFullYear()),
+      endDate: normalizeDateInput(endOfMonth, '', today.getFullYear()),
+      unit: 'month' as 'week' | 'month' | 'year'
+    }
+  })
+
+  const handleRequestChange: React.Dispatch<React.SetStateAction<FinanceFilters>> = useCallback(updater => {
+    setProps(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      const referenceYear = new Date().getFullYear()
+      const normalizedNext: FinanceFilters = {
+        ...next,
+        startDate: normalizeDateInput(next.startDate, prev.startDate, referenceYear),
+        endDate: normalizeDateInput(next.endDate, prev.endDate, referenceYear)
+      }
+
+      if (
+        normalizedNext.startDate === prev.startDate &&
+        normalizedNext.endDate === prev.endDate &&
+        normalizedNext.unit === prev.unit
+      ) {
+        return prev
+      }
+
+      return normalizedNext
+    })
+  }, [])
+
+  const { data: cashflowData, isFetching: isLoadingCashflow } = useGetCashflowDetailsQuery(props)
+
+  // NEW: Memoizing this prevents React from thinking the config changes on every render.
+  const chartSeriesConfig = useMemo(
+    () => [
+      {
+        name: 'Payments Accepted',
+        color: '#2e7d32',
+        matchRecord: (r: any) => r.type === 'payment',
+        getValue: (r: any) => r.amount
+      },
+      {
+        name: 'Expenses',
+        color: '#d32f2f',
+        matchRecord: (r: any) => r.type === 'expense',
+        getValue: (r: any) => r.amount
+      }
+    ],
+    []
+  )
+
   const renderTooltip = ({ category, seriesData }: any) => {
-    // Guard: If seriesData is missing or empty, return empty string
     if (!seriesData || seriesData.length === 0) return ''
 
     const metricRows = seriesData
       .map((s: any) => {
-        // Safely parse the value, defaulting to 0 if undefined
         const displayValue = (s.value ?? 0).toLocaleString('en-IN')
 
         return `
@@ -52,27 +97,19 @@ const FinancePage: React.FC = () => {
   `
   }
 
+  if (isLoadingCashflow) {
+    return <LoadingSpinner />
+  }
+
   return (
-    <TimelineDashboard<FinancialRecord>
-      title='Cash Flow Overview'
-      records={myApiRecords}
+    <TimelineDashboard<any>
+      records={cashflowData ?? []}
       getDate={record => record.date}
-      seriesConfig={[
-        {
-          name: 'Payments Accepted',
-          color: '#2e7d32', // Green
-          matchRecord: r => r.type === 'payment',
-          getValue: r => r.amount
-        },
-        {
-          name: 'Expenses',
-          color: '#d32f2f', // Red
-          matchRecord: r => r.type === 'expense',
-          getValue: r => r.amount
-        }
-      ]}
+      seriesConfig={chartSeriesConfig}
       valueFormatter={val => `₹${(val ?? 0).toLocaleString('en-IN')}`}
-      tooltipFormatter={renderTooltip} // Pass the custom tooltip function here!
+      tooltipFormatter={renderTooltip}
+      onRequestChange={handleRequestChange}
+      initialFrequency='month' // Ensure it starts exactly as the FinanceFilters state does above
     />
   )
 }
