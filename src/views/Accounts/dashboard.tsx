@@ -2,6 +2,7 @@ import React from 'react'
 
 import { PermissionLabels } from 'src/constants/permissions'
 import { GridDashboard, LayoutCard } from 'src/reusable_components/GridDashboard'
+
 import FinancePage from '../dashboardCards/FinancialStatus'
 import OverallExpensesDashboardCard from '../dashboardCards/OverallExpenses'
 

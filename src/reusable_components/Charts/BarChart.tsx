@@ -14,6 +14,7 @@ interface BarChartProps {
   title: string
   data: Record<string, ChartSeriesData>
   defaultPeriod?: string
+
   // Renamed to barColor for semantic accuracy, but behaves exactly the same
   barColor?: string | ((selectedPeriod: string, currentData: ChartSeriesData) => string)
   height?: string | number
@@ -39,6 +40,7 @@ const BarChart: React.FC<BarChartProps> = ({
     if (typeof barColor === 'function') {
       return barColor(period, currentData)
     }
+
     return barColor
   }, [barColor, period, currentData])
 

@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 
 import TimelineDashboard from 'src/reusable_components/Charts/TimelineAreaChart'
 import { normalizeDateInput } from 'src/utils/helpers'
+
 // import { useGetCollectionsQuery } from 'src/store/services/dashboardServices' // <-- Import your API hook here
 
 interface FeeCollection {
@@ -85,6 +86,7 @@ const CollectionsDashboardCard: React.FC = () => {
   // 5. Custom Tooltip (Upgraded to prevent flickering/shivering)
   const renderTooltip = ({ seriesData, category }: any) => {
     const total = seriesData[0]?.value ?? 0
+
     return `
       <div style="padding: 12px; font-family: inherit; width: 160px; pointer-events: none; border-radius: 6px; background: #fff; border: 1px solid #eaeaea; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
         <div style="font-size: 11px; color: #757575; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">

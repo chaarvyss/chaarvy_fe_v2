@@ -44,6 +44,7 @@ const AreaChart: React.FC<DynamicAreaChartProps> = ({
     if (typeof lineColor === 'function') {
       return lineColor(period, currentData)
     }
+
     return lineColor
   }, [lineColor, period, currentData])
 
