@@ -6,7 +6,7 @@ import { CommonCacheTag } from '../cacheTag'
 
 const commonExpensesServiceApi = api.injectEndpoints({
   endpoints: build => ({
-    createUpdateExpense: build.mutation<string, ExpenseRequest>({
+    createUpdateExpense: build.mutation<AddExpenseResponse, ExpenseRequest>({
       invalidatesTags: [CommonCacheTag.EXPENSES_LIST],
       query: body => {
         return {
@@ -54,6 +54,28 @@ const commonExpensesServiceApi = api.injectEndpoints({
           params: { expense_id }
         }
       }
+    }),
+    generateExpenseUploadUrls: build.mutation<GenerateUploadUrlsResponse[], GenerateUploadUrlsRequest>({
+      query: ({ expense_id, file_names }) => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.common.expenses.generateUploadUrls(expense_id),
+          body: { expense_id, file_names }
+        }
+      }
+    }),
+    getExpenseFiles: build.query<GetExpenseFilesResponse, string>({
+      query: expenseId => ({
+        url: urlConstants.common.expenses.getExpenseFilesUrl(expenseId),
+        method: HttpRequestMethods.GET
+      })
+    }),
+    deleteExpenseFiles: build.mutation<{ message: string }, DeleteExpenseFilesRequest>({
+      query: body => ({
+        url: urlConstants.common.expenses.deleteExpenseFilesUrl(body.expense_id),
+        method: HttpRequestMethods.DELETE,
+        body: { file_ids: body.file_ids }
+      })
     })
   })
 })
@@ -63,5 +85,8 @@ export const {
   useCreateUpdateBenficeryTypeMutation,
   useCreateUpdateExpenseCategoryTypeMutation,
   useCreateUpdatePaymentModeMutation,
-  useGetExpenseDetailQuery
+  useGetExpenseDetailQuery,
+  useGenerateExpenseUploadUrlsMutation,
+  useGetExpenseFilesQuery,
+  useDeleteExpenseFilesMutation
 } = commonExpensesServiceApi

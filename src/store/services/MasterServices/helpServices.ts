@@ -16,7 +16,15 @@ const helpServiceApi = api.injectEndpoints({
         }
       }
     }),
-    requestUpload: build.mutation<{ videoId: string; uploadUrl: string }, any>({
+    requestUpload: build.mutation<
+      {
+        videoId: string
+        uploadUrl: {
+          upload_url: string
+        }
+      },
+      any
+    >({
       query: payload => ({
         url: urlConstants.master.help.getUploadUrl,
         method: HttpRequestMethods.POST,

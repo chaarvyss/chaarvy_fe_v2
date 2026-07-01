@@ -34,6 +34,11 @@ type ExpenseCategoryRequest = {
   category_description?: string
 }
 
+type AddExpenseResponse = {
+  message: string
+  expense_id: string
+}
+
 type PaymentModeRequest = {
   payment_mode_id?: number
   payment_mode: string
@@ -55,4 +60,32 @@ type ExpenseCategoryType = {
   category_id?: string
   category_name: string
   category_description: string
+}
+
+// --- Types ---
+
+interface ExpenseFile {
+  file_id: string
+  file_name: string
+  url: string
+}
+
+interface GetExpenseFilesResponse {
+  expense_id: string
+  files: ExpenseFile[]
+}
+
+interface DeleteExpenseFilesRequest {
+  expense_id: string
+  file_ids: string[]
+}
+
+interface GenerateUploadUrlsRequest {
+  expense_id: string
+  file_names: string[]
+}
+
+interface GenerateUploadUrlsResponse {
+  file_name: string
+  upload_url: string
 }

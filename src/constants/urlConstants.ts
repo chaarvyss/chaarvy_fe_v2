@@ -38,7 +38,10 @@ export const urlConstants = {
       createUpdateBenficeryTypeUrl: `${commonRoutePrefix.expense}/add-update-benificery-type`,
       createUpdateExpenseCategoryTypeUrl: `${commonRoutePrefix.expense}/add-update-expense-category`,
       createUpdatePaymentModeUrl: `${commonRoutePrefix.expense}/create-update-payment-mode`,
-      getExpenseDetailUrl: `${commonRoutePrefix.expense}/get-expense-detail`
+      getExpenseDetailUrl: `${commonRoutePrefix.expense}/get-expense-detail`,
+      generateUploadUrls: (expense_id: string) => `${commonRoutePrefix.expense}/${expense_id}/generate-upload-urls`,
+      getExpenseFilesUrl: (expense_id: string) => `${commonRoutePrefix.expense}/${expense_id}/files`,
+      deleteExpenseFilesUrl: (expense_id: string) => `${commonRoutePrefix.expense}/${expense_id}/files`
     }
   },
 
