@@ -2,10 +2,11 @@ import React from 'react'
 
 import { GridDashboard, LayoutCard } from 'src/reusable_components/GridDashboard'
 
-import ActiveClients from './ActiveClients'
-import ClientsList from './clientsList'
-import CollectionsDashboard from './collections'
-import DropClients from './DropClients'
+import ActiveClients from '../../../views/dashboardCards/ActiveClients'
+import ClientsList from '../../../views/dashboardCards/clientsList'
+import CollectionsDashboard from '../../../views/dashboardCards/collections'
+import DropClients from '../../../views/dashboardCards/DropClients'
+
 import DashboardTodoList from './Todo'
 
 const dashboardComponents = {

@@ -25,8 +25,22 @@ interface AddExpenseProps {
   onSuccess: () => void
 }
 
+const defaultFormValues = {
+  expense_id: '',
+  benficery_type_id: '',
+  category_id: '',
+  description: '',
+  amount: '',
+  expense_date: '',
+  expense_by: '',
+  benficery: '',
+  payment_mode: '',
+  reference_id: '',
+  remarks: ''
+}
+
 const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
-  const { closeDrawer } = useSideDrawer()
+  const { closeDrawer, isOpen } = useSideDrawer()
 
   const { triggerToast } = useToast()
 
@@ -159,26 +173,21 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
 
   const { errors, handleSubmit, fields, setValues } = useFormBuilder<ExpenseRequest>({
     formConfig: expenseFormConfig,
-    initialValues: {
-      expense_id: '',
-      benficery_type_id: '',
-      category_id: '',
-      description: '',
-      amount: '',
-      expense_date: '',
-      expense_by: '',
-      benficery: '',
-      payment_mode: '',
-      reference_id: '',
-      remarks: ''
-    }
+    initialValues: defaultFormValues
   })
 
   useEffect(() => {
-    if (expenseDetail) {
-      setValues(expenseDetail)
+    if (isOpen) {
+      if (expenseId && expenseDetail) {
+        setValues(expenseDetail)
+      } else if (!expenseId) {
+        setValues(defaultFormValues)
+      }
+    } else {
+      onSuccess()
+      setValues(defaultFormValues)
     }
-  }, [expenseDetail])
+  }, [isOpen, expenseDetail, expenseId, setValues])
 
   const onSubmit = (data: ExpenseRequest) => {
     addExpenseRecord({ ...data, ...(expenseId ? { expense_id: expenseId } : {}) })

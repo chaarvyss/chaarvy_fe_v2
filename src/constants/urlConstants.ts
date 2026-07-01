@@ -151,7 +151,9 @@ export const urlConstants = {
     studentsCount: `${interRoutePrefix.dashboard}/students_count`,
     lowStationaryStockDetails: `${interRoutePrefix.dashboard}/stationary-stock`,
     studentEnrollmentCountDetails: `${interRoutePrefix.dashboard}/student_enrollments`,
-    paymentCountDetails: `${interRoutePrefix.dashboard}/payment_count`
+    paymentCountDetails: `${interRoutePrefix.dashboard}/payment_count`,
+    cashflowDetailsUrl: `${interRoutePrefix.dashboard}/cashflow-summary`,
+    expensesDetailsUrl: `${interRoutePrefix.dashboard}/expenses`
   },
   fees: {
     getprogramFees: `${interRoutePrefix.fees}/program-fee-detail`,

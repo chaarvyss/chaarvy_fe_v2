@@ -32,7 +32,9 @@ export const PermissionLabels = {
     studentCount: 'dashboard:student_count',
     payments: 'dashboard:payments',
     stationaryStock: 'dashboard:stationary_stock',
-    studentEnrollments: 'dashboard:student_enrollments'
+    studentEnrollments: 'dashboard:student_enrollments',
+    cashFlow: 'dashboard:cashflow',
+    expenses: 'dashboard:expenses'
   },
   collegeProfile: {
     collegeIconView: 'college_profile:icon:view',
