@@ -2,6 +2,7 @@ import { LoadingButton } from '@mui/lab'
 import { Stack, Box, Button, Typography, List, ListItem, IconButton, LinearProgress } from '@mui/material'
 import { useMemo, useEffect, useState, ChangeEvent } from 'react'
 
+import { useImageViewer } from 'src/@core/context/imageViewerContext'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { FieldConfig, getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
@@ -59,6 +60,7 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
   const [existingFiles, setExistingFiles] = useState<any[]>([])
   const [filesToDelete, setFilesToDelete] = useState<string[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
+  const { setShowImage } = useImageViewer()
 
   // --- API Hooks ---
   const { data: expenseDetail, isFetching: isFetchingExpenseDetail } = useGetExpenseDetailQuery(expenseId ?? '', {
@@ -165,7 +167,7 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
     ]
   )
 
-  const { errors, handleSubmit, fields, setValues } = useFormBuilder<ExpenseRequest>({
+  const { errors, handleSubmit, fields, setValues, shouldDisableSubmit } = useFormBuilder<ExpenseRequest>({
     formConfig: expenseFormConfig,
     initialValues: defaultFormValues
   })
@@ -223,7 +225,6 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
         const fileNames = selectedFiles.map(sf => sf.file.name)
         const urlsResponse = await generateUploadUrls({ expense_id: targetExpenseId, file_names: fileNames }).unwrap()
 
-        console.log('Generated Upload URLs:', urlsResponse)
         const uploadTargets = urlsResponse.map((data: any) => {
           const actualFile = selectedFiles.find(sf => sf.file.name === data.file_name)?.file
 
@@ -245,6 +246,14 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
       triggerToast(e?.message || 'Error processing expense or files', { variant: ToastVariants.ERROR })
     } finally {
       setIsProcessing(false)
+    }
+  }
+
+  const handleDocumentView = (file: any) => {
+    if (file.file_name.endsWith('.pdf')) {
+      window.open(file.url, '_blank')
+    } else {
+      setShowImage?.(file.url)
     }
   }
 
@@ -277,7 +286,7 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
               </IconButton>
             }
           >
-            <Typography variant='body2' component='a' href={file.url} target='_blank' color='primary'>
+            <Typography variant='body2' component='a' onClick={() => handleDocumentView(file)} color='primary'>
               {file.file_name}
             </Typography>
           </ListItem>
@@ -316,6 +325,7 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
         variant='contained'
         color='primary'
         size='small'
+        disabled={shouldDisableSubmit || isProcessing || isUpdatingRecord}
         sx={{ mt: 5, textTransform: 'none' }}
         loading={isProcessing || isUpdatingRecord}
       >

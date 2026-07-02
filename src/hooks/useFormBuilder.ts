@@ -356,6 +356,8 @@ export const useFormBuilder = <T extends Record<string, any>>({ formConfig, init
     handleChange,
     handleSubmit,
     setValues,
-    setOptionsMap
+    setOptionsMap,
+    shouldDisableSubmit:
+      errors.length > 0 || formConfig.some(f => f.rules?.includes('required') && isEmptyValue(values[f.key]))
   }
 }
