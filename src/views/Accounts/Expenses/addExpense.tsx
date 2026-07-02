@@ -8,8 +8,8 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { FieldConfig, getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
 import { InputTypes, InputVariants } from 'src/lib/enums'
 import FormGenerator from 'src/reusable_components/formGenerator'
+import { useGetPayeesListQuery } from 'src/store/services/adminServices'
 import {
-  useCreateUpdateBenficeryTypeMutation,
   useCreateUpdateExpenseCategoryTypeMutation,
   useCreateUpdateExpenseMutation,
   useGetExpenseDetailQuery,
@@ -63,6 +63,9 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
   const [isProcessing, setIsProcessing] = useState(false)
   const { setShowImage } = useImageViewer()
 
+  const [payeeSearchText, setPayeeSearchText] = useState<string>()
+  const [benficeryTypeId, setBenficeryTypeId] = useState<string>()
+
   const [usersListProps, setUsersListProps] = useState({ limit: 20, offset: 0, searchText: '' })
 
   const userProps = useDebounce(usersListProps)
@@ -81,7 +84,12 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
   const { data: paymentModes, isFetching: isFetchingPaymentModes } = useGetPaymentModesListQuery()
   const { data: usersList, isFetching: isFetchingUsersList } = useGetUsersListQuery(userProps, { skip: !isOpen })
 
-  const [createUpdateBenficeryType, { isLoading: isUpdatingBenficaryTypes }] = useCreateUpdateBenficeryTypeMutation()
+  const debouncedPayeeSearchText = useDebounce(payeeSearchText)
+  const { data: payeesList, isFetching: isFetchingPayeesList } = useGetPayeesListQuery(
+    { benficery_type_id: benficeryTypeId ?? '', search_text: debouncedPayeeSearchText },
+    { skip: !benficeryTypeId || !isOpen }
+  )
+
   const [createUpdateExpenceCategoryType, { isLoading: isUpdatingExpenseCategories }] =
     useCreateUpdateExpenseCategoryTypeMutation()
   const [createUpdatePaymentMode, { isLoading: isUpdatingPaymentModes }] = useCreateUpdatePaymentModeMutation()
@@ -116,24 +124,28 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
         type: InputTypes.SELECT,
         rules: ['required'],
         staticOptions: benficerTypes,
-
-        // onAddNew: async (text?: string) => {
-        //   if (!text) return
-        //   createUpdateBenficeryType({ benficery_type_name: text })
-        // },
         isOptionsLoading: isFetchingBenficieryTypes,
-        addNewLabel: 'Add new beneficiary',
         searchable: true,
-        isUpdating: isUpdatingBenficaryTypes,
-
-        // canEdit: true,
-        // onEdit: (id, value) => {
-        //   createUpdateBenficeryType({ benficery_type_id: String(id), benficery_type_name: value })
-        // },
         mapOptions: (data: any[]) =>
           data?.map(s => ({ label: s.benficery_type_name, value: s.benficery_type_id })) ?? []
       },
-      { key: 'benficery', label: 'Payee', type: InputTypes.INPUT, rules: ['required'] },
+      {
+        key: 'benficery',
+        dependsOn: 'benficery_type_id',
+        label: 'Payee',
+        fetchOptions: async (benficery_type_id: string) => {
+          setBenficeryTypeId(benficery_type_id)
+        },
+        searchable: true,
+        onSearch: (searchText: string) => {
+          setPayeeSearchText(searchText)
+        },
+        isOptionsLoading: isFetchingPayeesList,
+        type: InputTypes.SELECT,
+        rules: ['required'],
+        staticOptions: payeesList ?? [],
+        mapOptions: (data: any[]) => data?.map(s => ({ label: s.label, value: s.value })) ?? []
+      },
       {
         key: 'category_id',
         label: 'Expense Category',
@@ -155,7 +167,6 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
       },
       { key: 'reference_id', label: 'Reference id', type: InputTypes.INPUT, rules: ['required'] },
       { key: 'remarks', label: 'Notes', type: InputTypes.INPUT, rules: ['required'] },
-
       {
         key: 'payment_mode',
         label: 'Payment mode',
@@ -181,13 +192,13 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
       paymentModes,
       benficerTypes,
       expenseCategoies,
-      isUpdatingBenficaryTypes,
       isUpdatingExpenseCategories,
       isUpdatingPaymentModes,
       isFetchingBenficieryTypes,
       isFetchingPaymentModes,
       isFetchingExpenseCategories,
-      usersList
+      usersList,
+      payeesList
     ]
   )
 
