@@ -113,6 +113,9 @@ export type InputFields = {
   menuOptions?: MenuOptions[]
   showYearDropdown?: boolean
   showMonthDropdown?: boolean
+  yearDropdownItemNumber?: number
+  minDate?: Date
+  maxDate?: Date
   isLoading?: boolean
   checked?: boolean
   searchable?: boolean

@@ -1,5 +1,6 @@
 import { LoadingButton } from '@mui/lab'
 import { Stack, Box, Button, Typography, List, ListItem, IconButton, LinearProgress } from '@mui/material'
+import dayjs from 'dayjs'
 import { useMemo, useEffect, useState, ChangeEvent } from 'react'
 
 import { useImageViewer } from 'src/@core/context/imageViewerContext'
@@ -72,11 +73,13 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
 
   // --- API Hooks ---
   const { data: expenseDetail, isFetching: isFetchingExpenseDetail } = useGetExpenseDetailQuery(expenseId ?? '', {
-    skip: !expenseId
+    skip: !expenseId,
+    refetchOnMountOrArgChange: true
   })
 
   const { data: filesData, isFetching: isFetchingFiles } = useGetExpenseFilesQuery(expenseId ?? '', {
-    skip: !expenseId
+    skip: !expenseId,
+    refetchOnMountOrArgChange: true
   })
 
   const { data: benficerTypes, isFetching: isFetchingBenficieryTypes } = useGetBenificeryTypesListQuery()
@@ -102,7 +105,17 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
   const expenseFormConfig: FieldConfig<ExpenseRequest>[] = useMemo(
     () => [
       { key: 'description', label: 'Description', type: InputTypes.INPUT, rules: ['required'] },
-      { key: 'expense_date', label: 'Date', type: InputTypes.DATE, rules: ['required'] },
+      {
+        key: 'expense_date',
+        label: 'Date',
+        type: InputTypes.DATE,
+        rules: ['required'],
+        showYearDropdown: true,
+        showMonthDropdown: true,
+        yearDropdownItemNumber: 25,
+        maxDate: dayjs().add(1, 'year').toDate(),
+        minDate: dayjs().subtract(5, 'year').toDate()
+      },
       {
         key: 'expense_by',
         label: 'Paid by',
@@ -124,7 +137,7 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
         type: InputTypes.SELECT,
         rules: ['required'],
         staticOptions: benficerTypes,
-        isOptionsLoading: isFetchingBenficieryTypes,
+        isLoading: isFetchingBenficieryTypes,
         searchable: true,
         mapOptions: (data: any[]) =>
           data?.map(s => ({ label: s.benficery_type_name, value: s.benficery_type_id })) ?? []
@@ -134,13 +147,14 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
         dependsOn: 'benficery_type_id',
         label: 'Payee',
         fetchOptions: async (benficery_type_id: string) => {
+          setPayeeSearchText(undefined)
           setBenficeryTypeId(benficery_type_id)
         },
         searchable: true,
         onSearch: (searchText: string) => {
           setPayeeSearchText(searchText)
         },
-        isOptionsLoading: isFetchingPayeesList,
+        isLoading: isFetchingPayeesList,
         type: InputTypes.SELECT,
         rules: ['required'],
         staticOptions: payeesList ?? [],
@@ -198,7 +212,8 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
       isFetchingPaymentModes,
       isFetchingExpenseCategories,
       usersList,
-      payeesList
+      payeesList,
+      isFetchingPayeesList
     ]
   )
 
@@ -210,10 +225,10 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
   // --- Reset & Sync State ---
   useEffect(() => {
     if (isOpen) {
-      if (expenseId && expenseDetail) setValues(expenseDetail)
-      else if (!expenseId) setValues(defaultFormValues)
-
-      if (filesData?.files) setExistingFiles(filesData.files)
+      if (expenseId && expenseDetail) {
+        setValues(expenseDetail)
+        if (filesData?.files) setExistingFiles(filesData.files)
+      } else if (!expenseId) setValues(defaultFormValues)
     } else {
       onSuccess()
       setValues(defaultFormValues)
@@ -222,7 +237,7 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
       setFilesToDelete([])
       setIsProcessing(false)
     }
-  }, [isOpen, expenseDetail, expenseId, setValues, filesData])
+  }, [isOpen, expenseDetail, filesData])
 
   // --- File Selection Handlers ---
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {

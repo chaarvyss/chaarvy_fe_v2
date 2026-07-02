@@ -48,6 +48,7 @@ const commonExpensesServiceApi = api.injectEndpoints({
     }),
     getExpenseDetail: build.query<ExpenseRequest, string>({
       providesTags: [CommonCacheTag.EXPENSES_DETAIL],
+      keepUnusedDataFor: 0,
       query: expense_id => {
         return {
           method: HttpRequestMethods.GET,
@@ -68,6 +69,7 @@ const commonExpensesServiceApi = api.injectEndpoints({
     }),
     getExpenseFiles: build.query<GetExpenseFilesResponse, string>({
       providesTags: [CommonCacheTag.EXPENSES_DETAIL],
+      keepUnusedDataFor: 0,
       query: expenseId => ({
         url: urlConstants.common.expenses.getExpenseFilesUrl(expenseId),
         method: HttpRequestMethods.GET

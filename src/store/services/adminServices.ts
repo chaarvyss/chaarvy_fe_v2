@@ -413,6 +413,7 @@ const adminServiceApi = api.injectEndpoints({
       }
     }),
     getPayeesList: build.query<PayeeListResponse[], PayeeListRequest>({
+      keepUnusedDataFor: 0,
       query: params => {
         return {
           method: HttpRequestMethods.GET,

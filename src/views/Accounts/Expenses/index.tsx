@@ -71,11 +71,11 @@ const ExpensesList = () => {
       label: 'Expense category'
     },
     {
-      id: 'benficery',
+      id: 'beneficiary_name',
       label: 'Beneficiary name'
     },
     {
-      id: 'benficery_type',
+      id: 'beneficiary_type',
       label: 'Beneficiary type'
     },
     {
