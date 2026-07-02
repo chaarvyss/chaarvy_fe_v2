@@ -25,7 +25,7 @@ export type FieldConfig<T> = {
   mapOptions?: (data: any) => { label: string; value: any }[]
   staticOptions?: any[]
   searchable?: boolean
-  onSearch?: (searchText: string) => Promise<{ label: string; value: any }[]>
+  onSearch?: (searchText: string) => void
   onAddNew?: (text?: string) => void
   addNewLabel?: string
   onEdit?: (value: string | number, label: string) => void

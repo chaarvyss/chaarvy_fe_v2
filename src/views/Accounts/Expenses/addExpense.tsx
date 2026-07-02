@@ -22,8 +22,9 @@ import {
   useGetBenificeryTypesListQuery,
   useGetExpenseCategoryTypesListQuery
 } from 'src/store/services/common/listServices'
-import { useGetPaymentModesListQuery } from 'src/store/services/listServices'
+import { useGetPaymentModesListQuery, useGetUsersListQuery } from 'src/store/services/listServices'
 import { uploadFilesToAzure } from 'src/utils/azureUploadHelper'
+import { useDebounce } from 'src/utils/hooks/useDebounce'
 import GetChaarvyIcons, { ChaarvyIcon } from 'src/utils/icons'
 
 interface AddExpenseProps {
@@ -62,6 +63,10 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
   const [isProcessing, setIsProcessing] = useState(false)
   const { setShowImage } = useImageViewer()
 
+  const [usersListProps, setUsersListProps] = useState({ limit: 20, offset: 0, searchText: '' })
+
+  const userProps = useDebounce(usersListProps)
+
   // --- API Hooks ---
   const { data: expenseDetail, isFetching: isFetchingExpenseDetail } = useGetExpenseDetailQuery(expenseId ?? '', {
     skip: !expenseId
@@ -74,6 +79,7 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
   const { data: benficerTypes, isFetching: isFetchingBenficieryTypes } = useGetBenificeryTypesListQuery()
   const { data: expenseCategoies, isFetching: isFetchingExpenseCategories } = useGetExpenseCategoryTypesListQuery()
   const { data: paymentModes, isFetching: isFetchingPaymentModes } = useGetPaymentModesListQuery()
+  const { data: usersList, isFetching: isFetchingUsersList } = useGetUsersListQuery(userProps, { skip: !isOpen })
 
   const [createUpdateBenficeryType, { isLoading: isUpdatingBenficaryTypes }] = useCreateUpdateBenficeryTypeMutation()
   const [createUpdateExpenceCategoryType, { isLoading: isUpdatingExpenseCategories }] =
@@ -89,31 +95,45 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
     () => [
       { key: 'description', label: 'Description', type: InputTypes.INPUT, rules: ['required'] },
       { key: 'expense_date', label: 'Date', type: InputTypes.DATE, rules: ['required'] },
-      { key: 'expense_by', label: 'Paid by', type: InputTypes.INPUT, rules: ['required'] },
-      { key: 'benficery', label: 'Payee', type: InputTypes.INPUT, rules: ['required'] },
-      { key: 'reference_id', label: 'Reference id', type: InputTypes.INPUT, rules: ['required'] },
-      { key: 'remarks', label: 'Notes', type: InputTypes.INPUT, rules: ['required'] },
+      {
+        key: 'expense_by',
+        label: 'Paid by',
+        type: InputTypes.SELECT,
+        rules: ['required'],
+        staticOptions: usersList?.users ?? [],
+        searchable: true,
+        mapOptions: (data: any[]) => data?.map(s => ({ label: s.name, value: s.user_id })) ?? [],
+        onSearch: (searchText: string) => {
+          setUsersListProps({ ...usersListProps, searchText })
+        },
+        isUpdating: isFetchingUsersList,
+        canEdit: false,
+        isOptionsLoading: isFetchingUsersList
+      },
       {
         key: 'benficery_type_id',
         label: 'Benficery type',
         type: InputTypes.SELECT,
         rules: ['required'],
         staticOptions: benficerTypes,
-        onAddNew: async (text?: string) => {
-          if (!text) return
-          createUpdateBenficeryType({ benficery_type_name: text })
-        },
+
+        // onAddNew: async (text?: string) => {
+        //   if (!text) return
+        //   createUpdateBenficeryType({ benficery_type_name: text })
+        // },
         isOptionsLoading: isFetchingBenficieryTypes,
         addNewLabel: 'Add new beneficiary',
         searchable: true,
         isUpdating: isUpdatingBenficaryTypes,
-        canEdit: true,
-        onEdit: (id, value) => {
-          createUpdateBenficeryType({ benficery_type_id: String(id), benficery_type_name: value })
-        },
+
+        // canEdit: true,
+        // onEdit: (id, value) => {
+        //   createUpdateBenficeryType({ benficery_type_id: String(id), benficery_type_name: value })
+        // },
         mapOptions: (data: any[]) =>
           data?.map(s => ({ label: s.benficery_type_name, value: s.benficery_type_id })) ?? []
       },
+      { key: 'benficery', label: 'Payee', type: InputTypes.INPUT, rules: ['required'] },
       {
         key: 'category_id',
         label: 'Expense Category',
@@ -133,6 +153,9 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
         },
         mapOptions: (data: any[]) => data?.map(s => ({ label: s.category_name, value: s.category_id })) ?? []
       },
+      { key: 'reference_id', label: 'Reference id', type: InputTypes.INPUT, rules: ['required'] },
+      { key: 'remarks', label: 'Notes', type: InputTypes.INPUT, rules: ['required'] },
+
       {
         key: 'payment_mode',
         label: 'Payment mode',
@@ -163,7 +186,8 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
       isUpdatingPaymentModes,
       isFetchingBenficieryTypes,
       isFetchingPaymentModes,
-      isFetchingExpenseCategories
+      isFetchingExpenseCategories,
+      usersList
     ]
   )
 
