@@ -1,5 +1,4 @@
 import { urlConstants } from 'src/constants/urlConstants'
-import { FilterProps } from 'src/lib/interfaces'
 
 import { HttpRequestMethods } from '..'
 

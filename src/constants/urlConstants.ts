@@ -3,7 +3,8 @@ const masterPrefix = 'master'
 
 const commonRoutePrefix = {
   list: '/list',
-  expense: '/expenses'
+  expense: '/expenses',
+  vendor: '/vendor'
 }
 
 const interRoutePrefix = {
@@ -31,7 +32,14 @@ export const urlConstants = {
     list: {
       expensesUrl: `${commonRoutePrefix.list}/expenses`,
       benificeryTypesUrl: `${commonRoutePrefix.list}/benificery-types`,
-      expenseCategoryTypesUrl: `${commonRoutePrefix.list}/expense-category-types`
+      expenseCategoryTypesUrl: `${commonRoutePrefix.list}/expense-category-types`,
+      vendorsUrl: `${commonRoutePrefix.list}/vendors`
+    },
+    vendor: {
+      createUpdateVendorUrl: `${commonRoutePrefix.vendor}/create-update-vendor`,
+      createUpdateVendorTypeUrl: `${commonRoutePrefix.vendor}/create-update-vendor-type`,
+      createUpdateVendorServiceUrl: `${commonRoutePrefix.vendor}/create-update-vendor-service`,
+      getVendorDetailUrl: (vendor_id: string) => `${commonRoutePrefix.vendor}/${vendor_id}`
     },
     expenses: {
       createUpdateExpenseUrl: `${commonRoutePrefix.expense}/add-update-expense`,

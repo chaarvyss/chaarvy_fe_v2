@@ -7,7 +7,6 @@ import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { DateFormats, InputVariants } from 'src/lib/enums'
 import { dateToString } from 'src/lib/helpers'
-import { FilterProps } from 'src/lib/interfaces'
 import CustomDateElement from 'src/reusable_components/dateInputElement'
 import ReusableSelect from 'src/reusable_components/reusableSelect'
 import {

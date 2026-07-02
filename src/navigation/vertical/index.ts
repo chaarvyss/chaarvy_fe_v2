@@ -113,6 +113,12 @@ const navigation = (): VerticalNavItemsType => {
       icon: ChaarvyIcon.Finance,
       children: [
         {
+          key: PermissionLabels.nav.vendors,
+          title: 'Vendors',
+          path: PagePath.VENDORS,
+          icon: ChaarvyIcon.AccountWrenchOutline
+        },
+        {
           key: PermissionLabels.nav.expenses,
           title: 'Expenses',
           path: PagePath.EXPENSES,

@@ -6,7 +6,7 @@ import { useMemo, useEffect, useState, ChangeEvent } from 'react'
 import { useImageViewer } from 'src/@core/context/imageViewerContext'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { FieldConfig, getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
+import { getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
 import { InputTypes, InputVariants } from 'src/lib/enums'
 import FormGenerator from 'src/reusable_components/formGenerator'
 import { useGetPayeesListQuery } from 'src/store/services/adminServices'
@@ -154,10 +154,10 @@ const AddExpense = ({ expenseId, onSuccess }: AddExpenseProps) => {
         onSearch: (searchText: string) => {
           setPayeeSearchText(searchText)
         },
-        isLoading: isFetchingPayeesList,
+        isOptionsLoading: isFetchingPayeesList,
         type: InputTypes.SELECT,
         rules: ['required'],
-        staticOptions: payeesList ?? [],
+        staticOptions: payeesList,
         mapOptions: (data: any[]) => data?.map(s => ({ label: s.label, value: s.value })) ?? []
       },
       {

@@ -30,7 +30,8 @@ export const PagePath = {
   VEHICLE_MOMENTS: '/Transportation/vehicleMoments',
   VEHICLE_VENDORS: '/Transportation/vendors',
   REFERRELS: '/Admin/referrels',
-  EXPENSES: '/Accounts/Expenses'
+  EXPENSES: '/Accounts/Expenses',
+  VENDORS: '/Accounts/Vendors'
 }
 
 export const MasterPagePath = {

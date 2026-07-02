@@ -34,7 +34,8 @@ export enum CommonCacheTag {
   EXPENSES_DETAIL = 'expenses-detail',
   BENFICERY_TYPES_LIST = 'benficery-types',
   EXPENSE_CATEGORIES_LIST = 'expense-categories',
-  PAYMENT_MODES = 'payment-modes'
+  PAYMENT_MODES = 'payment-modes',
+  VENDORS_LIST = 'vendors-list'
 }
 
 export enum MasterCacheTag {

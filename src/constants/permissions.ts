@@ -26,7 +26,8 @@ export const PermissionLabels = {
     collectPayment: 'nav:collect_payment',
     referrels: 'nav:referrels',
     reports: 'nav:reports',
-    expenses: 'nav:expenses'
+    expenses: 'nav:expenses',
+    vendors: 'nav:vendors'
   },
   dashboard: {
     studentCount: 'dashboard:student_count',

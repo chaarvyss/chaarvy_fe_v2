@@ -7,7 +7,6 @@ import RenderFilterOptions from 'src/common/filters'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import { DEFAULT_PAGINATION_PROPS, DEFAULT_TABLE_ITEMS_LIMIT } from 'src/constants/constants'
 import { PagePath } from 'src/constants/pagePathConstants'
-import { FilterProps } from 'src/lib/interfaces'
 import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
 import {
   Admissions,
