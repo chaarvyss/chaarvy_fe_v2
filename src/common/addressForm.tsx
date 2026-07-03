@@ -3,7 +3,7 @@ import { useEffect, useMemo } from 'react'
 
 import { Typography } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { FieldConfig, getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
+import { getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
 import { InputTypes } from 'src/lib/enums'
 import FormGenerator from 'src/reusable_components/formGenerator'
 import { useCreateUpdateAddressMutation } from 'src/store/services/adminServices'

@@ -3,7 +3,7 @@ import { Box, Card } from '@mui/material'
 import { useEffect, useMemo } from 'react'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { FieldConfig, getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
+import { getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
 import { InputTypes, InputVariants } from 'src/lib/enums'
 import FormGenerator from 'src/reusable_components/formGenerator'
 import 'react-datepicker/dist/react-datepicker.css'
