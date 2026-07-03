@@ -6,8 +6,7 @@ import ActiveClients from '../../../views/dashboardCards/ActiveClients'
 import ClientsList from '../../../views/dashboardCards/clientsList'
 import CollectionsDashboard from '../../../views/dashboardCards/collections'
 import DropClients from '../../../views/dashboardCards/DropClients'
-
-import DashboardTodoList from './Todo'
+import DashboardTodoList from '../../../views/dashboardCards/Todo'
 
 const dashboardComponents = {
   Clients: ClientsList,

@@ -126,6 +126,7 @@ export type InputFields = {
   onEditSuccess?: () => void
   isOptionsLoading?: boolean
   isUpdating?: boolean
+  rows?: number
 }
 
 export type ErrorObject = {

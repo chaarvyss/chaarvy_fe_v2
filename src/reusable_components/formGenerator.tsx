@@ -474,6 +474,14 @@ const FormGenerator = ({
 
   if (isLoading) return <LoadingSpinner />
 
+  const isMultiLineField = ({ variant, rows }): boolean => {
+    if (variant === 'string' && rows && rows > 1) {
+      return true
+    }
+
+    return false
+  }
+
   return (
     <>
       <DatePickerWrapper>
@@ -504,7 +512,8 @@ const FormGenerator = ({
               onEdit,
               onEditSuccess,
               isOptionsLoading,
-              isUpdating
+              isUpdating,
+              rows
             }) => (
               <Grid item {...columnSize} key={id}>
                 {type === InputTypes.INPUT ? (
@@ -520,6 +529,9 @@ const FormGenerator = ({
                       value={value ?? ''}
                       defaultValue={value}
                       type={variant}
+                      multiline={isMultiLineField({ rows, variant })}
+                      rows={rows}
+                      variant='outlined'
                       disabled={isDisabled}
                       placeholder={placeholder ?? ''}
                       onChange={onChange}
