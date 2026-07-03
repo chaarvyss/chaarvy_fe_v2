@@ -1,3 +1,11 @@
+## [1.18.8](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.7...v1.18.8) (2026-07-03)
+
+
+### Bug Fixes
+
+* **Expenses:** AC-00 Upload expense bills ([#65](https://github.com/chaarvyss/chaarvy_fe_v2/issues/65)) ([fd5587c](https://github.com/chaarvyss/chaarvy_fe_v2/commit/fd5587cde01fe0dc82fe2f14a9b95836276672d9))
+* **ExpensesBugs:** AC-78: Expenses bugs ([#64](https://github.com/chaarvyss/chaarvy_fe_v2/issues/64)) ([f16b5e3](https://github.com/chaarvyss/chaarvy_fe_v2/commit/f16b5e36361770b27a7603cb499e2b6196415c92))
+
 ## [1.18.7](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.6...v1.18.7) (2026-06-28)
 
 
