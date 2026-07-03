@@ -16,6 +16,7 @@ import { Fragment, useEffect, useState, useRef } from 'react'
 import DatePicker from 'react-datepicker'
 
 import { FormControl, Grid, TextField } from '@muiElements'
+import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { InputTypes } from 'src/lib/enums'
 import { ErrorObject, InputFields } from 'src/lib/types'
 import { ensureDate } from 'src/lib/util/common_helpers'
@@ -79,6 +80,24 @@ const SelectInputField = ({
     }
     prevUpdating.current = isUpdating
   }, [isUpdating, onEditSuccess])
+
+  useEffect(() => {
+    // If the parent form resets the field to empty, clear the local search string and fetched options
+    if (!value) {
+      setInputValue('')
+      setFetchedOptions([])
+      setEditingOption(null)
+      setEditLabel('')
+    }
+  }, [value])
+
+  // --- UNMOUNT CLEANUP (Just in case the component actually unmounts) ---
+  useEffect(() => {
+    return () => {
+      setInputValue('')
+      setFetchedOptions([])
+    }
+  }, [])
 
   useEffect(() => {
     if (!searchable || !onSearch) {
@@ -161,7 +180,7 @@ const SelectInputField = ({
           freeSolo={!!onAddNew}
           openOnFocus
           disableCloseOnSelect={!!onEdit || editingOption !== null}
-          clearOnBlur={false}
+          clearOnBlur={true}
           open={isOpen || editingOption !== null}
           onOpen={() => setIsOpen(true)}
           onClose={() => {
@@ -457,161 +476,171 @@ const FormGenerator = ({
 
   return (
     <>
-      <Grid container spacing={gridSpacing}>
-        {fields.map(
-          ({
-            type,
-            id,
-            customInput,
-            isDisabled,
-            label,
-            placeholder,
-            onChange,
-            key,
-            caption,
-            value,
-            variant,
-            menuOptions,
-            showYearDropdown,
-            showMonthDropdown,
-            onSearch,
-            searchable,
-            addNewLabel,
-            onAddNew,
-            onEdit,
-            onEditSuccess,
-            isOptionsLoading,
-            isUpdating
-          }) => (
-            <Grid item {...columnSize} key={id}>
-              {type === InputTypes.INPUT ? (
-                <>
-                  <small>
-                    {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
-                  </small>
-                  <TextField
-                    fullWidth
-                    id={id}
-                    size='small'
-                    error={!!getHadError(key)}
-                    value={value ?? ''}
-                    defaultValue={value}
-                    type={variant}
-                    disabled={isDisabled}
-                    placeholder={placeholder ?? ''}
-                    onChange={onChange}
+      <DatePickerWrapper>
+        <Grid container spacing={gridSpacing}>
+          {fields.map(
+            ({
+              type,
+              id,
+              customInput,
+              isDisabled,
+              label,
+              placeholder,
+              onChange,
+              key,
+              caption,
+              value,
+              variant,
+              menuOptions,
+              showYearDropdown,
+              showMonthDropdown,
+              yearDropdownItemNumber,
+              minDate,
+              maxDate,
+              onSearch,
+              searchable,
+              addNewLabel,
+              onAddNew,
+              onEdit,
+              onEditSuccess,
+              isOptionsLoading,
+              isUpdating
+            }) => (
+              <Grid item {...columnSize} key={id}>
+                {type === InputTypes.INPUT ? (
+                  <>
+                    <small>
+                      {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
+                    </small>
+                    <TextField
+                      fullWidth
+                      id={id}
+                      size='small'
+                      error={!!getHadError(key)}
+                      value={value ?? ''}
+                      defaultValue={value}
+                      type={variant}
+                      disabled={isDisabled}
+                      placeholder={placeholder ?? ''}
+                      onChange={onChange}
+                    />
+                    {caption && <small>{caption}</small>}
+                    {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+                  </>
+                ) : type === InputTypes.SELECT ? (
+                  <SelectInputField
+                    field={{
+                      type,
+                      id,
+                      customInput,
+                      isDisabled,
+                      label,
+                      placeholder,
+                      onChange,
+                      isLoading,
+                      key,
+                      caption,
+                      value,
+                      variant,
+                      menuOptions,
+                      showYearDropdown,
+                      showMonthDropdown,
+                      searchable,
+                      onSearch,
+                      onAddNew,
+                      addNewLabel,
+                      onEdit,
+                      onEditSuccess,
+                      isOptionsLoading,
+                      isUpdating
+                    }}
+                    mandatoryFields={mandatoryFields}
+                    errorObj={getHadError(key)}
                   />
-                  {caption && <small>{caption}</small>}
-                  {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-                </>
-              ) : type === InputTypes.SELECT ? (
-                <SelectInputField
-                  field={{
-                    type,
-                    id,
-                    customInput,
-                    isDisabled,
-                    label,
-                    placeholder,
-                    onChange,
-                    isLoading,
-                    key,
-                    caption,
-                    value,
-                    variant,
-                    menuOptions,
-                    showYearDropdown,
-                    showMonthDropdown,
-                    searchable,
-                    onSearch,
-                    onAddNew,
-                    addNewLabel,
-                    onEdit,
-                    onEditSuccess,
-                    isOptionsLoading,
-                    isUpdating
-                  }}
-                  mandatoryFields={mandatoryFields}
-                  errorObj={getHadError(key)}
-                />
-              ) : type === InputTypes.RADIO ? (
-                <FormControl required={mandatoryFields.includes(key)} error={!!getHadError(key)} fullWidth>
-                  <FormLabel id={id}>
-                    {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
-                  </FormLabel>
-                  <RadioGroup
-                    row
-                    aria-labelledby={id}
-                    name={id}
-                    id={id}
-                    value={value ?? ''}
-                    onChange={(_, val) => onChange({ target: { value: val } } as any)}
-                  >
-                    {(menuOptions ?? []).map(each => (
-                      <FormControlLabel key={each.value} value={each.value} control={<Radio />} label={each.label} />
-                    ))}
-                  </RadioGroup>
-                  {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-                </FormControl>
-              ) : type === InputTypes.DATE ? (
-                <Box display='flex' flexDirection='column'>
-                  <small>
-                    {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
-                  </small>
-                  <DatePicker
-                    selected={ensureDate(value)}
-                    required={mandatoryFields.includes(key)}
-                    customInput={customInput ?? <CustomDateElement label='' />}
-                    id={id}
-                    onChange={onChange}
-                    disabled={isDisabled}
-                    showYearDropdown={showYearDropdown}
-                    showMonthDropdown={showMonthDropdown}
-                  />
-                  {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-                </Box>
-              ) : type === InputTypes.DATE_RANGE ? (
-                <Box display='flex' flexDirection='column'>
-                  <small>{label}</small>
-
-                  <DatePicker
-                    selectsRange
-                    startDate={value?.[0] || null}
-                    endDate={value?.[1] || null}
-                    onChange={(dates: [Date | null, Date | null]) => onChange(dates)}
-                    customInput={<CustomDateElement label='' />}
-                    isClearable
-                  />
-
-                  {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-                </Box>
-              ) : type === InputTypes.BUTTON ? (
-                <FormControl fullWidth>
-                  <small style={{ color: 'transparent' }}>.</small>
-                  <Box display='flex' alignItems='end'>
-                    <Button color='success' disabled={isDisabled} variant='contained' onClick={onChange} size='small'>
-                      {label}
-                    </Button>
+                ) : type === InputTypes.RADIO ? (
+                  <FormControl required={mandatoryFields.includes(key)} error={!!getHadError(key)} fullWidth>
+                    <FormLabel id={id}>
+                      {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
+                    </FormLabel>
+                    <RadioGroup
+                      row
+                      aria-labelledby={id}
+                      name={id}
+                      id={id}
+                      value={value ?? ''}
+                      onChange={(_, val) => onChange({ target: { value: val } } as any)}
+                    >
+                      {(menuOptions ?? []).map(each => (
+                        <FormControlLabel key={each.value} value={each.value} control={<Radio />} label={each.label} />
+                      ))}
+                    </RadioGroup>
+                    {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+                  </FormControl>
+                ) : type === InputTypes.DATE ? (
+                  <Box display='flex' flexDirection='column'>
+                    <small>
+                      {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
+                    </small>
+                    <DatePicker
+                      selected={ensureDate(value)}
+                      required={mandatoryFields.includes(key)}
+                      customInput={customInput ?? <CustomDateElement label='' />}
+                      id={id}
+                      onChange={onChange}
+                      disabled={isDisabled}
+                      showYearDropdown={showYearDropdown}
+                      showMonthDropdown={showMonthDropdown}
+                      yearDropdownItemNumber={yearDropdownItemNumber ?? 15}
+                      minDate={minDate ?? new Date('1995-01-01')}
+                      maxDate={maxDate ?? new Date()}
+                    />
+                    {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
                   </Box>
-                </FormControl>
-              ) : type === InputTypes.CHECKBOX ? (
-                <FormControl fullWidth>
-                  <FormControlLabel
-                    control={<Checkbox id={id} checked={value as boolean} onChange={onChange} disabled={isDisabled} />}
-                    label={
-                      <>
-                        {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
-                      </>
-                    }
-                  />
-                  {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
-                </FormControl>
-              ) : null}
-            </Grid>
-          )
-        )}
-      </Grid>
-      {!isLoading && footer && footer}
+                ) : type === InputTypes.DATE_RANGE ? (
+                  <Box display='flex' flexDirection='column'>
+                    <small>{label}</small>
+
+                    <DatePicker
+                      selectsRange
+                      startDate={value?.[0] || null}
+                      endDate={value?.[1] || null}
+                      onChange={(dates: [Date | null, Date | null]) => onChange(dates)}
+                      customInput={<CustomDateElement label='' />}
+                      isClearable
+                    />
+
+                    {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+                  </Box>
+                ) : type === InputTypes.BUTTON ? (
+                  <FormControl fullWidth>
+                    <small style={{ color: 'transparent' }}>.</small>
+                    <Box display='flex' alignItems='end'>
+                      <Button color='success' disabled={isDisabled} variant='contained' onClick={onChange} size='small'>
+                        {label}
+                      </Button>
+                    </Box>
+                  </FormControl>
+                ) : type === InputTypes.CHECKBOX ? (
+                  <FormControl fullWidth>
+                    <FormControlLabel
+                      control={
+                        <Checkbox id={id} checked={value as boolean} onChange={onChange} disabled={isDisabled} />
+                      }
+                      label={
+                        <>
+                          {label} {mandatoryFields.includes(key) ? <span style={{ color: 'red' }}>*</span> : ''}
+                        </>
+                      }
+                    />
+                    {getHadError(key) && <small style={{ color: 'red' }}>{getHadError(key)?.error}</small>}
+                  </FormControl>
+                ) : null}
+              </Grid>
+            )
+          )}
+        </Grid>
+        {!isLoading && footer && footer}
+      </DatePickerWrapper>
     </>
   )
 }

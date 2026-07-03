@@ -20,13 +20,13 @@ import {
   SelectChangeEvent,
   FormControl
 } from '@mui/material'
-import axios from 'axios' // Essential for tracking upload progress
 import React, { useState } from 'react'
 
 import ReusableVideoPlayer from 'src/components/VideoPlayer'
 import { PagePath } from 'src/constants/pagePathConstants'
 import { ChaarvyModal, LoadingSpinner } from 'src/reusable_components'
 import { useGetAllHelpVideosQuery, useRequestUploadMutation } from 'src/store/services/MasterServices/helpServices'
+import { uploadFilesToAzure } from 'src/utils/azureUploadHelper'
 import { formatDuration } from 'src/utils/helpers'
 import GetChaarvyIcons from 'src/utils/icons'
 
@@ -78,7 +78,9 @@ export default function VideoDashboard() {
     setUploadProgress(0)
 
     try {
-      // STEP 1: Get the secure SAS URL from FastAPI via RTK Mutation
+      setIsUploading(true)
+
+      // 1. Get the secure SAS URL from FastAPI
       const response = await requestUploadUrl({
         filename: file.name,
         contentType: file.type,
@@ -87,24 +89,13 @@ export default function VideoDashboard() {
         page_route: formData.page_route
       }).unwrap()
 
-      const { uploadUrl } = response
-
-      await axios.put(uploadUrl, file, {
-        headers: {
-          'x-ms-blob-type': 'BlockBlob',
-          'Content-Type': file.type
-        },
-        onUploadProgress: progressEvent => {
-          if (progressEvent.total) {
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-            setUploadProgress(percentCompleted)
-          }
-        }
+      // 2. Use the unified helper (passing an array of 1 item)
+      await uploadFilesToAzure([{ file: file, uploadUrl: response.uploadUrl.upload_url }], {
+        onProgress: percent => setUploadProgress(percent) // Tracks progress!
       })
 
-      // STEP 3: Cleanup and Refresh
+      // 3. Cleanup and Refresh
       setFormData({ title: '', course: '', page_route: '' })
-
       refetch()
     } catch (error) {
       console.error('Upload failed', error)

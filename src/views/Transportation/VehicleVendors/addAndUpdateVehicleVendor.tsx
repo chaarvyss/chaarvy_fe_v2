@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 
 import { Grid } from '@muiElements'
 import AddressForm, { AddressType } from 'src/common/addressForm'
-import { FieldConfig, getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
+import { getMandatoryFieldsList, useFormBuilder } from 'src/hooks/useFormBuilder'
 import { InputTypes } from 'src/lib/enums'
 import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
 import FormGenerator from 'src/reusable_components/formGenerator'

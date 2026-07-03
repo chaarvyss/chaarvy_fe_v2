@@ -1,5 +1,4 @@
 import { urlConstants } from 'src/constants/urlConstants'
-import { FilterProps } from 'src/lib/interfaces'
 import { HttpRequestMethods } from 'src/store'
 
 import api from '../api'
@@ -34,9 +33,23 @@ const commonListServiceApi = api.injectEndpoints({
           url: urlConstants.common.list.expenseCategoryTypesUrl
         }
       }
+    }),
+    getVendorsList: build.query<VendorsListResponse, FilterProps>({
+      providesTags: [CommonCacheTag.VENDORS_LIST],
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.common.list.vendorsUrl,
+          params
+        }
+      }
     })
   })
 })
 
-export const { useGetExpensesListQuery, useGetBenificeryTypesListQuery, useGetExpenseCategoryTypesListQuery } =
-  commonListServiceApi
+export const {
+  useGetExpensesListQuery,
+  useGetBenificeryTypesListQuery,
+  useGetExpenseCategoryTypesListQuery,
+  useGetVendorsListQuery
+} = commonListServiceApi

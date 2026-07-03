@@ -6,8 +6,8 @@ import { CommonCacheTag } from '../cacheTag'
 
 const commonExpensesServiceApi = api.injectEndpoints({
   endpoints: build => ({
-    createUpdateExpense: build.mutation<string, ExpenseRequest>({
-      invalidatesTags: [CommonCacheTag.EXPENSES_LIST],
+    createUpdateExpense: build.mutation<AddExpenseResponse, ExpenseRequest>({
+      invalidatesTags: [CommonCacheTag.EXPENSES_LIST, CommonCacheTag.EXPENSES_DETAIL],
       query: body => {
         return {
           method: HttpRequestMethods.POST,
@@ -47,6 +47,8 @@ const commonExpensesServiceApi = api.injectEndpoints({
       }
     }),
     getExpenseDetail: build.query<ExpenseRequest, string>({
+      providesTags: [CommonCacheTag.EXPENSES_DETAIL],
+      keepUnusedDataFor: 0,
       query: expense_id => {
         return {
           method: HttpRequestMethods.GET,
@@ -54,6 +56,32 @@ const commonExpensesServiceApi = api.injectEndpoints({
           params: { expense_id }
         }
       }
+    }),
+    generateExpenseUploadUrls: build.mutation<GenerateUploadUrlsResponse[], GenerateUploadUrlsRequest>({
+      invalidatesTags: [CommonCacheTag.EXPENSES_DETAIL],
+      query: ({ expense_id, file_names }) => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.common.expenses.generateUploadUrls(expense_id),
+          body: { expense_id, file_names }
+        }
+      }
+    }),
+    getExpenseFiles: build.query<GetExpenseFilesResponse, string>({
+      providesTags: [CommonCacheTag.EXPENSES_DETAIL],
+      keepUnusedDataFor: 0,
+      query: expenseId => ({
+        url: urlConstants.common.expenses.getExpenseFilesUrl(expenseId),
+        method: HttpRequestMethods.GET
+      })
+    }),
+    deleteExpenseFiles: build.mutation<{ message: string }, DeleteExpenseFilesRequest>({
+      invalidatesTags: [CommonCacheTag.EXPENSES_DETAIL],
+      query: body => ({
+        url: urlConstants.common.expenses.deleteExpenseFilesUrl(body.expense_id),
+        method: HttpRequestMethods.DELETE,
+        body: { file_ids: body.file_ids }
+      })
     })
   })
 })
@@ -63,5 +91,8 @@ export const {
   useCreateUpdateBenficeryTypeMutation,
   useCreateUpdateExpenseCategoryTypeMutation,
   useCreateUpdatePaymentModeMutation,
-  useGetExpenseDetailQuery
+  useGetExpenseDetailQuery,
+  useGenerateExpenseUploadUrlsMutation,
+  useGetExpenseFilesQuery,
+  useDeleteExpenseFilesMutation
 } = commonExpensesServiceApi

@@ -8,7 +8,7 @@ import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import { DEFAULT_TABLE_ITEMS_LIMIT } from 'src/constants/constants'
 import { PagePath } from 'src/constants/pagePathConstants'
 import { PermissionLabels } from 'src/constants/permissions'
-import { FilterProps, TableHeaderStatCardProps } from 'src/lib/interfaces'
+import { TableHeaderStatCardProps } from 'src/lib/interfaces'
 import { isAuthorised } from 'src/lib/util/permissionCheck'
 import { useGetExpensesListQuery } from 'src/store/services/common/listServices'
 import { ChaarvyIconFontSize, ThemeColorEnum } from 'src/utils/enums'
@@ -71,11 +71,11 @@ const ExpensesList = () => {
       label: 'Expense category'
     },
     {
-      id: 'benficery',
+      id: 'beneficiary_name',
       label: 'Beneficiary name'
     },
     {
-      id: 'benficery_type',
+      id: 'beneficiary_type',
       label: 'Beneficiary type'
     },
     {

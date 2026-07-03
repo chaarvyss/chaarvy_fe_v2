@@ -122,6 +122,16 @@ type ReferrelSummaryResponse = {
   total_fees: number
 }
 
+type PayeeListRequest = {
+  benficery_type_id: string
+  search_text?: string
+}
+
+type PayeeListResponse = {
+  label: string
+  value: string
+}
+
 const adminServiceApi = api.injectEndpoints({
   endpoints: build => ({
     createAddonCourse: build.mutation<string, string>({
@@ -401,6 +411,16 @@ const adminServiceApi = api.injectEndpoints({
           params
         }
       }
+    }),
+    getPayeesList: build.query<PayeeListResponse[], PayeeListRequest>({
+      keepUnusedDataFor: 0,
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admin.getPayeesListUrl,
+          params
+        }
+      }
     })
   })
 })
@@ -432,5 +452,6 @@ export const {
   useCreateUpdateFeesTypeMutation,
   useCreateUpdateProgramAddonCourseMutation,
   useUpdateProgramSegmentStatusMutation,
-  useGetReferrelSummaryQuery
+  useGetReferrelSummaryQuery,
+  useGetPayeesListQuery
 } = adminServiceApi

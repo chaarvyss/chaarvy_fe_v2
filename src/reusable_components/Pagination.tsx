@@ -1,8 +1,6 @@
 import { Card, FormControl, MenuItem, Pagination, Select, SelectChangeEvent } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 
-import { FilterProps } from 'src/lib/interfaces'
-
 export interface PaginationProps {
   total: number
   onChange: (data: FilterProps) => void

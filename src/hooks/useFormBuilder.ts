@@ -1,53 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 
-import { InputTypes } from 'src/lib/enums'
 import { dateToString } from 'src/lib/helpers'
 import { ErrorObject, InputFields } from 'src/lib/types'
 
-export type ValidationRule =
-  | 'required'
-  | 'number'
-  | 'email'
-  | 'mobile'
-  | 'pincode'
-  | 'aadhar'
-  | { type: 'minLength'; value: number; message?: string }
-  | { type: 'maxLength'; value: number; message?: string }
-
-export type FieldConfig<T> = {
-  key: keyof T
-  label: string
-  type: InputTypes
-  variant?: any
-  rules?: ValidationRule[]
-  dependsOn?: keyof T
-  fetchOptions?: (value: any) => Promise<any>
-  mapOptions?: (data: any) => { label: string; value: any }[]
-  staticOptions?: any[]
-  searchable?: boolean
-  onSearch?: (searchText: string) => Promise<{ label: string; value: any }[]>
-  onAddNew?: (text?: string) => void
-  addNewLabel?: string
-  onEdit?: (value: string | number, label: string) => void
-
-  // --- ADD THESE MISSING PROPS ---
-  canEdit?: boolean
-  isUpdating?: boolean
-  isLoading?: boolean
-  isEditingLoading?: boolean
-}
-
-export type FormConfig<T> = {
-  formConfig: FieldConfig<T>[]
-  initialValues: T
-}
-
-type ValidationError = { errorkey: string; error: string } | null
-
-type RuleHandler = (value: any, isEmpty: boolean, keyStr: string) => ValidationError
-
 export const mapToFields = ({ config, values, handleChange, optionsMap, loadingMap }: any): InputFields[] => {
-  return config.map(field => {
+  return config.map((field: any) => {
     const key = String(field.key)
 
     return {
@@ -67,7 +24,12 @@ export const mapToFields = ({ config, values, handleChange, optionsMap, loadingM
       canEdit: field.canEdit,
       onEdit: field.onEdit,
       isUpdating: field.isUpdating,
-      isOptionsLoading: field.isOptionsLoading
+      isOptionsLoading: field.isOptionsLoading,
+      showYearDropdown: field.showYearDropdown,
+      showMonthDropdown: field.showMonthDropdown,
+      yearDropdownItemNumber: field.yearDropdownItemNumber,
+      minDate: field.minDate,
+      maxDate: field.maxDate
     }
   })
 }
@@ -81,11 +43,16 @@ export const useFormBuilder = <T extends Record<string, any>>({ formConfig, init
   const [errors, setErrors] = useState<ErrorObject[]>([])
   const [optionsMap, setOptionsMap] = useState<Record<string, any[]>>({})
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({})
-  const [fetchedDeps, setFetchedDeps] = useState<Record<string, any>>({})
+
+  // ✅ FIX: Use useRef to track dependencies to avoid infinite re-renders
+  const fetchedDeps = useRef<Record<string, any>>({})
 
   const getValue = (e: any) => e?.target?.value ?? e
 
-  // ✅ STATIC OPTIONS (e.g., states)
+  // Moved up so it can be used inside the Dependency Engine
+  const isEmptyValue = useCallback((value: any) => value === null || value === undefined || value === '', [])
+
+  // ✅ STATIC OPTIONS
   useEffect(() => {
     const initialOptions: Record<string, any[]> = {}
 
@@ -94,7 +61,6 @@ export const useFormBuilder = <T extends Record<string, any>>({ formConfig, init
 
       if (Array.isArray(field.staticOptions) && field.staticOptions.length > 0) {
         const mapped = field.mapOptions ? field.mapOptions(field.staticOptions) : field.staticOptions
-
         initialOptions[key] = mapped
       }
     })
@@ -104,67 +70,76 @@ export const useFormBuilder = <T extends Record<string, any>>({ formConfig, init
     }
   }, [formConfig])
 
-  // ✅ DEPENDENCY ENGINE (handles both initial values & user changes)
+  // ✅ DEPENDENCY ENGINE (Handles resets, search clearing, and fetching)
   useEffect(() => {
+    let isMounted = true
+
     const runDependencies = async () => {
       for (const field of formConfig) {
-        if (!field.dependsOn || !field.fetchOptions) continue
+        if (!field.dependsOn) continue
 
         const parentKey = field.dependsOn
         const parentValue = values[parentKey]
-
-        if (!parentValue) continue
-
         const fieldKey = String(field.key)
+        const currentValue = values[field.key]
+        const lastFetchedParent = fetchedDeps.current[fieldKey]
 
-        // prevent duplicate API calls
-        if (fetchedDeps[fieldKey] === parentValue) continue
+        // SCENARIO 1: Parent is Empty (e.g., user cleared the parent field)
+        if (isEmptyValue(parentValue)) {
+          // Clear child value and search text
+          if (!isEmptyValue(currentValue)) {
+            setValues(prev => ({ ...prev, [field.key]: '' as any }))
+            if (field.searchable && field.onSearch) field.onSearch('')
+          }
 
-        // reset dependent field if parent changes
-        if (fetchedDeps[fieldKey] && fetchedDeps[fieldKey] !== parentValue) {
-          setValues(prev => ({
-            ...prev,
-            [field.key]: ''
-          }))
+          // Clear child options
+          if (lastFetchedParent !== undefined) {
+            setOptionsMap(prev => ({ ...prev, [fieldKey]: [] }))
+            fetchedDeps.current[fieldKey] = undefined // Reset tracking
+          }
+          continue
         }
+
+        // SCENARIO 2: Parent value hasn't changed since last run -> Skip
+        if (lastFetchedParent === parentValue) continue
+
+        // SCENARIO 3: Parent value CHANGED to a new valid value
+        // Clear child value & search field BEFORE fetching new options
+        if (lastFetchedParent !== undefined) {
+          setValues(prev => ({ ...prev, [field.key]: '' as any }))
+          if (field.searchable && field.onSearch) field.onSearch('')
+        }
+
+        // Update tracking ref to prevent infinite loops
+        fetchedDeps.current[fieldKey] = parentValue
+
+        // If no fetch logic is provided, we stop here
+        if (!field.fetchOptions) continue
 
         setLoadingMap(prev => ({ ...prev, [fieldKey]: true }))
 
         try {
           const data = await field.fetchOptions(parentValue)
+          if (!isMounted) return
 
           const mapped = field.mapOptions ? field.mapOptions(data) : data
-
-          setOptionsMap(prev => ({
-            ...prev,
-            [fieldKey]: mapped
-          }))
-
-          setFetchedDeps(prev => ({
-            ...prev,
-            [fieldKey]: parentValue
-          }))
+          setOptionsMap(prev => ({ ...prev, [fieldKey]: mapped }))
         } catch {
-          setOptionsMap(prev => ({
-            ...prev,
-            [fieldKey]: []
-          }))
+          if (isMounted) setOptionsMap(prev => ({ ...prev, [fieldKey]: [] }))
         } finally {
-          setLoadingMap(prev => ({
-            ...prev,
-            [fieldKey]: false
-          }))
+          if (isMounted) setLoadingMap(prev => ({ ...prev, [fieldKey]: false }))
         }
       }
     }
 
     runDependencies()
-  }, [values, formConfig])
+
+    return () => {
+      isMounted = false
+    }
+  }, [values, formConfig, isEmptyValue])
 
   // ✅ VALIDATION
-
-  const isEmptyValue = (value: any) => value === null || value === undefined || value === ''
-
   const validateRequired = (isEmpty: boolean, keyStr: string) =>
     isEmpty ? { errorkey: keyStr, error: 'This field is required' } : null
 
@@ -176,60 +151,33 @@ export const useFormBuilder = <T extends Record<string, any>>({ formConfig, init
 
   const validateMobile = (value: any, isEmpty: boolean, keyStr: string) => {
     if (isEmpty) return null
-
     const val = String(value).trim()
-
-    if (val.length != 10) {
-      return {
-        errorkey: keyStr,
-        error: 'Mobile number must be 10 digits'
-      }
-    }
+    if (val.length != 10) return { errorkey: keyStr, error: 'Mobile number must be 10 digits' }
 
     return null
   }
 
   const validatePincode = (value: any, isEmpty: boolean, keyStr: string) => {
     if (isEmpty) return null
-
-    if (!/^\d{6}$/.test(String(value))) {
-      return {
-        errorkey: keyStr,
-        error: 'Pincode must be 6 digits'
-      }
-    }
+    if (!/^\d{6}$/.test(String(value))) return { errorkey: keyStr, error: 'Pincode must be 6 digits' }
 
     return null
   }
 
   const validateAadhar = (value: any, isEmpty: boolean, keyStr: string) => {
     if (isEmpty) return null
-
     const val = String(value).trim()
-
-    if (val.length !== 12) {
-      return {
-        errorkey: keyStr,
-        error: 'Aadhar must be 12 digits'
-      }
-    }
+    if (val.length !== 12) return { errorkey: keyStr, error: 'Aadhar must be 12 digits' }
 
     return null
   }
 
   const validateLength = (rule: any, value: any, keyStr: string) => {
     if (rule.type === 'minLength' && value?.length < rule.value) {
-      return {
-        errorkey: keyStr,
-        error: rule.message || `Minimum ${rule.value} characters required`
-      }
+      return { errorkey: keyStr, error: rule.message || `Minimum ${rule.value} characters required` }
     }
-
     if (rule.type === 'maxLength' && value?.length > rule.value) {
-      return {
-        errorkey: keyStr,
-        error: rule.message || `Maximum ${rule.value} characters allowed`
-      }
+      return { errorkey: keyStr, error: rule.message || `Maximum ${rule.value} characters allowed` }
     }
 
     return null
@@ -237,15 +185,10 @@ export const useFormBuilder = <T extends Record<string, any>>({ formConfig, init
 
   const ruleHandlers: Record<string, RuleHandler> = {
     required: (_, isEmpty, keyStr) => validateRequired(isEmpty, keyStr),
-
     number: (value, isEmpty, keyStr) => validateNumber(value, isEmpty, keyStr),
-
     email: (value, isEmpty, keyStr) => validateEmail(value, isEmpty, keyStr),
-
     mobile: (value, isEmpty, keyStr) => validateMobile(value, isEmpty, keyStr),
-
     pincode: (value, isEmpty, keyStr) => validatePincode(value, isEmpty, keyStr),
-
     aadhar: (value, isEmpty, keyStr) => validateAadhar(value, isEmpty, keyStr)
   }
 
@@ -273,7 +216,6 @@ export const useFormBuilder = <T extends Record<string, any>>({ formConfig, init
   }
 
   // ✅ HANDLE CHANGE (pure, no side-effects)
-
   const updateErrors = useCallback(
     (key: keyof T, value: any) => {
       const keyStr = String(key)
@@ -293,7 +235,6 @@ export const useFormBuilder = <T extends Record<string, any>>({ formConfig, init
       const normalizedValue = value instanceof Date ? dateToString(value, 'yyyy-MM-dd') : value
 
       updateErrors(key, value)
-
       setValues(prev => ({ ...prev, [key]: normalizedValue }))
     },
     [updateErrors]
@@ -330,7 +271,6 @@ export const useFormBuilder = <T extends Record<string, any>>({ formConfig, init
     const { isValid } = validateForm()
     if (!isValid) return
 
-    // Fix: Assert as Record<string, any> so we can index it dynamically
     const processedValues = { ...values } as Record<string, any>
 
     Object.keys(processedValues).forEach(key => {
@@ -356,6 +296,8 @@ export const useFormBuilder = <T extends Record<string, any>>({ formConfig, init
     handleChange,
     handleSubmit,
     setValues,
-    setOptionsMap
+    setOptionsMap,
+    shouldDisableSubmit:
+      errors.length > 0 || formConfig.some(f => f.rules?.includes('required') && isEmptyValue(values[f.key]))
   }
 }
