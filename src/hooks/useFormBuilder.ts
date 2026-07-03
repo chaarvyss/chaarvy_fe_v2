@@ -29,7 +29,8 @@ export const mapToFields = ({ config, values, handleChange, optionsMap, loadingM
       showMonthDropdown: field.showMonthDropdown,
       yearDropdownItemNumber: field.yearDropdownItemNumber,
       minDate: field.minDate,
-      maxDate: field.maxDate
+      maxDate: field.maxDate,
+      rows: field.rows
     }
   })
 }

@@ -10,6 +10,7 @@ import Payments from 'src/views/dashboardCards/payments'
 import Population from 'src/views/dashboardCards/population'
 import StationaryStock from 'src/views/dashboardCards/stationaryStock'
 import StudentEnrollmentChart from 'src/views/dashboardCards/studentsByCourse'
+import DashboardTodoList from 'src/views/dashboardCards/Todo'
 
 const dashboardComponents = {
   Calender: MyCalendar,
@@ -19,11 +20,23 @@ const dashboardComponents = {
   Stationary_stock: StationaryStock,
   Student_enrollments: StudentEnrollmentChart,
   CashFlow: FinancePage,
-  Expenses: OverallExpensesDashboardCard
+  Expenses: OverallExpensesDashboardCard,
+  Todo: DashboardTodoList
 }
 
 const dashboardLayout: LayoutCard[] = [
   { i: 'greetingCard', x: 0, y: 0, w: 8, h: 2, shouldHide: true, permission_key: '', hadSearch: false },
+  {
+    i: 'Todo',
+    x: 0,
+    y: 0,
+    w: 8,
+    h: 2,
+    shouldHide: false,
+    permission_key: PermissionLabels.dashboard.todo,
+    hadSearch: false
+  },
+
   {
     i: 'Students',
     x: 0,

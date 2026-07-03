@@ -4,7 +4,8 @@ const masterPrefix = 'master'
 const commonRoutePrefix = {
   list: '/list',
   expense: '/expenses',
-  vendor: '/vendor'
+  vendor: '/vendor',
+  todo: '/todo'
 }
 
 const interRoutePrefix = {
@@ -34,6 +35,14 @@ export const urlConstants = {
       benificeryTypesUrl: `${commonRoutePrefix.list}/benificery-types`,
       expenseCategoryTypesUrl: `${commonRoutePrefix.list}/expense-category-types`,
       vendorsUrl: `${commonRoutePrefix.list}/vendors`
+    },
+    todo: {
+      createUpdateTodoUrl: `${commonRoutePrefix.todo}/create-update-todo`,
+      getTodoDetailUrl: (todo_id: string) => `${commonRoutePrefix.todo}/todo-detail/${todo_id}`,
+      getTodosUrl: `${commonRoutePrefix.todo}/get-todo-list`,
+      deleteTodo: (todo_id: string) => `${commonRoutePrefix.todo}/delete-todo/${todo_id}`,
+      updateTodoStatusUrl: ({ todo_id, status }: { todo_id: string; status: number }) =>
+        `${commonRoutePrefix.todo}/update-todo-status/${todo_id}/${status}`
     },
     vendor: {
       createUpdateVendorUrl: `${commonRoutePrefix.vendor}/create-update-vendor`,
