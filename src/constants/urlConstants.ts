@@ -102,7 +102,8 @@ export const urlConstants = {
     programAddonCourses: `${interRoutePrefix.list}/program-addon-courses`,
     getProgramCommonMediumsUrl: `${interRoutePrefix.list}/get-program-common-mediums`,
     getSegementsByProgramAndMediumUrl: `${interRoutePrefix.list}/segments-by-program-medium`,
-    getAllPermissionNamesUrl: `${interRoutePrefix.list}/all-permission-names`
+    getAllPermissionNamesUrl: `${interRoutePrefix.list}/all-permission-names`,
+    getSubjectsListUrl: `${interRoutePrefix.list}/subjects`
   },
   admin: {
     createUpdateUser: `${interRoutePrefix.admin}/create-update-user`,
@@ -114,6 +115,8 @@ export const urlConstants = {
     createUpdateProgramAddonCourse: `${interRoutePrefix.admin}/create-update-program-addon-course`,
     getReferrelSummaryUrl: `${interRoutePrefix.admin}/get_referrals_summary`,
     getPayeesListUrl: `${interRoutePrefix.admin}/get-payees-list`,
+    createUpdateSubjectUrl: `${interRoutePrefix.admin}/create-update-subject`,
+    updateSubjectStatusUrl: `${interRoutePrefix.admin}/update-subject-status`,
 
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,

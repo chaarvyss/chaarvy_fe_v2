@@ -274,6 +274,16 @@ const listServicesApi = api.injectEndpoints({
           url: `${urlConstants.list.getAllPermissionNamesUrl}`
         }
       }
+    }),
+    getSubjectsList: build.query<Subject[], FilterProps>({
+      providesTags: [CacheTag.ListSubjects],
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: `${urlConstants.list.getSubjectsListUrl}`,
+          params
+        }
+      }
     })
   })
 })
@@ -309,5 +319,6 @@ export const {
   useGetProgramAddonCoursesQuery,
   useGetProgramCommonMediumsQuery,
   useGetSegmentsByProgramMediumQuery,
-  useGetAllPermissionNamesQuery
+  useGetAllPermissionNamesQuery,
+  useGetSubjectsListQuery
 } = listServicesApi
