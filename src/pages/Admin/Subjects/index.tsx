@@ -1,3 +1,3 @@
-import Subjects from 'src/views/Subjects'
+import Subjects from 'src/views/Admin/Subjects'
 
 export default Subjects
