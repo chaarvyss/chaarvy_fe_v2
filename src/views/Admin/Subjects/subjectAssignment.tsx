@@ -286,7 +286,7 @@ const SubjectsAssignEditor = ({
   // --- Save Logic ---
   const handleSave = async () => {
     const payload = Object.entries(changes).map(([key, value]) => {
-      const [subjectId, progPrefix, programId, segPrefix, segmentId] = key.split('_')
+      const [subjectId, programId, segmentId] = key.split('_')
       const field = getField(programId, segmentId)
       const row = rowData.find(r => r.subjectId === subjectId)
 
