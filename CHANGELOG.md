@@ -1,3 +1,10 @@
+## [1.18.10](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.9...v1.18.10) (2026-07-07)
+
+
+### Bug Fixes
+
+* **Subjects:** AC-79 CRUD on subjects done ([#67](https://github.com/chaarvyss/chaarvy_fe_v2/issues/67)) ([c5c9405](https://github.com/chaarvyss/chaarvy_fe_v2/commit/c5c9405d5fc4520798b9cab56de7bc9b5e7bcefe))
+
 ## [1.18.9](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.8...v1.18.9) (2026-07-03)
 
 
