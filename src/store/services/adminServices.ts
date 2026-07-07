@@ -421,6 +421,26 @@ const adminServiceApi = api.injectEndpoints({
           params
         }
       }
+    }),
+    createUpdateSubject: build.mutation<string, Subject>({
+      invalidatesTags: [CacheTag.ListSubjects],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.createUpdateSubjectUrl,
+          body
+        }
+      }
+    }),
+    updateSubjectStatus: build.mutation<string, string>({
+      invalidatesTags: [CacheTag.ListSubjects],
+      query: subject_id => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.updateSubjectStatusUrl,
+          params: { subject_id }
+        }
+      }
     })
   })
 })
@@ -453,5 +473,7 @@ export const {
   useCreateUpdateProgramAddonCourseMutation,
   useUpdateProgramSegmentStatusMutation,
   useGetReferrelSummaryQuery,
-  useGetPayeesListQuery
+  useGetPayeesListQuery,
+  useCreateUpdateSubjectMutation,
+  useUpdateSubjectStatusMutation
 } = adminServiceApi
