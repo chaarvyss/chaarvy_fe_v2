@@ -25,6 +25,10 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { ChaarvyModal } from 'src/reusable_components'
 import { useGetSubjectsListQuery } from 'src/store/services/listServices'
+import {
+  useGetAllProgramSegmentsListQuery,
+  useGetProgramSegmentSubjectsListQuery
+} from 'src/store/services/programServices'
 import { useDebounce } from 'src/utils/hooks/useDebounce'
 
 ModuleRegistry.registerModules([AllCommunityModule])
@@ -47,17 +51,10 @@ export interface ProgramData {
   segments: { segment_id: string; segment_name: string }[]
 }
 
-export interface PastAssignmentData {
-  progSegmentSubId: string // Updated to match your backend ID naming
-  subject_id: string
-  program_id: string
-  segment_id: string
-}
-
 interface SubjectsAssignEditorProps {
   availableSubjects: SubjectResponse[]
   programData: ProgramData[]
-  pastData: PastAssignmentData[]
+  pastData: ProgramSegmentSubject[]
   isLoading?: boolean
   onSave: (payload: any[]) => Promise<void>
 }
@@ -75,56 +72,6 @@ const getSegmentColor = (segmentName: string) => {
 
   return `linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.2) 100%), hsl(${hue}, 85%, 88%)`
 }
-
-// --- 2. MOCK DATA: Programs & Segments ---
-const MOCK_PROGRAMS: ProgramData[] = [
-  {
-    program_id: 'early',
-    program_name: 'Early Years',
-    segments: [
-      { segment_id: 'nur', segment_name: 'Nursery' },
-      { segment_id: 'lkg', segment_name: 'LKG' },
-      { segment_id: 'ukg', segment_name: 'UKG' }
-    ]
-  },
-  {
-    program_id: 'primary',
-    program_name: 'Primary',
-    segments: [
-      { segment_id: 'cls1', segment_name: 'Class 1' },
-      { segment_id: 'cls2', segment_name: 'Class 2' },
-      { segment_id: 'cls3', segment_name: 'Class 3' }
-    ]
-  }
-]
-
-// --- 3. MOCK DATA: Past Assignments (Pre-checked values) ---
-const MOCK_PAST_DATA: PastAssignmentData[] = [
-  {
-    progSegmentSubId: 'map_1',
-    subject_id: '5bec5a7a-2be0-46fd-a902-5d275223a7f2',
-    program_id: 'early',
-    segment_id: 'nur'
-  },
-  {
-    progSegmentSubId: 'map_2',
-    subject_id: '5bec5a7a-2be0-46fd-a902-5d275223a7f2',
-    program_id: 'early',
-    segment_id: 'lkg'
-  },
-  {
-    progSegmentSubId: 'map_3',
-    subject_id: '0c73113c-a10c-4fee-b0e1-01efc4cff4b7',
-    program_id: 'early',
-    segment_id: 'nur'
-  },
-  {
-    progSegmentSubId: 'map_4',
-    subject_id: '0c73113c-a10c-4fee-b0e1-01efc4cff4b7',
-    program_id: 'early',
-    segment_id: 'lkg'
-  }
-]
 
 // --- Main Editor Component ---
 const SubjectsAssignEditor = ({
@@ -165,7 +112,7 @@ const SubjectsAssignEditor = ({
   useEffect(() => {
     // Map to quickly look up the progSegmentSubId
     const pastDataLookup = new Map(
-      pastData.map(d => [`${d.subject_id}_${d.program_id}_${d.segment_id}`, d.progSegmentSubId])
+      pastData.map(d => [`${d.subject_id}_${d.program_id}_${d.segment_id}`, d.program_segment_subject_id])
     )
 
     const newRowData = selectedSubjectIds.map(subjectId => {
@@ -496,6 +443,7 @@ const SubjectsAssignEditor = ({
             disableCloseOnSelect
             loading={isLoading}
             options={sortedSubjects}
+            limitTags={2}
             getOptionLabel={option => option.subject_name}
             value={selectedValues}
             isOptionEqualToValue={(option, value) => option.subject_id === value.subject_id}
@@ -676,8 +624,30 @@ export function SubjectAssignmentPage() {
   const filterP = useDebounce(filterProps, 500)
   const { data: subjectsList, isLoading, isFetching } = useGetSubjectsListQuery(filterP)
 
-  const [programs] = useState<ProgramData[]>(MOCK_PROGRAMS)
-  const [pastData] = useState<PastAssignmentData[]>(MOCK_PAST_DATA)
+  const { data: programSegmentsData, isFetching: isProgramSegmentsLoading } = useGetAllProgramSegmentsListQuery()
+  const [programs, setPrograms] = useState<ProgramData[]>([])
+
+  useEffect(() => {
+    if (programSegmentsData) {
+      const groupedPrograms: Record<string, ProgramData> = {}
+      programSegmentsData.forEach((segment: any) => {
+        const { program_id, program_name, segment_id, segment_name } = segment
+
+        if (!groupedPrograms[program_id]) {
+          groupedPrograms[program_id] = {
+            program_id,
+            program_name,
+            segments: []
+          }
+        }
+
+        groupedPrograms[program_id].segments.push({ segment_id, segment_name })
+      })
+      setPrograms(Object.values(groupedPrograms))
+    }
+  }, [programSegmentsData])
+
+  const { data: pastData } = useGetProgramSegmentSubjectsListQuery(undefined)
 
   const handleSaveAssignments = async (payload: any[]) => {
     return new Promise<void>(resolve => {
@@ -703,8 +673,8 @@ export function SubjectAssignmentPage() {
       <SubjectsAssignEditor
         availableSubjects={availableSubjects}
         programData={programs}
-        pastData={pastData}
-        isLoading={isLoading || isFetching} // Pass loading state to editor
+        pastData={pastData ?? []}
+        isLoading={isLoading || isFetching || isProgramSegmentsLoading} // Pass loading state to editor
         onSave={handleSaveAssignments}
       />
     </ChaarvyModal>
