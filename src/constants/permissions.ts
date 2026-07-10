@@ -19,6 +19,7 @@ export const PermissionLabels = {
     feesTypes: 'nav:fees_types',
     sections: 'nav:sections',
     programs: 'nav:programs',
+    subjects: 'nav:subjects',
     booksAndStationary: 'nav:books_and_stationary',
     addonCourses: 'nav:addon_courses',
     payments: 'nav:payments',

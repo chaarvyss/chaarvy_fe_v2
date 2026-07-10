@@ -13,6 +13,7 @@ export const PagePath = {
   BOOKS: '/Admin/books',
   ADDON_COURSE: '/Admin/addonCourse',
   PROGRAMS: '/Admin/programs',
+  SUBJECTS: '/Admin/Subjects',
   PAYMENTS: '/Admin/payments',
   REPORTS: '/Admin/reports',
   ADMISSION_FORM: '/StudentManagement/AdmissionForm',

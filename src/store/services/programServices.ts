@@ -201,6 +201,7 @@ const programServicesApi = api.injectEndpoints({
       }
     }),
     getProgramSegmentSubjectsList: build.query<ProgramSegmentSubject[], ProgramSegmentSubjectsListRequest | undefined>({
+      providesTags: [CacheTag.ListProgramSegmentSubjects],
       query: params => {
         return {
           method: HttpRequestMethods.GET,
@@ -215,6 +216,17 @@ const programServicesApi = api.injectEndpoints({
         return {
           method: HttpRequestMethods.GET,
           url: urlConstants.program.getAllProgramSegmentsUrl
+        }
+      }
+    }),
+
+    assignProgramSegmentSubject: build.mutation<string, ProgramSegmentSubject[]>({
+      invalidatesTags: [CacheTag.ListProgramSegmentSubjects],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.program.assignProgramSegmentSubjectUrl,
+          body
         }
       }
     })
@@ -237,5 +249,6 @@ export const {
   useCreateUpdateProgramSegmentSectionMutation,
   useGetProgramFeesHeaderDataQuery,
   useGetProgramSegmentSubjectsListQuery,
-  useGetAllProgramSegmentsListQuery
+  useGetAllProgramSegmentsListQuery,
+  useAssignProgramSegmentSubjectMutation
 } = programServicesApi

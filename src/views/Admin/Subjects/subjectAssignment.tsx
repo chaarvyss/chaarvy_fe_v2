@@ -26,6 +26,7 @@ import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { ChaarvyModal } from 'src/reusable_components'
 import { useGetSubjectsListQuery } from 'src/store/services/listServices'
 import {
+  useAssignProgramSegmentSubjectMutation,
   useGetAllProgramSegmentsListQuery,
   useGetProgramSegmentSubjectsListQuery
 } from 'src/store/services/programServices'
@@ -62,7 +63,6 @@ interface SubjectsAssignEditorProps {
 // --- Helpers ---
 const getField = (programId: string, segmentId: string) => `prog_${programId}_seg_${segmentId}`
 
-// Dynamic Glossy Color Generator (Same name = Same color)
 const getSegmentColor = (segmentName: string) => {
   let hash = 0
   for (let i = 0; i < segmentName.length; i++) {
@@ -86,14 +86,19 @@ const SubjectsAssignEditor = ({
   const { triggerToast } = useToast()
 
   const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([])
+  const [selectedProgramIds, setSelectedProgramIds] = useState<string[]>([])
   const [rowData, setRowData] = useState<any[]>([])
   const [changes, setChanges] = useState<Record<string, boolean>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // State to track hidden/dragged columns
+  // Use a ref to access latest changes inside useEffect without adding to dependencies
+  const changesRef = useRef(changes)
+  useEffect(() => {
+    changesRef.current = changes
+  }, [changes])
+
   const [hiddenColumns, setHiddenColumns] = useState<{ id: string; name: string; colIds: string[] }[]>([])
 
-  // Popover State
   const [copyPopover, setCopyPopover] = useState<{
     anchorEl: HTMLElement | null
     sourceField: string
@@ -102,52 +107,71 @@ const SubjectsAssignEditor = ({
   } | null>(null)
   const [selectedTargets, setSelectedTargets] = useState<string[]>([])
 
-  // Initialize selected subjects based on past data
+  // Initialize selected subjects and programs based on past data
   useEffect(() => {
-    const assignedSubjectIds = Array.from(new Set(pastData.map(d => d.subject_id)))
-    setSelectedSubjectIds(assignedSubjectIds)
-  }, [pastData])
+    // Filter for active assignments only
+    const activePastData = pastData.filter(d => d.status === 1)
 
-  // Build grid data whenever selected subjects change
+    const assignedSubjectIds = Array.from(new Set(activePastData.map(d => d.subject_id)))
+    setSelectedSubjectIds(assignedSubjectIds)
+
+    const assignedProgramIds = Array.from(new Set(activePastData.map(d => d.program_id)))
+    setSelectedProgramIds(assignedProgramIds.length > 0 ? assignedProgramIds : programData.map(p => p.program_id))
+  }, [pastData, programData])
+
+  // Filter out unselected programs for column definitions
+  const activePrograms = useMemo(() => {
+    return programData.filter(p => selectedProgramIds.includes(p.program_id))
+  }, [programData, selectedProgramIds])
+
+  // Build grid data for ALL programs (incorporating DB values and pending changes)
   useEffect(() => {
-    // Map to quickly look up the progSegmentSubId
-    const pastDataLookup = new Map(
-      pastData.map(d => [`${d.subject_id}_${d.program_id}_${d.segment_id}`, d.program_segment_subject_id])
-    )
+    // Store the ENTIRE object in the map, not just the ID
+    const pastDataLookup = new Map(pastData.map(d => [`${d.subject_id}|${d.program_id}|${d.segment_id}`, d]))
+
+    const originalDataDict: Record<string, any> = {}
 
     const newRowData = selectedSubjectIds.map(subjectId => {
       const subject = availableSubjects.find(s => s.subject_id === subjectId)
       const row: any = { subjectId, subjectName: subject?.subject_name || 'Unknown' }
+      const originalRow: any = { subjectId } // Pristine DB state for diffing
 
       programData.forEach(prog => {
         prog.segments.forEach(seg => {
           const field = getField(prog.program_id, seg.segment_id)
-          const pastId = pastDataLookup.get(`${subjectId}_${prog.program_id}_${seg.segment_id}`)
 
-          row[field] = !!pastId
-          row[`${field}_id`] = pastId || null // Store the DB ID for saving later
+          // Get the whole past record
+          const pastRecord = pastDataLookup.get(`${subjectId}|${prog.program_id}|${seg.segment_id}`)
+
+          // Checkbox is checked ONLY if the record exists AND status is 1
+          const dbValue = pastRecord ? pastRecord.status === 1 : false
+          originalRow[field] = dbValue
+
+          const changeKey = `${subjectId}|${prog.program_id}|${seg.segment_id}`
+
+          // Preserve uncommitted changes if grid is forced to rebuild
+          const isAssigned = changesRef.current[changeKey] !== undefined ? changesRef.current[changeKey] : dbValue
+
+          row[field] = isAssigned
+
+          // Attach the ID for saving later if the record exists
+          row[`${field}_id`] = pastRecord?.program_segment_subject_id || null
         })
       })
+
+      originalDataDict[subjectId] = originalRow
 
       return row
     })
 
     setRowData(newRowData)
-
-    const originalDataDict: Record<string, any> = {}
-    newRowData.forEach(row => {
-      originalDataDict[row.subjectId] = { ...row }
-    })
     originalRowDataRef.current = originalDataDict
-    setChanges({})
   }, [selectedSubjectIds, availableSubjects, programData, pastData])
 
-  // Sort available subjects: Selected (ASC) -> Unselected (ASC)
   const sortedSubjects = useMemo(() => {
     return [...availableSubjects].sort((a, b) => {
       const aSelected = selectedSubjectIds.includes(a.subject_id)
       const bSelected = selectedSubjectIds.includes(b.subject_id)
-
       if (aSelected && !bSelected) return -1
       if (!aSelected && bSelected) return 1
 
@@ -155,21 +179,33 @@ const SubjectsAssignEditor = ({
     })
   }, [availableSubjects, selectedSubjectIds])
 
-  // Map IDs back to objects for the Autocomplete value
-  const selectedValues = useMemo(() => {
+  const selectedSubjectValues = useMemo(() => {
     return selectedSubjectIds.map(
       id => availableSubjects.find(s => s.subject_id === id) || { subject_id: id, subject_name: 'Loading...' }
     )
   }, [selectedSubjectIds, availableSubjects])
 
-  // --- Change Tracking & Syncing UI ---
+  const selectedProgramValues = useMemo(() => {
+    return selectedProgramIds.map(
+      id => programData.find(p => p.program_id === id) || { program_id: id, program_name: 'Loading...', segments: [] }
+    )
+  }, [selectedProgramIds, programData])
+
   const onCellValueChanged = useCallback((params: CellValueChangedEvent) => {
     const field = params.colDef.field as string
     const subjectId = params.data.subjectId
     const newValue = Boolean(params.newValue)
 
     const originalValue = originalRowDataRef.current[subjectId]?.[field] || false
-    const changeKey = `${subjectId}_${field}`
+
+    // Safely extract programId and segmentId even if they contain underscores
+    const match = field.match(/prog_(.+?)_seg_(.+)/)
+    if (!match) return
+
+    const [, programId, segmentId] = match
+
+    // Use | delimiter to safely build composite key
+    const changeKey = `${subjectId}|${programId}|${segmentId}`
 
     setChanges(prev => {
       const updated = { ...prev }
@@ -186,7 +222,6 @@ const SubjectsAssignEditor = ({
     params.api.refreshHeader()
   }, [])
 
-  // --- Hidden Columns / Dragging Logic ---
   const syncHiddenColumns = useCallback(() => {
     const columns = gridRef.current?.api.getColumns()
     if (!columns) return
@@ -230,19 +265,19 @@ const SubjectsAssignEditor = ({
     )
   }, [])
 
-  // --- Save Logic ---
   const handleSave = async () => {
     const payload = Object.entries(changes).map(([key, value]) => {
-      const [subjectId, programId, segmentId] = key.split('_')
+      // Split by | to safely handle IDs with underscores
+      const [subjectId, programId, segmentId] = key.split('|')
       const field = getField(programId, segmentId)
       const row = rowData.find(r => r.subjectId === subjectId)
 
       return {
-        progSegmentSubId: row?.[`${field}_id`] || null, // Include the existing ID if it exists
+        progSegmentSubId: row?.[`${field}_id`] || null,
         subject_id: subjectId,
         program_id: programId,
         segment_id: segmentId,
-        is_assigned: value
+        status: value ? 1 : 0
       }
     })
 
@@ -251,15 +286,20 @@ const SubjectsAssignEditor = ({
     setIsSubmitting(true)
     try {
       await onSave(payload)
+
+      // Success toast triggers here after parent resolves the promise
       triggerToast('Subjects assigned successfully', { variant: ToastVariants.SUCCESS })
+      setChanges({}) // Reset local changes once properly saved
     } catch (error: any) {
-      triggerToast(error?.message || 'Failed to save assignments', { variant: ToastVariants.ERROR })
+      // Pull specific RTK error data if available
+      triggerToast(error?.data?.message || error?.message || 'Failed to save assignments', {
+        variant: ToastVariants.ERROR
+      })
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // --- Copy Popover Handlers ---
   const openCopyPopover = useCallback(
     (event: React.MouseEvent<HTMLElement>, field: string, segName: string, progName: string) => {
       setCopyPopover({
@@ -284,9 +324,8 @@ const SubjectsAssignEditor = ({
     setCopyPopover(null)
   }
 
-  // --- Grid Column Definitions ---
   const columnDefs = useMemo<(ColDef | ColGroupDef)[]>(() => {
-    const dynamicColumns = programData.map(
+    const dynamicColumns = activePrograms.map(
       (prog): ColGroupDef => ({
         headerName: prog.program_name,
         headerStyle: { backgroundColor: '#ffffff' },
@@ -297,7 +336,7 @@ const SubjectsAssignEditor = ({
             headerName: seg.segment_name,
             field: field,
             width: 140,
-            editable: true, // MUST be true for agCheckboxCellEditor to trigger on click
+            editable: true,
             headerStyle: {
               background: getSegmentColor(seg.segment_name),
               boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.8)',
@@ -345,8 +384,13 @@ const SubjectsAssignEditor = ({
             cellRenderer: 'agCheckboxCellRenderer',
             cellEditor: 'agCheckboxCellEditor',
             cellStyle: params => {
-              const originalValue = originalRowDataRef.current[params.data.subjectId]?.[params.colDef.field!] || false
-              const isChanged = originalValue !== params.value
+              const rawOriginalValue = originalRowDataRef.current[params.data.subjectId]?.[params.colDef.field!]
+
+              // Normalize both to strict booleans for safe comparison
+              const originalValueBool = rawOriginalValue === 1 || rawOriginalValue === '1' || rawOriginalValue === true
+              const currentValueBool = params.value === 1 || params.value === '1' || params.value === true
+
+              const isChanged = originalValueBool !== currentValueBool
 
               return {
                 display: 'flex',
@@ -371,7 +415,7 @@ const SubjectsAssignEditor = ({
           let hasRows = false
           props.api.forEachNode((node: any) => {
             hasRows = true
-            programData.forEach(prog => {
+            activePrograms.forEach(prog => {
               prog.segments.forEach(seg => {
                 if (!node.data[getField(prog.program_id, seg.segment_id)]) isGlobalChecked = false
               })
@@ -387,7 +431,7 @@ const SubjectsAssignEditor = ({
                 onChange={e => {
                   const checked = e.target.checked
                   gridRef.current?.api.forEachNode(node => {
-                    programData.forEach(prog => {
+                    activePrograms.forEach(prog => {
                       prog.segments.forEach(seg => {
                         node.setDataValue(getField(prog.program_id, seg.segment_id), checked)
                       })
@@ -404,7 +448,7 @@ const SubjectsAssignEditor = ({
         cellRenderer: (params: any) => {
           if (!params.node || !params.node.data) return null
 
-          const isRowChecked = programData.every(prog =>
+          const isRowChecked = activePrograms.every(prog =>
             prog.segments.every(seg => params.node.data[getField(prog.program_id, seg.segment_id)])
           )
 
@@ -415,7 +459,7 @@ const SubjectsAssignEditor = ({
                 checked={isRowChecked}
                 onChange={e => {
                   const checked = e.target.checked
-                  programData.forEach(prog => {
+                  activePrograms.forEach(prog => {
                     prog.segments.forEach(seg => {
                       params.node.setDataValue(getField(prog.program_id, seg.segment_id), checked)
                     })
@@ -431,12 +475,67 @@ const SubjectsAssignEditor = ({
       },
       ...dynamicColumns
     ]
-  }, [programData, openCopyPopover])
+  }, [activePrograms, openCopyPopover])
 
   return (
     <Box sx={{ width: '100%' }}>
       <Stack direction='row' justifyContent='space-between' alignItems='center' marginX={4} mb={3}>
-        <Box width={{ xs: '100%', sm: 400 }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexGrow={1} mr={2}>
+          <Autocomplete
+            multiple
+            size='small'
+            disableCloseOnSelect
+            loading={isLoading}
+            options={programData}
+            limitTags={2}
+            getOptionLabel={option => option.program_name}
+            value={selectedProgramValues}
+            isOptionEqualToValue={(option, value) => option.program_id === value.program_id}
+            sx={{ flex: 1 }}
+            onChange={(event, newValue) => {
+              const newIds = newValue.map(v => v.program_id)
+              const removedPrograms = selectedProgramIds.filter(id => !newIds.includes(id))
+
+              if (removedPrograms.length > 0) {
+                setChanges(prev => {
+                  const updated = { ...prev }
+                  Object.keys(updated).forEach(key => {
+                    const [, programId] = key.split('|') // Ensure safe splitting
+                    if (removedPrograms.includes(programId)) {
+                      delete updated[key]
+                    }
+                  })
+
+                  return updated
+                })
+              }
+
+              setSelectedProgramIds(newIds)
+            }}
+            renderOption={(props, option, { selected }) => (
+              <li {...props}>
+                <Checkbox style={{ marginRight: 8 }} checked={selected} size='small' />
+                <ListItemText primary={option.program_name} />
+              </li>
+            )}
+            renderInput={params => (
+              <TextField
+                {...params}
+                label='Select Programs'
+                placeholder='Search...'
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {isLoading ? <CircularProgress color='inherit' size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  )
+                }}
+              />
+            )}
+          />
+
           <Autocomplete
             multiple
             size='small'
@@ -445,8 +544,9 @@ const SubjectsAssignEditor = ({
             options={sortedSubjects}
             limitTags={2}
             getOptionLabel={option => option.subject_name}
-            value={selectedValues}
+            value={selectedSubjectValues}
             isOptionEqualToValue={(option, value) => option.subject_id === value.subject_id}
+            sx={{ flex: 1 }}
             onChange={(event, newValue) => {
               const newIds = newValue.map(v => v.subject_id)
               const removedSubjects = selectedSubjectIds.filter(id => !newIds.includes(id))
@@ -454,7 +554,6 @@ const SubjectsAssignEditor = ({
               for (const subjectId of removedSubjects) {
                 const row = rowData.find(r => r.subjectId === subjectId)
                 if (row) {
-                  // Ignore fields that end with '_id' to correctly validate assignments
                   const isAssigned = Object.keys(row).some(
                     key => key.startsWith('prog_') && !key.endsWith('_id') && row[key] === true
                   )
@@ -464,7 +563,7 @@ const SubjectsAssignEditor = ({
                       variant: ToastVariants.ERROR
                     })
 
-                    return // Block the state update
+                    return
                   }
                 }
               }
@@ -479,7 +578,7 @@ const SubjectsAssignEditor = ({
             renderInput={params => (
               <TextField
                 {...params}
-                label='Search & Select Subjects'
+                label='Select Subjects'
                 placeholder='Search...'
                 InputProps={{
                   ...params.InputProps,
@@ -493,7 +592,7 @@ const SubjectsAssignEditor = ({
               />
             )}
           />
-        </Box>
+        </Stack>
 
         <LoadingButton
           loading={isSubmitting}
@@ -502,12 +601,12 @@ const SubjectsAssignEditor = ({
           variant='contained'
           disabled={Object.keys(changes).length === 0}
           size='small'
+          sx={{ minWidth: 140 }}
         >
           Save Changes
         </LoadingButton>
       </Stack>
 
-      {/* RENDER DRAGGED / HIDDEN COLUMNS HERE */}
       {hiddenColumns.length > 0 && (
         <Box
           marginX={4}
@@ -550,7 +649,6 @@ const SubjectsAssignEditor = ({
         />
       </Box>
 
-      {/* Targets Popover for Copy Logic */}
       <Popover
         open={Boolean(copyPopover)}
         anchorEl={copyPopover?.anchorEl}
@@ -564,7 +662,7 @@ const SubjectsAssignEditor = ({
           <Divider sx={{ mb: 1.5 }} />
 
           <Box maxHeight={250} overflow='auto' sx={{ pr: 1 }}>
-            {programData.map(prog => {
+            {activePrograms.map(prog => {
               const availableSegments = prog.segments.filter(
                 seg => getField(prog.program_id, seg.segment_id) !== copyPopover?.sourceField
               )
@@ -619,7 +717,7 @@ const SubjectsAssignEditor = ({
   )
 }
 
-export function SubjectAssignmentPage() {
+export function SubjectAssignmentPage({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [filterProps] = useState<FilterProps>({ limit: 100, offset: 0, status_: '1' })
   const filterP = useDebounce(filterProps, 500)
   const { data: subjectsList, isLoading, isFetching } = useGetSubjectsListQuery(filterP)
@@ -640,25 +738,21 @@ export function SubjectAssignmentPage() {
             segments: []
           }
         }
-
         groupedPrograms[program_id].segments.push({ segment_id, segment_name })
       })
       setPrograms(Object.values(groupedPrograms))
     }
   }, [programSegmentsData])
 
-  const { data: pastData } = useGetProgramSegmentSubjectsListQuery(undefined)
+  const { data: pastData, refetch: refetchPastData } = useGetProgramSegmentSubjectsListQuery(undefined)
+
+  const [submitData] = useAssignProgramSegmentSubjectMutation()
 
   const handleSaveAssignments = async (payload: any[]) => {
-    return new Promise<void>(resolve => {
-      console.log('🚀 Payload being sent to server:', payload)
-      setTimeout(() => {
-        resolve()
-      }, 1500)
-    })
+    await submitData(payload).unwrap()
+    refetchPastData()
   }
 
-  // Derive available subjects list
   const availableSubjects = useMemo(() => {
     return (subjectsList ?? [])
       .filter((each: any) => each.status === 1)
@@ -669,12 +763,12 @@ export function SubjectAssignmentPage() {
   }, [subjectsList])
 
   return (
-    <ChaarvyModal isOpen={true} modalSize='col-12 col-md-10' onClose={() => {}} title='Subject Assignment'>
+    <ChaarvyModal isOpen={isOpen} modalSize='col-12 col-md-10' onClose={onClose} title='Subject Assignment'>
       <SubjectsAssignEditor
         availableSubjects={availableSubjects}
         programData={programs}
         pastData={pastData ?? []}
-        isLoading={isLoading || isFetching || isProgramSegmentsLoading} // Pass loading state to editor
+        isLoading={isLoading || isFetching || isProgramSegmentsLoading}
         onSave={handleSaveAssignments}
       />
     </ChaarvyModal>

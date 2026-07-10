@@ -14,6 +14,7 @@ export enum CacheTag {
   ListProgramSecondLanguages = 'listProgramSecondLanguages',
   ListProgramMediums = 'listProgramMediums',
   ListProgramSections = 'listProgramSections',
+  ListProgramSegmentSubjects = 'listProgramSegmentSubjects',
   ListAdmissions = 'listAdmissions',
   ListUsers = 'listUsers',
   ProgramFees = 'programFees',
