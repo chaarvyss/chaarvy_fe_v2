@@ -1,3 +1,10 @@
+## [1.18.11](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.10...v1.18.11) (2026-07-11)
+
+
+### Bug Fixes
+
+* **SubjectAssignment:** AC-80: Subject assignment to programs ([#68](https://github.com/chaarvyss/chaarvy_fe_v2/issues/68)) ([2e61a4b](https://github.com/chaarvyss/chaarvy_fe_v2/commit/2e61a4b15f753ae04baf2e0f09a0f62165d24b1b))
+
 ## [1.18.10](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.9...v1.18.10) (2026-07-07)
 
 
