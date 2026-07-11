@@ -1,3 +1,10 @@
+## [1.18.12](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.11...v1.18.12) (2026-07-11)
+
+
+### Bug Fixes
+
+* **SubjectAssignment:** AC-00: Subject assignment bug updated ([ccc61b4](https://github.com/chaarvyss/chaarvy_fe_v2/commit/ccc61b40643a4f3d48b6092afc00b3750d4da842))
+
 ## [1.18.11](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.10...v1.18.11) (2026-07-11)
 
 
