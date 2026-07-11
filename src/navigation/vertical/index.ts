@@ -51,6 +51,12 @@ const navigation = (): VerticalNavItemsType => {
           icon: ChaarvyIcon.BullseyeArrow
         },
         {
+          key: PermissionLabels.nav.subjects,
+          title: 'Subjects',
+          path: PagePath.SUBJECTS,
+          icon: ChaarvyIcon.BullseyeArrow
+        },
+        {
           key: PermissionLabels.nav.booksAndStationary,
           title: 'Books & Stationary',
           path: PagePath.BOOKS,

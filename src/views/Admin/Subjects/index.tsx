@@ -11,9 +11,12 @@ import { useDebounce } from 'src/utils/hooks/useDebounce'
 import GetChaarvyIcons, { ChaarvyIcon } from 'src/utils/icons'
 
 import AddUpdateSubject from './AddUpdateSubject'
+import SubjectAssignmentPage from './subjectAssignment'
 
 const Subjects = () => {
   const { openDrawer } = useSideDrawer()
+
+  const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false)
 
   const [filterProps, setFilterProps] = useState<FilterProps>({ limit: 100, offset: 0, status_: '1' })
 
@@ -95,28 +98,36 @@ const Subjects = () => {
   }
 
   return (
-    <ChaarvyTable
-      tableTitleHeaderProps={{
-        title: 'Subjects',
-        searchValue: filterProps?.searchText ?? '',
-        onSearch: searchText => setFilterProps({ ...filterProps, searchText, offset: 0 }),
-        showFilterIcon: true,
-        handleFilterButtonClick: onFilterButtonClick,
-        buttonTitle: 'Add Subject',
-        onButtonClick: () => {
-          openDrawer({
-            title: 'Add Subject',
-            content: <AddUpdateSubject />
-          })
-        }
-      }}
-      tableDataProps={{
-        columns,
-        data: subjectsList ?? [],
-        getRowKey: each => each.subject_id,
-        isLoading: isFetchingSubjects
-      }}
-    />
+    <>
+      <ChaarvyTable
+        tableTitleHeaderProps={{
+          title: 'Subjects',
+          searchValue: filterProps?.searchText ?? '',
+          onSearch: searchText => setFilterProps({ ...filterProps, searchText, offset: 0 }),
+          showFilterIcon: true,
+          handleFilterButtonClick: onFilterButtonClick,
+          buttonTitle: 'Add Subject',
+          optionalButtonText: 'Assign Subjects',
+          onOptionalButtonClick: () => {
+            setIsAssignmentModalOpen(true)
+          },
+          optionalButtonColor: 'info',
+          onButtonClick: () => {
+            openDrawer({
+              title: 'Add Subject',
+              content: <AddUpdateSubject />
+            })
+          }
+        }}
+        tableDataProps={{
+          columns,
+          data: subjectsList ?? [],
+          getRowKey: each => each.subject_id,
+          isLoading: isFetchingSubjects
+        }}
+      />
+      <SubjectAssignmentPage isOpen={isAssignmentModalOpen} onClose={() => setIsAssignmentModalOpen(false)} />
+    </>
   )
 }
 

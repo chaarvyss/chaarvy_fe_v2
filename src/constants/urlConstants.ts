@@ -203,7 +203,10 @@ export const urlConstants = {
     createUpdateProgramBook: `${interRoutePrefix.program}/create-update-program-book`,
     createUpdateProgramSegmentMedium: `${interRoutePrefix.program}/create-update-program-segment-medium`,
     createUpdateProgramSegmentSection: `${interRoutePrefix.program}/create-update-program-segment-section`,
-    getProgramFeesHeaderDataUrl: `${interRoutePrefix.program}/program-fees-header-data`
+    getProgramFeesHeaderDataUrl: `${interRoutePrefix.program}/program-fees-header-data`,
+    getProgramSegmentSubjectsListUrl: `${interRoutePrefix.program}/program-segment-subjects`,
+    getAllProgramSegmentsUrl: `${interRoutePrefix.program}/all-program-segments`,
+    assignProgramSegmentSubjectUrl: `${interRoutePrefix.program}/assign-program-segment-subject`
   },
   reports: {
     studentAdmissionsReport: `${interRoutePrefix.report}/admission-report`

@@ -1,15 +1,16 @@
 'use client'
 
 import { LoadingButton } from '@mui/lab'
-import { Box, Chip, Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { ModuleRegistry, AllCommunityModule, CellValueChangedEvent, ColDef, ColGroupDef } from 'ag-grid-community'
 import { AgGridReact } from 'ag-grid-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { FeesTypesResponse, ProgramFeesDataResponse } from 'src/lib/types'
+import { CustomDataGrid } from 'src/reusable_components/DataGrid'
 import { CreateProgramFeesPayload, useCreateUpdateProgramFeesMutation } from 'src/store/services/feesServices'
 import { ProgramFeesSegmentHeaderDataResponse } from 'src/store/services/programServices'
 
@@ -44,7 +45,6 @@ const FeesEditor = ({ program_id, segmentData, feesData, feesTypes }: FeesEditor
 
   const [rowData, setRowData] = useState<any[]>([])
   const [changes, setChanges] = useState<Record<string, any>>({})
-  const [hiddenColumns, setHiddenColumns] = useState<{ id: string; name: string; colIds: string[] }[]>([])
 
   const [createUpdateFees, { isLoading: isSubmitting }] = useCreateUpdateProgramFeesMutation()
 
@@ -245,49 +245,6 @@ const FeesEditor = ({ program_id, segmentData, feesData, feesTypes }: FeesEditor
       .catch(e => triggerToast(e?.data?.message || 'Failed to save', { variant: ToastVariants.ERROR }))
   }
 
-  const syncHiddenColumns = useCallback(() => {
-    const columns = gridRef.current?.api.getColumns()
-    if (!columns) return
-
-    const hiddenMap = new Map<string, { id: string; name: string; colIds: string[] }>()
-
-    columns
-      .filter(col => !col.isVisible())
-      .forEach(col => {
-        const groups: string[] = []
-        let parent = col.getParent()
-        while (parent) {
-          if (parent.getColGroupDef()?.headerName) groups.unshift(parent.getColGroupDef()!.headerName!)
-          parent = parent.getParent()
-        }
-
-        const colId = col.getColId()
-        for (let level = 1; level <= groups.length + 1; level++) {
-          const path = level <= groups.length ? groups.slice(0, level) : [...groups, col.getColDef()?.headerName]
-          const key = path.join('__')
-
-          if (!hiddenMap.has(key)) {
-            hiddenMap.set(key, { id: key, name: path.join(' > '), colIds: [] })
-          }
-          hiddenMap.get(key)!.colIds.push(colId)
-        }
-      })
-
-    const values = Array.from(hiddenMap.values())
-    values.forEach(item => {
-      item.colIds = [...new Set(item.colIds)]
-    })
-
-    setHiddenColumns(
-      values.filter(
-        item =>
-          !values.some(
-            other => other !== item && other.id.startsWith(item.id + '__') && other.colIds.length === item.colIds.length
-          )
-      )
-    )
-  }, [])
-
   const columnDefs = useMemo<(ColDef | ColGroupDef)[]>(
     () => [
       {
@@ -400,41 +357,18 @@ const FeesEditor = ({ program_id, segmentData, feesData, feesTypes }: FeesEditor
         </LoadingButton>
       </Stack>
 
-      <div className='ag-theme-alpine' style={{ height: '70vh' }}>
-        {hiddenColumns.length > 0 && (
-          <Box
-            display='flex'
-            gap={1}
-            mb={2}
-            flexWrap='wrap'
-            sx={{ p: 1, border: '1px solid #eee', borderRadius: 2, background: '#fafafa' }}
-          >
-            <Typography fontWeight={600}>Hidden:</Typography>
-            {hiddenColumns.map(column => (
-              <Chip
-                key={column.id}
-                label={column.name}
-                onDelete={() => gridRef.current?.api?.setColumnsVisible(column.colIds, true)}
-              />
-            ))}
-          </Box>
-        )}
-
-        <AgGridReact
-          ref={gridRef}
+      <Box>
+        <CustomDataGrid
+          gridRef={gridRef}
+          height='70vh'
           rowData={rowData}
           columnDefs={columnDefs}
           getRowId={p => String(p.data.feeTypeId)}
           onCellValueChanged={onCellValueChanged}
           defaultColDef={{ resizable: true, sortable: true, filter: false }}
           pinnedBottomRowData={totalRow}
-          undoRedoCellEditing
-          undoRedoCellEditingLimit={100}
-          onColumnVisible={syncHiddenColumns}
-          onColumnMoved={syncHiddenColumns}
-          suppressDragLeaveHidesColumns={false}
         />
-      </div>
+      </Box>
     </>
   )
 }
