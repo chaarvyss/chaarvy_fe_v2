@@ -27,13 +27,14 @@ const AddUpdateSubject = ({ subject_id, subject_name }: AddUpdateSubjectProps) =
   const { fields, errors, handleSubmit, setValues } = useFormBuilder<Subject>({
     formConfig: subjectFormConfig,
     initialValues: {
-      subject_name: ''
+      subject_name: '',
+      status: 1
     }
   })
 
   useEffect(() => {
     if (subject_id && subject_name) {
-      setValues({ subject_name, subject_id })
+      setValues({ subject_name, subject_id, status: 1 })
     }
   }, [subject_id, subject_name])
 
