@@ -114,17 +114,15 @@ const FacultySubjectsAssignEditor = ({
   } | null>(null)
   const [selectedTargets, setSelectedTargets] = useState<string[]>([])
 
-  const { activePastSet, pastDataLookup } = useMemo(() => {
-    const active = new Set<string>()
+  const { pastDataLookup } = useMemo(() => {
     const lookup = new Map<string, FacultyAssignmentRecord>()
 
     pastData.forEach(d => {
       const key = `${d.subject_id}|${d.program_id}|${d.segment_id}`
       lookup.set(key, d)
-      if (d.status === 1) active.add(key)
     })
 
-    return { activePastSet: active, pastDataLookup: lookup }
+    return { pastDataLookup: lookup }
   }, [pastData])
 
   useEffect(() => {
