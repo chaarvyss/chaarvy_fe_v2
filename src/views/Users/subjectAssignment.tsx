@@ -1,11 +1,14 @@
 'use client'
 
 import { Autocomplete, Box, Checkbox, ListItemText, Stack, TextField } from '@mui/material'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { ChaarvyModal } from 'src/reusable_components'
-import { SubjectAssignmentMatrix, SubjectAssignmentMatrixHandle } from 'src/reusable_components/SubjectAssignmentMatrix'
+import {
+  SubjectAssignmentMatrix,
+  SubjectAssignmentMatrixHandle,
+  useAssignmentMatrixHandlers
+} from 'src/reusable_components/SubjectAssignmentMatrix'
 import { useGetSubjectsListQuery } from 'src/store/services/listServices'
 import {
   useGetAllProgramSegmentsListQuery,
@@ -21,8 +24,6 @@ export function FacultyAssignmentPage({
   isOpen: boolean
   onClose: () => void
 }) {
-  const { triggerToast } = useToast()
-
   const mediumsList: any[] = []
 
   const { data: subjectsList, isFetching: isSubjectsLoading } = useGetSubjectsListQuery({
@@ -163,42 +164,13 @@ export function FacultyAssignmentPage({
     return availableSubjects.filter(s => validSubjectIdsForPrograms.has(s.subject_id))
   }, [availableSubjects, validSubjectIdsForPrograms, selectedProgramIds.length])
 
-  const handleProgramChange = useCallback(
-    (newIds: string[]) => {
-      const added = newIds.filter(id => !selectedProgramIds.includes(id))
-      let nextSubs = [...selectedSubjectIds]
-
-      if (added.length > 0 && pastData) {
-        const newSubs = pastData
-          .filter((d: any) => d.status === 1 && added.includes(d.program_id))
-          .map((d: any) => d.subject_id)
-        nextSubs = Array.from(new Set([...nextSubs, ...newSubs]))
-      }
-
-      const removed = selectedProgramIds.filter(id => !newIds.includes(id))
-      if (removed.length > 0) {
-        nextSubs = nextSubs.filter(subId => matrixRef.current?.hasAssignments(subId, newIds))
-      }
-
-      setSelectedProgramIds(newIds)
-      setSelectedSubjectIds(nextSubs)
-    },
-    [selectedProgramIds, selectedSubjectIds, pastData]
-  )
-
-  const handleSubjectChange = useCallback(
-    (newIds: string[]) => {
-      const removed = selectedSubjectIds.filter(id => !newIds.includes(id))
-      for (const subId of removed) {
-        if (matrixRef.current?.hasAssignments(subId, selectedProgramIds)) {
-          triggerToast('Cannot uncheck subject. It is assigned to an active segment.', { variant: ToastVariants.ERROR })
-
-          return
-        }
-      }
-      setSelectedSubjectIds(newIds)
-    },
-    [selectedSubjectIds, selectedProgramIds, triggerToast]
+  const { handleProgramChange, handleSubjectChange } = useAssignmentMatrixHandlers(
+    selectedProgramIds,
+    selectedSubjectIds,
+    setSelectedProgramIds,
+    setSelectedSubjectIds,
+    pastData,
+    matrixRef
   )
 
   const handleSave = async (payload: any[]) => {

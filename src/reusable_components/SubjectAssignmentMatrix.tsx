@@ -542,3 +542,63 @@ export const SubjectAssignmentMatrix = forwardRef<SubjectAssignmentMatrixHandle,
     )
   }
 )
+
+export interface BaseAssignmentRecord {
+  subject_id: string
+  program_id: string
+  status: number
+  [key: string]: any
+}
+
+export function useAssignmentMatrixHandlers(
+  selectedProgramIds: string[],
+  selectedSubjectIds: string[],
+  setSelectedProgramIds: (ids: string[]) => void,
+  setSelectedSubjectIds: (ids: string[]) => void,
+  pastData: BaseAssignmentRecord[] | undefined,
+  matrixRef: React.RefObject<SubjectAssignmentMatrixHandle | null>
+) {
+  const { triggerToast } = useToast()
+
+  const handleProgramChange = useCallback(
+    (newIds: string[]) => {
+      const added = newIds.filter(id => !selectedProgramIds.includes(id))
+      let nextSubs = [...selectedSubjectIds]
+
+      // Auto-add subjects associated with newly selected programs from PAST DATA
+      if (added.length > 0 && pastData) {
+        const newSubs = pastData
+          .filter((d: BaseAssignmentRecord) => d.status === 1 && added.includes(d.program_id))
+          .map((d: BaseAssignmentRecord) => d.subject_id)
+        nextSubs = Array.from(new Set([...nextSubs, ...newSubs]))
+      }
+
+      // Cleanup unassigned subjects when a program is removed
+      const removed = selectedProgramIds.filter(id => !newIds.includes(id))
+      if (removed.length > 0) {
+        nextSubs = nextSubs.filter(subId => matrixRef.current?.hasAssignments(subId, newIds))
+      }
+
+      setSelectedProgramIds(newIds)
+      setSelectedSubjectIds(nextSubs)
+    },
+    [selectedProgramIds, selectedSubjectIds, pastData, matrixRef, setSelectedProgramIds, setSelectedSubjectIds]
+  )
+
+  const handleSubjectChange = useCallback(
+    (newIds: string[]) => {
+      const removed = selectedSubjectIds.filter(id => !newIds.includes(id))
+      for (const subId of removed) {
+        if (matrixRef.current?.hasAssignments(subId, selectedProgramIds)) {
+          triggerToast('Cannot uncheck subject. It is assigned to an active segment.', { variant: ToastVariants.ERROR })
+
+          return
+        }
+      }
+      setSelectedSubjectIds(newIds)
+    },
+    [selectedSubjectIds, selectedProgramIds, matrixRef, triggerToast, setSelectedSubjectIds]
+  )
+
+  return { handleProgramChange, handleSubjectChange }
+}
