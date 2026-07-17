@@ -25,12 +25,14 @@ import { useGetRolesListQuery } from 'src/store/services/listServices'
 import { useGetUserProfileQuery, UserProfile } from 'src/store/services/viewServices'
 import GetChaarvyIcons from 'src/utils/icons'
 
+import FacultyAssignmentPage from './subjectAssignment'
 import UserPermissions from './userPermissions'
 
 enum FormType {
   BASE_DETAIL = 'base_detail',
   ADDRESS = 'address',
-  PERMISSIONS = 'permissions'
+  PERMISSIONS = 'permissions',
+  FACULTY_ASSIGNMENT = 'faculty_assignment'
 }
 
 const baseProfileKeys = [
@@ -178,6 +180,18 @@ const ViewUserProfile = (props: UserProfileProps) => {
       label: 'Permissions',
       icon: <GetChaarvyIcons iconName='AccountLockOutline' />,
       component: <UserPermissions user_id={user_id} />
+    },
+    {
+      value: FormType.FACULTY_ASSIGNMENT,
+      label: 'Faculty Assignment',
+      icon: <GetChaarvyIcons iconName='AccountGroupOutline' />,
+      component: (
+        <FacultyAssignmentPage
+          facultyId={user_id}
+          isOpen={value === FormType.FACULTY_ASSIGNMENT}
+          onClose={() => setValue(FormType.BASE_DETAIL)}
+        />
+      )
     }
   ]
 

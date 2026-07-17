@@ -2,12 +2,20 @@ import { Box, Chip, Typography } from '@mui/material'
 import { AgGridReact, AgGridReactProps } from 'ag-grid-react'
 import React, { useCallback, useState } from 'react'
 
+import LoadingSpinner from '../LoadingSpinner'
+
 export interface CustomDataGridProps extends AgGridReactProps {
   gridRef: React.RefObject<AgGridReact>
   height?: string | number
+  isLoading?: boolean
 }
 
-export const CustomDataGrid = ({ gridRef, height = '55vh', ...agGridProps }: CustomDataGridProps) => {
+export const CustomDataGrid = ({
+  gridRef,
+  height = '55vh',
+  isLoading = false,
+  ...agGridProps
+}: CustomDataGridProps) => {
   const [hiddenColumns, setHiddenColumns] = useState<{ id: string; name: string; colIds: string[] }[]>([])
 
   const syncHiddenColumns = useCallback(() => {
@@ -80,16 +88,20 @@ export const CustomDataGrid = ({ gridRef, height = '55vh', ...agGridProps }: Cus
         </Box>
       )}
       <Box className='ag-theme-alpine' sx={{ height, width: '100%' }}>
-        <AgGridReact
-          ref={gridRef}
-          onColumnVisible={syncHiddenColumns}
-          onColumnMoved={syncHiddenColumns}
-          suppressDragLeaveHidesColumns={false}
-          defaultColDef={{ resizable: true, sortable: false, filter: false }}
-          undoRedoCellEditing
-          undoRedoCellEditingLimit={100}
-          {...agGridProps}
-        />
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <AgGridReact
+            ref={gridRef}
+            onColumnVisible={syncHiddenColumns}
+            onColumnMoved={syncHiddenColumns}
+            suppressDragLeaveHidesColumns={false}
+            defaultColDef={{ resizable: true, sortable: false, filter: false }}
+            undoRedoCellEditing
+            undoRedoCellEditingLimit={100}
+            {...agGridProps}
+          />
+        )}
       </Box>
     </>
   )
