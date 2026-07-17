@@ -20,6 +20,8 @@ const DefaultPalette = (mode: PaletteMode, themeColor: ThemeColor) => {
       return '#FF8C90'
     } else if (themeColor === 'warning') {
       return '#FFCF5C'
+    } else if (themeColor === 'grey') {
+      return '#979796'
     } else {
       return '#6ACDFF'
     }

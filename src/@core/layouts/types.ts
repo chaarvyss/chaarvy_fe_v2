@@ -5,7 +5,7 @@ import { GetChaarvyIconsProps } from 'src/utils/icons'
 
 export type ContentWidth = 'full' | 'boxed'
 
-export type ThemeColor = 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success'
+export type ThemeColor = 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success' | 'grey'
 
 export type NavLink = {
   key?: string
@@ -18,7 +18,7 @@ export type NavLink = {
   externalLink?: boolean
   openInNewTab?: boolean
   icon?: GetChaarvyIconsProps['iconName']
-  badgeColor?: 'default' | 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info'
+  badgeColor?: 'default' | 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info' | 'grey'
   children?: NavLink[]
 }
 
