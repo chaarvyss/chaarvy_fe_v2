@@ -3,6 +3,7 @@
 import { Autocomplete, Box, Checkbox, ListItemText, Stack, TextField } from '@mui/material'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { ChaarvyModal } from 'src/reusable_components'
 import {
   SubjectAssignmentMatrix,
@@ -11,8 +12,11 @@ import {
 } from 'src/reusable_components/SubjectAssignmentMatrix'
 import { useGetSubjectsListQuery } from 'src/store/services/listServices'
 import {
-  useGetAllProgramSegmentsListQuery,
-  useGetProgramSegmentSubjectsListQuery
+  useGetActiveProgramMediumsQuery,
+  useGetProgramSegmentsByMediumsQuery,
+  useGetProgramSegmentSubjectsListQuery,
+  useGetUserSubjectsQuery,
+  useUserSubjectSyncMutation
 } from 'src/store/services/programServices'
 
 export function FacultyAssignmentPage({
@@ -24,103 +28,96 @@ export function FacultyAssignmentPage({
   isOpen: boolean
   onClose: () => void
 }) {
-  const mediumsList: any[] = []
+  const { data: mediumsList } = useGetActiveProgramMediumsQuery()
+
+  const [saveDetails] = useUserSubjectSyncMutation()
+
+  const { triggerToast } = useToast()
 
   const { data: subjectsList, isFetching: isSubjectsLoading } = useGetSubjectsListQuery({
     limit: 500,
     offset: 0,
     status_: '1'
   })
-  const { data: programSegmentsData, isFetching: isProgramsLoading } = useGetAllProgramSegmentsListQuery()
-  const { data: programSubjectData, isFetching: isMappingsLoading } = useGetProgramSegmentSubjectsListQuery(undefined)
 
   const [programs, setPrograms] = useState<any[]>([])
-  const [selectedMediumIds, setSelectedMediumIds] = useState<string[]>([])
+
+  const [selectedMediumId, setSelectedMediumId] = useState<string | null>(null)
   const [selectedProgramIds, setSelectedProgramIds] = useState<string[]>([])
   const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([])
+
+  const { data: programSegmentsData, isFetching: isProgramsLoading } = useGetProgramSegmentsByMediumsQuery(
+    { medium_ids: selectedMediumId ? [selectedMediumId] : [] },
+    { skip: !selectedMediumId }
+  )
+
+  const { data: programSubjectData, isFetching: isMappingsLoading } = useGetProgramSegmentSubjectsListQuery(undefined)
+
+  const { data: userSubjectsData, isFetching: isUserSubjectsLoading } = useGetUserSubjectsQuery(facultyId, {
+    skip: !facultyId
+  })
 
   const matrixRef = useRef<SubjectAssignmentMatrixHandle>(null)
 
   useEffect(() => {
-    if (programSegmentsData) {
+    if (programSegmentsData && Array.isArray(programSegmentsData)) {
       const grouped: Record<string, any> = {}
+
       programSegmentsData.forEach((seg: any) => {
-        if (!grouped[seg.program_id])
+        if (!grouped[seg.program_id]) {
           grouped[seg.program_id] = {
             program_id: seg.program_id,
             program_name: seg.program_name,
-            medium_id: seg.medium_id,
             segments: []
           }
-        grouped[seg.program_id].segments.push({ segment_id: seg.segment_id, segment_name: seg.segment_name })
+        }
+
+        const exists = grouped[seg.program_id].segments.some((s: any) => s.segment_id === seg.segment_id)
+        if (!exists) {
+          grouped[seg.program_id].segments.push({
+            segment_id: seg.segment_id,
+            segment_name: seg.segment_name
+          })
+        }
       })
+
       setPrograms(Object.values(grouped))
+    } else {
+      setPrograms([])
     }
   }, [programSegmentsData])
 
   const [hasInitialized, setHasInitialized] = useState(false)
 
-  const pastData: any[] = useMemo(
-    () => [
-      {
-        mapping_id: 1,
-        subject_id: '9ac0e9a5-b5bc-478f-b524-1e29adc75e0d',
-        program_id: '1d9c747a-770f-447f-8cc1-82904dadde68',
-        segment_id: 'ca15f750-335f-44ae-8b6e-a5832e34fcca',
-        status: 1,
-        faculty_id: 'd96ea2c5-cd1e-11ef-af72-842afd127d37'
-      },
-      {
-        mapping_id: 2,
-        subject_id: '71d5c6b1-344b-43b6-acc2-6ae667db82ee',
-        program_id: '1d9c747a-770f-447f-8cc1-82904dadde68',
-        segment_id: 'ca15f750-335f-44ae-8b6e-a5832e34fcca',
-        status: 1,
-        faculty_id: 'd96ea2c5-cd1e-11ef-af72-842afd127d37'
-      },
-      {
-        mapping_id: 3,
-        subject_id: '03543984-951f-487c-9b0b-f4617d0c6ec9',
-        program_id: '1d9c747a-770f-447f-8cc1-82904dadde68',
-        segment_id: 'ca15f750-335f-44ae-8b6e-a5832e34fcca',
-        status: 1,
-        faculty_id: 'd96ea2c5-cd1e-11ef-af72-842afd127d37'
-      },
-      {
-        mapping_id: 4,
-        subject_id: '9eeb892f-636a-4bfc-9f1e-2215d4099bb1',
-        program_id: '1d9c747a-770f-447f-8cc1-82904dadde68',
-        segment_id: 'ca15f750-335f-44ae-8b6e-a5832e34fcca',
-        status: 1,
-        faculty_id: 'd96ea2c5-cd1e-11ef-af72-842afd127d37'
-      },
-      {
-        mapping_id: 5,
-        subject_id: '1ec90c73-6518-462f-9590-c5dec4ecd040',
-        program_id: '1d9c747a-770f-447f-8cc1-82904dadde68',
-        segment_id: 'ca15f750-335f-44ae-8b6e-a5832e34fcca',
-        status: 1,
-        faculty_id: 'd96ea2c5-cd1e-11ef-af72-842afd127d37'
-      }
-    ],
-    []
-  )
+  // @ts-ignore (Remove ts-ignore if you have UserSubject imported/defined properly)
+  const pastData = useMemo(() => userSubjectsData ?? [], [userSubjectsData])
 
+  // FIX: Wait for isUserSubjectsLoading to be false before trying to initialize
   useEffect(() => {
-    if (!isOpen || hasInitialized) return
+    if (!isOpen || hasInitialized || isUserSubjectsLoading) return
 
-    const active = pastData.filter(d => d.status === 1)
-    setSelectedSubjectIds(Array.from(new Set(active.map(d => d.subject_id))))
-    setSelectedProgramIds(Array.from(new Set(active.map(d => d.program_id))))
+    const active = pastData.filter((d: any) => d.status === 1)
+    const uniqueMediums = Array.from(new Set(active.map((d: any) => d.medium_id).filter(Boolean)))
+
+    if (uniqueMediums.length > 0) {
+      const firstMedium = uniqueMediums[0] as string
+      setSelectedMediumId(firstMedium)
+
+      const activeForMedium = active.filter((d: any) => d.medium_id === firstMedium)
+      setSelectedProgramIds(Array.from(new Set(activeForMedium.map((d: any) => d.program_id))))
+      setSelectedSubjectIds(Array.from(new Set(activeForMedium.map((d: any) => d.subject_id))))
+    }
 
     setHasInitialized(true)
-  }, [pastData, isOpen, hasInitialized])
+  }, [pastData, isOpen, hasInitialized, isUserSubjectsLoading])
 
   useEffect(() => {
     if (!isOpen) {
       setHasInitialized(false)
+      setSelectedMediumId(null)
       setSelectedProgramIds([])
       setSelectedSubjectIds([])
+      setPrograms([])
     }
   }, [isOpen])
 
@@ -128,20 +125,13 @@ export function FacultyAssignmentPage({
     () => (mediumsList ?? []).map((m: any) => ({ medium_id: m.medium_id, medium_name: m.medium_name })),
     [mediumsList]
   )
+
   const availableSubjects = useMemo(
     () =>
       (subjectsList ?? [])
         .filter((s: any) => s.status === 1)
         .map((s: any) => ({ subject_id: s.subject_id, subject_name: s.subject_name })),
     [subjectsList]
-  )
-
-  const filteredPrograms = useMemo(
-    () =>
-      selectedMediumIds.length === 0
-        ? programs
-        : programs.filter(p => p.medium_id && selectedMediumIds.includes(p.medium_id)),
-    [programs, selectedMediumIds]
   )
 
   const activePrograms = useMemo(
@@ -152,7 +142,9 @@ export function FacultyAssignmentPage({
   const validSubjectIdsForPrograms = useMemo(() => {
     const validIds = new Set<string>()
     ;(programSubjectData || []).forEach((m: any) => {
-      if (m.status === 1 && selectedProgramIds.includes(m.program_id)) validIds.add(m.subject_id)
+      if (m.status === 1 && selectedProgramIds.includes(m.program_id)) {
+        validIds.add(m.subject_id)
+      }
     })
 
     return validIds
@@ -173,45 +165,80 @@ export function FacultyAssignmentPage({
     matrixRef
   )
 
-  const handleSave = async (payload: any[]) => {
-    const finalPayload = payload.map(item => ({ ...item, faculty_id: facultyId }))
-    console.log('Saving Faculty Payload:', finalPayload)
+  const handleMediumChange = (newMediumId: string | null) => {
+    setSelectedMediumId(newMediumId)
+
+    if (!newMediumId) {
+      setSelectedProgramIds([])
+      setSelectedSubjectIds([])
+
+      return
+    }
+
+    const activeForNewMedium = pastData.filter((d: any) => d.status === 1 && d.medium_id === newMediumId)
+
+    setSelectedProgramIds(Array.from(new Set(activeForNewMedium.map((d: any) => d.program_id))))
+    setSelectedSubjectIds(Array.from(new Set(activeForNewMedium.map((d: any) => d.subject_id))))
   }
 
-  const isGlobalLoading = isSubjectsLoading || isProgramsLoading || isMappingsLoading
+  const handleSave = async (payload: any[]) => {
+    if (!selectedMediumId) {
+      console.error('No medium selected. Cannot save.')
+
+      return
+    }
+    const finalPayload = {
+      user_id: facultyId,
+      medium_ids: [selectedMediumId],
+      data: payload.map(item => ({
+        ...item
+      }))
+    }
+    saveDetails(finalPayload)
+      .unwrap()
+      .then(() => {
+        triggerToast('User subjects synced successfully.', {
+          variant: ToastVariants.SUCCESS
+        })
+      })
+      .catch(err => {
+        triggerToast(err, {
+          variant: ToastVariants.ERROR
+        })
+      })
+  }
+
+  const isGlobalLoading = isSubjectsLoading || isProgramsLoading || isMappingsLoading || isUserSubjectsLoading
+
+  const currentMediumPastData = useMemo(() => {
+    return pastData.filter((d: any) => d.medium_id === selectedMediumId)
+  }, [pastData, selectedMediumId])
 
   return (
     <ChaarvyModal isOpen={isOpen} modalSize='col-12 col-md-11' onClose={onClose} title='Faculty Subject Assignment'>
       <Box sx={{ width: '100%', px: 4 }}>
         <Stack direction={{ xs: 'column', lg: 'row' }} spacing={2} mb={3}>
           <Autocomplete
-            multiple
             size='small'
-            disableCloseOnSelect
-            limitTags={2}
             sx={{ flex: 1 }}
             options={availableMediums}
             getOptionLabel={o => o.medium_name}
-            value={availableMediums.filter(m => selectedMediumIds.includes(m.medium_id))}
+            value={availableMediums.find(m => m.medium_id === selectedMediumId) || null}
             isOptionEqualToValue={(o, v) => o.medium_id === v.medium_id}
-            onChange={(_, val) => setSelectedMediumIds(val.map(v => v.medium_id))}
-            renderOption={(props, o, { selected }) => (
-              <li {...props}>
-                <Checkbox sx={{ mr: 1 }} checked={selected} size='small' />
-                <ListItemText primary={o.medium_name} />
-              </li>
-            )}
-            renderInput={params => <TextField {...params} label='1. Select Mediums' placeholder='Search...' />}
+            onChange={(_, val) => handleMediumChange(val ? val.medium_id : null)}
+            renderInput={params => <TextField {...params} label='1. Select Medium' placeholder='Search...' />}
           />
+
           <Autocomplete
             multiple
             size='small'
             disableCloseOnSelect
             sx={{ flex: 1 }}
             limitTags={2}
-            options={filteredPrograms}
+            options={programs}
+            disabled={!selectedMediumId}
             getOptionLabel={o => o.program_name}
-            value={filteredPrograms.filter(p => selectedProgramIds.includes(p.program_id))}
+            value={programs.filter(p => selectedProgramIds.includes(p.program_id))}
             isOptionEqualToValue={(o, v) => o.program_id === v.program_id}
             onChange={(_, val) => handleProgramChange(val.map(v => v.program_id))}
             renderOption={(props, o, { selected }) => (
@@ -220,8 +247,15 @@ export function FacultyAssignmentPage({
                 <ListItemText primary={o.program_name} />
               </li>
             )}
-            renderInput={params => <TextField {...params} label='2. Select Programs' placeholder='Search...' />}
+            renderInput={params => (
+              <TextField
+                {...params}
+                label='2. Select Programs'
+                placeholder={!selectedMediumId ? 'Select medium first...' : 'Search...'}
+              />
+            )}
           />
+
           <Autocomplete
             multiple
             size='small'
@@ -250,17 +284,20 @@ export function FacultyAssignmentPage({
           />
         </Stack>
 
-        <SubjectAssignmentMatrix
-          ref={matrixRef}
-          availableSubjects={availableSubjects}
-          activePrograms={activePrograms}
-          selectedSubjectIds={selectedSubjectIds}
-          pastData={pastData}
-          validMappings={programSubjectData}
-          idFieldName='mapping_id' // Uses mapping_id for faculty assignments
-          isLoading={isGlobalLoading}
-          onSave={handleSave}
-        />
+        {selectedMediumId && (
+          <SubjectAssignmentMatrix
+            key={selectedMediumId}
+            ref={matrixRef}
+            availableSubjects={availableSubjects}
+            activePrograms={activePrograms}
+            selectedSubjectIds={selectedSubjectIds}
+            pastData={currentMediumPastData}
+            validMappings={programSubjectData}
+            idFieldName='user_subject_id'
+            isLoading={isGlobalLoading}
+            onSave={handleSave}
+          />
+        )}
       </Box>
     </ChaarvyModal>
   )

@@ -203,7 +203,6 @@ export const SubjectAssignmentMatrix = forwardRef<SubjectAssignmentMatrixHandle,
       setIsSubmitting(true)
       try {
         await onSave(payload)
-        triggerToast('Assignments saved successfully', { variant: ToastVariants.SUCCESS })
         setChanges({})
       } catch (error: any) {
         triggerToast(error?.data?.message || error?.message || 'Failed to save', { variant: ToastVariants.ERROR })
