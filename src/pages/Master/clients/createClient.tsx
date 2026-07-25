@@ -53,14 +53,12 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
     (prop: keyof ClientData) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
       let val = event?.target?.value ?? event
 
-      // Auto-format the db_name as they type (optional but helpful)
       if (prop === 'db_name' && typeof val === 'string') {
         val = val.toUpperCase().replace(/\s/g, '')
       }
 
       setClientData(prev => ({ ...prev, [prop]: val as any }))
 
-      // Clear the error for this specific field when the user types
       if (errors[prop]) {
         setErrors(prev => ({ ...prev, [prop]: '' }))
       }
@@ -78,7 +76,6 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
     baseProfileKeys.forEach(({ v: key, l: label }) => {
       const value = clientData[key as keyof ClientData]
 
-      // Check for empty/default values
       if (value === undefined || value === null || value === '' || value === 0) {
         newErrors[key] = `${label} is required`
 
@@ -115,8 +112,6 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
       })
       .catch(e => triggerToast(e.data as string, { variant: ToastVariants.ERROR }))
   }
-
-  console.log(errors, 'errors')
 
   return (
     <Box>
