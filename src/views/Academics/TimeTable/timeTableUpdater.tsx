@@ -1,5 +1,5 @@
 import { Box, Typography, Popover, Autocomplete, TextField, Card, Button } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
 import {
@@ -51,7 +51,7 @@ export default function TimeTableSchedulerBoard({ programId: program_id, segment
   const [selectedMedium, setSelectedMedium] = useState<any>(null)
   const [selectedSection, setSelectedSection] = useState<string>()
 
-  const [fetchProgramMediums, { data: mediumOptions, isLoading: isMediumsLoading }] =
+  const [fetchProgramMediums, { data: mediumOptions, isFetching: isMediumsLoading }] =
     useLazyGetProgramSegmentMediumsListByProgramIdQuery()
 
   const { data: sectionsData } = useGetProgramSectionListQuery(
@@ -61,15 +61,64 @@ export default function TimeTableSchedulerBoard({ programId: program_id, segment
     }
   )
 
+  const mediums = useMemo(() => {
+    if (!segmentId || !mediumOptions || !sectionsData) return []
+    const validMediumIds = new Set(
+      sectionsData.filter(sec => sec.segment_id === segmentId && sec.seating_capacity > 0).map(sec => sec.medium_id)
+    )
+
+    return mediumOptions.filter(medium => medium.segment_id === segmentId && validMediumIds.has(medium.medium_id))
+  }, [segmentId, mediumOptions, sectionsData])
+
   useEffect(() => {
     if (program_id && segmentId) {
       fetchProgramMediums({ program_id, only_active: true })
-        .unwrap()
-        .then(res => {
-          setSelectedMedium(res[0]?.medium_id || null)
-        })
     }
-  }, [program_id, segmentId])
+  }, [program_id, segmentId, fetchProgramMediums])
+
+  useEffect(() => {
+    if (mediums && mediums.length > 0) {
+      const isValid = mediums.some(med => med.medium_id === selectedMedium)
+      if (!isValid) {
+        setSelectedMedium(mediums[0].medium_id)
+      }
+    } else {
+      setSelectedMedium(null)
+    }
+  }, [mediums, selectedMedium])
+
+  const segmentSections = useMemo(() => {
+    if (!segmentId || !sectionsData || !selectedMedium) return []
+
+    const filteredSections = sectionsData.filter(
+      section =>
+        section.segment_id === segmentId && section.medium_id === selectedMedium && section.seating_capacity > 0
+    )
+
+    return Array.from(new Map(filteredSections.map(item => [item.section_id, item])).values())
+  }, [segmentId, sectionsData, selectedMedium])
+
+  useEffect(() => {
+    if (segmentSections && segmentSections.length > 0) {
+      const isValid = segmentSections.some(sec => sec.section_id === selectedSection)
+      if (!isValid) {
+        setSelectedSection(segmentSections[0].section_id)
+      }
+    } else {
+      setSelectedSection(undefined)
+    }
+  }, [segmentSections, selectedSection])
+
+  useEffect(() => {
+    if (selectedMedium && selectedSection) {
+      // TODO: If you have an API hook for fetching timetable data, call it here!
+      // Example: fetchTimetable({ medium_id: selectedMedium, section_id: selectedSection })
+      //   .unwrap().then(res => setData(formatIncomingData(res)))
+
+      // For now, we clear the local state to prevent data bleeding between sections
+      setData({})
+    }
+  }, [selectedMedium, selectedSection])
 
   const open = Boolean(anchorEl)
 
@@ -109,7 +158,7 @@ export default function TimeTableSchedulerBoard({ programId: program_id, segment
             {isMediumsLoading ? (
               <Typography>Loading sections...</Typography>
             ) : (
-              (sectionsData ?? [])?.map(each => (
+              (segmentSections ?? [])?.map(each => (
                 <Button
                   size='small'
                   key={each.section_id}
@@ -125,11 +174,11 @@ export default function TimeTableSchedulerBoard({ programId: program_id, segment
             {isMediumsLoading ? (
               <Typography>Loading mediums</Typography>
             ) : (
-              (mediumOptions ?? [])?.map(each => (
+              (mediums ?? [])?.map(each => (
                 <Button
                   size='small'
                   key={each.medium_id}
-                  onClick={() => setSelectedMedium(each.medium_name)}
+                  onClick={() => setSelectedMedium(each.medium_id)}
                   variant={selectedMedium === each.medium_id ? 'contained' : 'outlined'}
                 >
                   {each.medium_name}

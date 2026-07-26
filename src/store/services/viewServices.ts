@@ -68,11 +68,11 @@ const viewServiceApi = api.injectEndpoints({
   endpoints: build => ({
     getProgramSegmentDetails: build.query<ProgramSegment[], ProgramMediumRequest>({
       providesTags: [CacheTag.ListProgramSegments],
-      query: params => {
+      query: ({ program_id }) => {
         return {
           method: HttpRequestMethods.GET,
           url: urlConstants.view.programSegments,
-          params
+          params: { program_id }
         }
       }
     }),

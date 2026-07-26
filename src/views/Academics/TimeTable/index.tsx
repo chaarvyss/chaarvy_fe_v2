@@ -1,9 +1,21 @@
 'use client'
-import { Typography, Box, Grow, useTheme, useMediaQuery, Select, MenuItem, FormControl, Button } from '@mui/material'
+import {
+  Typography,
+  Box,
+  Grow,
+  useTheme,
+  useMediaQuery,
+  Select,
+  MenuItem,
+  FormControl,
+  Button,
+  Stack
+} from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useLoader } from 'src/@core/context/loaderContext'
 import CardButton from 'src/components/Cards/CardButton'
+import { LoadingSpinner } from 'src/reusable_components'
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
 import { useGetProgramsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
@@ -25,7 +37,8 @@ const TimeTableView = () => {
 
   const { data: programsData, isLoading, isError: isErrorFetchingPrograms } = useGetProgramsListQuery(true)
 
-  const [fetchProgramSegments, { data: segmentsData }] = useLazyGetProgramSegmentDetailsQuery()
+  const [fetchProgramSegments, { data: segmentsData, isFetching: isFetchingSegments }] =
+    useLazyGetProgramSegmentDetailsQuery()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -46,7 +59,7 @@ const TimeTableView = () => {
 
   const segmentList = useMemo(() => {
     return (segmentsData ?? []).map(segment => ({
-      id: segment.program_segment_id,
+      id: segment.segment_id,
       name: segment.segment_name
     }))
   }, [segmentsData])
@@ -55,16 +68,16 @@ const TimeTableView = () => {
     if (view === ViewState.PROGRAM) {
       setSelectedProgram(item.id)
       setSelectedSegment(null)
-      fetchProgramSegments(item.id)
+      fetchProgramSegments({ program_id: item.id })
         .unwrap()
         .then(() => {
           setView(ViewState.SEGMENT)
         })
 
       return
+    } else {
+      setSelectedSegment(item.id)
     }
-
-    setSelectedSegment(item.id)
   }
 
   const handleBack = () => {
@@ -74,24 +87,27 @@ const TimeTableView = () => {
   }
 
   const renderPrograms = () => (
-    <ChaarvyFlex
-      className={{
-        gap: 3,
-        justifyContent: 'center',
-        width: '100%',
-        flexWrap: 'wrap'
-      }}
-    >
-      {isErrorFetchingPrograms ? (
-        <Typography color='error'>Error fetching programs</Typography>
-      ) : (
-        programList.map(item => (
-          <CardButton key={item.id} onClick={() => handleClick(item)} size='micro'>
-            <Typography textAlign='center'>{item.name}</Typography>
-          </CardButton>
-        ))
-      )}
-    </ChaarvyFlex>
+    <Stack direction='column' spacing={2} flexWrap='wrap' justifyContent='center' alignItems='center' width='100%'>
+      <ChaarvyFlex
+        className={{
+          gap: 3,
+          justifyContent: 'center',
+          width: '100%',
+          flexWrap: 'wrap'
+        }}
+      >
+        {isErrorFetchingPrograms ? (
+          <Typography color='error'>Error fetching programs</Typography>
+        ) : (
+          programList.map(item => (
+            <CardButton key={item.id} onClick={() => handleClick(item)} size='micro'>
+              <Typography textAlign='center'>{item.name}</Typography>
+            </CardButton>
+          ))
+        )}
+      </ChaarvyFlex>
+      {isFetchingSegments && <LoadingSpinner loadingText='Fetching segments...' />}
+    </Stack>
   )
 
   const renderSegments = () => {

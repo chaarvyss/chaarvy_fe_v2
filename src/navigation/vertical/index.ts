@@ -78,18 +78,18 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
 
-    // {
-    //   title: 'Academics',
-    //   icon: 'ChairSchool' as const,
-    //   children: [
-    //     {
-    //       key: PermissionLabels.nav.TIME_TABLE,
-    //       title: 'Time Table',
-    //       path: PagePath.TIME_TABLE,
-    //       icon: 'Timetable' as const
-    //     }
-    //   ]
-    // },
+    {
+      title: 'Academics',
+      icon: 'ChairSchool' as const,
+      children: [
+        {
+          key: PermissionLabels.nav.timetable,
+          title: 'Time Table',
+          path: PagePath.TIME_TABLE,
+          icon: 'Timetable' as const
+        }
+      ]
+    },
     {
       title: 'Student Management',
       icon: 'School' as const,
