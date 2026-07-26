@@ -23,14 +23,16 @@ import { useCreateUpdateUserMutation } from 'src/store/services/adminServices'
 import { useUploadProfilePicMutation } from 'src/store/services/authServices'
 import { useGetRolesListQuery } from 'src/store/services/listServices'
 import { useGetUserProfileQuery, UserProfile } from 'src/store/services/viewServices'
-import GetChaarvyIcons from 'src/utils/icons'
+import GetChaarvyIcons, { ChaarvyIcon } from 'src/utils/icons'
 
+import FacultyAssignmentPage from './subjectAssignment'
 import UserPermissions from './userPermissions'
 
 enum FormType {
   BASE_DETAIL = 'base_detail',
   ADDRESS = 'address',
-  PERMISSIONS = 'permissions'
+  PERMISSIONS = 'permissions',
+  FACULTY_ASSIGNMENT = 'faculty_assignment'
 }
 
 const baseProfileKeys = [
@@ -121,27 +123,28 @@ const ViewUserProfile = (props: UserProfileProps) => {
       {baseProfileKeys.map(field => (
         <Grid item xs={12} md={6} key={field.v}>
           <Box display='flex' flexDirection='column'>
-            <small>{field.l.replace('_', ' ').toUpperCase()}</small>
+            <small>{field.l.replace('_', ' ')}</small>
             <TextField
               onChange={handleChange(field.v as keyof UserProfile)}
               value={newDetails?.[field.v as keyof UserProfile]}
               disabled={field.v == 'created_on'}
               type={field.v === 'mobile' ? InputVariants.NUMBER : 'text'}
+              size='small'
             />
           </Box>
         </Grid>
       ))}
       <Grid item xs={12} md={6}>
         <FormControl fullWidth>
-          <Typography>Role</Typography>
-          <Select value={newDetails?.Role ?? ''} onChange={handleChange('Role')}>
+          <small>Role</small>
+          <Select value={newDetails?.Role ?? ''} onChange={handleChange('Role')} size='small'>
             {isRolesListLoading ? (
               <MenuItem disabled>
                 <CircularProgress size={24} />
               </MenuItem>
             ) : (
               (rolesData ?? []).map(({ role_id, role_name }) => (
-                <MenuItem key={value} value={role_id}>
+                <MenuItem key={role_id} value={role_id}>
                   {role_name}
                 </MenuItem>
               ))
@@ -163,21 +166,33 @@ const ViewUserProfile = (props: UserProfileProps) => {
     {
       value: FormType.BASE_DETAIL,
       label: 'User Details',
-      icon: <GetChaarvyIcons iconName='AccountDetails' />,
+      icon: <GetChaarvyIcons iconName={ChaarvyIcon.AccountDetails} fontSize='1.25rem' />,
       component: BaseDetailsTab()
     },
     {
       value: FormType.ADDRESS,
       label: 'Address',
-      icon: <GetChaarvyIcons iconName='MapMarkerOutline' />,
+      icon: <GetChaarvyIcons iconName={ChaarvyIcon.MapMarkerOutline} fontSize='1.25rem' />,
       component: <AddressForm user_type={AddressType.USER} user_id={user_id} address_id={details?.address_id} />
     },
 
     {
       value: FormType.PERMISSIONS,
       label: 'Permissions',
-      icon: <GetChaarvyIcons iconName='AccountLockOutline' />,
+      icon: <GetChaarvyIcons iconName={ChaarvyIcon.AccountLockOutline} fontSize='1.25rem' />,
       component: <UserPermissions user_id={user_id} />
+    },
+    {
+      value: FormType.FACULTY_ASSIGNMENT,
+      label: 'Faculty Assignment',
+      icon: <GetChaarvyIcons iconName={ChaarvyIcon.AccountGroupOutline} fontSize='1.25rem' />,
+      component: (
+        <FacultyAssignmentPage
+          facultyId={user_id}
+          isOpen={value === FormType.FACULTY_ASSIGNMENT}
+          onClose={() => setValue(FormType.BASE_DETAIL)}
+        />
+      )
     }
   ]
 
@@ -203,7 +218,7 @@ const ViewUserProfile = (props: UserProfileProps) => {
               className='position-absolute bg-info'
               sx={{ bottom: '0px', right: '20px' }}
             >
-              <GetChaarvyIcons iconName='PencilOutline' color='white' />
+              <GetChaarvyIcons iconName={ChaarvyIcon.PencilOutline} color='white' />
               <input hidden type='file' onChange={handleImageUpload} accept='image/png, image/jpeg' id='upload-image' />
             </IconButton>
             {profilePic && (
@@ -212,38 +227,51 @@ const ViewUserProfile = (props: UserProfileProps) => {
                 className='position-absolute bg-success'
                 onClick={handleUploadProfilePic}
               >
-                <GetChaarvyIcons iconName='ContentSave' color='white' />
+                <GetChaarvyIcons iconName={ChaarvyIcon.ContentSave} color='white' />
               </IconButton>
             )}
           </Box>
-          {mainKeys.map(field => (
-            <Grid item xs={12} className='n' key={field.l}>
-              <Typography>
-                {field.l} : {details?.[field.v as keyof UserProfile] ?? '-'}
-              </Typography>
-            </Grid>
-          ))}
+          <Grid container spacing={1.5} sx={{ maxWidth: 400, mx: 'auto', width: '100%', mt: 2 }}>
+            {mainKeys.map(field => (
+              <React.Fragment key={field.l}>
+                <Grid item xs={5}>
+                  <Typography variant='body2' color='text.secondary' sx={{ textAlign: 'left' }}>
+                    {field.l}
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={7}>
+                  <Typography variant='body2' fontWeight={500} sx={{ textAlign: 'left', wordBreak: 'break-word' }}>
+                    {details?.[field.v as keyof UserProfile] ?? '-'}
+                  </Typography>
+                </Grid>
+              </React.Fragment>
+            ))}
+          </Grid>
         </Box>
-        <Box>
-          <TabContext value={value}>
-            <TabList
-              onChange={handleTabChange}
-              aria-label='admission-form tabs'
-              sx={{ borderBottom: t => `1px solid ${t.palette.divider}` }}
-            >
-              {tabs.map(({ value, label, icon }) => (
-                <Tab
-                  key={value}
-                  value={value}
-                  label={
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      {icon}
-                      <TabName>{label}</TabName>
-                    </Box>
-                  }
-                />
-              ))}
-            </TabList>
+        <TabContext value={value}>
+          <Box>
+            <Box sx={{ overflow: 'auto' }}>
+              <TabList
+                onChange={handleTabChange}
+                aria-label='admission-form tabs'
+                sx={{ borderBottom: t => `1px solid ${t.palette.divider}` }}
+              >
+                {tabs.map(({ value, label, icon }) => (
+                  <Tab
+                    key={value}
+                    sx={{ textTransform: 'none' }}
+                    value={value}
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        {icon}
+                        <TabName>{label}</TabName>
+                      </Box>
+                    }
+                  />
+                ))}
+              </TabList>
+            </Box>
             <Box margin='1rem 0rem' maxHeight='60vh' overflow='auto'>
               {tabs.map(({ value, component }) => (
                 <TabPanel key={value} sx={{ p: 0 }} value={value}>
@@ -251,8 +279,8 @@ const ViewUserProfile = (props: UserProfileProps) => {
                 </TabPanel>
               ))}
             </Box>
-          </TabContext>
-        </Box>
+          </Box>
+        </TabContext>
       </Box>
     </ChaarvyModal>
   )

@@ -6,6 +6,7 @@ import {
   ProgramSegmentMediumBook
 } from 'src/lib/types'
 import { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
+import { SegmentMediums } from 'src/views/Admin/Programs/Modals/AddonCourses/types'
 import { BulkProcessResponse } from 'src/views/common/BulkProcessStatusModal'
 
 import { HttpRequestMethods } from '..'
@@ -229,6 +230,44 @@ const programServicesApi = api.injectEndpoints({
           body
         }
       }
+    }),
+    getActiveProgramMediums: build.query<SegmentMediums[], void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.program.getActiveProgramMediumsUrl
+        }
+      }
+    }),
+    getProgramSegmentsByMediums: build.query<ProgramSegment[], { medium_ids: string[] }>({
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.program.getProgramSegmentsByMediumsUrl,
+          params
+        }
+      }
+    }),
+    getUserSubjects: build.query<UserSubject[], string>({
+      providesTags: [CacheTag.ListUserSubjects],
+      query: user_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.program.getUserSubjectsUrl,
+          params: { user_id }
+        }
+      }
+    }),
+
+    userSubjectSync: build.mutation<string, UserSubjectSyncRequest>({
+      invalidatesTags: [CacheTag.ListUserSubjects],
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.program.userSubjectsSyncUrl,
+          body
+        }
+      }
     })
   })
 })
@@ -250,5 +289,9 @@ export const {
   useGetProgramFeesHeaderDataQuery,
   useGetProgramSegmentSubjectsListQuery,
   useGetAllProgramSegmentsListQuery,
-  useAssignProgramSegmentSubjectMutation
+  useAssignProgramSegmentSubjectMutation,
+  useGetProgramSegmentsByMediumsQuery,
+  useGetActiveProgramMediumsQuery,
+  useGetUserSubjectsQuery,
+  useUserSubjectSyncMutation
 } = programServicesApi

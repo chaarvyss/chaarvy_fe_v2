@@ -1,10 +1,10 @@
 import { LoadingButton } from '@mui/lab'
 import { SelectChangeEvent } from '@mui/material'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState, useMemo } from 'react'
 
 import { Box, Grid, TextField } from '@muiElements'
 import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
-import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import { useToast, ToastVariants } from 'src/@core/context/toastContext'
 import { InputVariants } from 'src/lib/enums'
 import { useCreateClientMutation } from 'src/store/services/MasterServices/adminServices'
 import { isValidEmail, isValidPhone } from 'src/utils/helpers'
@@ -40,7 +40,7 @@ const defaultClientData = {
 }
 
 const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
-  const [errors, setErrors] = useState<Array<string>>([])
+  const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
   const { closeDrawer } = useSideDrawer()
 
@@ -50,41 +50,56 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
   const [clientData, setClientData] = useState<ClientData>(defaultClientData)
 
   const handleChange =
-    (prop: keyof ClientData) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) =>
-      setClientData(prev => ({ ...prev, [prop]: event?.target?.value ?? event }))
+    (prop: keyof ClientData) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
+      let val = event?.target?.value ?? event
+
+      if (prop === 'db_name' && typeof val === 'string') {
+        val = val.toUpperCase().replace(/\s/g, '')
+      }
+
+      setClientData(prev => ({ ...prev, [prop]: val as any }))
+
+      if (errors[prop]) {
+        setErrors(prev => ({ ...prev, [prop]: '' }))
+      }
+    }
 
   useEffect(() => {
     setClientData(clientDetails ?? defaultClientData)
   }, [clientDetails])
 
-  const handleSubmit = () => {
-    const errors: string[] = []
+  const hadErrors = useMemo(() => Object.values(errors).filter(error => error !== ''), [errors])
 
-    baseProfileKeys.forEach(({ v: key }) => {
+  const handleSubmit = () => {
+    const newErrors: { [key: string]: string } = {}
+
+    baseProfileKeys.forEach(({ v: key, l: label }) => {
       const value = clientData[key as keyof ClientData]
 
       if (value === undefined || value === null || value === '' || value === 0) {
-        errors.push(key)
+        newErrors[key] = `${label} is required`
 
         return
       }
 
-      if (key.toLowerCase().includes('email_id')) {
-        if (!isValidEmail(value as string)) {
-          errors.push(key)
-        }
+      if (key === 'email_id' && !isValidEmail(value as string)) {
+        newErrors[key] = 'Please enter a valid email address'
       }
 
-      if (key.toLowerCase().includes('contact_numbers')) {
-        if (!isValidPhone(value as string)) {
-          errors.push(key)
+      if (key === 'contact_numbers' && !isValidPhone(value as string)) {
+        newErrors[key] = 'Please enter a valid 10-digit phone number'
+      }
+
+      if (key === 'db_name') {
+        const dbNameRegex = /^[TCS]\d+$/
+        if (!dbNameRegex.test(value as string)) {
+          newErrors[key] = 'Must start with T, C, or S followed only by numbers (e.g., T123)'
         }
       }
     })
 
-    if (errors.length > 0) {
-      setErrors(errors)
-      console.log('Validation Errors:', errors)
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
 
       return
     }
@@ -104,9 +119,9 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
         {baseProfileKeys.map(field => (
           <Grid item xs={12} key={field.v}>
             <Box display='flex' flexDirection='column'>
-              <small>{field.l.replace('_', ' ').toUpperCase()}</small>
+              <small>{field.l.replace('_', ' ')}</small>
               <TextField
-                error={errors.includes(field.v as keyof ClientData)}
+                error={!!errors[field.v as keyof ClientData]}
                 onChange={handleChange(field.v as keyof ClientData)}
                 value={clientData?.[field.v as keyof ClientData]}
                 size='small'
@@ -114,6 +129,7 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
                 type={
                   ['contact_numbers', 'processing_fees'].includes(field.v) ? InputVariants.NUMBER : InputVariants.TEXT
                 }
+                helperText={errors[field.v]}
               />
               {field.v === 'contact_numbers' && (
                 <p className='text-end' style={{ fontSize: '.7rem' }}>
@@ -125,7 +141,12 @@ const CreateClient = ({ clientDetails }: { clientDetails?: ClientData }) => {
         ))}
 
         <Grid item>
-          <LoadingButton loading={isCreatingClient} variant='contained' onClick={handleSubmit}>
+          <LoadingButton
+            loading={isCreatingClient}
+            disabled={hadErrors.length > 0}
+            variant='contained'
+            onClick={handleSubmit}
+          >
             {clientDetails ? 'Update' : 'Add'} Client
           </LoadingButton>
         </Grid>
