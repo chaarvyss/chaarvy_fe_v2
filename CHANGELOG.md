@@ -1,3 +1,10 @@
+## [1.18.13](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.12...v1.18.13) (2026-07-26)
+
+
+### Bug Fixes
+
+* **FacultySubject:** AC-82: Faculty For subject assignement ([#69](https://github.com/chaarvyss/chaarvy_fe_v2/issues/69)) ([fcbb3f1](https://github.com/chaarvyss/chaarvy_fe_v2/commit/fcbb3f1a57c37133a772e9149d9eeb041051a47d))
+
 ## [1.18.12](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.11...v1.18.12) (2026-07-11)
 
 
