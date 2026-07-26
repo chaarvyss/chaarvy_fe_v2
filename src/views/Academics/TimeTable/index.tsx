@@ -9,7 +9,10 @@ import {
   MenuItem,
   FormControl,
   Button,
-  Stack
+  Stack,
+  ListItemText,
+  List,
+  ListItemButton
 } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -114,11 +117,23 @@ const TimeTableView = () => {
     // 📱 Mobile dropdown
     if (isMobile) {
       return (
-        <Box sx={{ position: 'sticky', top: 0, zIndex: 10, background: '#fff', pb: 1 }}>
-          <FormControl fullWidth size='small'>
+        <Box
+          sx={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 10,
+            background: 'rgba(255, 255, 255, 0.9)', // Slight transparency
+            backdropFilter: 'blur(8px)', // Modern glass effect
+            pb: 2,
+            borderBottom: '1px solid',
+            borderColor: 'divider'
+          }}
+        >
+          <FormControl fullWidth size='small' sx={{ mt: 1 }}>
             <Select
               value={selectedSegment || ''}
               displayEmpty
+              sx={{ borderRadius: 2, bgcolor: 'background.paper' }}
               onChange={e => {
                 const selected = segmentList.find(item => item.id === e.target.value)
                 if (selected) handleClick(selected)
@@ -127,7 +142,6 @@ const TimeTableView = () => {
               <MenuItem value='' disabled>
                 Select Segment
               </MenuItem>
-
               {segmentList.map(item => (
                 <MenuItem key={item.id} value={item.id}>
                   {item.name}
@@ -139,82 +153,153 @@ const TimeTableView = () => {
       )
     }
 
-    // 💻 Desktop cards
+    // 💻 Desktop Sidebar (Modernized)
     return (
-      <ChaarvyFlex
-        className={{
-          gap: 2,
-          flexDirection: 'column',
-          alignItems: 'stretch'
+      <Box
+        sx={{
+          borderRight: '1px solid',
+          borderColor: 'divider',
+          pr: 2,
+          height: '100%',
+          minHeight: '60vh'
         }}
       >
-        {segmentList.map(item => (
-          <CardButton
-            key={item.id}
-            onClick={() => handleClick(item)}
-            size='micro'
-            className={{
-              backgroundImage: `linear-gradient(to bottom, ${selectedSegment === item.id ? '#2e0156, #d19cff' : '#fff'})`
-            }}
-          >
-            <Typography textAlign='center' sx={{ color: selectedSegment === item.id ? '#fff' : 'text.primary' }}>
-              {item.name}
-            </Typography>
-          </CardButton>
-        ))}
-      </ChaarvyFlex>
+        <Typography
+          variant='overline'
+          sx={{ color: 'text.secondary', ml: 1, mb: 1, display: 'block', textTransform: 'none' }}
+        >
+          Available Segments
+        </Typography>
+        <List sx={{ p: 0 }}>
+          {segmentList.map(item => {
+            const isSelected = item.id === selectedSegment
+
+            return (
+              <ListItemButton
+                key={item.id}
+                onClick={() => handleClick(item)}
+                selected={isSelected}
+                sx={{
+                  mb: 0.5,
+                  borderRadius: 2, // Soft rounded corners
+                  transition: 'all 0.2s',
+                  ...(isSelected && {
+                    bgcolor: 'primary.50', // Soft primary background
+                    color: 'primary.main',
+                    '&:hover': {
+                      bgcolor: 'primary.100'
+                    }
+                  }),
+                  ...(!isSelected && {
+                    color: 'text.secondary',
+                    '&:hover': {
+                      bgcolor: 'action.hover',
+                      color: 'text.primary'
+                    }
+                  })
+                }}
+              >
+                <ListItemText
+                  primary={item.name}
+                  primaryTypographyProps={{
+                    fontWeight: isSelected ? 600 : 500,
+                    fontSize: '0.95rem'
+                  }}
+                />
+              </ListItemButton>
+            )
+          })}
+        </List>
+      </Box>
     )
   }
 
   return (
-    <>
+    <Box sx={{ width: '100%' }}>
       {/* 🔙 Back Button */}
       {view !== ViewState.PROGRAM && (
-        <Button variant='text' size='small' startIcon={<GetChaarvyIcons iconName='ArrowLeft' />} onClick={handleBack}>
-          Back
+        <Button
+          variant='text'
+          size='small'
+          startIcon={<GetChaarvyIcons iconName='ArrowLeft' />}
+          onClick={handleBack}
+          sx={{
+            mb: 2, // Added margin bottom to separate it from the layout
+            borderRadius: 6,
+            textTransform: 'none',
+            color: 'text.secondary',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
+          Back to Programs
         </Button>
       )}
 
-      <ChaarvyFlex
-        className={{
-          direction: isMobile ? 'column' : 'row',
-          justifyContent: 'flex-start',
-          alignItems: 'start',
-          width: '100%',
-          gap: 2,
-          mt: 3
+      {/* 🏗️ Main Side-by-Side Layout */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          alignItems: 'flex-start', // Keeps items aligned to the top
+          gap: 3,
+          width: '100%'
         }}
       >
-        {/* 📚 Left Panel */}
-
+        {/* 📚 Left Panel (Sidebar) */}
         {view === ViewState.PROGRAM ? (
-          <Box>{renderPrograms()}</Box>
+          <Box sx={{ width: '100%' }}>{renderPrograms()}</Box>
         ) : (
-          <Box sx={{ width: isMobile ? '100%' : '20%' }}>{renderSegments()}</Box>
+          <Box
+            sx={{
+              width: isMobile ? '100%' : '250px',
+              flexShrink: 0 // Prevents the sidebar from getting squished
+            }}
+          >
+            {renderSegments()}
+          </Box>
         )}
 
-        {/* 📊 Right Panel */}
-        <ChaarvyFlex className={{ width: isMobile ? '100%' : '75%' }}>
+        {/* 📊 Right Panel (Timetable Area) */}
+        <Box
+          sx={{
+            flex: 1, // Tells this box to take up all remaining space
+            width: '100%',
+            minWidth: 0 // Crucial trick to prevent flex children from overflowing horizontally
+          }}
+        >
           {view === ViewState.SEGMENT &&
             (selectedSegment ? (
               <TimeTableSchedulerBoard programId={selectedProgram} segmentId={selectedSegment} />
             ) : (
-              <ChaarvyFlex
-                className={{
-                  width: '100%',
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  mt: 10
+                  minHeight: '400px',
+                  bgcolor: 'background.default',
+                  borderRadius: 3,
+                  border: '1px dashed',
+                  borderColor: 'divider',
+                  p: 4
                 }}
               >
                 <Grow in timeout={600}>
-                  <Typography variant='h6'>Select a segment to continue</Typography>
+                  <Box textAlign='center'>
+                    <Typography variant='h6' color='text.primary' gutterBottom>
+                      No Segment Selected
+                    </Typography>
+                    <Typography variant='body2' color='text.secondary'>
+                      Please choose a segment from the menu to view and manage its timetable.
+                    </Typography>
+                  </Box>
                 </Grow>
-              </ChaarvyFlex>
+              </Box>
             ))}
-        </ChaarvyFlex>
-      </ChaarvyFlex>
-    </>
+        </Box>
+      </Box>
+    </Box>
   )
 }
 
