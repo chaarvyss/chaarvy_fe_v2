@@ -24,6 +24,7 @@ import { useGetProgramsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
 import GetChaarvyIcons from 'src/utils/icons'
 
+import TimeTableTemplater from './timeTableTemplate'
 import TimeTableSchedulerBoard from './timeTableUpdater'
 
 enum ViewState {
@@ -37,6 +38,8 @@ const TimeTableView = () => {
   const [view, setView] = useState<ViewState>(ViewState.PROGRAM)
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null)
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null)
+
+  const [isTemplateDesignerOpen, setIsTemplateDesignerOpen] = useState(false)
 
   const { data: programsData, isLoading, isError: isErrorFetchingPrograms } = useGetProgramsListQuery(true)
 
@@ -91,6 +94,12 @@ const TimeTableView = () => {
 
   const renderPrograms = () => (
     <Stack direction='column' spacing={2} flexWrap='wrap' justifyContent='center' alignItems='center' width='100%'>
+      <Stack direction='row' justifyContent='end' alignItems='center' width='100%'>
+        <Button sx={{ textTransform: 'none' }} onClick={() => setIsTemplateDesignerOpen(true)}>
+          Template designer
+        </Button>
+      </Stack>
+      <TimeTableTemplater isOpen={isTemplateDesignerOpen} onClose={() => setIsTemplateDesignerOpen(false)} />
       <ChaarvyFlex
         className={{
           gap: 3,

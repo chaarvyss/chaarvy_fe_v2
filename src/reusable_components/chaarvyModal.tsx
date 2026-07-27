@@ -52,7 +52,7 @@ interface ChaarvyModalProps {
   onClose?: () => void
   shouldWarnOnClose?: boolean
   shouldRestrictCloseOnOuterClick?: boolean
-  title?: string
+  title?: string | JSX.Element
 }
 
 const ChaarvyModal = ({
