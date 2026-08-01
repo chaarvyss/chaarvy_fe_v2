@@ -441,6 +441,68 @@ const adminServiceApi = api.injectEndpoints({
           params: { subject_id }
         }
       }
+    }),
+
+    createUpdatePeriodTemplate: build.mutation<string, PeriodTemplateRequest>({
+      query: body => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.createUpdatePeriodTemplateUrl,
+          body
+        }
+      }
+    }),
+    getPeriodTemplate: build.query<IncomingTemplateData, void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admin.getPeriodTemplateUrl
+        }
+      }
+    }),
+    getDayOfWeek: build.query<DayOfWeek[], void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admin.getDayOfWeekUrl
+        }
+      }
+    }),
+    getFacultyAvailability: build.query<
+      FacultyAvailabilityResponse,
+      { program_id: string; segment_id: string; medium_id: string; section_id: string }
+    >({
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admin.getFacultyAvailabilityUrl,
+          params
+        }
+      }
+    }),
+    createUpdateTimetable: build.mutation<string, TimetableRequest>({
+      invalidatesTags: [CacheTag.ClassTimetable],
+      query: ({ params, body }: TimetableRequest) => {
+        return {
+          method: HttpRequestMethods.POST,
+          url: urlConstants.admin.createUpdateTimetableUrl,
+          params,
+          body
+        }
+      }
+    }),
+    getClassTimetable: build.query<
+      ExistingTimetableData[],
+      { program_id: string; segment_id: string; section_id: string; medium_id: string }
+    >({
+      providesTags: [CacheTag.ClassTimetable],
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admin.getClassTimetableUrl,
+          params
+        }
+      }
     })
   })
 })
@@ -475,5 +537,11 @@ export const {
   useGetReferrelSummaryQuery,
   useGetPayeesListQuery,
   useCreateUpdateSubjectMutation,
-  useUpdateSubjectStatusMutation
+  useUpdateSubjectStatusMutation,
+  useCreateUpdatePeriodTemplateMutation,
+  useGetPeriodTemplateQuery,
+  useGetDayOfWeekQuery,
+  useGetFacultyAvailabilityQuery,
+  useCreateUpdateTimetableMutation,
+  useGetClassTimetableQuery
 } = adminServiceApi

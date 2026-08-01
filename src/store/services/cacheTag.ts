@@ -29,7 +29,8 @@ export enum CacheTag {
   ListProgramSegmentSections = 'prgSegSec',
   ListStudentAddonPrograms = 'stdAdprgs',
   StudentPayableFees = 'studPayFees',
-  PDFTemplates = 'pdfTemplates'
+  PDFTemplates = 'pdfTemplates',
+  ClassTimetable = 'classTimetable'
 }
 
 export enum CommonCacheTag {

@@ -22,39 +22,29 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import dayjs, { Dayjs } from 'dayjs'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 
-import { ChaarvyModal } from 'src/reusable_components'
+import { ChaarvyModal, LoadingSpinner } from 'src/reusable_components'
+import { useCreateUpdatePeriodTemplateMutation, useGetPeriodTemplateQuery } from 'src/store/services/adminServices'
 import GetChaarvyIcons, { ChaarvyIcon } from 'src/utils/icons'
 
 interface TimeSlot {
   id: string
   title: string
-  startTime: Dayjs
-  endTime: Dayjs
+  start_time: Dayjs
+  end_time: Dayjs
   duration: number
-  isBreak: boolean
+  isBreak: number
 }
 
-// Incoming API Payload Interface (with raw time strings)
-interface IncomingTemplateData {
-  dayStartTime?: string // e.g., '09:00'
-  dayEndTime?: string // e.g., '16:00'
-  defaultDuration?: number
-  slots?: {
-    id: string
-    title: string
-    startTime: string // e.g., '09:00'
-    endTime: string // e.g., '09:45'
-    duration: number
-    isBreak: boolean
-  }[]
+interface TimeTableTemplaterProps {
+  isOpen: boolean
+  onClose: () => void
 }
 
-// Helper to convert time strings ("09:00" or "09:00:00") into a Dayjs object on today's date
-const parseTimeString = (timeStr?: string): Dayjs => {
+const parseTime = (timeStr?: string): Dayjs => {
   if (!timeStr) return dayjs().set('hour', 9).set('minute', 0).set('second', 0)
-
   const [hours, minutes] = timeStr.split(':').map(Number)
 
   return dayjs()
@@ -63,86 +53,192 @@ const parseTimeString = (timeStr?: string): Dayjs => {
     .set('second', 0)
 }
 
-interface TimeTableTemplaterProps {
-  isOpen: boolean
-  onClose: () => void
-  initialData?: IncomingTemplateData
+const recalculateDownstream = (slots: TimeSlot[], startIndex: number): TimeSlot[] => {
+  const updated = [...slots]
+  let currentEnd = updated[startIndex].end_time
+
+  for (let i = startIndex + 1; i < updated.length; i++) {
+    updated[i] = { ...updated[i], start_time: currentEnd }
+    const duration = updated[i].duration > 0 ? updated[i].duration : 45
+    updated[i].end_time = currentEnd.add(duration, 'minute')
+    currentEnd = updated[i].end_time
+  }
+
+  return updated
 }
 
-const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ initialData, onClose, isOpen }) => {
-  // Global Schedule Boundaries
+const SlotRow: React.FC<{
+  row: TimeSlot
+  index: number
+  onUpdate: (index: number, field: keyof TimeSlot, value: any) => void
+  onRemove: (index: number) => void
+  canRemove: boolean
+}> = ({ row, index, onUpdate, onRemove, canRemove }) => {
+  const isInvalid = row.duration <= 0
+
+  return (
+    <TableRow sx={{ bgcolor: row.isBreak ? 'action.hover' : 'inherit', transition: 'background-color 0.2s' }}>
+      <TableCell align='center'>
+        <Typography variant='body2' color='text.secondary' fontWeight='600'>
+          {index + 1}
+        </Typography>
+      </TableCell>
+      <TableCell>
+        <TextField
+          size='small'
+          fullWidth
+          value={row.title}
+          onChange={e => onUpdate(index, 'title', e.target.value)}
+          variant='outlined'
+          placeholder='e.g. Period 1 / Lunch'
+        />
+      </TableCell>
+      <TableCell>
+        <TimePicker
+          value={row.start_time}
+          onChange={val => val && onUpdate(index, 'start_time', val)}
+          disabled={index > 0}
+          slotProps={{ textField: { size: 'small', fullWidth: true } }}
+        />
+      </TableCell>
+      <TableCell>
+        <TextField
+          size='small'
+          type='number'
+          fullWidth
+          value={row.duration}
+          onChange={e => onUpdate(index, 'duration', e.target.value)}
+          error={isInvalid}
+          helperText={isInvalid ? '> 0 mins' : ''}
+          InputProps={{
+            endAdornment: <InputAdornment position='end'>mins</InputAdornment>,
+            inputProps: { min: 1, step: 5 }
+          }}
+        />
+      </TableCell>
+      <TableCell>
+        <TimePicker
+          value={row.end_time}
+          onChange={val => val && onUpdate(index, 'end_time', val)}
+          minTime={row.start_time}
+          slotProps={{ textField: { size: 'small', fullWidth: true, error: isInvalid } }}
+        />
+      </TableCell>
+      <TableCell align='center'>
+        <Tooltip title={row.isBreak ? 'Mark as Class' : 'Mark as Break'}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={row.isBreak === 1}
+                onChange={e => onUpdate(index, 'isBreak', e.target.checked ? 1 : 0)}
+                color='warning'
+                size='small'
+              />
+            }
+            label=''
+            sx={{ m: 0 }}
+          />
+        </Tooltip>
+      </TableCell>
+      <TableCell align='center'>
+        <IconButton size='small' color='error' onClick={() => onRemove(index)} disabled={!canRemove}>
+          <GetChaarvyIcons fontSize='1.25rem' iconName={ChaarvyIcon.DeleteOutline} />
+        </IconButton>
+      </TableCell>
+    </TableRow>
+  )
+}
+
+const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ onClose, isOpen }) => {
   const [dayStartTime, setDayStartTime] = useState<Dayjs>(dayjs().set('hour', 9).set('minute', 0).set('second', 0))
   const [dayEndTime, setDayEndTime] = useState<Dayjs>(dayjs().set('hour', 16).set('minute', 0).set('second', 0))
   const [defaultDuration, setDefaultDuration] = useState<number>(45)
-
   const [slots, setSlots] = useState<TimeSlot[]>([])
+  const [initialStateHash, setInitialStateHash] = useState<string>('')
 
-  // Convert incoming string-based past data into Dayjs state when initialData changes
+  const { data: fetchedTemplateData, isLoading: isFetchingTemplate } = useGetPeriodTemplateQuery()
+  const [createUpdatePeriodTemplate] = useCreateUpdatePeriodTemplateMutation()
+
+  const currentPayloadObj = useMemo(() => {
+    const initialIDs = fetchedTemplateData?.slots?.map(s => s.id) || []
+    const currentIDs = new Set(slots.map(s => s.id))
+    const deletedSlotIds = initialIDs.filter(id => !currentIDs.has(id))
+
+    const details = slots.map((s, index) => ({
+      id: s.id,
+      title: s.title,
+      start_time: s.start_time.format('HH:mm'),
+      end_time: s.end_time.format('HH:mm'),
+      duration: s.duration,
+      isBreak: s.isBreak ? 1 : 0,
+      sequence: index + 1
+    }))
+
+    return { details, deleted_ids: deletedSlotIds }
+  }, [slots, fetchedTemplateData])
+
+  const hasChanges = useMemo(() => {
+    if (!initialStateHash) return true
+
+    return JSON.stringify(currentPayloadObj) !== initialStateHash
+  }, [currentPayloadObj, initialStateHash])
+
   useEffect(() => {
-    if (initialData) {
-      if (initialData.dayStartTime) {
-        setDayStartTime(parseTimeString(initialData.dayStartTime))
-      }
-      if (initialData.dayEndTime) {
-        setDayEndTime(parseTimeString(initialData.dayEndTime))
-      }
-      if (initialData.defaultDuration) {
-        setDefaultDuration(initialData.defaultDuration)
-      }
+    if (fetchedTemplateData) {
+      if (fetchedTemplateData.dayStartTime) setDayStartTime(parseTime(fetchedTemplateData.dayStartTime))
+      if (fetchedTemplateData.dayEndTime) setDayEndTime(parseTime(fetchedTemplateData.dayEndTime))
+      if (fetchedTemplateData.defaultDuration) setDefaultDuration(fetchedTemplateData.defaultDuration)
 
-      if (initialData.slots && initialData.slots.length > 0) {
-        const parsedSlots: TimeSlot[] = initialData.slots.map(s => ({
+      if (fetchedTemplateData.slots && fetchedTemplateData.slots.length > 0) {
+        const parsedSlots: TimeSlot[] = fetchedTemplateData.slots.map(s => ({
           ...s,
-          startTime: parseTimeString(s.startTime),
-          endTime: parseTimeString(s.endTime)
+          start_time: parseTime(s.start_time),
+          end_time: parseTime(s.end_time)
         }))
         setSlots(parsedSlots)
+
+        const basePayload = parsedSlots.map((s, i) => ({
+          id: s.id,
+          title: s.title,
+          start_time: s.start_time.format('HH:mm'),
+          end_time: s.end_time.format('HH:mm'),
+          duration: s.duration,
+          is_break: s.isBreak ? 1 : 0,
+          sequence: i + 1
+        }))
+        setInitialStateHash(JSON.stringify({ details: basePayload, deleted_ids: [] }))
       }
     } else {
-      // Default fallback state if no past data is provided
       const defaultStart = dayjs().set('hour', 9).set('minute', 0).set('second', 0)
       setSlots([
         {
           id: '1',
           title: 'Period 1',
-          startTime: defaultStart,
-          endTime: defaultStart.add(defaultDuration, 'minute'),
+          start_time: defaultStart,
+          end_time: defaultStart.add(defaultDuration, 'minute'),
           duration: defaultDuration,
-          isBreak: false
+          isBreak: 0
         }
       ])
+      setInitialStateHash('')
     }
-  }, [initialData])
+  }, [fetchedTemplateData])
 
-  // Cascade/ripple timing updates to downstream rows
-  const recalculateDownstream = (updatedSlots: TimeSlot[], startIndex: number) => {
-    let currentEndTime = updatedSlots[startIndex].endTime
-
-    for (let i = startIndex + 1; i < updatedSlots.length; i++) {
-      updatedSlots[i].startTime = currentEndTime
-      const duration = updatedSlots[i].duration > 0 ? updatedSlots[i].duration : 45
-      updatedSlots[i].endTime = currentEndTime.add(duration, 'minute')
-      currentEndTime = updatedSlots[i].endTime
-    }
-
-    return updatedSlots
-  }
-
-  // Handle Day Start Time change -> updates first slot and ripples rest down
   const handleDayStartTimeChange = (newStart: Dayjs | null) => {
     if (!newStart) return
     setDayStartTime(newStart)
 
     if (slots.length > 0) {
-      let updated = [...slots]
-      updated[0].startTime = newStart
-      updated[0].endTime = newStart.add(updated[0].duration, 'minute')
-      updated = recalculateDownstream(updated, 0)
-      setSlots(updated)
+      const updated = [...slots]
+      updated[0] = {
+        ...updated[0],
+        start_time: newStart,
+        end_time: newStart.add(updated[0].duration, 'minute')
+      }
+      setSlots(recalculateDownstream(updated, 0))
     }
   }
 
-  // Auto-generate full schedule from Start Time to End Time using Default Duration
   const handleAutoGenerateSchedule = () => {
     if (!dayStartTime || !dayEndTime || defaultDuration <= 0) return
 
@@ -157,35 +253,32 @@ const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ initialData, on
         const remainingMins = dayEndTime.diff(currentStart, 'minute')
         if (remainingMins > 0) {
           generatedSlots.push({
-            id: Date.now().toString() + periodIndex,
+            id: uuidv4(),
             title: `Period ${periodIndex}`,
-            startTime: currentStart,
-            endTime: dayEndTime,
+            start_time: currentStart,
+            end_time: dayEndTime,
             duration: remainingMins,
-            isBreak: false
+            isBreak: 0
           })
         }
         break
       } else {
         generatedSlots.push({
-          id: Date.now().toString() + periodIndex,
+          id: uuidv4(),
           title: `Period ${periodIndex}`,
-          startTime: currentStart,
-          endTime: nextEnd,
+          start_time: currentStart,
+          end_time: nextEnd,
           duration: defaultDuration,
-          isBreak: false
+          isBreak: 0
         })
         currentStart = nextEnd
         periodIndex++
       }
     }
 
-    if (generatedSlots.length > 0) {
-      setSlots(generatedSlots)
-    }
+    if (generatedSlots.length > 0) setSlots(generatedSlots)
   }
 
-  // Bulk update non-break class durations when the global default changes
   const handleGlobalDurationChange = (newDurationStr: string) => {
     const newDuration = parseInt(newDurationStr, 10) || 0
     setDefaultDuration(newDuration)
@@ -196,14 +289,13 @@ const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ initialData, on
     let firstChangedIndex = -1
 
     updated = updated.map((slot, idx) => {
-      if (!slot.isBreak) {
+      if (slot.isBreak === 0) {
         if (firstChangedIndex === -1) firstChangedIndex = idx
-        const updatedEndTime = slot.startTime.add(newDuration, 'minute')
 
         return {
           ...slot,
           duration: newDuration,
-          endTime: updatedEndTime
+          end_time: slot.start_time.add(newDuration, 'minute')
         }
       }
 
@@ -222,29 +314,26 @@ const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ initialData, on
 
     if (field === 'duration') {
       const numericDuration = parseInt(value, 10) || 0
-      updated[index].duration = numericDuration
-
-      if (updated[index].startTime && numericDuration > 0) {
-        updated[index].endTime = updated[index].startTime.add(numericDuration, 'minute')
+      updated[index] = { ...updated[index], duration: numericDuration }
+      if (updated[index].start_time && numericDuration > 0) {
+        updated[index].end_time = updated[index].start_time.add(numericDuration, 'minute')
       }
       updated = recalculateDownstream(updated, index)
-    } else if (field === 'endTime') {
-      updated[index].endTime = value as Dayjs
-
-      if (value && updated[index].startTime) {
-        const diffMins = (value as Dayjs).diff(updated[index].startTime, 'minute')
+    } else if (field === 'end_time') {
+      updated[index] = { ...updated[index], end_time: value as Dayjs }
+      if (value && updated[index].start_time) {
+        const diffMins = (value as Dayjs).diff(updated[index].start_time, 'minute')
         updated[index].duration = diffMins > 0 ? diffMins : 0
       }
       updated = recalculateDownstream(updated, index)
-    } else if (field === 'startTime') {
-      updated[index].startTime = value as Dayjs
-
+    } else if (field === 'start_time') {
+      updated[index] = { ...updated[index], start_time: value as Dayjs }
       if (value && updated[index].duration > 0) {
-        updated[index].endTime = (value as Dayjs).add(updated[index].duration, 'minute')
+        updated[index].end_time = (value as Dayjs).add(updated[index].duration, 'minute')
       }
       updated = recalculateDownstream(updated, index)
     } else {
-      ;(updated[index] as any)[field] = value
+      updated[index] = { ...updated[index], [field]: value }
     }
 
     setSlots(updated)
@@ -253,12 +342,10 @@ const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ initialData, on
   const handleAddSlot = (isBreak = false) => {
     const lastSlot = slots[slots.length - 1]
     const defaultStart = lastSlot
-      ? lastSlot.endTime
+      ? lastSlot.end_time
       : dayStartTime || dayjs().set('hour', 9).set('minute', 0).set('second', 0)
-
     const slotDuration = isBreak ? 15 : defaultDuration > 0 ? defaultDuration : 45
     const defaultEnd = defaultStart.add(slotDuration, 'minute')
-
     const periodCount = slots.filter(s => !s.isBreak).length + 1
 
     setSlots([
@@ -266,10 +353,10 @@ const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ initialData, on
       {
         id: Date.now().toString(),
         title: isBreak ? 'Break' : `Period ${periodCount}`,
-        startTime: defaultStart,
-        endTime: defaultEnd,
+        start_time: defaultStart,
+        end_time: defaultEnd,
         duration: slotDuration,
-        isBreak
+        isBreak: isBreak ? 1 : 0
       }
     ])
   }
@@ -279,41 +366,36 @@ const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ initialData, on
 
     if (updated.length > 0 && index < updated.length) {
       if (index === 0) {
-        recalculateDownstream(updated, 0)
+        setSlots(recalculateDownstream(updated, 0))
+
+        return
       } else {
-        updated[index].startTime = updated[index - 1].endTime
-        updated[index].endTime = updated[index].startTime.add(updated[index].duration, 'minute')
-        recalculateDownstream(updated, index)
+        updated[index] = {
+          ...updated[index],
+          start_time: updated[index - 1].end_time,
+          end_time: updated[index - 1].end_time.add(updated[index].duration, 'minute')
+        }
+        setSlots(recalculateDownstream(updated, index))
+
+        return
       }
     }
 
     setSlots(updated)
   }
 
-  // Handle Save logic -> outputs clean HH:mm strings for backend storage
   const handleSave = () => {
-    const formattedData = {
-      dayStartTime: dayStartTime ? dayStartTime.format('HH:mm') : null,
-      dayEndTime: dayEndTime ? dayEndTime.format('HH:mm') : null,
-      defaultDuration,
-      slots: slots.map(s => ({
-        id: s.id,
-        title: s.title,
-        startTime: s.startTime.format('HH:mm'),
-        endTime: s.endTime.format('HH:mm'),
-        duration: s.duration,
-        isBreak: s.isBreak
-      }))
-    }
-
-    console.log('Saved Timetable Template:', formattedData)
-
-    // Add your API submit call here (e.g., dispatch(saveTimetableTemplate(formattedData)))
+    createUpdatePeriodTemplate(currentPayloadObj)
+      .unwrap()
+      .then(() => {
+        setSlots([])
+        onClose()
+      })
+      .catch(console.error)
   }
 
-  // Calculate overall day span stats
   const totalSchoolMinutes = dayStartTime && dayEndTime ? dayEndTime.diff(dayStartTime, 'minute') : 0
-  const activeSlotsEnd = slots.length > 0 ? slots[slots.length - 1].endTime : null
+  const activeSlotsEnd = slots.length > 0 ? slots[slots.length - 1].end_time : null
   const hasInvalidSlots = slots.some(s => s.duration <= 0)
 
   return (
@@ -346,16 +428,9 @@ const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ initialData, on
     >
       <Box sx={{ p: 2 }}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          {/* Top Controls: Day Start, End & Default Duration */}
           <Paper
             variant='outlined'
-            sx={{
-              p: 2.5,
-              mb: 3,
-              borderRadius: 2,
-              bgcolor: 'primary.50',
-              borderColor: 'primary.100'
-            }}
+            sx={{ p: 2.5, mb: 3, borderRadius: 2, bgcolor: 'primary.50', borderColor: 'primary.100' }}
           >
             <Stack spacing={2}>
               <Stack
@@ -364,7 +439,6 @@ const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ initialData, on
                 alignItems={{ xs: 'stretch', md: 'center' }}
                 justifyContent='space-between'
               >
-                {/* Time Range Pickers */}
                 <Stack direction='row' spacing={2} alignItems='center'>
                   <TimePicker
                     label='Day Start Time'
@@ -384,7 +458,6 @@ const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ initialData, on
                   />
                 </Stack>
 
-                {/* Default Duration Setting */}
                 <TextField
                   label='Default Duration'
                   size='small'
@@ -398,21 +471,21 @@ const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ initialData, on
                   }}
                 />
 
-                {/* Auto Fill Button */}
-                <Button
-                  variant='contained'
-                  color='primary'
-                  sx={{ textTransform: 'none', height: 40 }}
-                  startIcon={<GetChaarvyIcons fontSize='1.25rem' iconName={ChaarvyIcon.Refresh} />}
-                  onClick={handleAutoGenerateSchedule}
-                >
-                  Auto-Generate Slots
-                </Button>
+                {!fetchedTemplateData && (
+                  <Button
+                    variant='contained'
+                    color='primary'
+                    sx={{ textTransform: 'none', height: 40 }}
+                    startIcon={<GetChaarvyIcons fontSize='1.25rem' iconName={ChaarvyIcon.Refresh} />}
+                    onClick={handleAutoGenerateSchedule}
+                  >
+                    Auto-Generate Slots
+                  </Button>
+                )}
               </Stack>
 
               <Divider />
 
-              {/* Status Bar showing calculated span */}
               <Stack direction='row' spacing={3} justifyContent='space-between'>
                 <Typography variant='caption' color='text.secondary'>
                   Total Operating Window:{' '}
@@ -427,7 +500,6 @@ const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ initialData, on
             </Stack>
           </Paper>
 
-          {/* Slots Table */}
           <TableContainer component={Paper} variant='outlined' sx={{ borderRadius: 2 }}>
             <Table>
               <TableHead sx={{ bgcolor: 'grey.50' }}>
@@ -455,117 +527,26 @@ const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ initialData, on
                   </TableCell>
                 </TableRow>
               </TableHead>
-              <TableBody>
-                {slots.map((row, index) => {
-                  const isInvalid = row.duration <= 0
 
-                  return (
-                    <TableRow
+              {isFetchingTemplate ? (
+                <LoadingSpinner />
+              ) : (
+                <TableBody>
+                  {slots.map((row, index) => (
+                    <SlotRow
                       key={row.id}
-                      sx={{
-                        bgcolor: row.isBreak ? 'action.hover' : 'inherit',
-                        transition: 'background-color 0.2s'
-                      }}
-                    >
-                      {/* Index */}
-                      <TableCell align='center'>
-                        <Typography variant='body2' color='text.secondary' fontWeight='600'>
-                          {index + 1}
-                        </Typography>
-                      </TableCell>
-
-                      {/* Slot Name Input */}
-                      <TableCell>
-                        <TextField
-                          size='small'
-                          fullWidth
-                          value={row.title}
-                          onChange={e => updateSlotField(index, 'title', e.target.value)}
-                          variant='outlined'
-                          placeholder='e.g. Period 1 / Lunch'
-                        />
-                      </TableCell>
-
-                      {/* Start Time Picker */}
-                      <TableCell>
-                        <TimePicker
-                          value={row.startTime}
-                          onChange={val => val && updateSlotField(index, 'startTime', val)}
-                          disabled={index > 0}
-                          slotProps={{ textField: { size: 'small', fullWidth: true } }}
-                        />
-                      </TableCell>
-
-                      {/* Duration Input */}
-                      <TableCell>
-                        <TextField
-                          size='small'
-                          type='number'
-                          fullWidth
-                          value={row.duration}
-                          onChange={e => updateSlotField(index, 'duration', e.target.value)}
-                          error={isInvalid}
-                          helperText={isInvalid ? '> 0 mins' : ''}
-                          InputProps={{
-                            endAdornment: <InputAdornment position='end'>mins</InputAdornment>,
-                            inputProps: { min: 1, step: 5 }
-                          }}
-                        />
-                      </TableCell>
-
-                      {/* End Time Picker */}
-                      <TableCell>
-                        <TimePicker
-                          value={row.endTime}
-                          onChange={val => val && updateSlotField(index, 'endTime', val)}
-                          minTime={row.startTime}
-                          slotProps={{
-                            textField: {
-                              size: 'small',
-                              fullWidth: true,
-                              error: isInvalid
-                            }
-                          }}
-                        />
-                      </TableCell>
-
-                      {/* Break Switch */}
-                      <TableCell align='center'>
-                        <Tooltip title={row.isBreak ? 'Mark as Class' : 'Mark as Break'}>
-                          <FormControlLabel
-                            control={
-                              <Switch
-                                checked={row.isBreak}
-                                onChange={e => updateSlotField(index, 'isBreak', e.target.checked)}
-                                color='warning'
-                                size='small'
-                              />
-                            }
-                            label=''
-                            sx={{ m: 0 }}
-                          />
-                        </Tooltip>
-                      </TableCell>
-
-                      {/* Delete Action */}
-                      <TableCell align='center'>
-                        <IconButton
-                          size='small'
-                          color='error'
-                          onClick={() => handleRemoveSlot(index)}
-                          disabled={slots.length <= 1}
-                        >
-                          <GetChaarvyIcons fontSize='1.25rem' iconName={ChaarvyIcon.DeleteOutline} />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
+                      row={row}
+                      index={index}
+                      onUpdate={updateSlotField}
+                      onRemove={handleRemoveSlot}
+                      canRemove={slots.length > 1}
+                    />
+                  ))}
+                </TableBody>
+              )}
             </Table>
           </TableContainer>
 
-          {/* Action Toolbar */}
           <Stack direction='row' spacing={2} sx={{ mt: 3 }} justifyContent='space-between' alignItems='center'>
             <Stack direction='row' spacing={2}>
               <Button
@@ -592,16 +573,18 @@ const TimeTableTemplater: React.FC<TimeTableTemplaterProps> = ({ initialData, on
                 Total Slots: {slots.length} | Classes: {slots.filter(s => !s.isBreak).length} | Breaks:{' '}
                 {slots.filter(s => s.isBreak).length}
               </Typography>
-              <Button
-                variant='contained'
-                color='success'
-                disabled={hasInvalidSlots}
-                startIcon={<GetChaarvyIcons fontSize='1.25rem' iconName={ChaarvyIcon.Check} />}
-                onClick={handleSave}
-                sx={{ textTransform: 'none' }}
-              >
-                Save Schedule Template
-              </Button>
+              {hasChanges && (
+                <Button
+                  variant='contained'
+                  color='success'
+                  disabled={hasInvalidSlots}
+                  startIcon={<GetChaarvyIcons fontSize='1.25rem' iconName={ChaarvyIcon.Check} />}
+                  onClick={handleSave}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Save Schedule Template
+                </Button>
+              )}
             </Stack>
           </Stack>
         </LocalizationProvider>

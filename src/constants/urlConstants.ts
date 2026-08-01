@@ -117,6 +117,12 @@ export const urlConstants = {
     getPayeesListUrl: `${interRoutePrefix.admin}/get-payees-list`,
     createUpdateSubjectUrl: `${interRoutePrefix.admin}/create-update-subject`,
     updateSubjectStatusUrl: `${interRoutePrefix.admin}/update-subject-status`,
+    createUpdatePeriodTemplateUrl: `${interRoutePrefix.admin}/create-update-period-template`,
+    getPeriodTemplateUrl: `${interRoutePrefix.admin}/get-period-template`,
+    getDayOfWeekUrl: `${interRoutePrefix.admin}/day-of-week`,
+    getFacultyAvailabilityUrl: `${interRoutePrefix.admin}/get-faculty-availability`,
+    createUpdateTimetableUrl: `${interRoutePrefix.admin}/create-update-timetable`,
+    getClassTimetableUrl: `${interRoutePrefix.admin}/get-class-timetable`,
 
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
