@@ -503,6 +503,15 @@ const adminServiceApi = api.injectEndpoints({
           params
         }
       }
+    }),
+    getFacultyTimetable: build.query<FacultyTimetableData[], { faculty_id: string }>({
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.admin.getFacultyTimetableUrl,
+          params
+        }
+      }
     })
   })
 })
@@ -543,5 +552,6 @@ export const {
   useGetDayOfWeekQuery,
   useGetFacultyAvailabilityQuery,
   useCreateUpdateTimetableMutation,
-  useGetClassTimetableQuery
+  useGetClassTimetableQuery,
+  useGetFacultyTimetableQuery
 } = adminServiceApi

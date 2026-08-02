@@ -1,4 +1,4 @@
-import { Tooltip } from '@mui/material'
+import { Tooltip, CircularProgress } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button, { ButtonProps } from '@mui/material/Button'
 import React, { ReactNode } from 'react'
@@ -16,6 +16,7 @@ export interface ChaarvyButtonProps extends ButtonProps {
   rightIcon?: GetChaarvyIconsProps['iconName']
   label?: ReactNode
   hoverEffect?: Record<string, any>
+  loading?: boolean
 }
 
 const ChaarvyButton = ({
@@ -27,6 +28,8 @@ const ChaarvyButton = ({
   rightIcon,
   label,
   children,
+  loading = false,
+  disabled,
   ...props
 }: ChaarvyButtonProps) => {
   const mergedSx = (theme: any) => {
@@ -42,7 +45,10 @@ const ChaarvyButton = ({
 
     // ✅ Handle variant properly
     if (variant === 'contained') {
-      base.color = theme.palette.getContrastText(main)
+      // Force white text if color is 'success', otherwise let MUI calculate the best contrast
+      base.color = '#ffffff'
+
+      // base.color = color === 'info' ? '#ffffff' : theme.palette.getContrastText(main)
 
       if (fillType === 'solid') {
         base.backgroundColor = main
@@ -84,15 +90,16 @@ const ChaarvyButton = ({
   return (
     <Tooltip title={typeof label === 'string' ? label : ''} placement='top'>
       <span style={{ display: 'inline-flex' }}>
-        <Button
-          {...props}
-          variant={variant}
-          color={color ?? 'primary'} // fallback if custom
-          sx={mergedSx}
-        >
+        <Button {...props} disabled={loading || disabled} variant={variant} color={color ?? 'primary'} sx={mergedSx}>
           <ChaarvyFlex className={{ gap: 2 }}>
-            {leftIcon && <GetChaarvyIcons fontSize='1.25rem' iconName={leftIcon} />}
+            {loading ? (
+              <CircularProgress size='1.25rem' color='inherit' />
+            ) : (
+              leftIcon && <GetChaarvyIcons fontSize='1.25rem' iconName={leftIcon} />
+            )}
+
             {(label || children) && <Box>{label ?? children}</Box>}
+
             {rightIcon && <GetChaarvyIcons fontSize='1.25rem' iconName={rightIcon} />}
           </ChaarvyFlex>
         </Button>

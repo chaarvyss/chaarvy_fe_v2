@@ -18,7 +18,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { useLoader } from 'src/@core/context/loaderContext'
 import CardButton from 'src/components/Cards/CardButton'
-import { LoadingSpinner } from 'src/reusable_components'
+import { ChaarvyModal, LoadingSpinner } from 'src/reusable_components'
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
 import { useGetProgramsListQuery } from 'src/store/services/listServices'
 import { useLazyGetProgramSegmentDetailsQuery } from 'src/store/services/viewServices'
@@ -90,6 +90,13 @@ const TimeTableView = () => {
     setSelectedProgram(null)
     setSelectedSegment(null)
     setView(backMap[view])
+  }
+
+  const getSegmentName = (segmentId: string) => {
+    if (!segmentId) return ''
+    const segment = segmentList.find(item => item.id === segmentId)
+
+    return segment ? segment.name : ''
   }
 
   const renderPrograms = () => (
@@ -278,7 +285,15 @@ const TimeTableView = () => {
         >
           {view === ViewState.SEGMENT &&
             (selectedSegment ? (
-              <TimeTableSchedulerBoard programId={selectedProgram} segmentId={selectedSegment} />
+              <ChaarvyModal
+                isOpen={!!selectedSegment}
+                modalSize='col-12 col-md-10 col-xxl-9'
+                onClose={() => setSelectedSegment(null)}
+                title={`${getSegmentName(selectedSegment)} - Timetable Scheduler`}
+                shouldRestrictCloseOnOuterClick={true}
+              >
+                <TimeTableSchedulerBoard programId={selectedProgram} segmentId={selectedSegment} />
+              </ChaarvyModal>
             ) : (
               <Box
                 sx={{

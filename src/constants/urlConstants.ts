@@ -123,6 +123,7 @@ export const urlConstants = {
     getFacultyAvailabilityUrl: `${interRoutePrefix.admin}/get-faculty-availability`,
     createUpdateTimetableUrl: `${interRoutePrefix.admin}/create-update-timetable`,
     getClassTimetableUrl: `${interRoutePrefix.admin}/get-class-timetable`,
+    getFacultyTimetableUrl: `${interRoutePrefix.admin}/get-faculty-timetable`,
 
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,

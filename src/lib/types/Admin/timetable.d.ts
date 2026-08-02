@@ -57,6 +57,15 @@ type ExistingTimetableData = TimetableEntry & {
   faculty_name: string
 }
 
+type FacultyTimetableData = {
+  day_of_week: string
+  period_slot_id: string
+  subject_name: string
+  segment_name: string
+  section_name: string
+  medium_name: string
+}
+
 type TimetableRequest = {
   params: {
     program_id: string
@@ -64,5 +73,5 @@ type TimetableRequest = {
     section_id: string
     medium_id: string
   }
-  body: TimetableEntry[]
+  body: { details: TimetableEntry[]; deleted_ids?: string[] }
 }

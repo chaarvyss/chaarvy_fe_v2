@@ -1,8 +1,22 @@
-import { LoadingButton } from '@mui/lab'
-import { Box, Typography, Popover, Autocomplete, TextField, Card, Button } from '@mui/material'
+import {
+  Box,
+  Typography,
+  Popover,
+  Autocomplete,
+  TextField,
+  Card,
+  Button,
+  useTheme,
+  useMediaQuery,
+  FormControl,
+  Select,
+  MenuItem,
+  IconButton
+} from '@mui/material'
 import React, { useEffect, useState, useMemo, useRef } from 'react'
 
-import { LoadingSpinner } from 'src/reusable_components'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import { ChaarvyButton, LoadingSpinner } from 'src/reusable_components'
 import ChaarvyFlex from 'src/reusable_components/chaarvyFlex'
 import {
   useCreateUpdateTimetableMutation,
@@ -15,6 +29,9 @@ import {
   useGetProgramSectionListQuery,
   useLazyGetProgramSegmentMediumsListByProgramIdQuery
 } from 'src/store/services/programServices'
+import GetChaarvyIcons, { ChaarvyIcon } from 'src/utils/icons'
+
+import FacultyTimeTable from './FacultyTimeTable'
 
 type CellData = {
   id?: string
@@ -28,6 +45,11 @@ interface TimeTableSchedulerBoardProps {
 }
 
 export default function TimeTableSchedulerBoard({ programId: program_id, segmentId }: TimeTableSchedulerBoardProps) {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
+  const { triggerToast } = useToast()
+
   const [data, setData] = useState<Record<string, CellData>>({})
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [activeCell, setActiveCell] = useState<string | null>(null)
@@ -37,6 +59,10 @@ export default function TimeTableSchedulerBoard({ programId: program_id, segment
 
   const [selectedMedium, setSelectedMedium] = useState<string | null>(null)
   const [selectedSection, setSelectedSection] = useState<string>()
+
+  const [viewFacultyTimetable, setViewFacultyTimetable] = useState<string | undefined>(undefined)
+
+  const [deletedIds, setDeletedIds] = useState<string[]>([])
 
   const { data: fetchedTemplateData, isFetching: isFetchingTemplate } = useGetPeriodTemplateQuery()
   const { data: dayOfWeekData, isFetching: isDayOfWeekLoading } = useGetDayOfWeekQuery()
@@ -145,7 +171,6 @@ export default function TimeTableSchedulerBoard({ programId: program_id, segment
         const subjData = facultyAvailabilityData.find((s: any) => s.subject_id === item.subject_id)
         const facData = subjData?.available_faculty?.find((f: any) => f.user_id === item.faculty_id)
 
-        // --- UPDATED: Use item.faculty_name and item.subject_name directly if available
         newData[key] = {
           id: item.id,
           subject: {
@@ -200,6 +225,9 @@ export default function TimeTableSchedulerBoard({ programId: program_id, segment
     if (!activeCell) return
     setData(prev => {
       const newState = { ...prev }
+      if (prev[activeCell]?.id !== undefined) {
+        setDeletedIds(prevDeleted => [...prevDeleted, prev[activeCell]?.id as string])
+      }
       delete newState[activeCell]
 
       return newState
@@ -230,17 +258,16 @@ export default function TimeTableSchedulerBoard({ programId: program_id, segment
           section_id: selectedSection,
           medium_id: selectedMedium
         },
-        body: payload
+        body: { details: payload, deleted_ids: deletedIds }
       })
         .unwrap()
-        .then(response => {
-          console.log('Timetable saved successfully:', response)
+        .then(() => {
+          triggerToast('Timetable saved successfully', { variant: ToastVariants.SUCCESS })
+          setDeletedIds([])
         })
-        .catch(error => {
-          console.error('Error saving timetable:', error)
+        .catch(() => {
+          triggerToast('Error saving timetable', { variant: ToastVariants.ERROR })
         })
-    } else {
-      console.log('Final Timetable Payload:', payload)
     }
   }
 
@@ -314,187 +341,265 @@ export default function TimeTableSchedulerBoard({ programId: program_id, segment
   )
 
   return (
-    <Card sx={{ width: '100%', p: 3 }}>
-      {isGlobalLoading ? (
-        <LoadingSpinner />
-      ) : (
-        <>
-          <ChaarvyFlex className={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-            <ChaarvyFlex className={{ alignItems: 'center', gap: 3 }}>
-              <Typography variant='h6'>Timetable</Typography>
-              <LoadingButton
+    <>
+      <Card sx={{ width: '100%', p: 3 }}>
+        {isGlobalLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <>
+            <ChaarvyFlex
+              className={{
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 2,
+                flexWrap: 'wrap',
+                gap: 2
+              }}
+            >
+              <ChaarvyFlex className={{ gap: 2 }}>
+                {isMediumsLoading ? (
+                  <Typography>Loading sections...</Typography>
+                ) : isMobile ? (
+                  <FormControl size='small' sx={{ minWidth: 140 }}>
+                    <Select
+                      value={selectedSection || ''}
+                      onChange={e => setSelectedSection(e.target.value)}
+                      displayEmpty
+                    >
+                      <MenuItem value='' disabled>
+                        Select Section
+                      </MenuItem>
+                      {(segmentSections ?? [])?.map((each: any) => (
+                        <MenuItem key={each.section_id} value={each.section_id}>
+                          {each.section_name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                ) : (
+                  (segmentSections ?? [])?.map((each: any) => (
+                    <Button
+                      size='small'
+                      key={each.section_id}
+                      onClick={() => setSelectedSection(each.section_id)}
+                      variant={selectedSection === each.section_id ? 'contained' : 'outlined'}
+                    >
+                      {each.section_name}
+                    </Button>
+                  ))
+                )}
+              </ChaarvyFlex>
+
+              <ChaarvyFlex className={{ gap: 2 }}>
+                {isMediumsLoading ? (
+                  <Typography>Loading mediums...</Typography>
+                ) : isMobile ? (
+                  <FormControl size='small' sx={{ minWidth: 140 }}>
+                    <Select value={selectedMedium || ''} onChange={e => setSelectedMedium(e.target.value)} displayEmpty>
+                      <MenuItem value='' disabled>
+                        Select Medium
+                      </MenuItem>
+                      {(mediums ?? [])?.map((each: any) => (
+                        <MenuItem key={each.medium_id} value={each.medium_id}>
+                          {each.medium_name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                ) : (
+                  (mediums ?? [])?.map((each: any) => (
+                    <Button
+                      size='small'
+                      key={each.medium_id}
+                      onClick={() => setSelectedMedium(each.medium_id)}
+                      variant={selectedMedium === each.medium_id ? 'contained' : 'outlined'}
+                    >
+                      {each.medium_name}
+                    </Button>
+                  ))
+                )}
+              </ChaarvyFlex>
+
+              <ChaarvyButton
                 loading={isSavingTimetable}
                 variant='contained'
-                color='primary'
+                color='success'
+                sx={{ textTransform: 'none' }}
+                leftIcon={ChaarvyIcon.Floppy}
                 size='small'
                 onClick={handleSubmit}
               >
-                Save Timetable
-              </LoadingButton>
+                Save
+              </ChaarvyButton>
             </ChaarvyFlex>
 
-            <ChaarvyFlex className={{ gap: 2 }}>
-              {isMediumsLoading ? (
-                <Typography>Loading sections...</Typography>
-              ) : (
-                (segmentSections ?? [])?.map((each: any) => (
-                  <Button
-                    size='small'
-                    key={each.section_id}
-                    onClick={() => setSelectedSection(each.section_id)}
-                    variant={selectedSection === each.section_id ? 'contained' : 'outlined'}
-                  >
-                    {each.section_name}
-                  </Button>
-                ))
-              )}
-            </ChaarvyFlex>
-            <ChaarvyFlex className={{ gap: 2 }}>
-              {isMediumsLoading ? (
-                <Typography>Loading mediums</Typography>
-              ) : (
-                (mediums ?? [])?.map((each: any) => (
-                  <Button
-                    size='small'
-                    key={each.medium_id}
-                    onClick={() => setSelectedMedium(each.medium_id)}
-                    variant={selectedMedium === each.medium_id ? 'contained' : 'outlined'}
-                  >
-                    {each.medium_name}
-                  </Button>
-                ))
-              )}
-            </ChaarvyFlex>
-          </ChaarvyFlex>
+            <Box
+              display='grid'
+              gridTemplateColumns={`80px ${timeSlots.map((slot: any) => (slot.isBreak ? '20px' : '0.5fr')).join(' ')}`}
+              gap='2px'
+              overflow='auto'
+            >
+              <Box />
+              {timeSlots.map((slot: any) => (
+                <Box key={slot.id} textAlign='center' p={1} bgcolor='#f5f5f5'>
+                  {slot.isBreak ? (
+                    ''
+                  ) : (
+                    <>
+                      <Typography variant='subtitle2'>{slot.title}</Typography>
+                      <Typography variant='caption'>
+                        {slot.start_time} - {slot.end_time}
+                      </Typography>
+                    </>
+                  )}
+                </Box>
+              ))}
 
-          <Box
-            display='grid'
-            gridTemplateColumns={`80px ${timeSlots.map((slot: any) => (slot.isBreak ? '20px' : '0.5fr')).join(' ')}`}
-            gap='2px'
-            overflow='auto'
-          >
-            <Box />
-            {timeSlots.map((slot: any) => (
-              <Box key={slot.id} textAlign='center' p={1} bgcolor='#f5f5f5'>
-                {slot.isBreak ? (
-                  ''
-                ) : (
-                  <>
-                    <Typography variant='subtitle2'>{slot.title}</Typography>
-                    <Typography variant='caption'>
-                      {slot.start_time} - {slot.end_time}
-                    </Typography>
-                  </>
-                )}
-              </Box>
-            ))}
+              {(dayOfWeekData ?? []).map((day: any) => (
+                <React.Fragment key={day.id}>
+                  <ChaarvyFlex className={{ direction: 'column' }}>{day.day_name.slice(0, 3)}</ChaarvyFlex>
 
-            {(dayOfWeekData ?? []).map((day: any) => (
-              <React.Fragment key={day.id}>
-                <ChaarvyFlex className={{ direction: 'column' }}>{day.day_name.slice(0, 3)}</ChaarvyFlex>
+                  {timeSlots.map((slot: any) => {
+                    const key = `${day.id}_${slot.id}`
+                    const cell = data[key]
 
-                {timeSlots.map((slot: any) => {
-                  const key = `${day.id}_${slot.id}`
-                  const cell = data[key]
+                    return (
+                      <Box
+                        key={key}
+                        onClick={e => !slot.isBreak && handleCellClick(e, key)}
+                        sx={{
+                          minHeight: 50,
+                          border: '1px solid #ddd',
+                          p: 1,
+                          minWidth: slot.isBreak ? '20px' : '100px',
+                          width: slot.isBreak ? '20px' : 'auto',
+                          cursor: slot.isBreak ? 'not-allowed' : 'pointer',
+                          bgcolor: slot.isBreak ? '#eee' : '#fff'
+                        }}
+                      >
+                        {cell?.subject && (
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              gap: 0.5
+                            }}
+                          >
+                            <Typography fontSize={13} fontWeight={600} textAlign='center'>
+                              {cell.subject.name}
+                            </Typography>
+                            <Typography fontSize={12} textAlign='center' color='text.secondary'>
+                              {cell.faculty?.name}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
+                    )
+                  })}
+                </React.Fragment>
+              ))}
+            </Box>
 
-                  return (
-                    <Box
-                      key={key}
-                      onClick={e => !slot.isBreak && handleCellClick(e, key)}
-                      sx={{
-                        minHeight: 50,
-                        border: '1px solid #ddd',
-                        p: 1,
-                        minWidth: slot.isBreak ? '20px' : '100px',
-                        width: slot.isBreak ? '20px' : 'auto',
-                        cursor: slot.isBreak ? 'not-allowed' : 'pointer',
-                        bgcolor: slot.isBreak ? '#eee' : '#fff'
-                      }}
-                    >
-                      {cell?.subject && (
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            gap: 0.5
-                          }}
-                        >
-                          <Typography fontSize={13} fontWeight={600} textAlign='center'>
-                            {cell.subject.name}
-                          </Typography>
-                          <Typography fontSize={12} textAlign='center' color='text.secondary'>
-                            {cell.faculty?.name}
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  )
-                })}
-              </React.Fragment>
-            ))}
-          </Box>
-
-          <Popover
-            open={open}
-            anchorEl={anchorEl}
-            onClose={handleClose}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-          >
-            <Box p={2} width={250}>
-              <Autocomplete
-                options={subjectOptions}
-                getOptionLabel={opt => opt.name}
-                value={selectedSubject}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                onChange={(_, val) => {
-                  setSelectedSubject(val)
-                  setSelectedFaculty(null)
-                }}
-                renderInput={params => <TextField {...params} label='Subject' size='small' />}
-              />
-
-              <Box mt={2}>
+            <Popover
+              open={open}
+              anchorEl={anchorEl}
+              onClose={handleClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+            >
+              <Box p={2} width={250}>
                 <Autocomplete
-                  options={facultyOptions}
+                  options={subjectOptions}
                   getOptionLabel={opt => opt.name}
-                  value={selectedFaculty}
-                  disabled={!selectedSubject}
+                  value={selectedSubject}
                   isOptionEqualToValue={(option, value) => option.id === value.id}
                   onChange={(_, val) => {
-                    setSelectedFaculty(val)
-                    handleSave(selectedSubject, val)
+                    setSelectedSubject(val)
+                    setSelectedFaculty(null)
                   }}
-                  renderInput={params => (
-                    <TextField
-                      {...params}
-                      label={facultyOptions.length === 0 && selectedSubject ? 'No faculty available' : 'Faculty'}
-                      size='small'
-                    />
-                  )}
+                  renderInput={params => <TextField {...params} label='Subject' size='small' />}
                 />
-              </Box>
 
-              {data[activeCell || ''] && (
-                <Button
-                  fullWidth
-                  variant='outlined'
-                  color='error'
-                  size='small'
-                  sx={{ mt: 2 }}
-                  onClick={handleClearCell}
-                >
-                  Clear Slot
-                </Button>
-              )}
-            </Box>
-          </Popover>
-        </>
+                <Box mt={2}>
+                  <Autocomplete
+                    options={facultyOptions}
+                    getOptionLabel={opt => opt.name}
+                    value={selectedFaculty}
+                    disabled={!selectedSubject}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    onChange={(_, val) => {
+                      setSelectedFaculty(val)
+                      handleSave(selectedSubject, val)
+                    }}
+                    renderInput={params => (
+                      <TextField
+                        {...params}
+                        label={facultyOptions.length === 0 && selectedSubject ? 'No faculty available' : 'Faculty'}
+                        size='small'
+                      />
+                    )}
+                    renderOption={(props, option) => (
+                      <Box
+                        component='li'
+                        {...props}
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between !important',
+                          alignItems: 'center',
+                          width: '100%'
+                        }}
+                      >
+                        <Typography>{option.name}</Typography>
+
+                        <IconButton
+                          size='small'
+                          onClick={e => {
+                            e.stopPropagation()
+                            e.preventDefault()
+                            setViewFacultyTimetable(option.id)
+                          }}
+                          onMouseDown={e => {
+                            e.stopPropagation()
+                            e.preventDefault()
+                          }}
+                        >
+                          <GetChaarvyIcons fontSize='1.25rem' iconName={ChaarvyIcon.Information} />
+                        </IconButton>
+                      </Box>
+                    )}
+                  />
+                </Box>
+
+                {data[activeCell || ''] && (
+                  <Button
+                    fullWidth
+                    variant='outlined'
+                    color='error'
+                    size='small'
+                    sx={{ mt: 2 }}
+                    onClick={handleClearCell}
+                  >
+                    Clear Slot
+                  </Button>
+                )}
+              </Box>
+            </Popover>
+          </>
+        )}
+      </Card>
+
+      {timeSlots && dayOfWeekData && viewFacultyTimetable && (
+        <FacultyTimeTable
+          timeSlots={timeSlots}
+          dayOfWeekData={dayOfWeekData}
+          onClose={() => setViewFacultyTimetable(undefined)}
+          facultyId={viewFacultyTimetable}
+        />
       )}
-    </Card>
+    </>
   )
 }
