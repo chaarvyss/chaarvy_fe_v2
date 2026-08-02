@@ -11,7 +11,8 @@ import {
   FormControl,
   Select,
   MenuItem,
-  IconButton
+  IconButton,
+  Tooltip
 } from '@mui/material'
 import React, { useEffect, useState, useMemo, useRef } from 'react'
 
@@ -555,20 +556,22 @@ export default function TimeTableSchedulerBoard({ programId: program_id, segment
                       >
                         <Typography>{option.name}</Typography>
 
-                        <IconButton
-                          size='small'
-                          onClick={e => {
-                            e.stopPropagation()
-                            e.preventDefault()
-                            setViewFacultyTimetable(option.id)
-                          }}
-                          onMouseDown={e => {
-                            e.stopPropagation()
-                            e.preventDefault()
-                          }}
-                        >
-                          <GetChaarvyIcons fontSize='1.25rem' iconName={ChaarvyIcon.Information} />
-                        </IconButton>
+                        <Tooltip title='View Faculty Timetable' placement='top'>
+                          <IconButton
+                            size='small'
+                            onClick={e => {
+                              e.stopPropagation()
+                              e.preventDefault()
+                              setViewFacultyTimetable(option.id)
+                            }}
+                            onMouseDown={e => {
+                              e.stopPropagation()
+                              e.preventDefault()
+                            }}
+                          >
+                            <GetChaarvyIcons fontSize='1.25rem' iconName={ChaarvyIcon.Information} />
+                          </IconButton>
+                        </Tooltip>
                       </Box>
                     )}
                   />

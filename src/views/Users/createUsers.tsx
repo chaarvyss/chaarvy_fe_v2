@@ -1,4 +1,5 @@
-import { Button, SelectChangeEvent } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { SelectChangeEvent } from '@mui/material'
 import React, { ChangeEvent, useState } from 'react'
 
 import { Box } from '@muiElements'
@@ -13,7 +14,7 @@ import { UserProfile } from 'src/store/services/viewServices'
 
 const CreateUser = () => {
   const [newDetails, setNewDetails] = useState<UserProfile>()
-  const [updateUserProfile] = useCreateUpdateUserMutation()
+  const [updateUserProfile, { isLoading: isUpdatingUser }] = useCreateUpdateUserMutation()
   const { triggerToast } = useToast()
 
   const { closeDrawer } = useSideDrawer()
@@ -109,9 +110,9 @@ const CreateUser = () => {
     <Box>
       <FormGenerator fields={fields} mandatoryFields={['name', 'username', 'email', 'Role']} columnSize={{ xs: 12 }} />
       <Box mt={4}>
-        <Button variant='contained' onClick={handleSubmit}>
+        <LoadingButton loading={isUpdatingUser} variant='contained' onClick={handleSubmit}>
           Create User
-        </Button>
+        </LoadingButton>
       </Box>
     </Box>
   )
