@@ -1,5 +1,3 @@
-const Attendence = () => {
-  return <div>Attendence</div>
-}
+import StudentAttendence from 'src/views/Academics/Attendence'
 
-export default Attendence
+export default StudentAttendence

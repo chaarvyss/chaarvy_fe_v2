@@ -137,7 +137,7 @@ const navigation = (): VerticalNavItemsType => {
           icon: ChaarvyIcon.AccountCreditCardOutline
         }
       ]
-    }
+    },
 
     // {
     //   title: 'Transport Management',
@@ -163,18 +163,18 @@ const navigation = (): VerticalNavItemsType => {
     //     }
     //   ]
     // },
-    // {
-    //   title: 'Faculty Corner',
-    //   icon: 'AccountTie' as const,
-    //   children: [
-    //     {
-    //       key: PermissionLabels.nav.ATTENDENCE_REGISTER,
-    //       title: 'Attendence Register',
-    //       path: PagePath.ATTENDENCE_REGISTER,
-    //       icon: 'AccountCheck' as const
-    //     }
-    //   ]
-    // }
+    {
+      title: 'Faculty Corner',
+      icon: 'AccountTie' as const,
+      children: [
+        {
+          key: PermissionLabels.nav.attendenceRegister,
+          title: 'Attendence Register',
+          path: PagePath.ATTENDENCE_REGISTER,
+          icon: ChaarvyIcon.BullseyeArrow
+        }
+      ]
+    }
   ]
 
   const master_navs = [

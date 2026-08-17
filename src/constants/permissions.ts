@@ -12,6 +12,7 @@ export const Permissions = {
 
 export const PermissionLabels = {
   nav: {
+    attendenceRegister: 'nav:attendence_register',
     dashboard: 'nav:dashboard',
     collegeProfile: 'nav:college_profile',
     users: 'nav:users',

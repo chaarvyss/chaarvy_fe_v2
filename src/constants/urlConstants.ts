@@ -10,6 +10,7 @@ const commonRoutePrefix = {
 
 const interRoutePrefix = {
   admin: `${interPrefix}/admin`,
+  attendence: `${interPrefix}/attendence`,
   admisions: `${interPrefix}/admissions`,
   auth: `${interPrefix}/auth`,
   calender: `${interPrefix}/google-calender`,
@@ -153,6 +154,9 @@ export const urlConstants = {
     delete: {
       programBook: `${interRoutePrefix.admin}/delete-program-book`
     }
+  },
+  attendence: {
+    recordStudentAttendenceUrl: `${interRoutePrefix.attendence}/record-student-attendence`
   },
   admissions: {
     createAdmission: `${interRoutePrefix.admisions}/create-update-admission`,

@@ -34,7 +34,6 @@ const ChaarvyButton = ({
 }: ChaarvyButtonProps) => {
   const mergedSx = (theme: any) => {
     const palette = theme.palette[color] || theme.palette.primary
-
     const main = palette.main
     const light = palette.light ?? main
     const dark = palette.dark ?? main
@@ -43,39 +42,54 @@ const ChaarvyButton = ({
       textTransform: 'none'
     }
 
-    // ✅ Handle variant properly
-    if (variant === 'contained') {
-      // Force white text if color is 'success', otherwise let MUI calculate the best contrast
-      base.color = '#ffffff'
+    if (disabled) {
+      // ✅ Enforce disabled state and prevent hover events
+      base.color = theme.palette.action.disabled
+      base.pointerEvents = 'none'
 
-      // base.color = color === 'info' ? '#ffffff' : theme.palette.getContrastText(main)
+      // Handle disabled visuals properly per variant
+      if (variant === 'contained') {
+        base.backgroundColor = theme.palette.action.disabledBackground
+        base.background = 'none' // Clears out any gradient that might linger
+      } else if (variant === 'outlined') {
+        base.borderColor = theme.palette.action.disabledBackground
+        base.backgroundColor = 'transparent'
+      } else if (variant === 'text') {
+        base.backgroundColor = 'transparent'
+      }
+    } else {
+      // ✅ Handle active states only when NOT disabled
+      if (variant === 'contained') {
+        // Force white text if color is 'success', otherwise let MUI calculate the best contrast
+        base.color = '#ffffff'
 
-      if (fillType === 'solid') {
-        base.backgroundColor = main
-        base['&:hover'] = { backgroundColor: dark }
-      } else {
-        base.background = `linear-gradient(to bottom, ${light}, ${dark})`
-        base['&:hover'] = {
-          background: `linear-gradient(to bottom, ${main}, ${dark})`
+        if (fillType === 'solid') {
+          base.backgroundColor = main
+          base['&:hover'] = { backgroundColor: dark }
+        } else {
+          base.background = `linear-gradient(to bottom, ${light}, ${dark})`
+          base['&:hover'] = {
+            background: `linear-gradient(to bottom, ${main}, ${dark})`
+          }
         }
       }
-    }
 
-    if (variant === 'outlined') {
-      base.borderColor = main
-      base.color = main
+      if (variant === 'outlined') {
+        base.borderColor = main
+        base.color = main
 
-      base['&:hover'] = {
-        borderColor: dark,
-        backgroundColor: `${main}10`
+        base['&:hover'] = {
+          borderColor: dark,
+          backgroundColor: `${main}10`
+        }
       }
-    }
 
-    if (variant === 'text') {
-      base.color = main
+      if (variant === 'text') {
+        base.color = main
 
-      base['&:hover'] = {
-        backgroundColor: `${main}10`
+        base['&:hover'] = {
+          backgroundColor: `${main}10`
+        }
       }
     }
 
