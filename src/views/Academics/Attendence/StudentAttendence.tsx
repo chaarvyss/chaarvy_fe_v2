@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
 
 import { Box, Card, Typography, Grid, Divider } from '@muiElements' // Ensure Grid, Button, Divider are exported from your elements index
-import { ChaarvyButton } from 'src/reusable_components'
+import { ChaarvyButton, LoadingSpinner } from 'src/reusable_components'
+import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
 import ChaarvySelect from 'src/reusable_components/chaarvySelect'
+import { useGetStudentsListQuery } from 'src/store/services/attendenceServices'
 import { useGetProgramsListQuery } from 'src/store/services/listServices'
 import { useGetProgramSegmentMediumsListByProgramIdQuery } from 'src/store/services/programServices'
 
@@ -29,6 +31,22 @@ const StudentAttendence = () => {
     { program_id: studentSelection.program || '', only_active: true },
     { skip: !studentSelection.program }
   )
+
+  const { data: studentsListResponse, isFetching: isFetchingStudents } = useGetStudentsListQuery(
+    {
+      program_id: studentSelection.program || '',
+      segment_id: studentSelection.segment || '',
+      medium_id: studentSelection.medium || '',
+      section_id: studentSelection.section || '',
+      need_photo: true
+    },
+    {
+      skip:
+        !studentSelection.program || !studentSelection.segment || !studentSelection.medium || !studentSelection.section
+    }
+  )
+
+  console.log(studentsListResponse, 'studentsListResponse')
 
   const segmentOptions = useMemo(
     () =>
@@ -116,79 +134,114 @@ const StudentAttendence = () => {
     [studentSelection, programsList, segmentOptions, mediumOptions, sectionOptions]
   )
 
-  // Validation to enable/disable buttons
   const isSelectionComplete = Boolean(
     studentSelection.program && studentSelection.segment && studentSelection.medium && studentSelection.section
   )
 
   return (
-    <Card sx={{ p: 3, boxShadow: 2, borderRadius: 2 }}>
-      {/* Header Section */}
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: { sm: 'row' },
-          gap: 2,
-          mb: 2,
-          justifyContent: 'space-between',
-          alignItems: { xs: 'flex-start', sm: 'center' }
-        }}
-      >
-        <Typography variant='h6' fontWeight={600} color='text.primary'>
-          Attendance
-        </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: { xs: 'flex-start', sm: 'flex-end' } }}>
-          <Typography variant='body2' color='text.secondary' fontWeight={500}>
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+    <>
+      <Card sx={{ p: 3, boxShadow: 2, borderRadius: 2 }}>
+        {/* Header Section */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { sm: 'row' },
+            gap: 2,
+            mb: 2,
+            justifyContent: 'space-between',
+            alignItems: { xs: 'flex-start', sm: 'center' }
+          }}
+        >
+          <Typography variant='h6' fontWeight={600} color='text.primary'>
+            Attendance
           </Typography>
-          <Typography variant='body2' color='text.secondary'>
-            Period: {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: { xs: 'flex-start', sm: 'flex-end' } }}>
+            <Typography variant='body2' color='text.secondary' fontWeight={500}>
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+            </Typography>
+            <Typography variant='body2' color='text.secondary'>
+              Period: {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+            </Typography>
+          </Box>
         </Box>
-      </Box>
 
-      <Divider sx={{ mb: 3 }} />
+        <Divider sx={{ mb: 3 }} />
 
-      {/* Filters Section (Responsive Grid) */}
-      <Grid container spacing={2}>
-        {studentSelectConfig.map(config => (
-          <Grid item xs={12} sm={6} md={3} key={config.name}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-              <ChaarvySelect
-                options={config.options}
-                placeholder={config.placeholder}
-                value={config.value || ''}
-                onChange={config.onChange}
-                label={config.label}
-                sx={{ width: '100%' }}
-              />
-            </Box>
-          </Grid>
-        ))}
-      </Grid>
+        {/* Filters Section (Responsive Grid) */}
+        <Grid container spacing={2}>
+          {studentSelectConfig.map(config => (
+            <Grid item xs={12} sm={6} md={3} key={config.name}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                <ChaarvySelect
+                  options={config.options}
+                  placeholder={config.placeholder}
+                  value={config.value || ''}
+                  onChange={config.onChange}
+                  label={config.label}
+                  sx={{ width: '100%' }}
+                />
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
 
-      {/* Actions Section */}
-      <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', gap: 2, mt: 4 }}>
-        <ChaarvyButton
-          variant='outlined'
-          color='primary'
-          size='small'
-          disabled={!isSelectionComplete}
-          onClick={() => console.log('Fetching students for:', studentSelection)}
-        >
-          Fetch Students
-        </ChaarvyButton>
-        <ChaarvyButton
-          variant='contained'
-          size='small'
-          color='primary'
-          disabled={!isSelectionComplete}
-          onClick={() => console.log('Confirming attendance for:', studentSelection)}
-        >
-          Confirm Attendance
-        </ChaarvyButton>
-      </Box>
-    </Card>
+        {/* Actions Section */}
+        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', gap: 2, mt: 4 }}>
+          <ChaarvyButton
+            variant='outlined'
+            color='primary'
+            size='small'
+            disabled={!isSelectionComplete}
+            onClick={() => console.log('Fetching students for:', studentSelection)}
+          >
+            Fetch Students
+          </ChaarvyButton>
+          <ChaarvyButton
+            variant='contained'
+            size='small'
+            color='primary'
+            disabled={!isSelectionComplete}
+            onClick={() => console.log('Confirming attendance for:', studentSelection)}
+          >
+            Confirm Attendance
+          </ChaarvyButton>
+        </Box>
+      </Card>
+      {isFetchingStudents && <LoadingSpinner />}
+      {!isFetchingStudents && studentsListResponse && (
+        <Box sx={{ mt: 4 }}>
+          {studentsListResponse.length > 0 ? (
+            <Card sx={{ p: 3, boxShadow: 2, borderRadius: 2 }}>
+              <Typography variant='h6' fontWeight={600} color='text.primary' sx={{ mb: 2 }}>
+                Students List
+              </Typography>
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                {studentsListResponse.map(student => (
+                  <Grid item xs={6} md={3} key={student.student_course_enrollment_id}>
+                    <Card key={student.student_course_enrollment_id} sx={{ mb: 1, p: 1, pt: 5 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                        <ChaarvyAvatar
+                          src={student.image_url || '/default-profile.png'}
+                          alt={student.student_name}
+                          sx={{ height: '100px', width: '100px' }}
+                        />
+                        <Typography variant='body1' color='text.primary'>
+                          {student.student_name}
+                        </Typography>
+                      </Box>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Card>
+          ) : (
+            <Typography variant='body1' color='text.secondary'>
+              No students found for the selected criteria.
+            </Typography>
+          )}
+        </Box>
+      )}
+    </>
   )
 }
 
