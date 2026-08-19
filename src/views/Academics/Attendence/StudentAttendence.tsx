@@ -1,12 +1,20 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import DatePicker from 'react-datepicker'
 
 import { Box, Card, Typography, Grid, Divider } from '@muiElements' // Ensure Grid, Button, Divider are exported from your elements index
 import { ChaarvyButton, LoadingSpinner } from 'src/reusable_components'
 import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
 import ChaarvySelect from 'src/reusable_components/chaarvySelect'
-import { useGetStudentsListQuery } from 'src/store/services/attendenceServices'
+import {
+  useGetAttendenceByLogIdQuery,
+  useGetCurrentClassDetailsQuery,
+  useGetStudentsListQuery,
+  useRecordStudentAttendenceMutation
+} from 'src/store/services/attendenceServices'
 import { useGetProgramsListQuery } from 'src/store/services/listServices'
 import { useGetProgramSegmentMediumsListByProgramIdQuery } from 'src/store/services/programServices'
+
+import AttendenceCompletionProgress from './AttendenceCompletionProgress'
 
 interface StudentSelectionState {
   program: string | null
@@ -23,15 +31,22 @@ const defaultState: StudentSelectionState = {
 }
 
 const StudentAttendence = () => {
+  const [lastSavedTime, setLastSavedTime] = useState<Date>()
+  const [isFinalized, setIsFinalized] = useState<number>(0)
   const [studentSelection, setStudentSelection] = useState<StudentSelectionState>(defaultState)
-
+  const [attendenceData, setAttendenceData] = useState<StudentAttendenceState[]>([])
+  const [currentPeriodSlotId, setCurrentPeriodSlotId] = useState<string>()
+  const [currentDate, setCurrentDate] = useState<string>(new Date().toISOString().split('T')[0]) // Current date in YYYY-MM-DD format
+  const [attendanceLogId, setAttendanceLogId] = useState<string | null>(null)
   const { data: programsList } = useGetProgramsListQuery(true)
+  const { data: currentClassDetails } = useGetCurrentClassDetailsQuery()
+
+  const [saveAttendanceMutation] = useRecordStudentAttendenceMutation()
 
   const { data: segmentMediumResponse } = useGetProgramSegmentMediumsListByProgramIdQuery(
     { program_id: studentSelection.program || '', only_active: true },
     { skip: !studentSelection.program }
   )
-
   const { data: studentsListResponse, isFetching: isFetchingStudents } = useGetStudentsListQuery(
     {
       program_id: studentSelection.program || '',
@@ -46,7 +61,76 @@ const StudentAttendence = () => {
     }
   )
 
-  console.log(studentsListResponse, 'studentsListResponse')
+  const { data: attendenceByLogIdResponse } = useGetAttendenceByLogIdQuery(attendanceLogId || '', {
+    skip: !attendanceLogId
+  })
+
+  useEffect(() => {
+    if (attendenceByLogIdResponse) {
+      const { attendance, is_final } = attendenceByLogIdResponse
+      setAttendenceData(attendance)
+      setIsFinalized(is_final)
+    }
+  }, [attendenceByLogIdResponse])
+
+  useEffect(() => {
+    if (currentClassDetails) {
+      const { class_details, current_period_id, log_id } = currentClassDetails
+      setCurrentPeriodSlotId(current_period_id)
+      setAttendanceLogId(log_id || null)
+      if (class_details) {
+        setStudentSelection({
+          program: class_details.program_id,
+          segment: class_details.segment_id,
+          medium: class_details.medium_id,
+          section: class_details.section_id
+        })
+      }
+    }
+  }, [currentClassDetails])
+
+  const saveAttendance = () => {
+    if (Object.values(studentSelection).some(value => value === null)) {
+      console.error('Please select all required fields before saving attendance.')
+
+      return
+    }
+
+    if (!currentPeriodSlotId) {
+      console.error('Current period slot ID is not available.')
+
+      return
+    }
+    const attendancePayload: RecordStudentAttendenceRequest = {
+      program_id: studentSelection.program || '',
+      segment_id: studentSelection.segment || '',
+      medium_id: studentSelection.medium || '',
+      section_id: studentSelection.section || '',
+      period_slot_id: currentPeriodSlotId,
+      date: currentDate,
+      attendance_records: attendenceData
+    }
+
+    saveAttendanceMutation(attendancePayload)
+      .unwrap()
+      .then(response => {
+        console.log('Attendance saved successfully:', response)
+        setLastSavedTime(new Date())
+      })
+      .catch(error => {
+        console.error('Error saving attendance:', error)
+      })
+  }
+
+  useEffect(() => {
+    if (studentsListResponse) {
+      const initialAttendanceData = studentsListResponse.map(student => ({
+        student_course_enrollment_id: student.student_course_enrollment_id,
+        status: 2
+      }))
+      setAttendenceData(initialAttendanceData)
+    }
+  }, [studentsListResponse])
 
   const segmentOptions = useMemo(
     () =>
@@ -138,6 +222,31 @@ const StudentAttendence = () => {
     studentSelection.program && studentSelection.segment && studentSelection.medium && studentSelection.section
   )
 
+  const onCardClick = (enroll_id: string) => {
+    setAttendenceData(prevData =>
+      prevData.map(item =>
+        item.student_course_enrollment_id === enroll_id ? { ...item, status: item.status === 1 ? 0 : 1 } : item
+      )
+    )
+  }
+
+  const getBgColor = (enroll_id: string) => {
+    const status = attendenceData.find(item => item.student_course_enrollment_id === enroll_id)?.status
+
+    switch (status) {
+      case 0:
+        return 'linear-gradient(to top,  #ffedec 5%, #ffc2b8 95%)' // Red for absent
+      case 1:
+        return 'linear-gradient(to top,  #e1fee8 5%, #caffc6 95%)' // Green for present
+      default:
+        return 'white'
+    }
+  }
+
+  const finalizeAttendance = () => {
+    console.log('Finalizing attendance...')
+  }
+
   return (
     <>
       <Card sx={{ p: 3, boxShadow: 2, borderRadius: 2 }}>
@@ -155,10 +264,35 @@ const StudentAttendence = () => {
           <Typography variant='h6' fontWeight={600} color='text.primary'>
             Attendance
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: { xs: 'flex-start', sm: 'flex-end' } }}>
-            <Typography variant='body2' color='text.secondary' fontWeight={500}>
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-            </Typography>
+          <Box
+            id='attendance-date-picker'
+            sx={{ display: 'flex', flexDirection: 'column', alignItems: { xs: 'flex-start', sm: 'flex-end' } }}
+          >
+            <Box>
+              <DatePicker
+                selected={new Date(currentDate)}
+                popperPlacement='bottom-end'
+                onChange={(date: Date | null) => {
+                  if (date) setCurrentDate(date.toISOString().split('T')[0])
+                }}
+                portalId='attendance-date-picker'
+                customInput={
+                  <Typography
+                    onClick={() => console.log(currentDate)}
+                    variant='body2'
+                    color='text.secondary'
+                    fontWeight={500}
+                    sx={{ cursor: 'pointer' }}
+                  >
+                    {new Date(currentDate).toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </Typography>
+                }
+              />
+            </Box>
             <Typography variant='body2' color='text.secondary'>
               Period: {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
             </Typography>
@@ -188,37 +322,55 @@ const StudentAttendence = () => {
         {/* Actions Section */}
         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', gap: 2, mt: 4 }}>
           <ChaarvyButton
-            variant='outlined'
-            color='primary'
+            variant='contained'
             size='small'
-            disabled={!isSelectionComplete}
-            onClick={() => console.log('Fetching students for:', studentSelection)}
+            color='primary'
+            disabled={!isSelectionComplete || isFinalized === 1}
+            onClick={saveAttendance}
           >
-            Fetch Students
+            Save
           </ChaarvyButton>
           <ChaarvyButton
             variant='contained'
             size='small'
-            color='primary'
-            disabled={!isSelectionComplete}
-            onClick={() => console.log('Confirming attendance for:', studentSelection)}
+            color='success'
+            disabled={!isSelectionComplete || isFinalized === 1}
+            onClick={finalizeAttendance}
           >
-            Confirm Attendance
+            Finalize
           </ChaarvyButton>
         </Box>
+        {lastSavedTime && (
+          <Typography variant='caption' color='text.secondary' sx={{ mt: 1 }}>
+            Last saved at: {lastSavedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </Typography>
+        )}
       </Card>
       {isFetchingStudents && <LoadingSpinner />}
       {!isFetchingStudents && studentsListResponse && (
         <Box sx={{ mt: 4 }}>
           {studentsListResponse.length > 0 ? (
             <Card sx={{ p: 3, boxShadow: 2, borderRadius: 2 }}>
-              <Typography variant='h6' fontWeight={600} color='text.primary' sx={{ mb: 2 }}>
-                Students List
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant='h6' fontWeight={600} color='text.primary' sx={{ mb: 2 }}>
+                  Students List
+                </Typography>
+                <AttendenceCompletionProgress studentsListResponse={attendenceData} />
+              </Box>
               <Grid container spacing={2} sx={{ mb: 2 }}>
                 {studentsListResponse.map(student => (
                   <Grid item xs={6} md={3} key={student.student_course_enrollment_id}>
-                    <Card key={student.student_course_enrollment_id} sx={{ mb: 1, p: 1, pt: 5 }}>
+                    <Card
+                      key={student.student_course_enrollment_id}
+                      onClick={() => onCardClick(student.student_course_enrollment_id)}
+                      sx={{
+                        mb: 1,
+                        p: 1,
+                        pt: 5,
+                        cursor: 'pointer',
+                        backgroundImage: getBgColor(student.student_course_enrollment_id)
+                      }}
+                    >
                       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                         <ChaarvyAvatar
                           src={student.image_url || '/default-profile.png'}

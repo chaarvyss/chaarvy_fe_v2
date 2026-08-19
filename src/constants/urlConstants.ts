@@ -157,7 +157,9 @@ export const urlConstants = {
   },
   attendence: {
     recordStudentAttendenceUrl: `${interRoutePrefix.attendence}/record-student-attendence`,
-    getStudentsListUrl: `${interRoutePrefix.attendence}/get-students`
+    getStudentsListUrl: `${interRoutePrefix.attendence}/get-students`,
+    getCurrentClassDetailsUrl: `${interRoutePrefix.attendence}/get-current-class-details`,
+    getStudentAttendenceByLogIdUrl: `${interRoutePrefix.attendence}/get-student-attendence-by-log-id`
   },
   admissions: {
     createAdmission: `${interRoutePrefix.admisions}/create-update-admission`,

@@ -11,3 +11,46 @@ type GetActiveStudentsListResponse = {
   student_name: string
   image_url: string | null
 }
+
+type StudentAttendenceState = {
+  student_attendance_id?: string
+  student_course_enrollment_id: string
+  status: number
+}
+
+type GetAttendenceByLogIdRequest = {
+  attendance_log_id: string
+}
+
+type ClassDetails = {
+  program_id: string
+  segment_id: string
+  medium_id: string
+  section_id: string
+  subject_id: string
+}
+
+type GetAttendenceByLogIdResponse = {
+  attendance: StudentAttendenceState[]
+  class_details: ClassDetails
+  period_slot_id: string
+  date: string
+  is_final: number
+}
+
+type RecordStudentAttendenceRequest = {
+  attendance_log_id?: string
+  program_id: string
+  segment_id: string
+  medium_id: string
+  section_id: string
+  period_slot_id: string
+  date: string
+  attendance_records: StudentAttendenceState[]
+}
+
+type CurrentClassDetailsResponse = {
+  current_period_id: string
+  class_details: ClassDetails
+  log_id?: string
+}

@@ -6,10 +6,10 @@ import api from './api'
 
 const attendenceServiceApi = api.injectEndpoints({
   endpoints: build => ({
-    recordStudentAttendence: build.mutation<any, any>({
+    recordStudentAttendence: build.mutation<string, RecordStudentAttendenceRequest>({
       query: body => {
         return {
-          method: 'POST',
+          method: HttpRequestMethods.POST,
           url: urlConstants.attendence.recordStudentAttendenceUrl,
           body: { ...body }
         }
@@ -23,8 +23,30 @@ const attendenceServiceApi = api.injectEndpoints({
           params: { ...params }
         }
       }
+    }),
+    getCurrentClassDetails: build.query<CurrentClassDetailsResponse, void>({
+      query: () => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.attendence.getCurrentClassDetailsUrl
+        }
+      }
+    }),
+    getAttendenceByLogId: build.query<GetAttendenceByLogIdResponse, string>({
+      query: attendance_log_id => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.attendence.getStudentAttendenceByLogIdUrl,
+          params: { attendance_log_id }
+        }
+      }
     })
   })
 })
 
-export const { useRecordStudentAttendenceMutation, useGetStudentsListQuery } = attendenceServiceApi
+export const {
+  useRecordStudentAttendenceMutation,
+  useGetStudentsListQuery,
+  useGetCurrentClassDetailsQuery,
+  useGetAttendenceByLogIdQuery
+} = attendenceServiceApi
