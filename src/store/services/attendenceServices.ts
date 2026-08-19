@@ -40,6 +40,15 @@ const attendenceServiceApi = api.injectEndpoints({
           params: { attendance_log_id }
         }
       }
+    }),
+    getStudentAttendenceLogs: build.query<GetStudentAttendenceLogsResponse, GetStudentAttendenceLogsRequest>({
+      query: params => {
+        return {
+          method: HttpRequestMethods.GET,
+          url: urlConstants.attendence.getStudentAttendenceLogsUrl,
+          params: { ...params }
+        }
+      }
     })
   })
 })
@@ -48,5 +57,6 @@ export const {
   useRecordStudentAttendenceMutation,
   useGetStudentsListQuery,
   useGetCurrentClassDetailsQuery,
-  useGetAttendenceByLogIdQuery
+  useGetAttendenceByLogIdQuery,
+  useGetStudentAttendenceLogsQuery
 } = attendenceServiceApi

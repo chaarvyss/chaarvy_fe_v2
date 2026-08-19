@@ -54,3 +54,32 @@ type CurrentClassDetailsResponse = {
   class_details: ClassDetails
   log_id?: string
 }
+
+type GetStudentAttendenceLogsRequest = {
+  limit?: number
+  offset?: number
+  program_id?: string
+  segment_id?: string
+  medium_id?: string
+  section_id?: string
+  period_slot_id?: string
+  start_date?: string
+  end_date?: string
+}
+
+type GetStudentAttendenceLog = {
+  id: string
+  program: string
+  segment: string
+  medium: string
+  section: string
+  period: string
+  date: string
+  status: boolean
+}
+
+type GetStudentAttendenceLogsResponse = {
+  logs: GetStudentAttendenceLog[]
+  total_count: number
+  filtered: number
+}
