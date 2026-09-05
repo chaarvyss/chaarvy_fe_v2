@@ -78,18 +78,18 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
 
-    // {
-    //   title: 'Academics',
-    //   icon: 'ChairSchool' as const,
-    //   children: [
-    //     {
-    //       key: PermissionLabels.nav.TIME_TABLE,
-    //       title: 'Time Table',
-    //       path: PagePath.TIME_TABLE,
-    //       icon: 'Timetable' as const
-    //     }
-    //   ]
-    // },
+    {
+      title: 'Academics',
+      icon: 'ChairSchool' as const,
+      children: [
+        {
+          key: PermissionLabels.nav.timetable,
+          title: 'Time Table',
+          path: PagePath.TIME_TABLE,
+          icon: 'Timetable' as const
+        }
+      ]
+    },
     {
       title: 'Student Management',
       icon: 'School' as const,
@@ -137,7 +137,7 @@ const navigation = (): VerticalNavItemsType => {
           icon: ChaarvyIcon.AccountCreditCardOutline
         }
       ]
-    }
+    },
 
     // {
     //   title: 'Transport Management',
@@ -163,18 +163,18 @@ const navigation = (): VerticalNavItemsType => {
     //     }
     //   ]
     // },
-    // {
-    //   title: 'Faculty Corner',
-    //   icon: 'AccountTie' as const,
-    //   children: [
-    //     {
-    //       key: PermissionLabels.nav.ATTENDENCE_REGISTER,
-    //       title: 'Attendence Register',
-    //       path: PagePath.ATTENDENCE_REGISTER,
-    //       icon: 'AccountCheck' as const
-    //     }
-    //   ]
-    // }
+    {
+      title: 'Faculty Corner',
+      icon: 'AccountTie' as const,
+      children: [
+        {
+          key: PermissionLabels.nav.attendenceRegister,
+          title: 'Attendence Register',
+          path: PagePath.ATTENDENCE_REGISTER,
+          icon: ChaarvyIcon.BullseyeArrow
+        }
+      ]
+    }
   ]
 
   const master_navs = [

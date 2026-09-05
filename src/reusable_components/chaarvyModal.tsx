@@ -52,7 +52,7 @@ interface ChaarvyModalProps {
   onClose?: () => void
   shouldWarnOnClose?: boolean
   shouldRestrictCloseOnOuterClick?: boolean
-  title?: string
+  title?: string | JSX.Element
 }
 
 const ChaarvyModal = ({
@@ -120,7 +120,6 @@ const ChaarvyModal = ({
 
   return (
     <>
-      {/* <Modal open={isOpen} {...(!!shouldRestrictCloseOnOuterClick ? {} : { onClose: handleModalClose?.() })}> */}
       <Modal open={isOpen} onClose={shouldRestrictCloseOnOuterClick ? undefined : handleModalClose}>
         <Card className={getModalSize()} sx={style}>
           <Box

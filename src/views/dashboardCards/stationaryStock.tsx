@@ -7,7 +7,8 @@ import { useGetLowStationaryStockDetailsQuery } from 'src/store/services/dashboa
 
 const headers = [
   {
-    label: '#'
+    label: '#',
+    width: '20px'
   },
   {
     label: 'Item'

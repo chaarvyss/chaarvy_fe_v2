@@ -10,6 +10,7 @@ const commonRoutePrefix = {
 
 const interRoutePrefix = {
   admin: `${interPrefix}/admin`,
+  attendence: `${interPrefix}/attendence`,
   admisions: `${interPrefix}/admissions`,
   auth: `${interPrefix}/auth`,
   calender: `${interPrefix}/google-calender`,
@@ -117,6 +118,13 @@ export const urlConstants = {
     getPayeesListUrl: `${interRoutePrefix.admin}/get-payees-list`,
     createUpdateSubjectUrl: `${interRoutePrefix.admin}/create-update-subject`,
     updateSubjectStatusUrl: `${interRoutePrefix.admin}/update-subject-status`,
+    createUpdatePeriodTemplateUrl: `${interRoutePrefix.admin}/create-update-period-template`,
+    getPeriodTemplateUrl: `${interRoutePrefix.admin}/get-period-template`,
+    getDayOfWeekUrl: `${interRoutePrefix.admin}/day-of-week`,
+    getFacultyAvailabilityUrl: `${interRoutePrefix.admin}/get-faculty-availability`,
+    createUpdateTimetableUrl: `${interRoutePrefix.admin}/create-update-timetable`,
+    getClassTimetableUrl: `${interRoutePrefix.admin}/get-class-timetable`,
+    getFacultyTimetableUrl: `${interRoutePrefix.admin}/get-faculty-timetable`,
 
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
@@ -146,6 +154,13 @@ export const urlConstants = {
     delete: {
       programBook: `${interRoutePrefix.admin}/delete-program-book`
     }
+  },
+  attendence: {
+    recordStudentAttendenceUrl: `${interRoutePrefix.attendence}/record-student-attendence`,
+    getStudentsListUrl: `${interRoutePrefix.attendence}/get-students`,
+    getCurrentClassDetailsUrl: `${interRoutePrefix.attendence}/get-current-class-details`,
+    getStudentAttendenceByLogIdUrl: `${interRoutePrefix.attendence}/get-student-attendence-by-log-id`,
+    getStudentAttendenceLogsUrl: `${interRoutePrefix.attendence}/get-student-attendence-logs`
   },
   admissions: {
     createAdmission: `${interRoutePrefix.admisions}/create-update-admission`,

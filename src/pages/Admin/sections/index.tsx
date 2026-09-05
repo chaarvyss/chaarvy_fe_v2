@@ -23,6 +23,7 @@ import DropDownMenu from 'src/reusable_components/dropDownMenu'
 import TableTilteHeader from 'src/reusable_components/Table/TableTilteHeader'
 import { useCreateUpdateSectionMutation } from 'src/store/services/adminServices'
 import { useGetSectionsListQuery } from 'src/store/services/listServices'
+import { ChaarvyIcon } from 'src/utils/icons'
 
 const defaultSectionState = {
   section_id: undefined,
@@ -30,9 +31,10 @@ const defaultSectionState = {
 }
 
 const Sections = () => {
-  const { data: sectionsList, isLoading } = useGetSectionsListQuery()
+  const { data: sectionsList, isFetching: isLoading } = useGetSectionsListQuery()
   const [isSectionModalOpen, setSectionModalOpen] = useState<boolean>(false)
   const [selectedSection, setSelectedSection] = useState<Section>(defaultSectionState)
+  const [nameError, setNameError] = useState<string>('')
 
   const [createUpdateSection, { isLoading: isCreating }] = useCreateUpdateSectionMutation()
 
@@ -66,6 +68,7 @@ const Sections = () => {
   const handleModalClose = () => {
     setSectionModalOpen(false)
     setSelectedSection(defaultSectionState)
+    setNameError('')
   }
 
   const handleSubmit = () => {
@@ -95,6 +98,18 @@ const Sections = () => {
     (prop: keyof Section) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
       const value = event.target.value
       setSelectedSection(prev => ({ ...prev, [prop]: value }))
+
+      if (
+        sectionsList?.some(
+          section =>
+            section.section_name.toLowerCase() === value.toLowerCase() &&
+            section.section_id !== selectedSection?.section_id
+        )
+      ) {
+        setNameError('Section name already exists')
+      } else {
+        setNameError('')
+      }
     }
 
   const SectionModal = () => (
@@ -113,12 +128,20 @@ const Sections = () => {
               fullWidth
               onChange={handleChange('section_name')}
               value={selectedSection?.section_name}
+              error={!!nameError}
+              helperText={nameError}
+              size='small'
             />
           </Box>
         </Grid>
         <Grid item xs={12}>
           <Box display='flex' flexDirection='column'>
-            <LoadingButton loading={isCreating} disabled={!selectedSection?.section_name} onClick={handleSubmit}>
+            <LoadingButton
+              size='small'
+              loading={isCreating}
+              disabled={!selectedSection?.section_name}
+              onClick={handleSubmit}
+            >
               Submit
             </LoadingButton>
           </Box>
@@ -132,7 +155,12 @@ const Sections = () => {
   return (
     <>
       {SectionModal()}
-      <TableTilteHeader title='Sections' buttonTitle='Add Section' onButtonClick={handleAddSection} />
+      <TableTilteHeader
+        title='Sections'
+        iconName={ChaarvyIcon.Plus}
+        buttonTitle='Add Section'
+        onButtonClick={handleAddSection}
+      />
       <Card>
         {(sectionsList ?? []).length > 0 ? (
           <TableContainer>

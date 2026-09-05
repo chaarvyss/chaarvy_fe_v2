@@ -46,6 +46,7 @@ export interface ChaarvyDataTableProps<T = any> {
   // --- NEW: Infinite Scroll Props ---
   hasMore?: boolean
   onLoadMore?: () => void
+  onRowClick?: (row: T) => void
 }
 
 const ChaarvyDataTable = <T extends Record<string, any>>({
@@ -64,7 +65,8 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
   defaultEntryData,
   shouldHideActions = false,
   hasMore = false,
-  onLoadMore
+  onLoadMore,
+  onRowClick
 }: ChaarvyDataTableProps<T>) => {
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({})
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -440,7 +442,9 @@ const ChaarvyDataTable = <T extends Record<string, any>>({
                 <TableRow
                   key={getRowKey(row, index)}
                   hover={hover}
+                  onClick={() => onRowClick?.(row)}
                   sx={{
+                    cursor: onRowClick ? 'pointer' : 'default',
                     backgroundColor: isNewRow(row, index)
                       ? newRowBg
                       : isUpdatedRow(row, index)
