@@ -21,6 +21,8 @@ export const PagePath = {
   COLLECT_PAYMENT: '/StudentManagement/Payments/pendingPayments',
   ATTENDENCE_REGISTER: '/Faculty/attendence',
   ATTENDENCE_LOG: '/Faculty/attendence_log',
+  TOPICS_MANAGEMENT: '/Faculty/topics',
+  SCHEDULE_PLANNER: '/Faculty/schedule_planner',
   TIME_TABLE: '/Academics/timeTable',
   TRANSPORTATION: '/Transportation',
   VEHICLE_LIVE_TRACKING: '/Transportation/liveTrack',
