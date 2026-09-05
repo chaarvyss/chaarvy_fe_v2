@@ -1,3 +1,10 @@
+## [1.18.14](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.13...v1.18.14) (2026-09-05)
+
+
+### Bug Fixes
+
+* **timeTable:** AC-83: Timetable new ([#70](https://github.com/chaarvyss/chaarvy_fe_v2/issues/70)) ([58a369c](https://github.com/chaarvyss/chaarvy_fe_v2/commit/58a369cb9f755834bb9257e9befe623ffcee0ec6))
+
 ## [1.18.13](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.12...v1.18.13) (2026-07-26)
 
 
