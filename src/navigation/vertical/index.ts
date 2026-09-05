@@ -168,6 +168,12 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'AccountTie' as const,
       children: [
         {
+          key: PermissionLabels.nav.attendence_log,
+          title: 'Attendence',
+          path: PagePath.ATTENDENCE_LOG,
+          icon: ChaarvyIcon.RegisteredTrademark
+        },
+        {
           key: PermissionLabels.nav.attendenceRegister,
           title: 'Attendence Register',
           path: PagePath.ATTENDENCE_REGISTER,
