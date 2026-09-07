@@ -1,99 +1,151 @@
 import { IconButton, Tooltip } from '@mui/material'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { Box, Card, Typography, Grid, Chip, TextField } from '@muiElements'
-import { ChaarvyButton, ChaarvyModal } from 'src/reusable_components'
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import { ChaarvyButton, ChaarvyModal, LoadingSpinner } from 'src/reusable_components'
 import ChaarvySelect from 'src/reusable_components/chaarvySelect'
+import { useCreateUpdateTopicMutation, useGetTopicsListQuery } from 'src/store/services/facultyServices'
+import {
+  useGetAllProgramSegmentsListQuery,
+  useGetProgramSegmentSubjectsListQuery
+} from 'src/store/services/programServices'
 import GetChaarvyIcons, { ChaarvyIcon } from 'src/utils/icons'
 
 import TopicQuestionBank from './TopicQuestionBank'
 
-// Mock Data
-const CLASSES = [
-  { label: 'Class 1', value: 'c1' },
-  { label: 'Class 2', value: 'c2' },
-  { label: 'Class 3', value: 'c3' },
-  { label: 'Class 4', value: 'c4' },
-  { label: 'Class 5', value: 'c5' }
-]
-
-const SUBJECTS = [
-  { label: 'Mathematics', value: 'math' },
-  { label: 'Science', value: 'sci' },
-  { label: 'English', value: 'eng' }
-]
-
-const MOCK_TOPICS: Record<string, { id: string; title: string; desc: string; qsCount: number }[]> = {
-  'c3-math': [
-    { id: 't1', title: 'Addition and Subtraction', desc: 'Basic arithmetic operations.', qsCount: 15 },
-    { id: 't2', title: 'Multiplication Tables', desc: 'Learn tables 1 through 10.', qsCount: 8 }
-  ],
-  'c5-sci': [
-    { id: 't3', title: 'Solar System', desc: 'Planets, sun, and basic astronomy.', qsCount: 20 },
-    { id: 't4', title: 'Human Body', desc: 'Organs and systems.', qsCount: 12 }
-  ]
+type TopicRequestPayload = {
+  program: string
+  segment: string
+  subject: string
 }
 
 const TopicManagement = () => {
-  const [selectedClass, setSelectedClass] = useState<string | null>(null)
-  const [selectedSubject, setSelectedSubject] = useState<string | null>(null)
+  const { triggerToast } = useToast()
+
+  const [topicRequestPayload, setTopicRequestPayload] = useState<TopicRequestPayload>({
+    program: '',
+    segment: '',
+    subject: ''
+  })
+
+  const [topicDetails, setTopicDetails] = useState<{
+    topic_name: string
+    description: string
+    topic_id?: string
+  }>({
+    topic_name: '',
+    description: ''
+  })
+
   const [selectedTopic, setSelectedTopic] = useState<any>(null)
 
-  // Add Topic Modal State
   const [isAddModalOpen, setAddModalOpen] = useState(false)
   const [editingTopicId, setEditingTopicId] = useState<string | null>(null)
-  const [newTitle, setNewTitle] = useState('')
-  const [newDesc, setNewDesc] = useState('')
-  const [, setForceUpdate] = useState(0)
 
-  const currentKey = `${selectedClass}-${selectedSubject}`
-  const topics = MOCK_TOPICS[currentKey] || []
+  const { data: programSegments } = useGetAllProgramSegmentsListQuery()
+  const [createUpdateTopic] = useCreateUpdateTopicMutation()
+
+  const { data: topicsResponse, isFetching: isFetchingTopics } = useGetTopicsListQuery(
+    {
+      program_id: topicRequestPayload.program,
+      segment_id: topicRequestPayload.segment,
+      subject_id: topicRequestPayload.subject
+    },
+    {
+      skip: Object.values(topicRequestPayload).includes('')
+    }
+  )
+
+  const programs = (programSegments ?? []).filter(item => item?.status !== 0)
+
+  const programOptions = Array.from(
+    new Map(
+      programs.map((item: any) => [item.program_id, { label: item.program_name, value: item.program_id }])
+    ).values()
+  )
+
+  const segmentOptions = Array.from(
+    new Map(
+      programs
+        .filter((item: any) => item.program_id === topicRequestPayload?.program)
+        .map((item: any) => [item.segment_id, { label: item.segment_name, value: item.segment_id }])
+    ).values()
+  )
+
+  const { data: subjectsResponse } = useGetProgramSegmentSubjectsListQuery(
+    {
+      program_id: topicRequestPayload?.program,
+      segment_id: topicRequestPayload?.segment
+    },
+    {
+      skip: !topicRequestPayload?.program || !topicRequestPayload?.segment
+    }
+  )
+
+  const subjects = useMemo(
+    () =>
+      (subjectsResponse ?? []).map((item: any) => ({
+        label: item?.subject_name,
+        value: item?.subject_id
+      })),
+    [subjectsResponse]
+  )
 
   if (selectedTopic) {
     return <TopicQuestionBank topic={selectedTopic} onBack={() => setSelectedTopic(null)} />
   }
 
+  const handleChange = (e: string, key: string) => {
+    setTopicRequestPayload({ ...topicRequestPayload, [key]: e })
+  }
+
   const handleOpenModal = (topic?: any) => {
     if (topic) {
       setEditingTopicId(topic.id)
-      setNewTitle(topic.title)
-      setNewDesc(topic.desc)
+      setTopicDetails(topic)
     } else {
       setEditingTopicId(null)
-      setNewTitle('')
-      setNewDesc('')
+      setTopicDetails({
+        topic_name: '',
+        description: '',
+        topic_id: ''
+      })
     }
     setAddModalOpen(true)
   }
 
   const handleSaveTopic = () => {
-    if (!newTitle.trim()) return
-    if (!MOCK_TOPICS[currentKey]) {
-      MOCK_TOPICS[currentKey] = []
-    }
-
-    if (editingTopicId) {
-      const topicIndex = MOCK_TOPICS[currentKey].findIndex(t => t.id === editingTopicId)
-      if (topicIndex > -1) {
-        MOCK_TOPICS[currentKey][topicIndex] = {
-          ...MOCK_TOPICS[currentKey][topicIndex],
-          title: newTitle,
-          desc: newDesc
-        }
-      }
-    } else {
-      MOCK_TOPICS[currentKey].push({
-        id: `t_${Date.now()}`,
-        title: newTitle,
-        desc: newDesc || 'No description provided.',
-        qsCount: 0
+    const { program, segment, subject } = topicRequestPayload
+    createUpdateTopic({
+      ...topicDetails,
+      program_id: program,
+      segment_id: segment,
+      subject_id: subject
+    })
+      .unwrap()
+      .then(() => {
+        setAddModalOpen(false)
+        setTopicDetails({
+          topic_name: '',
+          description: ''
+        })
+        triggerToast('Topic created successfully', {
+          variant: ToastVariants.SUCCESS
+        })
       })
-    }
-    setForceUpdate(prev => prev + 1)
-    setAddModalOpen(false)
-    setNewTitle('')
-    setNewDesc('')
-    setEditingTopicId(null)
+      .catch((error: any) => {
+        triggerToast(error.message || 'Failed to create topic', {
+          variant: ToastVariants.ERROR
+        })
+      })
+  }
+
+  const handleTopicChange = (value: string, key: string) => {
+    setTopicDetails((prev: any) => ({
+      ...prev,
+      [key]: value
+    }))
   }
 
   return (
@@ -110,27 +162,38 @@ const TopicManagement = () => {
           <Grid container spacing={4} alignItems='flex-end'>
             <Grid item xs={12} sm={4}>
               <ChaarvySelect
-                label='Class / Program'
+                label='Program'
+                placeholder='Select Program'
+                options={programOptions}
+                value={topicRequestPayload?.program}
+                onChange={(e: any) => handleChange(e.target.value, 'program')}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <ChaarvySelect
+                label='Class'
                 placeholder='Select Class'
-                options={CLASSES}
-                value={selectedClass || ''}
-                onChange={(e: any) => setSelectedClass(e.target.value)}
+                options={segmentOptions}
+                value={topicRequestPayload?.segment}
+                onChange={(e: any) => handleChange(e.target.value, 'segment')}
               />
             </Grid>
             <Grid item xs={12} sm={4}>
               <ChaarvySelect
                 label='Subject'
                 placeholder='Select Subject'
-                options={SUBJECTS}
-                value={selectedSubject || ''}
-                onChange={(e: any) => setSelectedSubject(e.target.value)}
+                options={subjects}
+                value={topicRequestPayload?.subject}
+                onChange={(e: any) => handleChange(e.target.value, 'subject')}
               />
             </Grid>
             <Grid item xs={12} sm={4}>
               <ChaarvyButton
                 variant='contained'
                 color='primary'
-                disabled={!selectedClass || !selectedSubject}
+                disabled={
+                  !topicRequestPayload?.program || !topicRequestPayload?.segment || !topicRequestPayload?.subject
+                }
                 fullWidth
                 sx={{ py: 1.5, borderRadius: 2, fontWeight: 600, textTransform: 'none', fontSize: '1rem' }}
                 onClick={() => handleOpenModal()}
@@ -142,15 +205,17 @@ const TopicManagement = () => {
         </Card>
       </Box>
 
-      {selectedClass && selectedSubject && (
+      {isFetchingTopics ? (
+        <LoadingSpinner />
+      ) : (
         <Card sx={{ p: 2, animation: 'fadeIn 0.5s ease-in', flexGrow: 1, overflowY: 'auto' }}>
           <Typography variant='h6' mb={3} color='text.primary'>
             Configured Topics
           </Typography>
           <Grid container spacing={3}>
-            {topics.length > 0 ? (
-              topics.map(topic => (
-                <Grid item xs={12} md={6} lg={4} key={topic.id}>
+            {(topicsResponse ?? []).length > 0 ? (
+              topicsResponse?.map(topic => (
+                <Grid item xs={12} md={6} lg={4} key={topic.topic_id}>
                   <Card
                     sx={{
                       p: 3,
@@ -186,13 +251,13 @@ const TopicManagement = () => {
                       }}
                     />
                     <Box display='flex' justifyContent='space-between' alignItems='flex-start' mb={2}>
-                      <Tooltip placement='top' title={topic.title}>
+                      <Tooltip placement='top' title={topic.topic_name}>
                         <Typography noWrap maxWidth={200} variant='h6' color='text.primary' sx={{ lineHeight: 1.3 }}>
-                          {topic.title}
+                          {topic.topic_name}
                         </Typography>
                       </Tooltip>
                       <Chip
-                        label={`${topic.qsCount} Qs`}
+                        label={`${topic.total_questions} Qs`}
                         size='small'
                         sx={{
                           bgcolor: 'rgba(118, 75, 162, 0.1)',
@@ -213,7 +278,7 @@ const TopicManagement = () => {
                         overflow: 'hidden'
                       }}
                     >
-                      {topic.desc}
+                      {topic.description}
                     </Typography>
                     <Box display='flex' justifyContent='space-between' alignItems='center'>
                       <Typography
@@ -282,15 +347,20 @@ const TopicManagement = () => {
           <Grid container spacing={1}>
             <Grid item xs={12}>
               <Typography variant='caption'>Topic Title</Typography>
-              <TextField value={newTitle} size='small' onChange={e => setNewTitle(e.target.value)} fullWidth />
+              <TextField
+                value={topicDetails.topic_name}
+                size='small'
+                onChange={e => handleTopicChange(e.target.value, 'topic_name')}
+                fullWidth
+              />
             </Grid>
             <Grid item xs={12}>
               <Typography variant='caption'>Description (Optional)</Typography>
               <TextField
                 multiline
                 rows={3}
-                value={newDesc}
-                onChange={e => setNewDesc(e.target.value)}
+                value={topicDetails.description}
+                onChange={e => handleTopicChange(e.target.value, 'description')}
                 fullWidth
                 variant='outlined'
               />
@@ -304,7 +374,7 @@ const TopicManagement = () => {
                 size='small'
                 color='primary'
                 onClick={handleSaveTopic}
-                disabled={!newTitle.trim()}
+                disabled={!topicDetails.topic_name.trim()}
               >
                 {editingTopicId ? 'Update Topic' : 'Save Topic'}
               </ChaarvyButton>

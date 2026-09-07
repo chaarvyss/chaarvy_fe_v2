@@ -21,34 +21,7 @@ type MarkGroup = {
 }
 
 const TopicQuestionBank = ({ topic, onBack }: { topic: any; onBack: () => void }) => {
-  const [markGroups, setMarkGroups] = useState<MarkGroup[]>([
-    {
-      id: 'mg1',
-      title: 'Multiple Choice Questions',
-      marks: 1,
-      questions: [
-        {
-          id: 'q1',
-          text: 'What is 5 + 5?',
-          type: 'mcq',
-          options: ['8', '10', '12', '15'],
-          answer: '10'
-        }
-      ]
-    },
-    {
-      id: 'mg2',
-      title: 'Short Answer Questions',
-      marks: 3,
-      questions: [
-        {
-          id: 'q2',
-          text: 'Explain the process of addition.',
-          type: 'theory'
-        }
-      ]
-    }
-  ])
+  const [markGroups, setMarkGroups] = useState<MarkGroup[]>([])
 
   const [isGroupModalOpen, setGroupModalOpen] = useState(false)
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null)
@@ -162,7 +135,7 @@ const TopicQuestionBank = ({ topic, onBack }: { topic: any; onBack: () => void }
         sx={{ p: 2, bgcolor: 'rgba(118, 75, 162, 0.05)', borderRadius: 2, borderLeft: '4px solid #764ba2' }}
       >
         <Typography variant='h5' fontWeight={700} color='text.primary'>
-          {topic.title} - Question Bank
+          {topic.topic_name} - Question Bank
         </Typography>
         <ChaarvyButton variant='outlined' onClick={onBack} size='small' sx={{ borderRadius: 2 }}>
           ← Back
@@ -343,7 +316,7 @@ const TopicQuestionBank = ({ topic, onBack }: { topic: any; onBack: () => void }
           isOpen={isGroupModalOpen}
           onClose={() => setGroupModalOpen(false)}
           title={editingGroupId ? 'Edit Mark Group' : 'Add New Mark Group'}
-          modalSize='col-4'
+          modalSize='col-11 col-md-4'
         >
           <Grid container spacing={2}>
             <Grid item xs={12}>

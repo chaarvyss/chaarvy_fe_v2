@@ -14,6 +14,7 @@ const interRoutePrefix = {
   admisions: `${interPrefix}/admissions`,
   auth: `${interPrefix}/auth`,
   calender: `${interPrefix}/google-calender`,
+  faculty: `${interPrefix}/faculty`,
   fees: `${interPrefix}/fees`,
   list: `${interPrefix}/list`,
   program: `${interPrefix}/program`,
@@ -194,6 +195,10 @@ export const urlConstants = {
     paymentCountDetails: `${interRoutePrefix.dashboard}/payment_count`,
     cashflowDetailsUrl: `${interRoutePrefix.dashboard}/cashflow-summary`,
     expensesDetailsUrl: `${interRoutePrefix.dashboard}/expenses`
+  },
+  faculty: {
+    getTopicsListUrl: `${interRoutePrefix.faculty}/topics`,
+    createUpdateTopicUrl: `${interRoutePrefix.faculty}/create_update_topic`
   },
   fees: {
     getprogramFees: `${interRoutePrefix.fees}/program-fee-detail`,

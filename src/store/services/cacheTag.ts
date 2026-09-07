@@ -2,6 +2,7 @@ export enum CacheTag {
   Address = 'address',
   CollegeProfile = 'collegeProfile',
   ListAddonCourse = 'listAddonCourse',
+  SubjectTopics = 'subjectTopics',
   ListBooks = 'listBooks',
   ListFeesTypes = 'listFeesTypes',
   ListLanguages = 'listLanguages',
