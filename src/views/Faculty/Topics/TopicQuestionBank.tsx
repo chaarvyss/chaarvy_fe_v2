@@ -3,6 +3,7 @@ import { useState } from 'react'
 
 import { Box, Typography, Grid, TextField, MenuItem, Chip } from '@muiElements'
 import { ChaarvyButton, ChaarvyModal } from 'src/reusable_components'
+import { Medium } from 'src/store/services/admisissionsService'
 import GetChaarvyIcons, { ChaarvyIcon } from 'src/utils/icons'
 
 type Question = {
@@ -20,7 +21,9 @@ type MarkGroup = {
   questions: Question[]
 }
 
-const TopicQuestionBank = ({ topic, onBack }: { topic: any; onBack: () => void }) => {
+const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: any; onBack: () => void; mediums?: Medium[] }) => {
+  console.log(mediums)
+
   const [markGroups, setMarkGroups] = useState<MarkGroup[]>([])
 
   const [isGroupModalOpen, setGroupModalOpen] = useState(false)

@@ -5,6 +5,7 @@ import { Box, Card, Typography, Grid, Chip, TextField } from '@muiElements'
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { ChaarvyButton, ChaarvyModal, LoadingSpinner } from 'src/reusable_components'
 import ChaarvySelect from 'src/reusable_components/chaarvySelect'
+import { useGetActiveSegmentMediumsQuery } from 'src/store/services/admisissionsService'
 import { useCreateUpdateTopicMutation, useGetTopicsListQuery } from 'src/store/services/facultyServices'
 import {
   useGetAllProgramSegmentsListQuery,
@@ -44,6 +45,15 @@ const TopicManagement = () => {
   const [editingTopicId, setEditingTopicId] = useState<string | null>(null)
 
   const { data: programSegments } = useGetAllProgramSegmentsListQuery()
+
+  const { data: mediumResponse } = useGetActiveSegmentMediumsQuery(
+    {
+      program_id: topicRequestPayload?.program,
+      segment_id: topicRequestPayload?.segment
+    },
+    { skip: !topicRequestPayload?.program || !topicRequestPayload?.segment }
+  )
+
   const [createUpdateTopic] = useCreateUpdateTopicMutation()
 
   const { data: topicsResponse, isFetching: isFetchingTopics } = useGetTopicsListQuery(
@@ -93,7 +103,7 @@ const TopicManagement = () => {
   )
 
   if (selectedTopic) {
-    return <TopicQuestionBank topic={selectedTopic} onBack={() => setSelectedTopic(null)} />
+    return <TopicQuestionBank topic={selectedTopic} onBack={() => setSelectedTopic(null)} mediums={mediumResponse} />
   }
 
   const handleChange = (e: string, key: string) => {
