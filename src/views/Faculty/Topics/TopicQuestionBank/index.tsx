@@ -43,6 +43,8 @@ const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: Topic; onBack: (
           onAddQuestion={handlers.addQuestion}
           onTranslateQuestion={handlers.handleTranslateQuestion}
           onDeleteQuestion={(groupId, qIndex) => modalState.setDeleteTarget({ type: 'question', groupId, qIndex })}
+          onSaveQuestion={handlers.handleSaveQuestion}
+          isSavingQuestion={handlers.isSavingQuestion}
           updateTitle={handlers.updateQuestionTitle}
           updateOption={handlers.updateQuestionOption}
           updateAnswer={handlers.updateQuestionAnswer}

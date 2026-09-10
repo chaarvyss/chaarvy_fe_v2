@@ -37,6 +37,27 @@ interface GetQuestionsRequest extends GetTopicsListRequest {
   topic_id: string
 }
 
+export type CreateUpdateQuestionRequest = {
+  question_id?: string
+  program_id: string
+  segment_id: string
+  subject_id: string
+  topic_id: string
+  question_type: string
+  question_title: Record<string, string>
+  options?: Record<string, string[]> | null
+  correct_option?: Record<string, string> | null
+}
+
+export type BulkDeleteQuestionsRequest = {
+  question_ids: string[]
+}
+
+export type BulkUpdateQuestionTypeRequest = {
+  question_ids: string[]
+  question_type: string
+}
+
 const facultyServiceApi = api.injectEndpoints({
   endpoints: build => ({
     getTopicsList: build.query<Topic[], GetTopicsListRequest>({
@@ -59,13 +80,38 @@ const facultyServiceApi = api.injectEndpoints({
         }
       }
     }),
-    getQuestions: build.query<QuestionType[], GetQuestionsRequest>({
+    getQuestions: build.query<any[], GetQuestionsRequest>({
+      providesTags: [CacheTag.TopicQuestions],
       query: params => {
         return {
           url: urlConstants.faculty.getQuestionsUrl,
           params
         }
       }
+    }),
+    createUpdateQuestion: build.mutation<{ message: string }, CreateUpdateQuestionRequest>({
+      invalidatesTags: [CacheTag.TopicQuestions, CacheTag.SubjectTopics],
+      query: body => ({
+        method: HttpRequestMethods.POST,
+        url: urlConstants.faculty.createUpdateQuestionUrl,
+        body
+      })
+    }),
+    bulkDeleteQuestions: build.mutation<{ message: string }, BulkDeleteQuestionsRequest>({
+      invalidatesTags: [CacheTag.TopicQuestions, CacheTag.SubjectTopics],
+      query: body => ({
+        method: HttpRequestMethods.POST,
+        url: urlConstants.faculty.bulkDeleteQuestionsUrl,
+        body
+      })
+    }),
+    bulkUpdateQuestionType: build.mutation<{ message: string }, BulkUpdateQuestionTypeRequest>({
+      invalidatesTags: [CacheTag.TopicQuestions],
+      query: body => ({
+        method: HttpRequestMethods.POST,
+        url: urlConstants.faculty.bulkUpdateQuestionTypeUrl,
+        body
+      })
     }),
     createUpdateTopic: build.mutation<string, CreateUpdateTopicRequest>({
       invalidatesTags: [CacheTag.SubjectTopics],
@@ -92,5 +138,8 @@ export const {
   useCreateUpdateTopicMutation,
   useGetQuestionTypesQuery,
   useGetQuestionsQuery,
+  useCreateUpdateQuestionMutation,
+  useBulkDeleteQuestionsMutation,
+  useBulkUpdateQuestionTypeMutation,
   useTranslateTextMutation
 } = facultyServiceApi

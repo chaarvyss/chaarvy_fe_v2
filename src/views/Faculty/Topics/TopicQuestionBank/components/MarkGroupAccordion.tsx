@@ -19,6 +19,8 @@ interface MarkGroupAccordionProps {
   onAddQuestion: (groupId: string, type: 'mcq' | 'theory') => void
   onTranslateQuestion: (groupId: string, qIndex: number, q: Question) => void
   onDeleteQuestion: (groupId: string, qIndex: number) => void
+  onSaveQuestion: (groupId: string, qIndex: number) => void
+  isSavingQuestion: (groupId: string, qIndex: number) => boolean
   updateTitle: (groupId: string, qIndex: number, mediumId: string, val: string) => void
   updateOption: (groupId: string, qIndex: number, mediumId: string, optIndex: number, val: string) => void
   updateAnswer: (groupId: string, qIndex: number, mediumId: string, val: string) => void
@@ -34,6 +36,8 @@ export const MarkGroupAccordion = ({
   onAddQuestion,
   onTranslateQuestion,
   onDeleteQuestion,
+  onSaveQuestion,
+  isSavingQuestion,
   updateTitle,
   updateOption,
   updateAnswer
@@ -88,8 +92,10 @@ export const MarkGroupAccordion = ({
             mediums={mediums}
             englishMediumId={englishMediumId}
             isTranslating={isTranslating === `${group.id}-${qIndex}`}
+            isSaving={isSavingQuestion(group.id, qIndex)}
             onTranslate={() => onTranslateQuestion(group.id, qIndex, q)}
             onDelete={() => onDeleteQuestion(group.id, qIndex)}
+            onSave={() => onSaveQuestion(group.id, qIndex)}
             updateTitle={updateTitle}
             updateOption={updateOption}
             updateAnswer={updateAnswer}

@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react'
 
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { Medium } from 'src/store/services/admisissionsService'
 import {
   useGetQuestionTypesQuery,
   useGetQuestionsQuery,
-  useTranslateTextMutation
+  useTranslateTextMutation,
+  useCreateUpdateQuestionMutation,
+  useBulkDeleteQuestionsMutation,
+  useBulkUpdateQuestionTypeMutation
 } from 'src/store/services/facultyServices'
 
 import { Topic, MarkGroup, Question } from '../types'
 
 export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
+  const { triggerToast } = useToast()
   const { data: questionTypes } = useGetQuestionTypesQuery()
 
   const { data: questions } = useGetQuestionsQuery(
@@ -24,9 +29,13 @@ export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
     }
   )
 
+  const [createUpdateQuestion] = useCreateUpdateQuestionMutation()
+  const [bulkDeleteQuestions] = useBulkDeleteQuestionsMutation()
+  const [bulkUpdateQuestionType] = useBulkUpdateQuestionTypeMutation()
   const [translateText] = useTranslateTextMutation()
   const [markGroups, setMarkGroups] = useState<MarkGroup[]>([])
   const [isTranslating, setIsTranslating] = useState<string | null>(null)
+  const [savingQuestionKey, setSavingQuestionKey] = useState<string | null>(null)
 
   useEffect(() => {
     const questionList = Array.isArray(questions)
@@ -54,7 +63,65 @@ export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
         })
       })
 
-      setMarkGroups(Array.from(groupsMap.values()))
+      setMarkGroups(prev => {
+        if (prev.length === 0) {
+          return Array.from(groupsMap.values())
+        }
+
+        const resultGroups: MarkGroup[] = []
+        const usedServerQIds = new Set<string>()
+
+        prev.forEach(prevGroup => {
+          const serverGroup = groupsMap.get(prevGroup.id)
+          const newQuestions: Question[] = []
+
+          prevGroup.questions.forEach(q => {
+            if (q.id) {
+              const serverQ = serverGroup?.questions.find(sq => sq.id === q.id)
+              if (serverQ) {
+                newQuestions.push(serverQ)
+                usedServerQIds.add(serverQ.id!)
+              } else {
+                newQuestions.push(q)
+              }
+            } else {
+              const matchedServerQ = serverGroup?.questions.find(
+                sq =>
+                  !usedServerQIds.has(sq.id!) &&
+                  JSON.stringify(sq.question_title) === JSON.stringify(q.question_title)
+              )
+              if (matchedServerQ) {
+                newQuestions.push(matchedServerQ)
+                usedServerQIds.add(matchedServerQ.id!)
+              } else {
+                newQuestions.push(q)
+              }
+            }
+          })
+
+          serverGroup?.questions.forEach(sq => {
+            if (!usedServerQIds.has(sq.id!)) {
+              newQuestions.push(sq)
+              usedServerQIds.add(sq.id!)
+            }
+          })
+
+          resultGroups.push({
+            ...prevGroup,
+            title: serverGroup?.title || prevGroup.title,
+            marks: serverGroup?.marks || prevGroup.marks,
+            questions: newQuestions
+          })
+        })
+
+        groupsMap.forEach((serverGroup, gId) => {
+          if (!prev.some(pg => pg.id === gId)) {
+            resultGroups.push(serverGroup)
+          }
+        })
+
+        return resultGroups
+      })
     }
   }, [questions, questionTypes])
 
@@ -65,12 +132,45 @@ export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
     { type: 'group'; id: string } | { type: 'question'; groupId: string; qIndex: number } | null
   >(null)
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteTarget) return
+
     if (deleteTarget.type === 'group') {
-      deleteMarkGroup(deleteTarget.id)
+      const targetGroup = markGroups.find(mg => mg.id === deleteTarget.id)
+      const savedQuestionIds = targetGroup?.questions.filter(q => q.id).map(q => q.id!) || []
+
+      try {
+        if (savedQuestionIds.length > 0) {
+          await bulkDeleteQuestions({ question_ids: savedQuestionIds }).unwrap()
+        }
+        deleteMarkGroup(deleteTarget.id)
+        triggerToast('Mark group and its questions deleted successfully', {
+          variant: ToastVariants.SUCCESS
+        })
+      } catch (err: any) {
+        console.error('Failed to delete mark group:', err)
+        triggerToast(err?.data?.message || err?.message || 'Failed to delete mark group', {
+          variant: ToastVariants.ERROR
+        })
+      }
     } else {
-      deleteQuestion(deleteTarget.groupId, deleteTarget.qIndex)
+      const targetGroup = markGroups.find(mg => mg.id === deleteTarget.groupId)
+      const targetQuestion = targetGroup?.questions[deleteTarget.qIndex]
+
+      try {
+        if (targetQuestion?.id) {
+          await bulkDeleteQuestions({ question_ids: [targetQuestion.id] }).unwrap()
+        }
+        deleteQuestion(deleteTarget.groupId, deleteTarget.qIndex)
+        triggerToast('Question deleted successfully', {
+          variant: ToastVariants.SUCCESS
+        })
+      } catch (err: any) {
+        console.error('Failed to delete question:', err)
+        triggerToast(err?.data?.message || err?.message || 'Failed to delete question', {
+          variant: ToastVariants.ERROR
+        })
+      }
     }
     setDeleteTarget(null)
   }
@@ -86,30 +186,89 @@ export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
     setGroupModalOpen(true)
   }
 
-  const handleSaveGroup = () => {
+  const handleSaveGroup = async () => {
     if (!groupID.trim() || !questionTypes) return
 
     const questionType = questionTypes.find(each => each.id === groupID)
+    if (!questionType) return
 
     if (editingGroupId) {
-      setMarkGroups(prev =>
-        prev.map(mg =>
-          mg.id === editingGroupId
-            ? { ...mg, title: questionType?.question_type ?? '', marks: questionType?.marks ?? 1 }
-            : mg
-        )
-      )
+      if (editingGroupId === groupID) {
+        setGroupModalOpen(false)
+        setEditingGroupId(null)
+        setgroupID('')
+        return
+      }
+
+      const oldGroup = markGroups.find(mg => mg.id === editingGroupId)
+      const savedQuestionIds = oldGroup?.questions.filter(q => q.id).map(q => q.id!) || []
+
+      try {
+        if (savedQuestionIds.length > 0) {
+          await bulkUpdateQuestionType({ question_ids: savedQuestionIds, question_type: groupID }).unwrap()
+        }
+
+        setMarkGroups(prev => {
+          const currentOldGroup = prev.find(mg => mg.id === editingGroupId)
+          if (!currentOldGroup) return prev
+
+          const updatedQuestions = currentOldGroup.questions.map(q => ({
+            ...q,
+            question_type: groupID
+          }))
+
+          const existingTargetGroup = prev.find(mg => mg.id === groupID)
+
+          if (existingTargetGroup) {
+            return prev
+              .filter(mg => mg.id !== editingGroupId)
+              .map(mg =>
+                mg.id === groupID
+                  ? { ...mg, questions: [...mg.questions, ...updatedQuestions] }
+                  : mg
+              )
+          } else {
+            return prev.map(mg =>
+              mg.id === editingGroupId
+                ? {
+                    ...mg,
+                    id: groupID,
+                    title: questionType.question_type ?? '',
+                    marks: questionType.marks ?? 1,
+                    questions: updatedQuestions
+                  }
+                : mg
+            )
+          }
+        })
+
+        triggerToast('Mark group updated successfully', {
+          variant: ToastVariants.SUCCESS
+        })
+      } catch (err: any) {
+        console.error('Failed to update group question type:', err)
+        triggerToast(err?.data?.message || err?.message || 'Failed to update group', {
+          variant: ToastVariants.ERROR
+        })
+      }
     } else {
       if (!markGroups.find(mg => mg.id === groupID)) {
         setMarkGroups(prev => [
           ...prev,
           {
             id: groupID,
-            title: questionType?.question_type ?? '',
-            marks: questionType?.marks ?? 1,
+            title: questionType.question_type ?? '',
+            marks: questionType.marks ?? 1,
             questions: []
           }
         ])
+        triggerToast('Mark group added successfully', {
+          variant: ToastVariants.SUCCESS
+        })
+      } else {
+        triggerToast('Mark group already exists', {
+          variant: ToastVariants.INFO
+        })
       }
     }
 
@@ -280,10 +439,77 @@ export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
     }
   }
 
+  const handleSaveQuestion = async (groupId: string, qIndex: number) => {
+    const group = markGroups.find(mg => mg.id === groupId)
+    if (!group) return
+    const q = group.questions[qIndex]
+    if (!q) return
+
+    const englishTitle = q.question_title?.[englishMediumId]?.trim()
+    const hasAnyTitle = Object.values(q.question_title || {}).some(t => t?.trim())
+    if (!englishTitle && !hasAnyTitle) {
+      triggerToast('Please provide a question title before saving', {
+        variant: ToastVariants.ERROR
+      })
+      return
+    }
+
+    if (q.ui_type === 'mcq') {
+      const englishOpts = q.options?.[englishMediumId] || []
+      const hasEmptyOpt = englishOpts.some(opt => !opt?.trim())
+      if (englishOpts.length < 4 || hasEmptyOpt) {
+        triggerToast('Please fill all 4 options for the question', {
+          variant: ToastVariants.ERROR
+        })
+        return
+      }
+
+      const englishAnswer = q.correct_option?.[englishMediumId]?.trim()
+      if (!englishAnswer) {
+        triggerToast('Please select a correct answer for the question', {
+          variant: ToastVariants.ERROR
+        })
+        return
+      }
+    }
+
+    const saveKey = `${groupId}-${qIndex}`
+    setSavingQuestionKey(saveKey)
+
+    try {
+      const payload = {
+        question_id: q.id || undefined,
+        program_id: topic.program,
+        segment_id: topic.segment,
+        subject_id: topic.subject,
+        topic_id: topic.topic_id,
+        question_type: groupId,
+        question_title: q.question_title,
+        options: q.ui_type === 'mcq' ? q.options : null,
+        correct_option: q.ui_type === 'mcq' ? q.correct_option : null
+      }
+
+      const res = await createUpdateQuestion(payload).unwrap()
+      triggerToast(res?.message || (q.id ? 'Question updated successfully' : 'Question created successfully'), {
+        variant: ToastVariants.SUCCESS
+      })
+    } catch (err: any) {
+      console.error('Failed to save question:', err)
+      triggerToast(err?.data?.message || err?.message || 'Failed to save question', {
+        variant: ToastVariants.ERROR
+      })
+    } finally {
+      setSavingQuestionKey(null)
+    }
+  }
+
+  const isSavingQuestion = (groupId: string, qIndex: number) => savingQuestionKey === `${groupId}-${qIndex}`
+
   return {
     markGroups,
     questionTypes,
     isTranslating,
+    savingQuestionKey,
     englishMediumId,
     modalState: {
       isGroupModalOpen,
@@ -302,7 +528,9 @@ export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
       updateQuestionTitle,
       updateQuestionOption,
       updateQuestionAnswer,
-      handleTranslateQuestion
+      handleTranslateQuestion,
+      handleSaveQuestion,
+      isSavingQuestion
     }
   }
 }

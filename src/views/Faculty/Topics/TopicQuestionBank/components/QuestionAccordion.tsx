@@ -14,8 +14,10 @@ interface QuestionAccordionProps {
   mediums?: Medium[]
   englishMediumId: string
   isTranslating: boolean
+  isSaving: boolean
   onTranslate: () => void
   onDelete: () => void
+  onSave: () => void
   updateTitle: (groupId: string, qIndex: number, mediumId: string, val: string) => void
   updateOption: (groupId: string, qIndex: number, mediumId: string, optIndex: number, val: string) => void
   updateAnswer: (groupId: string, qIndex: number, mediumId: string, val: string) => void
@@ -28,8 +30,10 @@ export const QuestionAccordion = ({
   mediums,
   englishMediumId,
   isTranslating,
+  isSaving,
   onTranslate,
   onDelete,
+  onSave,
   updateTitle,
   updateOption,
   updateAnswer
@@ -59,8 +63,15 @@ export const QuestionAccordion = ({
               {q.question_title?.[englishMediumId] || 'New Question'}
             </Typography>
             <Chip size='small' label={q.ui_type?.toUpperCase() || 'QUESTION'} sx={{ fontSize: '0.7em', height: 20 }} />
+            <Chip
+              size='small'
+              label={q.id ? 'Saved' : 'Draft'}
+              color={q.id ? 'success' : 'warning'}
+              variant='outlined'
+              sx={{ fontSize: '0.65em', height: 18, fontWeight: 600 }}
+            />
           </Box>
-          <Box display='flex' gap={2} onClick={e => e.stopPropagation()}>
+          <Box display='flex' gap={1.5} alignItems='center' onClick={e => e.stopPropagation()}>
             <ChaarvyButton
               size='small'
               variant='outlined'
@@ -70,6 +81,16 @@ export const QuestionAccordion = ({
               sx={{ textTransform: 'none', py: 0.5 }}
             >
               {isTranslating ? <CircularProgress size={16} /> : '🌍 Auto-Translate'}
+            </ChaarvyButton>
+            <ChaarvyButton
+              size='small'
+              variant='contained'
+              color='primary'
+              disabled={isSaving}
+              onClick={onSave}
+              sx={{ textTransform: 'none', py: 0.5, px: 2, minWidth: 70 }}
+            >
+              {isSaving ? <CircularProgress size={16} color='inherit' /> : q.id ? 'Update' : 'Save'}
             </ChaarvyButton>
             <ChaarvyButton size='small' color='error' onClick={onDelete} sx={{ minWidth: 'auto', p: 0.5 }}>
               Remove
@@ -159,6 +180,19 @@ export const QuestionAccordion = ({
               </Grid>
             </>
           )}
+
+          <Box display='flex' justifyContent='flex-end' gap={2} mt={3}>
+            <ChaarvyButton
+              variant='contained'
+              color='primary'
+              size='small'
+              disabled={isSaving}
+              onClick={onSave}
+              sx={{ textTransform: 'none', px: 3, borderRadius: 1.5 }}
+            >
+              {isSaving ? <CircularProgress size={16} color='inherit' /> : q.id ? 'Update Question' : 'Save Question'}
+            </ChaarvyButton>
+          </Box>
         </Box>
       </AccordionDetails>
     </Accordion>
