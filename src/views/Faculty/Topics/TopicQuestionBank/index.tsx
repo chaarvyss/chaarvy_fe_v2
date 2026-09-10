@@ -5,7 +5,7 @@ import { Box, Typography, Grid, TextField, MenuItem, Chip } from '@muiElements'
 import { ChaarvyButton, ChaarvyModal } from 'src/reusable_components'
 import ChaarvySelect from 'src/reusable_components/chaarvySelect'
 import { Medium } from 'src/store/services/admisissionsService'
-import { useGetQuestionTypesQuery } from 'src/store/services/facultyServices'
+import { useGetQuestionTypesQuery, useGetQuestionsQuery } from 'src/store/services/facultyServices'
 import GetChaarvyIcons, { ChaarvyIcon } from 'src/utils/icons'
 
 type Question = {
@@ -23,10 +23,25 @@ type MarkGroup = {
   questions: Question[]
 }
 
-const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: any; onBack: () => void; mediums?: Medium[] }) => {
-  console.log(mediums)
+interface Topic {
+  program_id: string
+  segment_id: string
+  subject_id: string
+  topic_id: string
+  topic_name: string
+}
 
+const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: Topic; onBack: () => void; mediums?: Medium[] }) => {
   const { data: questionTypes } = useGetQuestionTypesQuery()
+
+  const { data: questions } = useGetQuestionsQuery({
+    program_id: topic.program_id,
+    segment_id: topic.segment_id,
+    subject_id: topic.subject_id,
+    topic_id: topic.topic_id
+  })
+
+  console.log({ mediums, questions })
 
   const [markGroups, setMarkGroups] = useState<MarkGroup[]>([])
 

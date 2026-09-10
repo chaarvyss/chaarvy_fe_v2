@@ -30,7 +30,11 @@ interface QuestionType {
 interface GetTopicsListRequest {
   program_id: string
   segment_id: string
-  subject_id?: string
+  subject_id: string
+}
+
+interface GetQuestionsRequest extends GetTopicsListRequest {
+  topic_id: string
 }
 
 const facultyServiceApi = api.injectEndpoints({
@@ -55,6 +59,14 @@ const facultyServiceApi = api.injectEndpoints({
         }
       }
     }),
+    getQuestions: build.query<QuestionType[], GetQuestionsRequest>({
+      query: params => {
+        return {
+          url: urlConstants.faculty.getQuestionsUrl,
+          params
+        }
+      }
+    }),
     createUpdateTopic: build.mutation<string, CreateUpdateTopicRequest>({
       invalidatesTags: [CacheTag.SubjectTopics],
       query: body => {
@@ -68,4 +80,5 @@ const facultyServiceApi = api.injectEndpoints({
   })
 })
 
-export const { useGetTopicsListQuery, useCreateUpdateTopicMutation, useGetQuestionTypesQuery } = facultyServiceApi
+export const { useGetTopicsListQuery, useCreateUpdateTopicMutation, useGetQuestionTypesQuery, useGetQuestionsQuery } =
+  facultyServiceApi

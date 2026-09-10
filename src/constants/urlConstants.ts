@@ -199,7 +199,8 @@ export const urlConstants = {
   faculty: {
     getTopicsListUrl: `${interRoutePrefix.faculty}/topics`,
     createUpdateTopicUrl: `${interRoutePrefix.faculty}/create_update_topic`,
-    getQuestionTypesUrl: `${interRoutePrefix.faculty}/question_types`
+    getQuestionTypesUrl: `${interRoutePrefix.faculty}/question_types`,
+    getQuestionsUrl: `${interRoutePrefix.faculty}/questions`
   },
   fees: {
     getprogramFees: `${interRoutePrefix.fees}/program-fee-detail`,
