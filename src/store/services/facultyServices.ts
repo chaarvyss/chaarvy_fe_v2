@@ -21,6 +21,12 @@ interface Topic {
   topic_name: string
 }
 
+interface QuestionType {
+  id: string
+  question_type: string
+  marks: number
+}
+
 interface GetTopicsListRequest {
   program_id: string
   segment_id: string
@@ -42,6 +48,13 @@ const facultyServiceApi = api.injectEndpoints({
         }
       }
     }),
+    getQuestionTypes: build.query<QuestionType[], void>({
+      query: () => {
+        return {
+          url: urlConstants.faculty.getQuestionTypesUrl
+        }
+      }
+    }),
     createUpdateTopic: build.mutation<string, CreateUpdateTopicRequest>({
       invalidatesTags: [CacheTag.SubjectTopics],
       query: body => {
@@ -55,4 +68,4 @@ const facultyServiceApi = api.injectEndpoints({
   })
 })
 
-export const { useGetTopicsListQuery, useCreateUpdateTopicMutation } = facultyServiceApi
+export const { useGetTopicsListQuery, useCreateUpdateTopicMutation, useGetQuestionTypesQuery } = facultyServiceApi

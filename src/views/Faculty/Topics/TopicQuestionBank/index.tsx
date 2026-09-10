@@ -3,7 +3,9 @@ import { useState } from 'react'
 
 import { Box, Typography, Grid, TextField, MenuItem, Chip } from '@muiElements'
 import { ChaarvyButton, ChaarvyModal } from 'src/reusable_components'
+import ChaarvySelect from 'src/reusable_components/chaarvySelect'
 import { Medium } from 'src/store/services/admisissionsService'
+import { useGetQuestionTypesQuery } from 'src/store/services/facultyServices'
 import GetChaarvyIcons, { ChaarvyIcon } from 'src/utils/icons'
 
 type Question = {
@@ -24,12 +26,13 @@ type MarkGroup = {
 const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: any; onBack: () => void; mediums?: Medium[] }) => {
   console.log(mediums)
 
+  const { data: questionTypes } = useGetQuestionTypesQuery()
+
   const [markGroups, setMarkGroups] = useState<MarkGroup[]>([])
 
   const [isGroupModalOpen, setGroupModalOpen] = useState(false)
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null)
-  const [groupTitle, setGroupTitle] = useState('')
-  const [groupMarks, setGroupMarks] = useState<number | ''>('')
+  const [groupID, setgroupID] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<
     { type: 'group'; id: string } | { type: 'question'; groupId: string; qId: string } | null
   >(null)
@@ -47,33 +50,41 @@ const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: any; onBack: () 
   const handleOpenGroupModal = (group?: MarkGroup) => {
     if (group) {
       setEditingGroupId(group.id)
-      setGroupTitle(group.title)
-      setGroupMarks(group.marks)
+      setgroupID(group.id)
     } else {
       setEditingGroupId(null)
-      setGroupTitle('')
-      setGroupMarks('')
+      setgroupID('')
     }
     setGroupModalOpen(true)
   }
 
   const handleSaveGroup = () => {
-    if (!groupTitle.trim() || !groupMarks) return
+    if (!groupID.trim() || !questionTypes) return
+
+    const questionType = questionTypes.find(each => each.id === groupID)
+
     if (editingGroupId) {
       setMarkGroups(
-        markGroups.map(mg => (mg.id === editingGroupId ? { ...mg, title: groupTitle, marks: Number(groupMarks) } : mg))
+        markGroups.map(mg =>
+          mg.id === editingGroupId
+            ? { ...mg, title: questionType?.question_type ?? '', marks: questionType?.marks ?? 1 }
+            : mg
+        )
       )
     } else {
       setMarkGroups([
         ...markGroups,
         {
-          id: `mg_${Date.now()}`,
-          title: groupTitle,
-          marks: Number(groupMarks),
+          id: groupID,
+          title: questionType?.question_type ?? '',
+          marks: questionType?.marks ?? 1,
           questions: []
         }
       ])
     }
+
+    setgroupID('')
+    setEditingGroupId(null)
     setGroupModalOpen(false)
   }
 
@@ -324,12 +335,12 @@ const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: any; onBack: () 
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Typography variant='caption'>Group Title</Typography>
-              <TextField
-                value={groupTitle}
-                size='small'
-                onChange={e => setGroupTitle(e.target.value)}
-                fullWidth
-                placeholder='e.g., Multiple Choice Questions'
+              <ChaarvySelect
+                label='Question Type'
+                placeholder='Select Question Type'
+                value={questionTypes?.find(each => each.id === groupID)?.id}
+                onChange={(e: any) => setgroupID(e.target.value)}
+                options={questionTypes?.map(qt => ({ label: qt.question_type, value: qt.id })) || []}
               />
             </Grid>
             <Grid item xs={12}>
@@ -337,8 +348,8 @@ const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: any; onBack: () 
               <TextField
                 type='number'
                 size='small'
-                value={groupMarks}
-                onChange={e => setGroupMarks(e.target.value ? Number(e.target.value) : '')}
+                disabled
+                value={questionTypes?.find(each => each.id === groupID)?.marks ?? 0}
                 fullWidth
                 placeholder='e.g., 2'
               />
@@ -352,7 +363,7 @@ const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: any; onBack: () 
                 size='small'
                 color='primary'
                 onClick={handleSaveGroup}
-                disabled={!groupTitle.trim() || groupMarks === ''}
+                disabled={!groupID.trim()}
               >
                 {editingGroupId ? 'Update Group' : 'Save Group'}
               </ChaarvyButton>
