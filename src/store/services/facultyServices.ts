@@ -76,9 +76,24 @@ const facultyServiceApi = api.injectEndpoints({
           body
         }
       }
+    }),
+    translateText: build.mutation<
+      { translations: Record<string, string> },
+      { text: string; target_languages: string[] }
+    >({
+      query: body => ({
+        method: HttpRequestMethods.POST,
+        url: '/translate', // Ensure your backend creates this endpoint
+        body
+      })
     })
   })
 })
 
-export const { useGetTopicsListQuery, useCreateUpdateTopicMutation, useGetQuestionTypesQuery, useGetQuestionsQuery } =
-  facultyServiceApi
+export const {
+  useGetTopicsListQuery,
+  useCreateUpdateTopicMutation,
+  useGetQuestionTypesQuery,
+  useGetQuestionsQuery,
+  useTranslateTextMutation
+} = facultyServiceApi
