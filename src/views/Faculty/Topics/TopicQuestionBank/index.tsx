@@ -1,5 +1,5 @@
 import { Accordion, AccordionSummary, AccordionDetails, IconButton } from '@mui/material'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import { Box, Typography, Grid, TextField, MenuItem, Chip } from '@muiElements'
 import { ChaarvyButton, ChaarvyModal } from 'src/reusable_components'
@@ -9,11 +9,13 @@ import { useGetQuestionTypesQuery, useGetQuestionsQuery } from 'src/store/servic
 import GetChaarvyIcons, { ChaarvyIcon } from 'src/utils/icons'
 
 type Question = {
-  id: string
-  text: string
-  type: 'mcq' | 'theory'
-  options?: string[]
-  answer?: string
+  id?: string
+  topic_id: string
+  question_title: { [key: string]: string }
+  options?: { [key: string]: string[] }
+  correct_option?: { [key: string]: string }
+  question_type: string
+  ui_type?: 'mcq' | 'theory'
 }
 
 type MarkGroup = {
@@ -24,9 +26,9 @@ type MarkGroup = {
 }
 
 interface Topic {
-  program_id: string
-  segment_id: string
-  subject_id: string
+  program: string
+  segment: string
+  subject: string
   topic_id: string
   topic_name: string
 }
@@ -34,22 +36,57 @@ interface Topic {
 const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: Topic; onBack: () => void; mediums?: Medium[] }) => {
   const { data: questionTypes } = useGetQuestionTypesQuery()
 
-  const { data: questions } = useGetQuestionsQuery({
-    program_id: topic.program_id,
-    segment_id: topic.segment_id,
-    subject_id: topic.subject_id,
-    topic_id: topic.topic_id
-  })
-
-  console.log({ mediums, questions })
+  const { data: questions } = useGetQuestionsQuery(
+    {
+      program_id: topic.program,
+      segment_id: topic.segment,
+      subject_id: topic.subject,
+      topic_id: topic.topic_id
+    },
+    {
+      skip: !topic.program || !topic.segment || !topic.subject || !topic.topic_id
+    }
+  )
 
   const [markGroups, setMarkGroups] = useState<MarkGroup[]>([])
+
+  useEffect(() => {
+    // Check if questions is an array directly, or nested inside a data/questions property
+    const questionList = Array.isArray(questions)
+      ? questions
+      : (questions as any)?.data || (questions as any)?.questions
+
+    if (questionList && Array.isArray(questionList)) {
+      const groupsMap = new Map<string, MarkGroup>()
+
+      questionList.forEach((q: any) => {
+        // Find type info if available, otherwise use fallbacks
+        const qTypeInfo = questionTypes ? questionTypes.find((qt: any) => qt.id === q.question_type) : null
+
+        if (!groupsMap.has(q.question_type)) {
+          groupsMap.set(q.question_type, {
+            id: q.question_type,
+            title: qTypeInfo?.question_type || 'Unknown Type',
+            marks: qTypeInfo?.marks || 1,
+            questions: []
+          })
+        }
+
+        groupsMap.get(q.question_type)?.questions.push({
+          ...q,
+          ui_type: q.options && Object.keys(q.options).length > 0 ? 'mcq' : 'theory'
+        })
+      })
+
+      setMarkGroups(Array.from(groupsMap.values()))
+    }
+  }, [questions, questionTypes])
 
   const [isGroupModalOpen, setGroupModalOpen] = useState(false)
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null)
   const [groupID, setgroupID] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<
-    { type: 'group'; id: string } | { type: 'question'; groupId: string; qId: string } | null
+    { type: 'group'; id: string } | { type: 'question'; groupId: string; qIndex: number } | null
   >(null)
 
   const confirmDelete = () => {
@@ -57,7 +94,7 @@ const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: Topic; onBack: (
     if (deleteTarget.type === 'group') {
       deleteMarkGroup(deleteTarget.id)
     } else {
-      deleteQuestion(deleteTarget.groupId, deleteTarget.qId)
+      deleteQuestion(deleteTarget.groupId, deleteTarget.qIndex)
     }
     setDeleteTarget(null)
   }
@@ -87,15 +124,18 @@ const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: Topic; onBack: (
         )
       )
     } else {
-      setMarkGroups([
-        ...markGroups,
-        {
-          id: groupID,
-          title: questionType?.question_type ?? '',
-          marks: questionType?.marks ?? 1,
-          questions: []
-        }
-      ])
+      // Check if group already exists
+      if (!markGroups.find(mg => mg.id === groupID)) {
+        setMarkGroups([
+          ...markGroups,
+          {
+            id: groupID,
+            title: questionType?.question_type ?? '',
+            marks: questionType?.marks ?? 1,
+            questions: []
+          }
+        ])
+      }
     }
 
     setgroupID('')
@@ -112,11 +152,20 @@ const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: Topic; onBack: (
       markGroups.map(mg => {
         if (mg.id === groupId) {
           const newQ: Question = {
-            id: `q_${Date.now()}`,
-            text: '',
-            type,
-            ...(type === 'mcq' ? { options: ['', '', '', ''], answer: '' } : {})
+            topic_id: topic.topic_id,
+            question_type: groupId,
+            question_title: {},
+            ui_type: type,
+            ...(type === 'mcq' ? { options: {}, correct_option: {} } : {})
           }
+
+          mediums?.forEach(m => {
+            newQ.question_title[m.medium_id] = ''
+            if (type === 'mcq') {
+              newQ.options![m.medium_id] = ['', '', '', '']
+              newQ.correct_option![m.medium_id] = ''
+            }
+          })
 
           return { ...mg, questions: [...mg.questions, newQ] }
         }
@@ -126,11 +175,11 @@ const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: Topic; onBack: (
     )
   }
 
-  const deleteQuestion = (groupId: string, qId: string) => {
+  const deleteQuestion = (groupId: string, qIndex: number) => {
     setMarkGroups(
       markGroups.map(mg => {
         if (mg.id === groupId) {
-          return { ...mg, questions: mg.questions.filter(q => q.id !== qId) }
+          return { ...mg, questions: mg.questions.filter((_, idx) => idx !== qIndex) }
         }
 
         return mg
@@ -138,13 +187,66 @@ const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: Topic; onBack: (
     )
   }
 
-  const updateQuestion = (groupId: string, qId: string, updates: Partial<Question>) => {
+  const updateQuestionTitle = (groupId: string, qIndex: number, mediumId: string, val: string) => {
     setMarkGroups(
       markGroups.map(mg => {
         if (mg.id === groupId) {
           return {
             ...mg,
-            questions: mg.questions.map(q => (q.id === qId ? { ...q, ...updates } : q))
+            questions: mg.questions.map((q, idx) => {
+              if (idx === qIndex) {
+                return { ...q, question_title: { ...q.question_title, [mediumId]: val } }
+              }
+
+              return q
+            })
+          }
+        }
+
+        return mg
+      })
+    )
+  }
+
+  const updateQuestionOption = (groupId: string, qIndex: number, mediumId: string, optIndex: number, val: string) => {
+    setMarkGroups(
+      markGroups.map(mg => {
+        if (mg.id === groupId) {
+          return {
+            ...mg,
+            questions: mg.questions.map((q, idx) => {
+              if (idx === qIndex) {
+                const newOpts = { ...(q.options || {}) }
+                const arr = [...(newOpts[mediumId] || ['', '', '', ''])]
+                arr[optIndex] = val
+                newOpts[mediumId] = arr
+
+                return { ...q, options: newOpts }
+              }
+
+              return q
+            })
+          }
+        }
+
+        return mg
+      })
+    )
+  }
+
+  const updateQuestionAnswer = (groupId: string, qIndex: number, mediumId: string, val: string) => {
+    setMarkGroups(
+      markGroups.map(mg => {
+        if (mg.id === groupId) {
+          return {
+            ...mg,
+            questions: mg.questions.map((q, idx) => {
+              if (idx === qIndex) {
+                return { ...q, correct_option: { ...q.correct_option, [mediumId]: val } }
+              }
+
+              return q
+            })
           }
         }
 
@@ -214,7 +316,7 @@ const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: Topic; onBack: (
           <AccordionDetails sx={{ p: 4, bgcolor: '#fff' }}>
             {group.questions.map((q, qIndex) => (
               <Box
-                key={q.id}
+                key={q.id || `q-${qIndex}`}
                 sx={{
                   mb: 4,
                   p: 3,
@@ -229,70 +331,107 @@ const TopicQuestionBank = ({ topic, onBack, mediums }: { topic: Topic; onBack: (
                   <Typography variant='subtitle1' fontWeight={600} color='text.primary'>
                     Q{qIndex + 1}.{' '}
                     <Box component='span' sx={{ color: 'text.secondary', fontWeight: 500, fontSize: '0.85em' }}>
-                      ({q.type.toUpperCase()})
+                      ({q.ui_type?.toUpperCase() || 'QUESTION'})
                     </Box>
                   </Typography>
                   <ChaarvyButton
                     size='small'
                     color='error'
-                    onClick={() => setDeleteTarget({ type: 'question', groupId: group.id, qId: q.id })}
+                    onClick={() => setDeleteTarget({ type: 'question', groupId: group.id, qIndex })}
                     sx={{ minWidth: 'auto', p: 0.5 }}
                   >
                     Remove
                   </ChaarvyButton>
                 </Box>
 
-                <TextField
-                  fullWidth
-                  label='Question Text'
-                  value={q.text}
-                  onChange={e => updateQuestion(group.id, q.id, { text: e.target.value })}
-                  multiline
-                  rows={2}
-                  sx={{ mb: 3, '& .MuiOutlinedInput-root': { bgcolor: 'white', borderRadius: 2 } }}
-                />
-
-                {q.type === 'mcq' && (
-                  <Grid container spacing={3}>
-                    {q.options?.map((opt, optIndex) => (
-                      <Grid item xs={12} sm={6} key={optIndex}>
+                <Box sx={{ p: 2, border: '1px solid #eee', borderRadius: 2, bgcolor: 'white' }}>
+                  <Typography variant='subtitle2' mb={2} color='primary.main'>
+                    Question Title
+                  </Typography>
+                  <Grid container spacing={3} mb={3}>
+                    {mediums?.map(medium => (
+                      <Grid item xs={12} sm={6} key={`title-${medium.medium_id}`}>
                         <TextField
                           fullWidth
-                          size='small'
-                          value={opt}
-                          onChange={e => {
-                            const newOpts = [...(q.options || [])]
-                            newOpts[optIndex] = e.target.value
-                            updateQuestion(group.id, q.id, { options: newOpts })
-                          }}
-                          sx={{
-                            '& .MuiOutlinedInput-root': {
-                              bgcolor: q.answer && opt === q.answer ? '#c1ffc6ff' : 'white',
-                              borderRadius: 2
-                            }
-                          }}
+                          label={`Question Text (${medium.medium_name || medium.medium_id})`}
+                          value={q.question_title?.[medium.medium_id] || ''}
+                          onChange={e => updateQuestionTitle(group.id, qIndex, medium.medium_id, e.target.value)}
+                          multiline
+                          rows={2}
                         />
                       </Grid>
                     ))}
-                    <Grid item xs={12}>
-                      <TextField
-                        select
-                        fullWidth
-                        size='small'
-                        label='Correct Answer'
-                        value={q.answer}
-                        onChange={e => updateQuestion(group.id, q.id, { answer: e.target.value })}
-                        sx={{ '& .MuiOutlinedInput-root': { bgcolor: 'white', borderRadius: 2 } }}
-                      >
-                        {q.options?.map((opt, optIndex) => (
-                          <MenuItem key={optIndex} value={opt}>
-                            {opt || '-'}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    </Grid>
                   </Grid>
-                )}
+
+                  {q.ui_type === 'mcq' && (
+                    <>
+                      <Typography variant='subtitle2' mb={2} color='primary.main'>
+                        Options
+                      </Typography>
+                      {Array.from({ length: 4 }).map((_, optIndex) => (
+                        <Box
+                          key={`opt-${optIndex}`}
+                          mb={3}
+                          p={2}
+                          sx={{ border: '1px dashed #e0e0e0', borderRadius: 2 }}
+                        >
+                          <Typography variant='caption' fontWeight={600} display='block' mb={2}>
+                            Option {optIndex + 1}
+                          </Typography>
+                          <Grid container spacing={3}>
+                            {mediums?.map(medium => {
+                              const optValue = q.options?.[medium.medium_id]?.[optIndex] || ''
+                              const isCorrect = q.correct_option?.[medium.medium_id] === optValue && optValue !== ''
+
+                              return (
+                                <Grid item xs={12} sm={6} key={`opt-${optIndex}-${medium.medium_id}`}>
+                                  <TextField
+                                    fullWidth
+                                    size='small'
+                                    label={`Option ${optIndex + 1} (${medium.medium_name})`}
+                                    value={optValue}
+                                    onChange={e =>
+                                      updateQuestionOption(group.id, qIndex, medium.medium_id, optIndex, e.target.value)
+                                    }
+                                    sx={{
+                                      '& .MuiOutlinedInput-root': {
+                                        bgcolor: isCorrect ? '#e8f5e9' : 'transparent'
+                                      }
+                                    }}
+                                  />
+                                </Grid>
+                              )
+                            })}
+                          </Grid>
+                        </Box>
+                      ))}
+
+                      <Typography variant='subtitle2' mt={3} mb={2} color='primary.main'>
+                        Correct Answer
+                      </Typography>
+                      <Grid container spacing={3}>
+                        {mediums?.map(medium => (
+                          <Grid item xs={12} sm={6} key={`correct-${medium.medium_id}`}>
+                            <TextField
+                              select
+                              fullWidth
+                              size='small'
+                              label={`Correct Answer (${medium.medium_name} )`}
+                              value={q.correct_option?.[medium.medium_id] || ''}
+                              onChange={e => updateQuestionAnswer(group.id, qIndex, medium.medium_id, e.target.value)}
+                            >
+                              {(q.options?.[medium.medium_id] || ['', '', '', '']).map((opt, optIndex) => (
+                                <MenuItem key={optIndex} value={opt}>
+                                  {opt || `Option ${optIndex + 1}`}
+                                </MenuItem>
+                              ))}
+                            </TextField>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </>
+                  )}
+                </Box>
               </Box>
             ))}
 
