@@ -84,7 +84,7 @@ export const QuestionBankModals = ({
           isOpen={!!deleteTarget}
           onClose={() => setDeleteTarget(null)}
           title='Confirm Deletion'
-          modalSize='col-3'
+          modalSize='col-11 col-sm-8 col-md-6 col-lg-4'
         >
           <Box p={2} textAlign='center'>
             <Typography variant='body1' mb={3}>

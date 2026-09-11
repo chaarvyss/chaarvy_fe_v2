@@ -77,10 +77,7 @@ const facultyServiceApi = api.injectEndpoints({
         }
       }
     }),
-    translateText: build.mutation<
-      { translations: Record<string, string> },
-      { text: string; target_languages: string[] }
-    >({
+    translateText: build.mutation<Record<string, string>, { text: string; target_languages: string[] }>({
       query: body => ({
         method: HttpRequestMethods.POST,
         url: urlConstants.google.translateTextUrl,

@@ -244,9 +244,9 @@ export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
       if (englishText) {
         try {
           const res = await translateText({ text: englishText, target_languages: targetMediums }).unwrap()
-          if (res?.translations) {
-            Object.entries(res.translations).forEach(([lang, translatedText]) => {
-              updateQuestionTitle(groupId, qIndex, lang, translatedText as string)
+          if (res) {
+            Object.entries(res).forEach(([lang, translatedText]) => {
+              updateQuestionTitle(groupId, qIndex, lang, translatedText)
             })
           }
         } catch (e) {
@@ -260,9 +260,11 @@ export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
           if (englishOptions[i]) {
             try {
               const res = await translateText({ text: englishOptions[i], target_languages: targetMediums }).unwrap()
-              if (res?.translations) {
-                Object.entries(res.translations).forEach(([lang, translatedText]) => {
-                  updateQuestionOption(groupId, qIndex, lang, i, translatedText as string)
+
+              if (res) {
+                const responseData = res as Record<string, string>
+                Object.entries(responseData).forEach(([lang, translatedText]) => {
+                  updateQuestionOption(groupId, qIndex, lang, i, translatedText)
                 })
               }
             } catch (e) {
