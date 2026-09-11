@@ -9,6 +9,7 @@ const commonRoutePrefix = {
 }
 
 const interRoutePrefix = {
+  google: `${interPrefix}/google`,
   admin: `${interPrefix}/admin`,
   attendence: `${interPrefix}/attendence`,
   admisions: `${interPrefix}/admissions`,
@@ -212,6 +213,9 @@ export const urlConstants = {
     updateProcessingFeesStatusUrl: `${interRoutePrefix.fees}/update-processing-fees-status`,
     getStudentPendingFeesDetailsUrl: `${interRoutePrefix.fees}/get-student-pending-fees-details`,
     getPaymentHistoryUrl: `${interRoutePrefix.fees}/get_payment_history`
+  },
+  google: {
+    translateTextUrl: `${interRoutePrefix.google}/translate`
   },
   program: {
     programAddon: `${interRoutePrefix.program}/program-addon-course`,

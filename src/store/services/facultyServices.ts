@@ -83,7 +83,7 @@ const facultyServiceApi = api.injectEndpoints({
     >({
       query: body => ({
         method: HttpRequestMethods.POST,
-        url: '/translate', // Ensure your backend creates this endpoint
+        url: urlConstants.google.translateTextUrl,
         body
       })
     })
