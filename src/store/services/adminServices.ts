@@ -512,9 +512,31 @@ const adminServiceApi = api.injectEndpoints({
           params
         }
       }
+    }),
+    getHolidays: build.query<HolidayItem[], { start_date?: string; end_date?: string } | void>({
+      providesTags: [CacheTag.Holidays],
+      query: params => ({
+        method: HttpRequestMethods.GET,
+        url: urlConstants.admin.getHolidaysUrl,
+        params
+      })
+    }),
+    createUpdateHoliday: build.mutation<{ message: string }, { details: HolidayItem[]; deleted_ids?: string[] }>({
+      invalidatesTags: [CacheTag.Holidays],
+      query: body => ({
+        method: HttpRequestMethods.POST,
+        url: urlConstants.admin.createUpdateHolidayUrl,
+        body
+      })
     })
   })
 })
+
+export interface HolidayItem {
+  id?: string
+  date: string
+  holiday_name: string
+}
 
 export const {
   useCreateAddonCourseMutation,
@@ -553,5 +575,7 @@ export const {
   useGetFacultyAvailabilityQuery,
   useCreateUpdateTimetableMutation,
   useGetClassTimetableQuery,
-  useGetFacultyTimetableQuery
+  useGetFacultyTimetableQuery,
+  useGetHolidaysQuery,
+  useCreateUpdateHolidayMutation
 } = adminServiceApi

@@ -74,6 +74,12 @@ const navigation = (): VerticalNavItemsType => {
           title: 'Reports',
           path: PagePath.REPORTS,
           icon: ChaarvyIcon.DataMatrix
+        },
+        {
+          key: PermissionLabels.nav.holidays,
+          title: 'Holidays',
+          path: PagePath.HOLIDAYS,
+          icon: ChaarvyIcon.CalendarMonthOutline
         }
       ]
     },
@@ -167,6 +173,18 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Faculty Corner',
       icon: 'AccountTie' as const,
       children: [
+        {
+          key: PermissionLabels.nav.topicsManagement,
+          title: 'Topics Management',
+          path: PagePath.TOPICS_MANAGEMENT,
+          icon: ChaarvyIcon.Bookshelf
+        },
+        {
+          key: PermissionLabels.nav.schedulePlanner,
+          title: 'Schedule Planner',
+          path: PagePath.SCHEDULE_PLANNER,
+          icon: ChaarvyIcon.Finance
+        },
         {
           key: PermissionLabels.nav.attendence_log,
           title: 'Attendence',

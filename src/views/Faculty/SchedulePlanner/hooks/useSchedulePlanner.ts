@@ -1,0 +1,661 @@
+import dayjs from 'dayjs'
+import isBetween from 'dayjs/plugin/isBetween'
+import { useState, useMemo, useEffect } from 'react'
+
+dayjs.extend(isBetween)
+
+import { ToastVariants, useToast } from 'src/@core/context/toastContext'
+import { useSettings } from 'src/@core/hooks/useSettings'
+import { sessionStorageKeys } from 'src/lib/enums'
+import { User } from 'src/lib/interfaces'
+import { useGetHolidaysQuery, useGetPeriodTemplateQuery } from 'src/store/services/adminServices'
+import {
+  useGetActiveSegmentMediumsQuery,
+  useGetActiveMediumSectionsQuery
+} from 'src/store/services/admisissionsService'
+import {
+  useGetTopicsListQuery,
+  useGetTopicSchedulesQuery,
+  useCreateUpdateTopicScheduleMutation,
+  useDeleteTopicScheduleMutation,
+  useGetFacultyTimetableQuery
+} from 'src/store/services/facultyServices'
+import { useGetUsersListQuery } from 'src/store/services/listServices'
+import {
+  useGetAllProgramSegmentsListQuery,
+  useGetProgramSegmentSubjectsListQuery
+} from 'src/store/services/programServices'
+import { useDebounce } from 'src/utils/hooks/useDebounce'
+
+import { PERIOD_SLOTS, PeriodSlot, PlannedSchedule, SlotModalState, SelectedScheduleModalState } from '../types'
+
+export const useSchedulePlanner = () => {
+  const { triggerToast } = useToast()
+  const { settings } = useSettings()
+
+  // Faculty User selection & Logged-in user state
+  const loggedInUserId = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem(sessionStorageKeys.userId) || ''
+    }
+
+    return ''
+  }, [])
+
+  const [selectedUserId, setSelectedUserId] = useState<string>(loggedInUserId)
+
+  useEffect(() => {
+    if (!selectedUserId && loggedInUserId) {
+      setSelectedUserId(loggedInUserId)
+    }
+  }, [loggedInUserId, selectedUserId])
+
+  const activeUserId = selectedUserId || loggedInUserId
+
+  // Fetch users list for autoselect dropdown
+  const { data: usersResponse, isFetching: isFetchingUsers } = useGetUsersListQuery({ limit: 200 })
+  const users = useMemo(() => usersResponse?.users || [], [usersResponse])
+
+  // Currently selected user object (with fallback to logged in user's profile info while loading)
+  const selectedUser = useMemo(() => {
+    if (!activeUserId) return null
+    const found = users.find(u => u.user_id === activeUserId)
+    if (found) return found
+
+    if (activeUserId === loggedInUserId) {
+      return {
+        user_id: loggedInUserId,
+        name: settings?.current_username || 'Logged In User',
+        username: '',
+        email: '',
+        mobile: '',
+        profile_pic: '',
+        status: '',
+        role_name: ''
+      } as User
+    }
+
+    return null
+  }, [users, activeUserId, loggedInUserId, settings?.current_username])
+
+  const userOptions = useMemo(() => {
+    if (selectedUser && !users.some(u => u.user_id === selectedUser.user_id)) {
+      return [selectedUser, ...users]
+    }
+
+    return users
+  }, [users, selectedUser])
+
+  // Calendar State
+  const [currentDate, setCurrentDate] = useState(dayjs())
+  const [viewMode, setViewMode] = useState<'month' | 'week'>('week')
+  const [showGenerator, setShowGenerator] = useState(false)
+
+  // ---------------- Calendar Math ----------------
+
+  const start = useMemo(() => {
+    if (viewMode === 'week') {
+      // Sunday of the week containing currentDate
+      return currentDate.subtract(currentDate.day(), 'day').startOf('day')
+    }
+
+    // Month view: Sunday on or before the 1st of the month
+    const monthStart = currentDate.startOf('month')
+
+    return monthStart.subtract(monthStart.day(), 'day').startOf('day')
+  }, [currentDate, viewMode])
+
+  const end = useMemo(() => {
+    if (viewMode === 'week') {
+      // Saturday of the week containing currentDate
+      return start.add(6, 'day').endOf('day')
+    }
+
+    // Month view: Saturday on or after the last day of the month
+    const monthEnd = currentDate.endOf('month')
+
+    return monthEnd.add(6 - monthEnd.day(), 'day').endOf('day')
+  }, [currentDate, viewMode, start])
+
+  const days = useMemo(() => {
+    const list: dayjs.Dayjs[] = []
+    let day = start
+    while (day.isBefore(end)) {
+      list.push(day)
+      day = day.add(1, 'day')
+    }
+
+    return list
+  }, [start, end])
+
+  const startDateStr = useMemo(() => (days.length > 0 ? days[0].format('YYYY-MM-DD') : undefined), [days])
+  const endDateStr = useMemo(() => (days.length > 0 ? days[days.length - 1].format('YYYY-MM-DD') : undefined), [days])
+
+  const handlePrev = () => setCurrentDate(currentDate.subtract(1, viewMode))
+  const handleNext = () => setCurrentDate(currentDate.add(1, viewMode))
+  const handleToday = () => setCurrentDate(dayjs())
+
+  // DB Queries & Mutations for Topic Schedules (filtered by visible date range and selected faculty)
+  const { data: dbSchedules = [], isFetching: isFetchingSchedules } = useGetTopicSchedulesQuery(
+    startDateStr && endDateStr
+      ? {
+          start_date: startDateStr,
+          end_date: endDateStr,
+          faculty_id: activeUserId || undefined,
+          user_id: activeUserId || undefined
+        }
+      : undefined
+  )
+  const [createUpdateScheduleMutation, { isLoading: isSavingSchedule }] = useCreateUpdateTopicScheduleMutation()
+  const [deleteScheduleMutation, { isLoading: isDeletingSchedule }] = useDeleteTopicScheduleMutation()
+
+  // DB Queries for Holidays in visible date range
+  const { data: holidaysData = [], isFetching: isFetchingHolidays } = useGetHolidaysQuery(
+    startDateStr && endDateStr ? { start_date: startDateStr, end_date: endDateStr } : undefined,
+    { skip: !startDateStr || !endDateStr }
+  )
+
+  const holidaysMap = useMemo(() => {
+    const map = new Map<string, string>()
+    ;(holidaysData ?? []).forEach(h => {
+      if (h?.date) {
+        map.set(dayjs(h.date).format('YYYY-MM-DD'), h.holiday_name || 'Holiday')
+      }
+    })
+
+    return map
+  }, [holidaysData])
+
+  // Timetable Period Slots from BE
+  const { data: periodTemplateData, isFetching: isFetchingPeriodTemplate } = useGetPeriodTemplateQuery()
+
+  const periodSlots = useMemo<PeriodSlot[]>(() => {
+    if (periodTemplateData?.slots && periodTemplateData.slots.length > 0) {
+      return periodTemplateData.slots.map((s: any) => ({
+        id: s.id,
+        start_time: s.start_time,
+        end_time: s.end_time,
+        duration: s.duration,
+        isBreak: s.isBreak,
+        title: s.title
+      }))
+    }
+
+    return PERIOD_SLOTS
+  }, [periodTemplateData])
+
+  // Schedules State: derived from database query
+  const plannedSchedules = useMemo<PlannedSchedule[]>(() => {
+    return (dbSchedules ?? []).map(s => ({
+      id: s.id,
+      period_id: s.period_id,
+      period_title: s.period_title,
+      date: s.date,
+      program_id: s.program_id,
+      program_name: s.program_name,
+      segment_id: s.segment_id,
+      segment_name: s.segment_name,
+      subject_id: s.subject_id,
+      subject_name: s.subject_name,
+      topic_id: s.topic_id,
+      topic_name: s.topic_name,
+      medium_id: s.medium_id,
+      section_id: s.section_id,
+      section_name: s.section_name,
+      completed: s.completed ?? s.status === 1
+    }))
+  }, [dbSchedules])
+
+  // Modal / Drawer States
+  const [slotModalState, setSlotModalState] = useState<SlotModalState | null>(null)
+  const [selectedScheduleForModal, setSelectedScheduleForModal] = useState<SelectedScheduleModalState | null>(null)
+  const [topicSearchText, setTopicSearchText] = useState('')
+  const debouncedTopicSearch = useDebounce(topicSearchText, 500)
+  const [isAutoFilledFromTimetable, setIsAutoFilledFromTimetable] = useState(false)
+
+  // 0. Faculty Timetable (for auto-filling slots based on day-of-week and period)
+  const { data: facultyTimetableData, isFetching: isFetchingTimetable } = useGetFacultyTimetableQuery(
+    activeUserId ? { faculty_id: activeUserId, user_id: activeUserId } : undefined
+  )
+
+  // ---------------- API Queries ----------------
+
+  // 1. Programs & Segments
+  const { data: programSegments, isFetching: isFetchingProgramSegments } = useGetAllProgramSegmentsListQuery()
+
+  const programs = useMemo(() => (programSegments ?? []).filter((item: any) => item?.status !== 0), [programSegments])
+
+  const programOptions = useMemo(
+    () =>
+      Array.from(
+        new Map(
+          programs.map((item: any) => [item.program_id, { label: item.program_name, value: item.program_id }])
+        ).values()
+      ),
+    [programs]
+  )
+
+  const segmentOptions = useMemo(
+    () =>
+      Array.from(
+        new Map(
+          programs
+            .filter((item: any) => item.program_id === slotModalState?.program_id)
+            .map((item: any) => [item.segment_id, { label: item.segment_name, value: item.segment_id }])
+        ).values()
+      ),
+    [programs, slotModalState?.program_id]
+  )
+
+  // 2. Subjects (for selected program & segment in drawer)
+  const { data: subjectsResponse, isFetching: isFetchingSubjects } = useGetProgramSegmentSubjectsListQuery(
+    {
+      program_id: slotModalState?.program_id || '',
+      segment_id: slotModalState?.segment_id || ''
+    },
+    {
+      skip: !slotModalState?.program_id || !slotModalState?.segment_id
+    }
+  )
+
+  const subjectOptions = useMemo(
+    () =>
+      (subjectsResponse ?? []).map((item: any) => ({
+        label: item?.subject_name,
+        value: item?.subject_id
+      })),
+    [subjectsResponse]
+  )
+
+  // 3. Mediums (for selected program & segment in drawer)
+  const { data: mediumsResponse, isFetching: isFetchingMediums } = useGetActiveSegmentMediumsQuery(
+    {
+      program_id: slotModalState?.program_id || '',
+      segment_id: slotModalState?.segment_id || ''
+    },
+    {
+      skip: !slotModalState?.program_id || !slotModalState?.segment_id
+    }
+  )
+
+  const mediumOptions = useMemo(
+    () =>
+      (mediumsResponse ?? []).map((item: any) => ({
+        label: item?.medium_name,
+        value: item?.medium_id
+      })),
+    [mediumsResponse]
+  )
+
+  // 4. Topics: Fetched based on selected program, segment, and mandatory subject!
+  const { data: topicsResponse, isFetching: isFetchingTopics } = useGetTopicsListQuery(
+    {
+      program_id: slotModalState?.program_id || '',
+      segment_id: slotModalState?.segment_id || '',
+      subject_id: slotModalState?.subject_id || '',
+      search: debouncedTopicSearch ? debouncedTopicSearch.trim() : undefined
+    },
+    {
+      skip: !slotModalState?.program_id || !slotModalState?.segment_id || !slotModalState?.subject_id
+    }
+  )
+
+  const topicOptions = useMemo(
+    () =>
+      (topicsResponse ?? []).map((item: any) => ({
+        label: item?.topic_name,
+        value: item?.topic_id,
+        total_questions: item?.total_questions,
+        description: item?.description
+      })),
+    [topicsResponse]
+  )
+
+  // 5. Sections: Fetched based on selected program, segment, and medium!
+  const { data: sectionsResponse, isFetching: isFetchingSections } = useGetActiveMediumSectionsQuery(
+    {
+      program_id: slotModalState?.program_id || '',
+      segment_id: slotModalState?.segment_id || '',
+      medium_id: slotModalState?.medium_id || ''
+    },
+    {
+      skip: !slotModalState?.program_id || !slotModalState?.segment_id || !slotModalState?.medium_id
+    }
+  )
+
+  const sectionOptions = useMemo(
+    () =>
+      (sectionsResponse ?? []).map((sec: any) => ({
+        label: sec?.section_name,
+        value: sec?.section_id
+      })),
+    [sectionsResponse]
+  )
+
+  // ---------------- Drawer Actions ----------------
+
+  const openSlotModal = (date?: string, periodId?: string) => {
+    setTopicSearchText('')
+    const targetDate = date || dayjs().format('YYYY-MM-DD')
+    const dayOfWeekNumber = dayjs(targetDate).day() // 0 = Sun, 1 = Mon, 2 = Tue, ..., 6 = Sat
+
+    if (dayOfWeekNumber === 0) {
+      triggerToast('Cannot book slots on Sunday (Weekend)', {
+        variant: ToastVariants.INFO
+      })
+
+      return
+    }
+
+    if (holidaysMap.has(targetDate)) {
+      triggerToast(`Cannot book slots on a holiday (${holidaysMap.get(targetDate)})`, {
+        variant: ToastVariants.INFO
+      })
+
+      return
+    }
+
+    const defaultPeriodId = periodId || periodSlots.find(p => p.isBreak === 0)?.id || ''
+
+    // Find matching timetable entry for this day_of_week and period_slot_id
+    const matchedEntry = (facultyTimetableData ?? []).find((entry: any) => {
+      const entryDay = Number(entry.day_of_week)
+
+      return entryDay === dayOfWeekNumber && entry.period_slot_id === defaultPeriodId
+    })
+
+    if (matchedEntry && (matchedEntry.program_id || matchedEntry.subject_id)) {
+      setIsAutoFilledFromTimetable(true)
+      setSlotModalState({
+        date: targetDate,
+        period_id: defaultPeriodId,
+        program_id: matchedEntry.program_id || '',
+        segment_id: matchedEntry.segment_id || '',
+        subject_id: matchedEntry.subject_id || '',
+        topic_id: '',
+        medium_id: matchedEntry.medium_id || '',
+        section_id: matchedEntry.section_id || ''
+      })
+    } else {
+      setIsAutoFilledFromTimetable(false)
+      setSlotModalState({
+        date: targetDate,
+        period_id: defaultPeriodId,
+        program_id: '',
+        segment_id: '',
+        subject_id: '',
+        topic_id: '',
+        medium_id: '',
+        section_id: ''
+      })
+    }
+  }
+
+  const closeSlotModal = () => {
+    setSlotModalState(null)
+    setIsAutoFilledFromTimetable(false)
+    setTopicSearchText('')
+  }
+
+  const setSlotModalField = (key: keyof SlotModalState, value: string) => {
+    setSlotModalState(prev => {
+      if (!prev) return null
+      const next = { ...prev, [key]: value }
+
+      // Reset downstream selections when parent selection changes
+      if (key === 'program_id') {
+        next.segment_id = ''
+        next.subject_id = ''
+        next.topic_id = ''
+        next.medium_id = ''
+        next.section_id = ''
+        setTopicSearchText('')
+      } else if (key === 'segment_id') {
+        next.subject_id = ''
+        next.topic_id = ''
+        next.medium_id = ''
+        next.section_id = ''
+        setTopicSearchText('')
+      } else if (key === 'medium_id') {
+        next.section_id = ''
+      } else if (key === 'subject_id') {
+        next.topic_id = ''
+        setTopicSearchText('')
+      }
+
+      return next
+    })
+  }
+
+  const handleSaveSchedule = async (data: {
+    date: string
+    period_id: string
+    program_id: string
+    segment_id: string
+    subject_id?: string
+    topic_id: string
+    medium_id?: string
+    section_id?: string
+  }) => {
+    const formattedDate = dayjs(data.date).format('YYYY-MM-DD')
+    if (dayjs(formattedDate).day() === 0) {
+      triggerToast('Cannot schedule topics on Sunday (Weekend)', {
+        variant: ToastVariants.ERROR
+      })
+
+      return
+    }
+
+    if (holidaysMap.has(formattedDate)) {
+      triggerToast(`Cannot schedule topics on a holiday (${holidaysMap.get(formattedDate)})`, {
+        variant: ToastVariants.ERROR
+      })
+
+      return
+    }
+
+    try {
+      await createUpdateScheduleMutation({
+        date: formattedDate,
+        period_id: data.period_id,
+        program_id: data.program_id,
+        segment_id: data.segment_id,
+        medium_id: data.medium_id || undefined,
+        section_id: data.section_id || undefined,
+        topic_id: data.topic_id,
+        faculty_id: activeUserId || undefined,
+        user_id: activeUserId || undefined,
+        status: 0
+      }).unwrap()
+
+      triggerToast('Schedule planned successfully', { variant: ToastVariants.SUCCESS })
+      closeSlotModal()
+    } catch (err: any) {
+      triggerToast(err?.data?.message || 'Failed to plan schedule', { variant: ToastVariants.ERROR })
+    }
+  }
+
+  const handleUpdateSchedule = async (scheduleId: string, updates: Partial<PlannedSchedule>) => {
+    const existing = plannedSchedules.find(s => s.id === scheduleId)
+    if (!existing) return
+
+    if (updates.date) {
+      const formattedDate = dayjs(updates.date).format('YYYY-MM-DD')
+      if (dayjs(formattedDate).day() === 0) {
+        triggerToast('Cannot reschedule to Sunday (Weekend)', {
+          variant: ToastVariants.ERROR
+        })
+
+        return
+      }
+
+      if (holidaysMap.has(formattedDate)) {
+        triggerToast(`Cannot reschedule to a holiday (${holidaysMap.get(formattedDate)})`, {
+          variant: ToastVariants.ERROR
+        })
+
+        return
+      }
+    }
+
+    if (selectedScheduleForModal && selectedScheduleForModal.schedule.id === scheduleId) {
+      setSelectedScheduleForModal({
+        schedule: { ...selectedScheduleForModal.schedule, ...updates }
+      })
+    }
+
+    try {
+      await createUpdateScheduleMutation({
+        id: scheduleId,
+        date: updates.date ? dayjs(updates.date).format('YYYY-MM-DD') : existing.date,
+        period_id: updates.period_id ?? existing.period_id,
+        program_id: updates.program_id ?? existing.program_id ?? '',
+        segment_id: updates.segment_id ?? existing.segment_id ?? '',
+        medium_id: updates.medium_id ?? existing.medium_id,
+        section_id: updates.section_id ?? existing.section_id,
+        topic_id: updates.topic_id ?? existing.topic_id,
+        status: updates.completed !== undefined ? (updates.completed ? 1 : 0) : existing.completed ? 1 : 0
+      }).unwrap()
+
+      triggerToast('Schedule updated successfully', { variant: ToastVariants.SUCCESS })
+    } catch (err: any) {
+      triggerToast(err?.data?.message || 'Failed to update schedule', { variant: ToastVariants.ERROR })
+    }
+  }
+
+  const handleRemoveSchedule = async (scheduleId: string) => {
+    try {
+      await deleteScheduleMutation({ schedule_id: scheduleId }).unwrap()
+      setSelectedScheduleForModal(null)
+      triggerToast('Schedule removed', { variant: ToastVariants.INFO })
+    } catch (err: any) {
+      triggerToast(err?.data?.message || 'Failed to remove schedule', { variant: ToastVariants.ERROR })
+    }
+  }
+
+  const handleToggleComplete = async (scheduleId: string) => {
+    const existing = plannedSchedules.find(s => s.id === scheduleId)
+    if (!existing) return
+    const nextVal = !existing.completed
+
+    if (selectedScheduleForModal && selectedScheduleForModal.schedule.id === scheduleId) {
+      setSelectedScheduleForModal({
+        schedule: {
+          ...selectedScheduleForModal.schedule,
+          completed: nextVal
+        }
+      })
+    }
+
+    try {
+      await createUpdateScheduleMutation({
+        id: scheduleId,
+        date: existing.date,
+        period_id: existing.period_id,
+        program_id: existing.program_id ?? '',
+        segment_id: existing.segment_id ?? '',
+        medium_id: existing.medium_id,
+        section_id: existing.section_id,
+        topic_id: existing.topic_id,
+        status: nextVal ? 1 : 0
+      }).unwrap()
+
+      triggerToast(nextVal ? 'Topic marked as complete' : 'Topic marked as pending', {
+        variant: ToastVariants.SUCCESS
+      })
+    } catch (err: any) {
+      if (selectedScheduleForModal && selectedScheduleForModal.schedule.id === scheduleId) {
+        setSelectedScheduleForModal({
+          schedule: {
+            ...selectedScheduleForModal.schedule,
+            completed: existing.completed
+          }
+        })
+      }
+      triggerToast(err?.data?.message || 'Failed to update topic status', { variant: ToastVariants.ERROR })
+    }
+  }
+
+  // ---------------- Coverage Stats ----------------
+
+  const totalCount = plannedSchedules.length
+  const completedCount = plannedSchedules.filter(s => s.completed).length
+  const overdueCount = plannedSchedules.filter(s => !s.completed && dayjs(s.date).isBefore(dayjs(), 'day')).length
+  const pendingCount = totalCount - completedCount - overdueCount
+
+  return {
+    calendar: {
+      currentDate,
+      viewMode,
+      setViewMode,
+      days,
+      periodSlots,
+      holidays: holidaysData,
+      facultyTimetable: facultyTimetableData,
+      isFetchingHolidays,
+      isFetchingPeriodTemplate,
+      isFetchingTimetable,
+      isLoading: isFetchingSchedules || isFetchingTimetable || isFetchingHolidays || isFetchingPeriodTemplate,
+      handlePrev,
+      handleNext,
+      handleToday
+    },
+    schedules: {
+      plannedSchedules,
+      isFetchingSchedules,
+      isSavingSchedule,
+      isDeletingSchedule,
+      handleSaveSchedule,
+      handleUpdateSchedule,
+      handleRemoveSchedule,
+      handleToggleComplete
+    },
+    coverage: {
+      totalCount,
+      completedCount,
+      overdueCount,
+      pendingCount
+    },
+    generator: {
+      showGenerator,
+      setShowGenerator
+    },
+    facultyUser: {
+      users,
+      options: userOptions,
+      selectedUser,
+      selectedUserId: activeUserId,
+      setSelectedUserId,
+      isFetchingUsers
+    },
+    drawer: {
+      slotModalState,
+      openSlotModal,
+      closeSlotModal,
+      setSlotModalField,
+      topicSearchText,
+      setTopicSearchText,
+      isAutoFilledFromTimetable,
+      isFetchingTimetable,
+      programOptions,
+      segmentOptions,
+      subjectOptions,
+      mediumOptions,
+      topicOptions,
+      sectionOptions,
+      periodSlots,
+      holidays: holidaysData,
+      isFetchingPeriodTemplate,
+      isFetchingProgramSegments,
+      isFetchingSubjects,
+      isFetchingTopics,
+      isFetchingMediums,
+      isFetchingSections
+    },
+    modal: {
+      selectedScheduleForModal,
+      setSelectedScheduleForModal,
+      closeScheduleModal: () => setSelectedScheduleForModal(null)
+    }
+  }
+}
