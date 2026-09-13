@@ -1,4 +1,14 @@
-import { Box, Typography, IconButton, TextField, MenuItem, Drawer, CircularProgress } from '@mui/material'
+import {
+  Box,
+  Typography,
+  IconButton,
+  TextField,
+  MenuItem,
+  Drawer,
+  CircularProgress,
+  Autocomplete,
+  Chip
+} from '@mui/material'
 import dayjs from 'dayjs'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -18,11 +28,15 @@ interface PlanScheduleDrawerProps {
   subjectOptions: { label: string; value: string }[]
   mediumOptions: { label: string; value: string }[]
   topicOptions: { label: string; value: string; total_questions?: number; description?: string }[]
+  topicSearchText?: string
+  setTopicSearchText?: (text: string) => void
+  isAutoFilledFromTimetable?: boolean
   sectionOptions?: { label: string; value: string }[]
   periodSlots?: PeriodSlot[]
   isFetchingProgramSegments?: boolean
   isFetchingSubjects?: boolean
   isFetchingTopics?: boolean
+  isFetchingMediums?: boolean
   isFetchingSections?: boolean
   isFetchingPeriodSlots?: boolean
   isSaving?: boolean
@@ -48,9 +62,14 @@ export const PlanScheduleDrawer = ({
   subjectOptions,
   mediumOptions,
   topicOptions,
+  topicSearchText = '',
+  setTopicSearchText,
+  isAutoFilledFromTimetable = false,
   sectionOptions = [],
   periodSlots = PERIOD_SLOTS,
-  isFetchingTopics,
+  isFetchingSubjects = false,
+  isFetchingTopics = false,
+  isFetchingMediums = false,
   isFetchingSections = false,
   isFetchingPeriodSlots = false,
   isSaving = false,
@@ -63,7 +82,10 @@ export const PlanScheduleDrawer = ({
     slotModalState.period_id &&
     slotModalState.program_id &&
     slotModalState.segment_id &&
-    slotModalState.topic_id
+    slotModalState.subject_id &&
+    slotModalState.topic_id &&
+    slotModalState.medium_id &&
+    slotModalState.section_id
   )
 
   return (
@@ -87,11 +109,23 @@ export const PlanScheduleDrawer = ({
           </IconButton>
         </Box>
 
-        <Typography variant='body2' color='text.secondary' mb={3}>
+        <Typography variant='body2' color='text.secondary' mb={isAutoFilledFromTimetable ? 1.5 : 3}>
           {slotModalState.date
             ? `Scheduling for ${dayjs(slotModalState.date).format('MMMM D, YYYY')}.`
             : 'Select date and program to schedule a topic.'}
         </Typography>
+
+        {isAutoFilledFromTimetable && (
+          <Box mb={2.5}>
+            <Chip
+              size='small'
+              label='Pre-filled from your Timetable (Editable)'
+              color='primary'
+              variant='outlined'
+              sx={{ fontSize: '0.75rem', fontWeight: 600 }}
+            />
+          </Box>
+        )}
 
         <Box display='flex' flexDirection='column' gap={2.5} flex={1} overflow='auto' pr={0.5}>
           {/* Date Picker */}
@@ -177,102 +211,86 @@ export const PlanScheduleDrawer = ({
             </TextField>
           </Box>
 
-          {/* Subject (Optional Filter) */}
-          {subjectOptions.length > 0 && (
-            <Box>
-              <Typography variant='caption' color='text.secondary' fontWeight={600} mb={0.5} display='block'>
-                Subject (Optional)
-              </Typography>
-              <TextField
-                select
-                fullWidth
-                size='small'
-                value={slotModalState.subject_id || ''}
-                onChange={e => setSlotModalField('subject_id', e.target.value)}
-              >
-                <MenuItem value=''>All Subjects</MenuItem>
-                {subjectOptions.map(sub => (
-                  <MenuItem key={sub.value} value={sub.value}>
-                    {sub.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Box>
-          )}
-
-          {/* Topic (Fetched dynamically based on Program & Segment) */}
+          {/* Subject (Mandatory) */}
           <Box>
             <Box display='flex' justifyContent='space-between' alignItems='center' mb={0.5}>
               <Typography variant='caption' color='text.secondary' fontWeight={600} display='block'>
-                Topic *
+                Subject *
               </Typography>
-              {isFetchingTopics && <CircularProgress size={14} />}
+              {isFetchingSubjects && <CircularProgress size={14} />}
             </Box>
             <TextField
               select
               fullWidth
               size='small'
-              disabled={!slotModalState.program_id || !slotModalState.segment_id || isFetchingTopics}
-              value={slotModalState.topic_id || ''}
-              onChange={e => setSlotModalField('topic_id', e.target.value)}
+              disabled={!slotModalState.program_id || !slotModalState.segment_id || isFetchingSubjects}
+              value={slotModalState.subject_id || ''}
+              onChange={e => setSlotModalField('subject_id', e.target.value)}
               helperText={
                 !slotModalState.program_id || !slotModalState.segment_id
-                  ? 'Select Program and Segment to view topics'
-                  : topicOptions.length === 0 && !isFetchingTopics
-                    ? 'No topics found for this selection'
+                  ? 'Select Program and Segment first'
+                  : subjectOptions.length === 0 && !isFetchingSubjects
+                    ? 'No subjects found for this selection'
                     : ''
               }
             >
-              {topicOptions.map(t => (
-                <MenuItem key={t.value} value={t.value}>
-                  {t.label}
-                  {t.total_questions !== undefined && t.total_questions > 0 && (
-                    <Typography component='span' variant='caption' color='text.secondary' sx={{ ml: 1 }}>
-                      ({t.total_questions} Qs)
-                    </Typography>
-                  )}
+              {subjectOptions.map(sub => (
+                <MenuItem key={sub.value} value={sub.value}>
+                  {sub.label}
                 </MenuItem>
               ))}
             </TextField>
           </Box>
 
-          {/* Medium */}
-          {mediumOptions.length > 0 && (
-            <Box>
-              <Typography variant='caption' color='text.secondary' fontWeight={600} mb={0.5} display='block'>
-                Medium
-              </Typography>
-              <TextField
-                select
-                fullWidth
-                size='small'
-                value={slotModalState.medium_id || ''}
-                onChange={e => setSlotModalField('medium_id', e.target.value)}
-              >
-                {mediumOptions.map(m => (
-                  <MenuItem key={m.value} value={m.value}>
-                    {m.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Box>
-          )}
-
-          {/* Section */}
+          {/* Medium (Mandatory) */}
           <Box>
-            <Typography variant='caption' color='text.secondary' fontWeight={600} mb={0.5} display='block'>
-              Section
-            </Typography>
+            <Box display='flex' justifyContent='space-between' alignItems='center' mb={0.5}>
+              <Typography variant='caption' color='text.secondary' fontWeight={600} display='block'>
+                Medium *
+              </Typography>
+              {isFetchingMediums && <CircularProgress size={14} />}
+            </Box>
             <TextField
               select
               fullWidth
               size='small'
+              disabled={!slotModalState.program_id || !slotModalState.segment_id || isFetchingMediums}
+              value={slotModalState.medium_id || ''}
+              onChange={e => setSlotModalField('medium_id', e.target.value)}
+              helperText={
+                !slotModalState.program_id || !slotModalState.segment_id
+                  ? 'Select Program and Segment first'
+                  : mediumOptions.length === 0 && !isFetchingMediums
+                    ? 'No mediums found for this selection'
+                    : ''
+              }
+            >
+              {mediumOptions.map(m => (
+                <MenuItem key={m.value} value={m.value}>
+                  {m.label}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
+
+          {/* Section (Mandatory) */}
+          <Box>
+            <Box display='flex' justifyContent='space-between' alignItems='center' mb={0.5}>
+              <Typography variant='caption' color='text.secondary' fontWeight={600} display='block'>
+                Section *
+              </Typography>
+              {isFetchingSections && <CircularProgress size={14} />}
+            </Box>
+            <TextField
+              select
+              fullWidth
+              size='small'
+              disabled={!slotModalState.medium_id || isFetchingSections}
               value={slotModalState.section_id || ''}
               onChange={e => setSlotModalField('section_id', e.target.value)}
-              disabled={!slotModalState.medium_id || isFetchingSections}
               helperText={
                 !slotModalState.medium_id
-                  ? 'Select Medium to view sections'
+                  ? 'Select Medium first'
                   : sectionOptions.length === 0 && !isFetchingSections
                     ? 'No sections found for this selection'
                     : ''
@@ -284,6 +302,77 @@ export const PlanScheduleDrawer = ({
                 </MenuItem>
               ))}
             </TextField>
+          </Box>
+
+          {/* Topic (Searchable with 500ms debounce, fetched dynamically based on Program, Segment & Subject) */}
+          <Box>
+            <Box display='flex' justifyContent='space-between' alignItems='center' mb={0.5}>
+              <Typography variant='caption' color='text.secondary' fontWeight={600} display='block'>
+                Topic *
+              </Typography>
+              {isFetchingTopics && <CircularProgress size={14} />}
+            </Box>
+            <Autocomplete
+              size='small'
+              disabled={!slotModalState.subject_id}
+              loading={isFetchingTopics}
+              options={topicOptions}
+              getOptionLabel={opt => (typeof opt === 'string' ? opt : opt.label || '')}
+              isOptionEqualToValue={(opt, val) => opt.value === val.value}
+              value={topicOptions.find(t => t.value === slotModalState.topic_id) || null}
+              onChange={(_, newVal) => {
+                setSlotModalField('topic_id', newVal ? newVal.value : '')
+              }}
+              inputValue={topicSearchText}
+              onInputChange={(_, newInputValue) => {
+                if (setTopicSearchText) {
+                  setTopicSearchText(newInputValue)
+                }
+              }}
+              noOptionsText={
+                !slotModalState.subject_id
+                  ? 'Select Subject to view topics'
+                  : isFetchingTopics
+                    ? 'Searching topics...'
+                    : 'No topics found'
+              }
+              renderOption={(props, option) => (
+                <Box component='li' {...props} key={option.value}>
+                  <Box display='flex' flexDirection='column' width='100%'>
+                    <Box display='flex' justifyContent='space-between' alignItems='center'>
+                      <Typography variant='body2' fontWeight={500}>
+                        {option.label}
+                      </Typography>
+                      {option.total_questions !== undefined && option.total_questions > 0 && (
+                        <Typography variant='caption' color='text.secondary' sx={{ ml: 1 }}>
+                          ({option.total_questions} Qs)
+                        </Typography>
+                      )}
+                    </Box>
+                    {option.description && (
+                      <Typography variant='caption' color='text.secondary' sx={{ fontSize: '0.72rem' }}>
+                        {option.description}
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              )}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  placeholder={!slotModalState.subject_id ? 'Select Subject first' : 'Search topic name...'}
+                  helperText={
+                    !slotModalState.program_id || !slotModalState.segment_id
+                      ? 'Select Program and Segment first'
+                      : !slotModalState.subject_id
+                        ? 'Select Subject to view topics'
+                        : topicOptions.length === 0 && !isFetchingTopics
+                          ? 'No topics found for this subject'
+                          : ''
+                  }
+                />
+              )}
+            />
           </Box>
         </Box>
 
@@ -304,8 +393,8 @@ export const PlanScheduleDrawer = ({
                 segment_id: slotModalState.segment_id,
                 subject_id: slotModalState.subject_id || undefined,
                 topic_id: slotModalState.topic_id,
-                medium_id: slotModalState.medium_id || undefined,
-                section_id: slotModalState.section_id || 'A'
+                medium_id: slotModalState.medium_id,
+                section_id: slotModalState.section_id
               })
             }}
             size='small'

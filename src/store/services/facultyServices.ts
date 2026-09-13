@@ -31,6 +31,7 @@ interface GetTopicsListRequest {
   program_id: string
   segment_id: string
   subject_id?: string
+  search?: string
 }
 
 interface GetQuestionsRequest extends GetTopicsListRequest {
@@ -96,17 +97,25 @@ export type DeleteTopicScheduleRequest = {
   schedule_id: string
 }
 
+export interface GetTopicSchedulesRequest {
+  program_id?: string
+  segment_id?: string
+  start_date?: string
+  end_date?: string
+}
+
 const facultyServiceApi = api.injectEndpoints({
   endpoints: build => ({
     getTopicsList: build.query<Topic[], GetTopicsListRequest>({
       providesTags: [CacheTag.SubjectTopics],
-      query: ({ program_id, segment_id, subject_id }) => {
+      query: ({ program_id, segment_id, subject_id, search }) => {
         return {
           url: urlConstants.faculty.getTopicsListUrl,
           params: {
             program_id,
             segment_id,
-            subject_id
+            subject_id,
+            search
           }
         }
       }
@@ -168,7 +177,7 @@ const facultyServiceApi = api.injectEndpoints({
         body
       })
     }),
-    getTopicSchedules: build.query<TopicScheduleResponse[], { program_id?: string; segment_id?: string } | void>({
+    getTopicSchedules: build.query<TopicScheduleResponse[], GetTopicSchedulesRequest | void>({
       providesTags: [CacheTag.FacultyTopicSchedule],
       query: params => ({
         url: urlConstants.faculty.getTopicSchedulesUrl,
@@ -190,6 +199,12 @@ const facultyServiceApi = api.injectEndpoints({
         url: urlConstants.faculty.deleteTopicScheduleUrl,
         body
       })
+    }),
+    getFacultyTimetable: build.query<FacultyTimetableData[], void>({
+      providesTags: [CacheTag.ClassTimetable],
+      query: () => ({
+        url: urlConstants.faculty.getFacultyTimetableUrl
+      })
     })
   })
 })
@@ -205,6 +220,7 @@ export const {
   useTranslateTextMutation,
   useGetTopicSchedulesQuery,
   useCreateUpdateTopicScheduleMutation,
-  useDeleteTopicScheduleMutation
+  useDeleteTopicScheduleMutation,
+  useGetFacultyTimetableQuery
 } = facultyServiceApi
 

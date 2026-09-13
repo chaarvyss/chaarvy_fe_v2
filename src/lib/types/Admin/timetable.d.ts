@@ -58,12 +58,19 @@ type ExistingTimetableData = TimetableEntry & {
 }
 
 type FacultyTimetableData = {
-  day_of_week: string
+  id?: string
+  day_of_week: string | number
   period_slot_id: string
-  subject_name: string
-  segment_name: string
-  section_name: string
-  medium_name: string
+  program_id?: string
+  program_name?: string
+  segment_id?: string
+  segment_name?: string
+  medium_id?: string
+  medium_name?: string
+  section_id?: string
+  section_name?: string
+  subject_id?: string
+  subject_name?: string
 }
 
 type TimetableRequest = {

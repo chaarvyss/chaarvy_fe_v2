@@ -91,11 +91,11 @@ const SchedulePlanner = () => {
               onChange={(e, val) => val && calendar.setViewMode(val)}
               size='small'
             >
-              <ToggleButton value='month' sx={{ px: 2.5, textTransform: 'none', fontWeight: 600 }}>
-                Month
-              </ToggleButton>
               <ToggleButton value='week' sx={{ px: 2.5, textTransform: 'none', fontWeight: 600 }}>
                 Week
+              </ToggleButton>
+              <ToggleButton value='month' sx={{ px: 2.5, textTransform: 'none', fontWeight: 600 }}>
+                Month
               </ToggleButton>
             </ToggleButtonGroup>
 
@@ -149,12 +149,16 @@ const SchedulePlanner = () => {
         subjectOptions={drawer.subjectOptions}
         mediumOptions={drawer.mediumOptions}
         topicOptions={drawer.topicOptions}
+        topicSearchText={drawer.topicSearchText}
+        setTopicSearchText={drawer.setTopicSearchText}
+        isAutoFilledFromTimetable={drawer.isAutoFilledFromTimetable}
         sectionOptions={drawer.sectionOptions}
         periodSlots={drawer.periodSlots}
         isFetchingPeriodSlots={drawer.isFetchingPeriodTemplate}
         isFetchingProgramSegments={drawer.isFetchingProgramSegments}
         isFetchingSubjects={drawer.isFetchingSubjects}
         isFetchingTopics={drawer.isFetchingTopics}
+        isFetchingMediums={drawer.isFetchingMediums}
         isFetchingSections={drawer.isFetchingSections}
         isSaving={schedules.isSavingSchedule}
         onSaveSchedule={schedules.handleSaveSchedule}

@@ -14,12 +14,14 @@ import {
   useGetTopicsListQuery,
   useGetTopicSchedulesQuery,
   useCreateUpdateTopicScheduleMutation,
-  useDeleteTopicScheduleMutation
+  useDeleteTopicScheduleMutation,
+  useGetFacultyTimetableQuery
 } from 'src/store/services/facultyServices'
 import {
   useGetAllProgramSegmentsListQuery,
   useGetProgramSegmentSubjectsListQuery
 } from 'src/store/services/programServices'
+import { useDebounce } from 'src/utils/hooks/useDebounce'
 
 import { PERIOD_SLOTS, PeriodSlot, PlannedSchedule, SlotModalState, SelectedScheduleModalState } from '../types'
 
@@ -31,8 +33,54 @@ export const useSchedulePlanner = () => {
   const [viewMode, setViewMode] = useState<'month' | 'week'>('week')
   const [showGenerator, setShowGenerator] = useState(false)
 
-  // DB Queries & Mutations for Topic Schedules
-  const { data: dbSchedules = [], isFetching: isFetchingSchedules } = useGetTopicSchedulesQuery()
+  // ---------------- Calendar Math ----------------
+
+  const start = useMemo(() => {
+    if (viewMode === 'week') {
+      // Sunday of the week containing currentDate
+      return currentDate.subtract(currentDate.day(), 'day').startOf('day')
+    }
+
+    // Month view: Sunday on or before the 1st of the month
+    const monthStart = currentDate.startOf('month')
+
+    return monthStart.subtract(monthStart.day(), 'day').startOf('day')
+  }, [currentDate, viewMode])
+
+  const end = useMemo(() => {
+    if (viewMode === 'week') {
+      // Saturday of the week containing currentDate
+      return start.add(6, 'day').endOf('day')
+    }
+
+    // Month view: Saturday on or after the last day of the month
+    const monthEnd = currentDate.endOf('month')
+
+    return monthEnd.add(6 - monthEnd.day(), 'day').endOf('day')
+  }, [currentDate, viewMode, start])
+
+  const days = useMemo(() => {
+    const list: dayjs.Dayjs[] = []
+    let day = start
+    while (day.isBefore(end)) {
+      list.push(day)
+      day = day.add(1, 'day')
+    }
+
+    return list
+  }, [start, end])
+
+  const startDateStr = useMemo(() => (days.length > 0 ? days[0].format('YYYY-MM-DD') : undefined), [days])
+  const endDateStr = useMemo(() => (days.length > 0 ? days[days.length - 1].format('YYYY-MM-DD') : undefined), [days])
+
+  const handlePrev = () => setCurrentDate(currentDate.subtract(1, viewMode))
+  const handleNext = () => setCurrentDate(currentDate.add(1, viewMode))
+  const handleToday = () => setCurrentDate(dayjs())
+
+  // DB Queries & Mutations for Topic Schedules (filtered by visible date range for faster fetching)
+  const { data: dbSchedules = [], isFetching: isFetchingSchedules } = useGetTopicSchedulesQuery(
+    startDateStr && endDateStr ? { start_date: startDateStr, end_date: endDateStr } : undefined
+  )
   const [createUpdateScheduleMutation, { isLoading: isSavingSchedule }] = useCreateUpdateTopicScheduleMutation()
   const [deleteScheduleMutation, { isLoading: isDeletingSchedule }] = useDeleteTopicScheduleMutation()
 
@@ -79,6 +127,12 @@ export const useSchedulePlanner = () => {
   // Modal / Drawer States
   const [slotModalState, setSlotModalState] = useState<SlotModalState | null>(null)
   const [selectedScheduleForModal, setSelectedScheduleForModal] = useState<SelectedScheduleModalState | null>(null)
+  const [topicSearchText, setTopicSearchText] = useState('')
+  const debouncedTopicSearch = useDebounce(topicSearchText, 500)
+  const [isAutoFilledFromTimetable, setIsAutoFilledFromTimetable] = useState(false)
+
+  // 0. Faculty Timetable (for auto-filling slots based on day-of-week and period)
+  const { data: facultyTimetableData, isFetching: isFetchingTimetable } = useGetFacultyTimetableQuery()
 
   // ---------------- API Queries ----------------
 
@@ -130,7 +184,7 @@ export const useSchedulePlanner = () => {
   )
 
   // 3. Mediums (for selected program & segment in drawer)
-  const { data: mediumsResponse } = useGetActiveSegmentMediumsQuery(
+  const { data: mediumsResponse, isFetching: isFetchingMediums } = useGetActiveSegmentMediumsQuery(
     {
       program_id: slotModalState?.program_id || '',
       segment_id: slotModalState?.segment_id || ''
@@ -149,15 +203,16 @@ export const useSchedulePlanner = () => {
     [mediumsResponse]
   )
 
-  // 4. Topics: Fetched based on selected program and segment!
+  // 4. Topics: Fetched based on selected program, segment, and mandatory subject!
   const { data: topicsResponse, isFetching: isFetchingTopics } = useGetTopicsListQuery(
     {
       program_id: slotModalState?.program_id || '',
       segment_id: slotModalState?.segment_id || '',
-      ...(slotModalState?.subject_id ? { subject_id: slotModalState.subject_id } : {})
+      subject_id: slotModalState?.subject_id || '',
+      search: debouncedTopicSearch ? debouncedTopicSearch.trim() : undefined
     },
     {
-      skip: !slotModalState?.program_id || !slotModalState?.segment_id
+      skip: !slotModalState?.program_id || !slotModalState?.segment_id || !slotModalState?.subject_id
     }
   )
 
@@ -193,64 +248,53 @@ export const useSchedulePlanner = () => {
     [sectionsResponse]
   )
 
-  // ---------------- Calendar Math ----------------
-
-  const start = useMemo(() => {
-    if (viewMode === 'week') {
-      // Sunday of the week containing currentDate
-      return currentDate.subtract(currentDate.day(), 'day').startOf('day')
-    }
-
-    // Month view: Sunday on or before the 1st of the month
-    const monthStart = currentDate.startOf('month')
-
-    return monthStart.subtract(monthStart.day(), 'day').startOf('day')
-  }, [currentDate, viewMode])
-
-  const end = useMemo(() => {
-    if (viewMode === 'week') {
-      // Saturday of the week containing currentDate
-      return start.add(6, 'day').endOf('day')
-    }
-
-    // Month view: Saturday on or after the last day of the month
-    const monthEnd = currentDate.endOf('month')
-
-    return monthEnd.add(6 - monthEnd.day(), 'day').endOf('day')
-  }, [currentDate, viewMode, start])
-
-  const days = useMemo(() => {
-    const list: dayjs.Dayjs[] = []
-    let day = start
-    while (day.isBefore(end)) {
-      list.push(day)
-      day = day.add(1, 'day')
-    }
-
-    return list
-  }, [start, end])
-
-  const handlePrev = () => setCurrentDate(currentDate.subtract(1, viewMode))
-  const handleNext = () => setCurrentDate(currentDate.add(1, viewMode))
-  const handleToday = () => setCurrentDate(dayjs())
-
   // ---------------- Drawer Actions ----------------
 
   const openSlotModal = (date?: string, periodId?: string) => {
+    setTopicSearchText('')
+    const targetDate = date || dayjs().format('YYYY-MM-DD')
     const defaultPeriodId = periodId || periodSlots.find(p => p.isBreak === 0)?.id || ''
-    setSlotModalState({
-      date: date || dayjs().format('YYYY-MM-DD'),
-      period_id: defaultPeriodId,
-      program_id: '',
-      segment_id: '',
-      subject_id: '',
-      topic_id: '',
-      medium_id: '',
-      section_id: ''
+    const dayOfWeekNumber = dayjs(targetDate).day() // 0 = Sun, 1 = Mon, 2 = Tue, ..., 6 = Sat
+
+    // Find matching timetable entry for this day_of_week and period_slot_id
+    const matchedEntry = (facultyTimetableData ?? []).find((entry: any) => {
+      const entryDay = Number(entry.day_of_week)
+
+      return entryDay === dayOfWeekNumber && entry.period_slot_id === defaultPeriodId
     })
+
+    if (matchedEntry && (matchedEntry.program_id || matchedEntry.subject_id)) {
+      setIsAutoFilledFromTimetable(true)
+      setSlotModalState({
+        date: targetDate,
+        period_id: defaultPeriodId,
+        program_id: matchedEntry.program_id || '',
+        segment_id: matchedEntry.segment_id || '',
+        subject_id: matchedEntry.subject_id || '',
+        topic_id: '',
+        medium_id: matchedEntry.medium_id || '',
+        section_id: matchedEntry.section_id || ''
+      })
+    } else {
+      setIsAutoFilledFromTimetable(false)
+      setSlotModalState({
+        date: targetDate,
+        period_id: defaultPeriodId,
+        program_id: '',
+        segment_id: '',
+        subject_id: '',
+        topic_id: '',
+        medium_id: '',
+        section_id: ''
+      })
+    }
   }
 
-  const closeSlotModal = () => setSlotModalState(null)
+  const closeSlotModal = () => {
+    setSlotModalState(null)
+    setIsAutoFilledFromTimetable(false)
+    setTopicSearchText('')
+  }
 
   const setSlotModalField = (key: keyof SlotModalState, value: string) => {
     setSlotModalState(prev => {
@@ -264,15 +308,18 @@ export const useSchedulePlanner = () => {
         next.topic_id = ''
         next.medium_id = ''
         next.section_id = ''
+        setTopicSearchText('')
       } else if (key === 'segment_id') {
         next.subject_id = ''
         next.topic_id = ''
         next.medium_id = ''
         next.section_id = ''
+        setTopicSearchText('')
       } else if (key === 'medium_id') {
         next.section_id = ''
       } else if (key === 'subject_id') {
         next.topic_id = ''
+        setTopicSearchText('')
       }
 
       return next
@@ -434,6 +481,10 @@ export const useSchedulePlanner = () => {
       openSlotModal,
       closeSlotModal,
       setSlotModalField,
+      topicSearchText,
+      setTopicSearchText,
+      isAutoFilledFromTimetable,
+      isFetchingTimetable,
       programOptions,
       segmentOptions,
       subjectOptions,
@@ -445,6 +496,7 @@ export const useSchedulePlanner = () => {
       isFetchingProgramSegments,
       isFetchingSubjects,
       isFetchingTopics,
+      isFetchingMediums,
       isFetchingSections
     },
     modal: {
