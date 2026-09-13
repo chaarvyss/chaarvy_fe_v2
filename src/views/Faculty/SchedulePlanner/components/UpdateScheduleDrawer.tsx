@@ -1,18 +1,20 @@
 import { Box, Typography, IconButton, TextField, MenuItem, Divider, Drawer } from '@mui/material'
 import dayjs from 'dayjs'
+import React, { useMemo } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 
 import { ChaarvyButton } from 'src/reusable_components'
 import GetChaarvyIcons, { ChaarvyIcon } from 'src/utils/icons'
 
-import { PERIOD_SLOTS, PeriodSlot, PlannedSchedule, SelectedScheduleModalState } from '../types'
+import { PERIOD_SLOTS, PeriodSlot, PlannedSchedule, SelectedScheduleModalState, HolidayItem } from '../types'
 
 interface UpdateScheduleDrawerProps {
   isOpen: boolean
   onClose: () => void
   selectedScheduleForModal: SelectedScheduleModalState | null
   periodSlots?: PeriodSlot[]
+  holidays?: HolidayItem[]
   onUpdateSchedule: (scheduleId: string, updates: Partial<PlannedSchedule>) => void
   onRemoveSchedule: (scheduleId: string) => void
   onToggleComplete: (scheduleId: string) => void
@@ -23,10 +25,22 @@ export const UpdateScheduleDrawer = ({
   onClose,
   selectedScheduleForModal,
   periodSlots = PERIOD_SLOTS,
+  holidays = [],
   onUpdateSchedule,
   onRemoveSchedule,
   onToggleComplete
 }: UpdateScheduleDrawerProps) => {
+  const holidayMap = useMemo(() => {
+    const map = new Map<string, string>()
+    ;(holidays ?? []).forEach(h => {
+      if (h?.date) {
+        map.set(dayjs(h.date).format('YYYY-MM-DD'), h.holiday_name || 'Holiday')
+      }
+    })
+
+    return map
+  }, [holidays])
+
   if (!selectedScheduleForModal) return null
 
   const { schedule } = selectedScheduleForModal
@@ -74,6 +88,7 @@ export const UpdateScheduleDrawer = ({
               <DatePicker
                 portalId='datepicker-portal'
                 minDate={new Date()}
+                filterDate={(date: Date) => date.getDay() !== 0 && !holidayMap.has(dayjs(date).format('YYYY-MM-DD'))}
                 selected={schedule.date ? new Date(schedule.date) : null}
                 onChange={(date: Date | null) => {
                   if (date) {
@@ -99,11 +114,13 @@ export const UpdateScheduleDrawer = ({
               value={schedule.period_id || ''}
               onChange={e => onUpdateSchedule(schedule.id, { period_id: e.target.value })}
             >
-              {periodSlots.filter(p => p.isBreak === 0).map(p => (
-                <MenuItem key={p.id} value={p.id}>
-                  {p.title} ({p.start_time} - {p.end_time})
-                </MenuItem>
-              ))}
+              {periodSlots
+                .filter(p => p.isBreak === 0)
+                .map(p => (
+                  <MenuItem key={p.id} value={p.id}>
+                    {p.title} ({p.start_time} - {p.end_time})
+                  </MenuItem>
+                ))}
             </TextField>
           </Box>
 

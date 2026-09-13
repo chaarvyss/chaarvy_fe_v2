@@ -33,7 +33,8 @@ export const PermissionLabels = {
     reports: 'nav:reports',
     expenses: 'nav:expenses',
     vendors: 'nav:vendors',
-    timetable: 'nav:time_table'
+    timetable: 'nav:time_table',
+    holidays: 'nav:holidays'
   },
   dashboard: {
     studentCount: 'dashboard:student_count',
@@ -236,6 +237,9 @@ export const PermissionLabels = {
     download: {
       studentAdmissionsReport: 'reports:download:studentAdmissionsReport'
     }
+  },
+  schedulePlanner: {
+    canPlanOthers: 'schedule_planner:can_plan_others'
   },
   expenses: {
     add: 'expenses:add',

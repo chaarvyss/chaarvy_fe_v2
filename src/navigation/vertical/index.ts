@@ -74,6 +74,12 @@ const navigation = (): VerticalNavItemsType => {
           title: 'Reports',
           path: PagePath.REPORTS,
           icon: ChaarvyIcon.DataMatrix
+        },
+        {
+          key: PermissionLabels.nav.holidays,
+          title: 'Holidays',
+          path: PagePath.HOLIDAYS,
+          icon: ChaarvyIcon.CalendarMonthOutline
         }
       ]
     },

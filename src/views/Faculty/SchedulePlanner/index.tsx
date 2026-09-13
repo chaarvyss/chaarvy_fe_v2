@@ -1,6 +1,17 @@
-import { Box, Card, Typography, ToggleButtonGroup, ToggleButton, IconButton } from '@mui/material'
+import {
+  Box,
+  Card,
+  Typography,
+  ToggleButtonGroup,
+  ToggleButton,
+  IconButton,
+  Autocomplete,
+  TextField
+} from '@mui/material'
 
-import { ChaarvyButton } from 'src/reusable_components'
+import { PermissionLabels } from 'src/constants/permissions'
+import { isAuthorised } from 'src/lib/util/permissionCheck'
+import { ChaarvyButton, LoadingSpinner } from 'src/reusable_components'
 import CoverageProgressBar from 'src/reusable_components/CoverageProgressBar'
 import GetChaarvyIcons, { ChaarvyIcon } from 'src/utils/icons'
 
@@ -11,7 +22,9 @@ import { useSchedulePlanner } from './hooks/useSchedulePlanner'
 import QuestionPaperGenerator from './QuestionPaperGenerator'
 
 const SchedulePlanner = () => {
-  const { calendar, schedules, coverage, generator, drawer, modal } = useSchedulePlanner()
+  const { calendar, schedules, coverage, generator, drawer, modal, facultyUser } = useSchedulePlanner()
+
+  const canPlanOthersSchedule = isAuthorised(PermissionLabels.schedulePlanner.canPlanOthers)
 
   if (generator.showGenerator) {
     const generatorTopics = schedules.plannedSchedules.map(s => ({
@@ -43,7 +56,32 @@ const SchedulePlanner = () => {
             total={coverage.totalCount}
           />
         </Box>
-        <Box display='flex' gap={2}>
+        <Box display='flex' gap={2} alignItems='center'>
+          <Autocomplete
+            disabled={!canPlanOthersSchedule}
+            size='small'
+            options={facultyUser.options}
+            loading={facultyUser.isFetchingUsers}
+            value={facultyUser.selectedUser}
+            getOptionLabel={opt => opt.name || opt.username || ''}
+            isOptionEqualToValue={(opt, val) => opt.user_id === val?.user_id}
+            onChange={(_, val) => facultyUser.setSelectedUserId(val?.user_id || '')}
+            sx={{
+              minWidth: 240,
+              '& .MuiInputBase-root': {
+                height: 40,
+                borderRadius: 2,
+                bgcolor: '#f8fafc'
+              }
+            }}
+            renderInput={params => (
+              <TextField
+                {...params}
+                size='small'
+                placeholder={facultyUser.isFetchingUsers ? 'Loading users...' : 'Select User'}
+              />
+            )}
+          />
           <ChaarvyButton
             variant='contained'
             color='primary'
@@ -51,15 +89,6 @@ const SchedulePlanner = () => {
             sx={{ borderRadius: 2, fontWeight: 600, textTransform: 'none', height: 40, px: 3 }}
           >
             + Plan Schedule
-          </ChaarvyButton>
-          <ChaarvyButton
-            variant='outlined'
-            color='primary'
-            disabled={schedules.plannedSchedules.length === 0}
-            onClick={() => generator.setShowGenerator(true)}
-            sx={{ borderRadius: 2, fontWeight: 600, textTransform: 'none', height: 40 }}
-          >
-            Generate Question Paper
           </ChaarvyButton>
         </Box>
       </Box>
@@ -126,16 +155,32 @@ const SchedulePlanner = () => {
           </Box>
         </Box>
 
-        {/* Calendar Grid Component */}
-        <CalendarGrid
-          viewMode={calendar.viewMode}
-          currentDate={calendar.currentDate}
-          days={calendar.days}
-          plannedSchedules={schedules.plannedSchedules}
-          periodSlots={calendar.periodSlots}
-          onSelectEmptySlot={(date, periodId) => drawer.openSlotModal(date, periodId)}
-          onSelectSchedule={schedule => modal.setSelectedScheduleForModal({ schedule })}
-        />
+        {/* Calendar Grid Component or Loading Spinner */}
+        {calendar.isLoading ? (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: 420,
+              py: 4
+            }}
+          >
+            <LoadingSpinner loadingText='Loading schedule data...' />
+          </Box>
+        ) : (
+          <CalendarGrid
+            viewMode={calendar.viewMode}
+            currentDate={calendar.currentDate}
+            days={calendar.days}
+            plannedSchedules={schedules.plannedSchedules}
+            periodSlots={calendar.periodSlots}
+            holidays={calendar.holidays}
+            facultyTimetable={calendar.facultyTimetable}
+            onSelectEmptySlot={(date, periodId) => drawer.openSlotModal(date, periodId)}
+            onSelectSchedule={schedule => modal.setSelectedScheduleForModal({ schedule })}
+          />
+        )}
       </Card>
 
       {/* Plan New Schedule Side Drawer (Program -> Segment -> Topics cascading) */}
@@ -154,6 +199,7 @@ const SchedulePlanner = () => {
         isAutoFilledFromTimetable={drawer.isAutoFilledFromTimetable}
         sectionOptions={drawer.sectionOptions}
         periodSlots={drawer.periodSlots}
+        holidays={drawer.holidays}
         isFetchingPeriodSlots={drawer.isFetchingPeriodTemplate}
         isFetchingProgramSegments={drawer.isFetchingProgramSegments}
         isFetchingSubjects={drawer.isFetchingSubjects}
@@ -170,6 +216,7 @@ const SchedulePlanner = () => {
         onClose={modal.closeScheduleModal}
         selectedScheduleForModal={modal.selectedScheduleForModal}
         periodSlots={calendar.periodSlots}
+        holidays={calendar.holidays}
         onUpdateSchedule={schedules.handleUpdateSchedule}
         onRemoveSchedule={schedules.handleRemoveSchedule}
         onToggleComplete={schedules.handleToggleComplete}

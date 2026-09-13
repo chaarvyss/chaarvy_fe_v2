@@ -91,6 +91,8 @@ export type CreateUpdateTopicScheduleRequest = {
   medium_id?: string
   section_id?: string
   status?: number
+  faculty_id?: string
+  user_id?: string
 }
 
 export type DeleteTopicScheduleRequest = {
@@ -102,6 +104,8 @@ export interface GetTopicSchedulesRequest {
   segment_id?: string
   start_date?: string
   end_date?: string
+  faculty_id?: string
+  user_id?: string
 }
 
 const facultyServiceApi = api.injectEndpoints({
@@ -200,10 +204,11 @@ const facultyServiceApi = api.injectEndpoints({
         body
       })
     }),
-    getFacultyTimetable: build.query<FacultyTimetableData[], void>({
+    getFacultyTimetable: build.query<FacultyTimetableData[], { faculty_id?: string; user_id?: string } | void>({
       providesTags: [CacheTag.ClassTimetable],
-      query: () => ({
-        url: urlConstants.faculty.getFacultyTimetableUrl
+      query: params => ({
+        url: urlConstants.faculty.getFacultyTimetableUrl,
+        params: params || {}
       })
     })
   })
@@ -223,4 +228,3 @@ export const {
   useDeleteTopicScheduleMutation,
   useGetFacultyTimetableQuery
 } = facultyServiceApi
-

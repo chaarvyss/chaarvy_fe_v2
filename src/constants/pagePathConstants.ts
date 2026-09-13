@@ -16,6 +16,7 @@ export const PagePath = {
   SUBJECTS: '/Admin/Subjects',
   PAYMENTS: '/Admin/payments',
   REPORTS: '/Admin/reports',
+  HOLIDAYS: '/Admin/holidays',
   ADMISSION_FORM: '/StudentManagement/AdmissionForm',
   ADMISSIONS: '/StudentManagement/Admissions',
   COLLECT_PAYMENT: '/StudentManagement/Payments/pendingPayments',

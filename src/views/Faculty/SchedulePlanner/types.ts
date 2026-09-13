@@ -129,3 +129,6 @@ export interface SlotModalState {
 export interface SelectedScheduleModalState {
   schedule: PlannedSchedule
 }
+
+export type { HolidayItem } from 'src/store/services/adminServices'
+export type FacultyTimetableItem = FacultyTimetableData

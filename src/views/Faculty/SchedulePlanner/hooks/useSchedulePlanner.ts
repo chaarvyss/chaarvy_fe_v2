@@ -1,11 +1,14 @@
 import dayjs from 'dayjs'
 import isBetween from 'dayjs/plugin/isBetween'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 
 dayjs.extend(isBetween)
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
-import { useGetPeriodTemplateQuery } from 'src/store/services/adminServices'
+import { useSettings } from 'src/@core/hooks/useSettings'
+import { sessionStorageKeys } from 'src/lib/enums'
+import { User } from 'src/lib/interfaces'
+import { useGetHolidaysQuery, useGetPeriodTemplateQuery } from 'src/store/services/adminServices'
 import {
   useGetActiveSegmentMediumsQuery,
   useGetActiveMediumSectionsQuery
@@ -17,6 +20,7 @@ import {
   useDeleteTopicScheduleMutation,
   useGetFacultyTimetableQuery
 } from 'src/store/services/facultyServices'
+import { useGetUsersListQuery } from 'src/store/services/listServices'
 import {
   useGetAllProgramSegmentsListQuery,
   useGetProgramSegmentSubjectsListQuery
@@ -27,6 +31,60 @@ import { PERIOD_SLOTS, PeriodSlot, PlannedSchedule, SlotModalState, SelectedSche
 
 export const useSchedulePlanner = () => {
   const { triggerToast } = useToast()
+  const { settings } = useSettings()
+
+  // Faculty User selection & Logged-in user state
+  const loggedInUserId = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem(sessionStorageKeys.userId) || ''
+    }
+
+    return ''
+  }, [])
+
+  const [selectedUserId, setSelectedUserId] = useState<string>(loggedInUserId)
+
+  useEffect(() => {
+    if (!selectedUserId && loggedInUserId) {
+      setSelectedUserId(loggedInUserId)
+    }
+  }, [loggedInUserId, selectedUserId])
+
+  const activeUserId = selectedUserId || loggedInUserId
+
+  // Fetch users list for autoselect dropdown
+  const { data: usersResponse, isFetching: isFetchingUsers } = useGetUsersListQuery({ limit: 200 })
+  const users = useMemo(() => usersResponse?.users || [], [usersResponse])
+
+  // Currently selected user object (with fallback to logged in user's profile info while loading)
+  const selectedUser = useMemo(() => {
+    if (!activeUserId) return null
+    const found = users.find(u => u.user_id === activeUserId)
+    if (found) return found
+
+    if (activeUserId === loggedInUserId) {
+      return {
+        user_id: loggedInUserId,
+        name: settings?.current_username || 'Logged In User',
+        username: '',
+        email: '',
+        mobile: '',
+        profile_pic: '',
+        status: '',
+        role_name: ''
+      } as User
+    }
+
+    return null
+  }, [users, activeUserId, loggedInUserId, settings?.current_username])
+
+  const userOptions = useMemo(() => {
+    if (selectedUser && !users.some(u => u.user_id === selectedUser.user_id)) {
+      return [selectedUser, ...users]
+    }
+
+    return users
+  }, [users, selectedUser])
 
   // Calendar State
   const [currentDate, setCurrentDate] = useState(dayjs())
@@ -77,12 +135,36 @@ export const useSchedulePlanner = () => {
   const handleNext = () => setCurrentDate(currentDate.add(1, viewMode))
   const handleToday = () => setCurrentDate(dayjs())
 
-  // DB Queries & Mutations for Topic Schedules (filtered by visible date range for faster fetching)
+  // DB Queries & Mutations for Topic Schedules (filtered by visible date range and selected faculty)
   const { data: dbSchedules = [], isFetching: isFetchingSchedules } = useGetTopicSchedulesQuery(
-    startDateStr && endDateStr ? { start_date: startDateStr, end_date: endDateStr } : undefined
+    startDateStr && endDateStr
+      ? {
+          start_date: startDateStr,
+          end_date: endDateStr,
+          faculty_id: activeUserId || undefined,
+          user_id: activeUserId || undefined
+        }
+      : undefined
   )
   const [createUpdateScheduleMutation, { isLoading: isSavingSchedule }] = useCreateUpdateTopicScheduleMutation()
   const [deleteScheduleMutation, { isLoading: isDeletingSchedule }] = useDeleteTopicScheduleMutation()
+
+  // DB Queries for Holidays in visible date range
+  const { data: holidaysData = [], isFetching: isFetchingHolidays } = useGetHolidaysQuery(
+    startDateStr && endDateStr ? { start_date: startDateStr, end_date: endDateStr } : undefined,
+    { skip: !startDateStr || !endDateStr }
+  )
+
+  const holidaysMap = useMemo(() => {
+    const map = new Map<string, string>()
+    ;(holidaysData ?? []).forEach(h => {
+      if (h?.date) {
+        map.set(dayjs(h.date).format('YYYY-MM-DD'), h.holiday_name || 'Holiday')
+      }
+    })
+
+    return map
+  }, [holidaysData])
 
   // Timetable Period Slots from BE
   const { data: periodTemplateData, isFetching: isFetchingPeriodTemplate } = useGetPeriodTemplateQuery()
@@ -132,7 +214,9 @@ export const useSchedulePlanner = () => {
   const [isAutoFilledFromTimetable, setIsAutoFilledFromTimetable] = useState(false)
 
   // 0. Faculty Timetable (for auto-filling slots based on day-of-week and period)
-  const { data: facultyTimetableData, isFetching: isFetchingTimetable } = useGetFacultyTimetableQuery()
+  const { data: facultyTimetableData, isFetching: isFetchingTimetable } = useGetFacultyTimetableQuery(
+    activeUserId ? { faculty_id: activeUserId, user_id: activeUserId } : undefined
+  )
 
   // ---------------- API Queries ----------------
 
@@ -253,8 +337,25 @@ export const useSchedulePlanner = () => {
   const openSlotModal = (date?: string, periodId?: string) => {
     setTopicSearchText('')
     const targetDate = date || dayjs().format('YYYY-MM-DD')
-    const defaultPeriodId = periodId || periodSlots.find(p => p.isBreak === 0)?.id || ''
     const dayOfWeekNumber = dayjs(targetDate).day() // 0 = Sun, 1 = Mon, 2 = Tue, ..., 6 = Sat
+
+    if (dayOfWeekNumber === 0) {
+      triggerToast('Cannot book slots on Sunday (Weekend)', {
+        variant: ToastVariants.INFO
+      })
+
+      return
+    }
+
+    if (holidaysMap.has(targetDate)) {
+      triggerToast(`Cannot book slots on a holiday (${holidaysMap.get(targetDate)})`, {
+        variant: ToastVariants.INFO
+      })
+
+      return
+    }
+
+    const defaultPeriodId = periodId || periodSlots.find(p => p.isBreak === 0)?.id || ''
 
     // Find matching timetable entry for this day_of_week and period_slot_id
     const matchedEntry = (facultyTimetableData ?? []).find((entry: any) => {
@@ -336,15 +437,34 @@ export const useSchedulePlanner = () => {
     medium_id?: string
     section_id?: string
   }) => {
+    const formattedDate = dayjs(data.date).format('YYYY-MM-DD')
+    if (dayjs(formattedDate).day() === 0) {
+      triggerToast('Cannot schedule topics on Sunday (Weekend)', {
+        variant: ToastVariants.ERROR
+      })
+
+      return
+    }
+
+    if (holidaysMap.has(formattedDate)) {
+      triggerToast(`Cannot schedule topics on a holiday (${holidaysMap.get(formattedDate)})`, {
+        variant: ToastVariants.ERROR
+      })
+
+      return
+    }
+
     try {
       await createUpdateScheduleMutation({
-        date: dayjs(data.date).format('YYYY-MM-DD'),
+        date: formattedDate,
         period_id: data.period_id,
         program_id: data.program_id,
         segment_id: data.segment_id,
         medium_id: data.medium_id || undefined,
         section_id: data.section_id || undefined,
         topic_id: data.topic_id,
+        faculty_id: activeUserId || undefined,
+        user_id: activeUserId || undefined,
         status: 0
       }).unwrap()
 
@@ -358,6 +478,25 @@ export const useSchedulePlanner = () => {
   const handleUpdateSchedule = async (scheduleId: string, updates: Partial<PlannedSchedule>) => {
     const existing = plannedSchedules.find(s => s.id === scheduleId)
     if (!existing) return
+
+    if (updates.date) {
+      const formattedDate = dayjs(updates.date).format('YYYY-MM-DD')
+      if (dayjs(formattedDate).day() === 0) {
+        triggerToast('Cannot reschedule to Sunday (Weekend)', {
+          variant: ToastVariants.ERROR
+        })
+
+        return
+      }
+
+      if (holidaysMap.has(formattedDate)) {
+        triggerToast(`Cannot reschedule to a holiday (${holidaysMap.get(formattedDate)})`, {
+          variant: ToastVariants.ERROR
+        })
+
+        return
+      }
+    }
 
     if (selectedScheduleForModal && selectedScheduleForModal.schedule.id === scheduleId) {
       setSelectedScheduleForModal({
@@ -451,7 +590,12 @@ export const useSchedulePlanner = () => {
       setViewMode,
       days,
       periodSlots,
+      holidays: holidaysData,
+      facultyTimetable: facultyTimetableData,
+      isFetchingHolidays,
       isFetchingPeriodTemplate,
+      isFetchingTimetable,
+      isLoading: isFetchingSchedules || isFetchingTimetable || isFetchingHolidays || isFetchingPeriodTemplate,
       handlePrev,
       handleNext,
       handleToday
@@ -476,6 +620,14 @@ export const useSchedulePlanner = () => {
       showGenerator,
       setShowGenerator
     },
+    facultyUser: {
+      users,
+      options: userOptions,
+      selectedUser,
+      selectedUserId: activeUserId,
+      setSelectedUserId,
+      isFetchingUsers
+    },
     drawer: {
       slotModalState,
       openSlotModal,
@@ -492,6 +644,7 @@ export const useSchedulePlanner = () => {
       topicOptions,
       sectionOptions,
       periodSlots,
+      holidays: holidaysData,
       isFetchingPeriodTemplate,
       isFetchingProgramSegments,
       isFetchingSubjects,

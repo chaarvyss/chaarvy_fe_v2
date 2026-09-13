@@ -126,6 +126,8 @@ export const urlConstants = {
     createUpdateTimetableUrl: `${interRoutePrefix.admin}/create-update-timetable`,
     getClassTimetableUrl: `${interRoutePrefix.admin}/get-class-timetable`,
     getFacultyTimetableUrl: `${interRoutePrefix.admin}/get-faculty-timetable`,
+    getHolidaysUrl: `${interRoutePrefix.admin}/holidays`,
+    createUpdateHolidayUrl: `${interRoutePrefix.admin}/create-update-holiday`,
 
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
