@@ -30,7 +30,7 @@ interface QuestionType {
 interface GetTopicsListRequest {
   program_id: string
   segment_id: string
-  subject_id: string
+  subject_id?: string
 }
 
 interface GetQuestionsRequest extends GetTopicsListRequest {
@@ -56,6 +56,44 @@ export type BulkDeleteQuestionsRequest = {
 export type BulkUpdateQuestionTypeRequest = {
   question_ids: string[]
   question_type: string
+}
+
+export type TopicScheduleResponse = {
+  id: string
+  topic_id: string
+  topic_name: string
+  user_id?: string
+  date: string
+  period_id: string
+  period_title?: string
+  program_id: string
+  program_name?: string
+  segment_id: string
+  segment_name?: string
+  subject_id?: string
+  subject_name?: string
+  medium_id?: string
+  section_id?: string
+  section_name?: string
+  status: number
+  completed_on?: string | null
+  completed: boolean
+}
+
+export type CreateUpdateTopicScheduleRequest = {
+  id?: string
+  topic_id: string
+  date: string
+  period_id: string
+  program_id: string
+  segment_id: string
+  medium_id?: string
+  section_id?: string
+  status?: number
+}
+
+export type DeleteTopicScheduleRequest = {
+  schedule_id: string
 }
 
 const facultyServiceApi = api.injectEndpoints({
@@ -129,6 +167,29 @@ const facultyServiceApi = api.injectEndpoints({
         url: urlConstants.google.translateTextUrl,
         body
       })
+    }),
+    getTopicSchedules: build.query<TopicScheduleResponse[], { program_id?: string; segment_id?: string } | void>({
+      providesTags: [CacheTag.FacultyTopicSchedule],
+      query: params => ({
+        url: urlConstants.faculty.getTopicSchedulesUrl,
+        params: params || {}
+      })
+    }),
+    createUpdateTopicSchedule: build.mutation<{ message: string; id?: string }, CreateUpdateTopicScheduleRequest>({
+      invalidatesTags: [CacheTag.FacultyTopicSchedule],
+      query: body => ({
+        method: HttpRequestMethods.POST,
+        url: urlConstants.faculty.createUpdateTopicScheduleUrl,
+        body
+      })
+    }),
+    deleteTopicSchedule: build.mutation<{ message: string }, DeleteTopicScheduleRequest>({
+      invalidatesTags: [CacheTag.FacultyTopicSchedule],
+      query: body => ({
+        method: HttpRequestMethods.POST,
+        url: urlConstants.faculty.deleteTopicScheduleUrl,
+        body
+      })
     })
   })
 })
@@ -141,5 +202,9 @@ export const {
   useCreateUpdateQuestionMutation,
   useBulkDeleteQuestionsMutation,
   useBulkUpdateQuestionTypeMutation,
-  useTranslateTextMutation
+  useTranslateTextMutation,
+  useGetTopicSchedulesQuery,
+  useCreateUpdateTopicScheduleMutation,
+  useDeleteTopicScheduleMutation
 } = facultyServiceApi
+

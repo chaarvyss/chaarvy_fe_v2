@@ -203,7 +203,10 @@ export const urlConstants = {
     getQuestionsUrl: `${interRoutePrefix.faculty}/questions`,
     createUpdateQuestionUrl: `${interRoutePrefix.faculty}/create_update_question`,
     bulkDeleteQuestionsUrl: `${interRoutePrefix.faculty}/bulk_delete_questions`,
-    bulkUpdateQuestionTypeUrl: `${interRoutePrefix.faculty}/bulk_update_question_type`
+    bulkUpdateQuestionTypeUrl: `${interRoutePrefix.faculty}/bulk_update_question_type`,
+    getTopicSchedulesUrl: `${interRoutePrefix.faculty}/topic_schedules`,
+    createUpdateTopicScheduleUrl: `${interRoutePrefix.faculty}/create_update_topic_schedule`,
+    deleteTopicScheduleUrl: `${interRoutePrefix.faculty}/delete_topic_schedule`
   },
   fees: {
     getprogramFees: `${interRoutePrefix.fees}/program-fee-detail`,
