@@ -11,9 +11,11 @@ const commonRoutePrefix = {
 const interRoutePrefix = {
   admin: `${interPrefix}/admin`,
   attendence: `${interPrefix}/attendence`,
+  attendence: `${interPrefix}/attendence`,
   admisions: `${interPrefix}/admissions`,
   auth: `${interPrefix}/auth`,
   calender: `${interPrefix}/google-calender`,
+  faculty: `${interPrefix}/faculty`,
   fees: `${interPrefix}/fees`,
   list: `${interPrefix}/list`,
   program: `${interPrefix}/program`,
@@ -125,6 +127,8 @@ export const urlConstants = {
     createUpdateTimetableUrl: `${interRoutePrefix.admin}/create-update-timetable`,
     getClassTimetableUrl: `${interRoutePrefix.admin}/get-class-timetable`,
     getFacultyTimetableUrl: `${interRoutePrefix.admin}/get-faculty-timetable`,
+    getHolidaysUrl: `${interRoutePrefix.admin}/holidays`,
+    createUpdateHolidayUrl: `${interRoutePrefix.admin}/create-update-holiday`,
 
     add: {
       addonCourse: `${interRoutePrefix.admin}/add-addon-course`,
@@ -160,7 +164,8 @@ export const urlConstants = {
     getStudentsListUrl: `${interRoutePrefix.attendence}/get-students`,
     getCurrentClassDetailsUrl: `${interRoutePrefix.attendence}/get-current-class-details`,
     getStudentAttendenceByLogIdUrl: `${interRoutePrefix.attendence}/get-student-attendence-by-log-id`,
-    getStudentAttendenceLogsUrl: `${interRoutePrefix.attendence}/get-student-attendence-logs`
+    getStudentAttendenceLogsUrl: `${interRoutePrefix.attendence}/get-student-attendence-logs`,
+    putFinalizeAttendenceUrl: `${interRoutePrefix.attendence}/finalize-attendance`
   },
   admissions: {
     createAdmission: `${interRoutePrefix.admisions}/create-update-admission`,
@@ -194,6 +199,19 @@ export const urlConstants = {
     cashflowDetailsUrl: `${interRoutePrefix.dashboard}/cashflow-summary`,
     expensesDetailsUrl: `${interRoutePrefix.dashboard}/expenses`
   },
+  faculty: {
+    getTopicsListUrl: `${interRoutePrefix.faculty}/topics`,
+    createUpdateTopicUrl: `${interRoutePrefix.faculty}/create_update_topic`,
+    getQuestionTypesUrl: `${interRoutePrefix.faculty}/question_types`,
+    getQuestionsUrl: `${interRoutePrefix.faculty}/questions`,
+    createUpdateQuestionUrl: `${interRoutePrefix.faculty}/create_update_question`,
+    bulkDeleteQuestionsUrl: `${interRoutePrefix.faculty}/bulk_delete_questions`,
+    bulkUpdateQuestionTypeUrl: `${interRoutePrefix.faculty}/bulk_update_question_type`,
+    getTopicSchedulesUrl: `${interRoutePrefix.faculty}/topic_schedules`,
+    createUpdateTopicScheduleUrl: `${interRoutePrefix.faculty}/create_update_topic_schedule`,
+    deleteTopicScheduleUrl: `${interRoutePrefix.faculty}/delete_topic_schedule`,
+    getFacultyTimetableUrl: `${interRoutePrefix.faculty}/timetable`
+  },
   fees: {
     getprogramFees: `${interRoutePrefix.fees}/program-fee-detail`,
     createUpdateProgramFees: `${interRoutePrefix.fees}/create-update-program-fees`,
@@ -204,6 +222,9 @@ export const urlConstants = {
     updateProcessingFeesStatusUrl: `${interRoutePrefix.fees}/update-processing-fees-status`,
     getStudentPendingFeesDetailsUrl: `${interRoutePrefix.fees}/get-student-pending-fees-details`,
     getPaymentHistoryUrl: `${interRoutePrefix.fees}/get_payment_history`
+  },
+  google: {
+    translateTextUrl: `/google/translate`
   },
   program: {
     programAddon: `${interRoutePrefix.program}/program-addon-course`,

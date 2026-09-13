@@ -49,6 +49,15 @@ const attendenceServiceApi = api.injectEndpoints({
           params: { ...params }
         }
       }
+    }),
+    finalizeAttendence: build.mutation<string, string>({
+      query: attendance_log_id => {
+        return {
+          method: HttpRequestMethods.PUT,
+          url: urlConstants.attendence.putFinalizeAttendenceUrl,
+          params: { attendance_log_id }
+        }
+      }
     })
   })
 })
@@ -58,5 +67,6 @@ export const {
   useGetStudentsListQuery,
   useGetCurrentClassDetailsQuery,
   useGetAttendenceByLogIdQuery,
-  useGetStudentAttendenceLogsQuery
+  useGetStudentAttendenceLogsQuery,
+  useFinalizeAttendenceMutation
 } = attendenceServiceApi

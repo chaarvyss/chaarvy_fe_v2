@@ -16,6 +16,7 @@ type ProgramSegment = {
   program_name: string
   segment_id: string
   segment_name: string
+  status: number
 }
 
 type UserSubject = {

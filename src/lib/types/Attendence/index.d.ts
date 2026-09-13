@@ -34,8 +34,10 @@ type GetAttendenceByLogIdResponse = {
   attendance: StudentAttendenceState[]
   class_details: ClassDetails
   period_slot_id: string
+  period_name: string
   date: string
   is_final: number
+  created_by: string
 }
 
 type RecordStudentAttendenceRequest = {

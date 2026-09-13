@@ -6,6 +6,7 @@ import RenderFilterOptions from 'src/common/filters'
 import GreenDonut from 'src/components/Charts/GreenDonut'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import { DEFAULT_PAGINATION_PROPS } from 'src/constants/constants'
+import { PagePath } from 'src/constants/pagePathConstants'
 import { useGetStudentAttendenceLogsQuery } from 'src/store/services/attendenceServices'
 
 const AttendenceLog = () => {
@@ -93,7 +94,7 @@ const AttendenceLog = () => {
         data: attendenceLogs?.logs ?? [],
         getRowKey: (row: any, index: number) => index,
         onRowClick: (row: any) => {
-          console.log('Row clicked:', row)
+          window.location.href = PagePath.ATTENDENCE_REGISTER + '?log_id=' + row.id
         },
         emptyMessage: 'No data available',
         hover: true,

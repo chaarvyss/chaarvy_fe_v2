@@ -1,11 +1,14 @@
+import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import DatePicker from 'react-datepicker'
 
 import { Box, Card, Typography, Grid, Divider } from '@muiElements' // Ensure Grid, Button, Divider are exported from your elements index
+import { PagePath } from 'src/constants/pagePathConstants'
 import { ChaarvyButton, LoadingSpinner } from 'src/reusable_components'
 import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
 import ChaarvySelect from 'src/reusable_components/chaarvySelect'
 import {
+  useFinalizeAttendenceMutation,
   useGetAttendenceByLogIdQuery,
   useGetCurrentClassDetailsQuery,
   useGetStudentsListQuery,
@@ -31,6 +34,12 @@ const defaultState: StudentSelectionState = {
 }
 
 const StudentAttendence = () => {
+  const current_user = sessionStorage.getItem('uid')
+
+  const router = useRouter()
+  const { log_id: queryLogId } = router.query
+  const urlLogId = typeof queryLogId === 'string' ? queryLogId : null
+
   const [lastSavedTime, setLastSavedTime] = useState<Date>()
   const [isFinalized, setIsFinalized] = useState<number>(0)
   const [studentSelection, setStudentSelection] = useState<StudentSelectionState>(defaultState)
@@ -38,10 +47,40 @@ const StudentAttendence = () => {
   const [currentPeriodSlotId, setCurrentPeriodSlotId] = useState<string>()
   const [currentDate, setCurrentDate] = useState<string>(new Date().toISOString().split('T')[0]) // Current date in YYYY-MM-DD format
   const [attendanceLogId, setAttendanceLogId] = useState<string | null>(null)
+
+  const getSafeDate = (d: string) => {
+    let dateStr = d
+    if (typeof d === 'string') {
+      let parts: string[] = []
+      if (d.includes('-')) parts = d.split('-')
+      else if (d.includes('/')) parts = d.split('/')
+
+      if (parts.length === 3) {
+        if (parts[2].length === 4) {
+          dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`
+        } else if (parts[0].length === 4) {
+          dateStr = `${parts[0]}-${parts[1]}-${parts[2]}`
+        }
+      }
+    }
+    const dateObj = new Date(dateStr)
+
+    return isNaN(dateObj.getTime()) ? new Date() : dateObj
+  }
+
+  useEffect(() => {
+    if (router.isReady && urlLogId) {
+      setAttendanceLogId(urlLogId)
+    }
+  }, [router.isReady, urlLogId])
+
   const { data: programsList } = useGetProgramsListQuery(true)
-  const { data: currentClassDetails } = useGetCurrentClassDetailsQuery()
+  const { data: currentClassDetails } = useGetCurrentClassDetailsQuery(undefined, {
+    skip: !router.isReady || !!urlLogId
+  })
 
   const [saveAttendanceMutation] = useRecordStudentAttendenceMutation()
+  const [finalizeAttendence] = useFinalizeAttendenceMutation()
 
   const { data: segmentMediumResponse } = useGetProgramSegmentMediumsListByProgramIdQuery(
     { program_id: studentSelection.program || '', only_active: true },
@@ -67,9 +106,22 @@ const StudentAttendence = () => {
 
   useEffect(() => {
     if (attendenceByLogIdResponse) {
-      const { attendance, is_final } = attendenceByLogIdResponse
+      const { attendance, is_final, class_details, period_slot_id, date } = attendenceByLogIdResponse
       setAttendenceData(attendance)
       setIsFinalized(is_final)
+      if (class_details) {
+        setStudentSelection({
+          program: class_details.program_id,
+          segment: class_details.segment_id,
+          medium: class_details.medium_id,
+          section: class_details.section_id
+        })
+      }
+      if (period_slot_id) setCurrentPeriodSlotId(period_slot_id)
+      if (date) {
+        const validDateObj = getSafeDate(date)
+        setCurrentDate(validDateObj.toISOString().split('T')[0])
+      }
     }
   }, [attendenceByLogIdResponse])
 
@@ -124,11 +176,18 @@ const StudentAttendence = () => {
 
   useEffect(() => {
     if (studentsListResponse) {
-      const initialAttendanceData = studentsListResponse.map(student => ({
-        student_course_enrollment_id: student.student_course_enrollment_id,
-        status: 2
-      }))
-      setAttendenceData(initialAttendanceData)
+      setAttendenceData(prevData => {
+        return studentsListResponse.map(student => {
+          const existing = prevData.find(p => p.student_course_enrollment_id === student.student_course_enrollment_id)
+
+          return (
+            existing || {
+              student_course_enrollment_id: student.student_course_enrollment_id,
+              status: 2
+            }
+          )
+        })
+      })
     }
   }, [studentsListResponse])
 
@@ -223,11 +282,12 @@ const StudentAttendence = () => {
   )
 
   const onCardClick = (enroll_id: string) => {
-    setAttendenceData(prevData =>
-      prevData.map(item =>
-        item.student_course_enrollment_id === enroll_id ? { ...item, status: item.status === 1 ? 0 : 1 } : item
+    if (!isFinalized)
+      setAttendenceData(prevData =>
+        prevData.map(item =>
+          item.student_course_enrollment_id === enroll_id ? { ...item, status: item.status === 1 ? 0 : 1 } : item
+        )
       )
-    )
   }
 
   const getBgColor = (enroll_id: string) => {
@@ -244,7 +304,12 @@ const StudentAttendence = () => {
   }
 
   const finalizeAttendance = () => {
-    console.log('Finalizing attendance...')
+    if (!!attendanceLogId)
+      finalizeAttendence(attendanceLogId)
+        .unwrap()
+        .then(() => {
+          window.location.href = PagePath.ATTENDENCE_LOG
+        })
   }
 
   return (
@@ -270,7 +335,7 @@ const StudentAttendence = () => {
           >
             <Box>
               <DatePicker
-                selected={new Date(currentDate)}
+                selected={getSafeDate(currentDate)}
                 popperPlacement='bottom-end'
                 onChange={(date: Date | null) => {
                   if (date) setCurrentDate(date.toISOString().split('T')[0])
@@ -284,7 +349,7 @@ const StudentAttendence = () => {
                     fontWeight={500}
                     sx={{ cursor: 'pointer' }}
                   >
-                    {new Date(currentDate).toLocaleDateString('en-US', {
+                    {getSafeDate(currentDate).toLocaleDateString('en-US', {
                       weekday: 'long',
                       month: 'short',
                       day: 'numeric'
@@ -294,7 +359,9 @@ const StudentAttendence = () => {
               />
             </Box>
             <Typography variant='body2' color='text.secondary'>
-              Period: {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+              Period:{' '}
+              {attendenceByLogIdResponse?.period_name ??
+                new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
             </Typography>
           </Box>
         </Box>
@@ -334,7 +401,9 @@ const StudentAttendence = () => {
             variant='contained'
             size='small'
             color='success'
-            disabled={!isSelectionComplete || isFinalized === 1}
+            disabled={
+              !isSelectionComplete || isFinalized === 1 || attendenceByLogIdResponse?.created_by !== current_user
+            }
             onClick={finalizeAttendance}
           >
             Finalize
