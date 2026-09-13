@@ -2,6 +2,7 @@ export enum CacheTag {
   Address = 'address',
   CollegeProfile = 'collegeProfile',
   ListAddonCourse = 'listAddonCourse',
+  SubjectTopics = 'subjectTopics',
   ListBooks = 'listBooks',
   ListFeesTypes = 'listFeesTypes',
   ListLanguages = 'listLanguages',
@@ -30,7 +31,10 @@ export enum CacheTag {
   ListStudentAddonPrograms = 'stdAdprgs',
   StudentPayableFees = 'studPayFees',
   PDFTemplates = 'pdfTemplates',
-  ClassTimetable = 'classTimetable'
+  ClassTimetable = 'classTimetable',
+  TopicQuestions = 'topicQuestions',
+  FacultyTopicSchedule = 'facultyTopicSchedule',
+  Holidays = 'holidays'
 }
 
 export enum CommonCacheTag {

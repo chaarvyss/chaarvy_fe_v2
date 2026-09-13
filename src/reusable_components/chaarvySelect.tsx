@@ -17,7 +17,7 @@ export interface ChaarvySelectProps extends Omit<SelectProps, 'children'> {
 
 const ChaarvySelect: React.FC<ChaarvySelectProps> = ({ label, options, placeholder, isRequired, sx, ...props }) => {
   return (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
       {label && (
         <Typography variant='body2' fontWeight={600} color='text.secondary'>
           {label} {isRequired && '*'}
@@ -26,6 +26,7 @@ const ChaarvySelect: React.FC<ChaarvySelectProps> = ({ label, options, placehold
       <Select
         {...props}
         displayEmpty={Boolean(placeholder)}
+        fullWidth
         size='small'
         sx={{
           borderRadius: '8px',

@@ -100,7 +100,7 @@ interface ActiveProgramSegmentSectionRequest extends ActiveProgramMediumRequest 
   medium_id: string
 }
 
-interface Medium {
+export interface Medium {
   medium_id: string
   medium_name: string
 }
