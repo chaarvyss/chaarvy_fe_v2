@@ -87,8 +87,7 @@ export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
             } else {
               const matchedServerQ = serverGroup?.questions.find(
                 sq =>
-                  !usedServerQIds.has(sq.id!) &&
-                  JSON.stringify(sq.question_title) === JSON.stringify(q.question_title)
+                  !usedServerQIds.has(sq.id!) && JSON.stringify(sq.question_title) === JSON.stringify(q.question_title)
               )
               if (matchedServerQ) {
                 newQuestions.push(matchedServerQ)
@@ -197,6 +196,7 @@ export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
         setGroupModalOpen(false)
         setEditingGroupId(null)
         setgroupID('')
+
         return
       }
 
@@ -222,11 +222,7 @@ export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
           if (existingTargetGroup) {
             return prev
               .filter(mg => mg.id !== editingGroupId)
-              .map(mg =>
-                mg.id === groupID
-                  ? { ...mg, questions: [...mg.questions, ...updatedQuestions] }
-                  : mg
-              )
+              .map(mg => (mg.id === groupID ? { ...mg, questions: [...mg.questions, ...updatedQuestions] } : mg))
           } else {
             return prev.map(mg =>
               mg.id === editingGroupId
@@ -451,6 +447,7 @@ export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
       triggerToast('Please provide a question title before saving', {
         variant: ToastVariants.ERROR
       })
+
       return
     }
 
@@ -461,6 +458,7 @@ export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
         triggerToast('Please fill all 4 options for the question', {
           variant: ToastVariants.ERROR
         })
+
         return
       }
 
@@ -469,6 +467,7 @@ export const useQuestionBank = (topic: Topic, mediums?: Medium[]) => {
         triggerToast('Please select a correct answer for the question', {
           variant: ToastVariants.ERROR
         })
+
         return
       }
     }
