@@ -11,7 +11,6 @@ const commonRoutePrefix = {
 const interRoutePrefix = {
   admin: `${interPrefix}/admin`,
   attendence: `${interPrefix}/attendence`,
-  attendence: `${interPrefix}/attendence`,
   admisions: `${interPrefix}/admissions`,
   auth: `${interPrefix}/auth`,
   calender: `${interPrefix}/google-calender`,
