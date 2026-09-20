@@ -22,6 +22,7 @@ export interface TableTitleHeaderProps {
   optionalButtonColor?: 'primary' | 'success' | 'error' | 'info' | 'warning'
   onSearch?: (searchText: string) => void
   searchValue?: string
+  extraActions?: React.ReactNode
 }
 
 export const renderStats = (statData: TableHeaderStatCardProps[]) => {
@@ -65,7 +66,8 @@ const TableTilteHeader = ({
   onOptionalButtonClick,
   optionalButtonColor,
   onSearch,
-  searchValue
+  searchValue,
+  extraActions
 }: TableTitleHeaderProps) => {
   const titleRef = useRef<HTMLElement | null>(null)
   const [isTruncated, setIsTruncated] = useState(false)
@@ -174,6 +176,7 @@ const TableTilteHeader = ({
         }
         action={
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
+            {extraActions}
             {optionalButtonText && (
               <ChaarvyButton
                 fillType='gradient'

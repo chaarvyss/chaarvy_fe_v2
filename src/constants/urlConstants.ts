@@ -21,7 +21,8 @@ const interRoutePrefix = {
   report: `${interPrefix}/report`,
   view: `${interPrefix}/view`,
   dashboard: `${interPrefix}/dash_board`,
-  template: `${interPrefix}/template`
+  template: `${interPrefix}/template`,
+  bulk: `${interPrefix}/bulk`
 }
 
 const masterRoutePrefix = {
@@ -264,6 +265,16 @@ export const urlConstants = {
   template: {
     pdfTemplates: `${interRoutePrefix.template}/get_pdf_templates`,
     addUpdatePdfTemplateUrl: `${interRoutePrefix.template}/add_update_pdf_template`
+  },
+  bulk: {
+    downloadStudentsTemplate: `${interRoutePrefix.bulk}/templates/students`,
+    validateStudents: `${interRoutePrefix.bulk}/validate/students`,
+    uploadStudents: `${interRoutePrefix.bulk}/upload/students`,
+    downloadStudentsErrorSheet: `${interRoutePrefix.bulk}/download-error-sheet/students`,
+    downloadBooksTemplate: `${interRoutePrefix.bulk}/templates/books`,
+    validateBooks: `${interRoutePrefix.bulk}/validate/books`,
+    uploadBooks: `${interRoutePrefix.bulk}/upload/books`,
+    downloadBooksErrorSheet: `${interRoutePrefix.bulk}/download-error-sheet/books`
   },
   master: {
     admin: {

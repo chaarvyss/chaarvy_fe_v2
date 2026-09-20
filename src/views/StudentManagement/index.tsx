@@ -8,6 +8,7 @@ import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import { DEFAULT_PAGINATION_PROPS, DEFAULT_TABLE_ITEMS_LIMIT } from 'src/constants/constants'
 import { PagePath } from 'src/constants/pagePathConstants'
 import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
+import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
 import {
   Admissions,
   useGetProcessingFeesPendingEnrollmentsQuery,
@@ -17,6 +18,7 @@ import { useGetApplicationFeesPaymentMutation } from 'src/store/services/feesSer
 import { ThemeColorEnum } from 'src/utils/enums'
 import GetChaarvyIcons from 'src/utils/icons'
 
+import StudentBulkUploadModal from './StudentBulkUploadModal'
 import ViewAdmissionModal from './viewAdmissionModal'
 
 const AdmissionsList = () => {
@@ -27,6 +29,7 @@ const AdmissionsList = () => {
   const [filterProps, setFilterProps] = useState<FilterProps>(DEFAULT_PAGINATION_PROPS)
 
   const [selectedAdmission, setSelectedAdmission] = useState<string>()
+  const [isBulkUploadOpen, setIsBulkUploadOpen] = useState<boolean>(false)
 
   const [createPayment, { isLoading: isCreatingPaymentLink }] = useGetApplicationFeesPaymentMutation()
   const { data: processingFeesPendingEnrollments } = useGetProcessingFeesPendingEnrollmentsQuery()
@@ -237,6 +240,16 @@ const AdmissionsList = () => {
           stats: admission_stats,
           handleFilterButtonClick: onFilterButtonClick,
           iconName: 'FilePlus',
+          extraActions: (
+            <ChaarvyButton
+              label='Bulk Upload'
+              leftIcon='Upload'
+              fillType='solid'
+              color='primary'
+              size='small'
+              onClick={() => setIsBulkUploadOpen(true)}
+            />
+          ),
           optionalButtonColor: 'warning',
           optionalButtonText:
             (processingFeesPendingEnrollments?.length ?? 0) > 0
@@ -263,6 +276,11 @@ const AdmissionsList = () => {
       {selectedAdmission && (
         <ViewAdmissionModal studentId={selectedAdmission} onClose={() => setSelectedAdmission(undefined)} />
       )}
+      <StudentBulkUploadModal
+        isOpen={isBulkUploadOpen}
+        onClose={() => setIsBulkUploadOpen(false)}
+        onSuccess={() => fetchAdmissions(filterProps)}
+      />
     </>
   )
 }

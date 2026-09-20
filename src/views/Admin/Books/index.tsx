@@ -5,10 +5,12 @@ import { useSideDrawer } from 'src/@core/context/sideDrawerContext'
 import RenderFilterOptions from 'src/common/filters'
 import ChaarvyTable from 'src/components/Tables/ChaarvyTable'
 import { CascadingSelectorState } from 'src/reusable_components/CascadingSelectors'
+import ChaarvyButton from 'src/reusable_components/ChaarvyButton'
 import { useLazyGetBooksListQuery } from 'src/store/services/listServices'
 import GetChaarvyIcons from 'src/utils/icons'
 
 import AddUpdateBooks, { ItemType } from './add_books'
+import BooksBulkUploadModal from './BooksBulkUploadModal'
 import { getAggregatedBooks } from './helpers'
 
 const BooksList = () => {
@@ -16,6 +18,7 @@ const BooksList = () => {
   const [fetchBooks, { data: booksResponse, isLoading }] = useLazyGetBooksListQuery()
   const [filterProps, setFilterProps] = useState<FilterProps>({ limit: 20, offset: 0 })
   const [isAddBooksModalOpen, setIsAddBookModalOpen] = useState<boolean>(false)
+  const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState<boolean>(false)
 
   const [selectedItemType, setSelectedItemType] = useState<ItemType>('specific')
   const [selectedDetails, setSelectedDetails] = useState<CascadingSelectorState>()
@@ -135,7 +138,17 @@ const BooksList = () => {
           onButtonClick: handleAddBook,
           showFilterIcon: true,
           handleFilterButtonClick: onFilterButtonClick,
-          iconName: 'FilePlus'
+          iconName: 'FilePlus',
+          extraActions: (
+            <ChaarvyButton
+              label='Bulk Upload'
+              leftIcon='Upload'
+              fillType='solid'
+              color='primary'
+              size='small'
+              onClick={() => setIsBulkUploadModalOpen(true)}
+            />
+          )
         }}
         paginationProps={{
           total: booksResponse?.counts?.filtered ?? 0,
@@ -148,6 +161,11 @@ const BooksList = () => {
           emptyMessage: 'No Books available',
           isLoading
         }}
+      />
+      <BooksBulkUploadModal
+        isOpen={isBulkUploadModalOpen}
+        onClose={() => setIsBulkUploadModalOpen(false)}
+        onSuccess={() => fetchBooks(filterProps)}
       />
     </>
   )
