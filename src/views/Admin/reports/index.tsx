@@ -1,14 +1,6 @@
 import { LoadingButton } from '@mui/lab'
-import {
-  Avatar,
-  Box,
-  Card,
-  Divider,
-  Grid,
-  Typography,
-  useTheme
-} from '@mui/material'
-import React, { useState } from 'react'
+import { Avatar, Box, Card, Divider, Grid, Typography, useTheme } from '@mui/material'
+import { useState } from 'react'
 
 import { ToastVariants, useToast } from 'src/@core/context/toastContext'
 import { TemplateDownloadCard } from 'src/reusable_components'

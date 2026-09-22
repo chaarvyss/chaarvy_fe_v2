@@ -1,16 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import {
-  Avatar,
-  Box,
-  Card,
-  CardContent,
-  CardHeader,
-  Chip,
-  Stack,
-  Typography,
-  useTheme
-} from '@mui/material'
-import React from 'react'
+import { Avatar, Box, Card, CardContent, CardHeader, Chip, Stack, Typography, useTheme } from '@mui/material'
 
 import GetChaarvyIcons, { GetChaarvyIconsProps } from 'src/utils/icons'
 

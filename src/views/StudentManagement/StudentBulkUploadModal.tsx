@@ -135,9 +135,7 @@ const StudentBulkUploadModal = ({ isOpen, onClose, onSuccess }: StudentBulkUploa
                       <TableCell>{row.admission_number}</TableCell>
                       <TableCell>{row.student_name}</TableCell>
                       <TableCell>₹{row.total_course_fees.toLocaleString('en-IN')}</TableCell>
-                      <TableCell>
-                        {row.addon_courses?.length > 0 ? row.addon_courses.join(', ') : 'None'}
-                      </TableCell>
+                      <TableCell>{row.addon_courses?.length > 0 ? row.addon_courses.join(', ') : 'None'}</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>₹{row.payable_fees.toLocaleString('en-IN')}</TableCell>
                     </TableRow>
                   ))}

@@ -37,9 +37,7 @@ const BooksBulkUploadModal = ({ isOpen, onClose, onSuccess }: BooksBulkUploadMod
         backgroundColor: `${theme.palette.info.main}08`
       }}
     >
-      <AlertTitle sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-        Two-Sheet Books & Curriculum Architecture
-      </AlertTitle>
+      <AlertTitle sx={{ fontWeight: 600, fontSize: '0.9rem' }}>Two-Sheet Books & Curriculum Architecture</AlertTitle>
       <Typography variant='caption' display='block' sx={{ mb: 0.5 }}>
         • <strong>Sheet 1 (Books_Master)</strong>: Physical stock catalog (Book Name, Medium, Price, Available Qty).
         Each book exists once per medium.

@@ -53,7 +53,7 @@ export interface StudentUploadResponse {
   invalid_rows: InvalidRowDetail[]
 }
 
-export interface BooksValidationResponse extends BaseValidationResponse {}
+export type BooksValidationResponse = BaseValidationResponse
 
 export interface BooksUploadResponse {
   message: string
