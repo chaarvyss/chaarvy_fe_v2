@@ -27,14 +27,17 @@ export interface InvalidRowDetail {
   errors: string[]
 }
 
-export interface StudentValidationResponse {
+export interface BaseValidationResponse {
   total_rows: number
   valid_count: number
   error_count: number
+  invalid_rows: InvalidRowDetail[]
+}
+
+export interface StudentValidationResponse extends BaseValidationResponse {
   fee_types_detected?: string[]
   summary?: BulkValidationSummary
   valid_rows_preview?: ValidRowPreview[]
-  invalid_rows: InvalidRowDetail[]
 }
 
 export interface StudentUploadResponse {
@@ -50,12 +53,7 @@ export interface StudentUploadResponse {
   invalid_rows: InvalidRowDetail[]
 }
 
-export interface BooksValidationResponse {
-  total_rows: number
-  valid_count: number
-  error_count: number
-  invalid_rows: InvalidRowDetail[]
-}
+export interface BooksValidationResponse extends BaseValidationResponse {}
 
 export interface BooksUploadResponse {
   message: string
