@@ -1,3 +1,10 @@
+# [1.19.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.15...v1.19.0) (2026-09-22)
+
+
+### Features
+
+* **Bulk upload:** AC-00 data bulk upload ([#73](https://github.com/chaarvyss/chaarvy_fe_v2/issues/73)) ([48dfa19](https://github.com/chaarvyss/chaarvy_fe_v2/commit/48dfa19962fe877ad1cc830a43398f4ed5f282c0))
+
 ## [1.18.15](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.14...v1.18.15) (2026-09-13)
 
 
