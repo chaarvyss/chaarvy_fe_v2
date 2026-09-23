@@ -1,12 +1,12 @@
-import React from 'react'
 import { Box, Typography, TextField, IconButton, CircularProgress, Chip } from '@mui/material'
-import PencilOutlineIcon from 'mdi-material-ui/PencilOutline'
-import ReplyIcon from 'mdi-material-ui/Reply'
+import EmojiPicker from 'emoji-picker-react'
 import CloseIcon from 'mdi-material-ui/Close'
 import EmoticonOutlineIcon from 'mdi-material-ui/EmoticonOutline'
 import PaperclipIcon from 'mdi-material-ui/Paperclip'
+import PencilOutlineIcon from 'mdi-material-ui/PencilOutline'
+import ReplyIcon from 'mdi-material-ui/Reply'
 import SendIcon from 'mdi-material-ui/Send'
-import EmojiPicker from 'emoji-picker-react'
+import React from 'react'
 
 import { useChatContext } from '../context/ChatContext'
 

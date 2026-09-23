@@ -56,10 +56,7 @@ const ChatSidebar: React.FC = () => {
           borderColor: 'primary.main'
         }}
       >
-        <ListItemButton
-          onClick={() => setActiveConversationId(conv.conversation_id)}
-          sx={{ py: 1.5 }}
-        >
+        <ListItemButton onClick={() => setActiveConversationId(conv.conversation_id)} sx={{ py: 1.5 }}>
           <ListItemAvatar>
             <Badge badgeContent={conv.unread_count} color='error'>
               {isDirect ? (
@@ -67,9 +64,7 @@ const ChatSidebar: React.FC = () => {
                   overlap='circular'
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                   variant='dot'
-                  color={
-                    conv.other_user_id && onlineUsers[conv.other_user_id] ? 'success' : 'warning'
-                  }
+                  color={conv.other_user_id && onlineUsers[conv.other_user_id] ? 'success' : 'warning'}
                   sx={{
                     '& .MuiBadge-badge': {
                       boxShadow: theme => `0 0 0 2px ${theme.palette.background.paper}`,
@@ -93,20 +88,11 @@ const ChatSidebar: React.FC = () => {
           <ListItemText
             primary={
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography
-                  variant='subtitle2'
-                  noWrap
-                  sx={{ fontWeight: conv.unread_count > 0 ? 700 : 500 }}
-                >
+                <Typography variant='subtitle2' noWrap sx={{ fontWeight: conv.unread_count > 0 ? 700 : 500 }}>
                   {conv.title}
                 </Typography>
-                <Typography
-                  variant='caption'
-                  sx={{ color: 'text.secondary', minWidth: 60, textAlign: 'right' }}
-                >
-                  {conv.last_message_at
-                    ? dayjs(conv.last_message_at, 'DD-MM-YYYY HH:mm:ss').format('MMM D')
-                    : ''}
+                <Typography variant='caption' sx={{ color: 'text.secondary', minWidth: 60, textAlign: 'right' }}>
+                  {conv.last_message_at ? dayjs(conv.last_message_at, 'DD-MM-YYYY HH:mm:ss').format('MMM D') : ''}
                 </Typography>
               </Box>
             }

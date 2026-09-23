@@ -50,6 +50,7 @@ const ChatAdvancedFilters: React.FC<ChatAdvancedFiltersProps> = ({ showFilters, 
     programSegmentMediums.forEach(item => {
       uniqueMap.set(item.segment_id, { segment_id: item.segment_id, segment_name: item.segment_name })
     })
+
     return Array.from(uniqueMap.values())
   }, [contactFilterProgram, allSegments, programSegmentMediums])
 
@@ -64,8 +65,10 @@ const ChatAdvancedFilters: React.FC<ChatAdvancedFiltersProps> = ({ showFilters, 
       filtered.forEach(item => {
         uniqueMap.set(item.medium_id, { language_id: item.medium_id, language_name: item.medium_name })
       })
+
       return Array.from(uniqueMap.values())
     }
+
     return allMediums
   }, [contactFilterProgram, contactFilterSegment, allMediums, programSegmentMediums])
 
@@ -138,13 +141,7 @@ const ChatAdvancedFilters: React.FC<ChatAdvancedFiltersProps> = ({ showFilters, 
             bgcolor: 'background.default'
           }}
         >
-          <TextField
-            select
-            size='small'
-            label='Program'
-            value={contactFilterProgram}
-            onChange={handleProgramChange}
-          >
+          <TextField select size='small' label='Program' value={contactFilterProgram} onChange={handleProgramChange}>
             <MenuItem value=''>
               <em>Any</em>
             </MenuItem>
@@ -155,13 +152,7 @@ const ChatAdvancedFilters: React.FC<ChatAdvancedFiltersProps> = ({ showFilters, 
             ))}
           </TextField>
 
-          <TextField
-            select
-            size='small'
-            label='Segment'
-            value={contactFilterSegment}
-            onChange={handleSegmentChange}
-          >
+          <TextField select size='small' label='Segment' value={contactFilterSegment} onChange={handleSegmentChange}>
             <MenuItem value=''>
               <em>Any</em>
             </MenuItem>
@@ -172,13 +163,7 @@ const ChatAdvancedFilters: React.FC<ChatAdvancedFiltersProps> = ({ showFilters, 
             ))}
           </TextField>
 
-          <TextField
-            select
-            size='small'
-            label='Medium'
-            value={contactFilterMedium}
-            onChange={handleMediumChange}
-          >
+          <TextField select size='small' label='Medium' value={contactFilterMedium} onChange={handleMediumChange}>
             <MenuItem value=''>
               <em>Any</em>
             </MenuItem>

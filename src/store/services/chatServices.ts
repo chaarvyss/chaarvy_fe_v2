@@ -71,15 +71,18 @@ export interface ParticipantDetail {
 
 export const chatServicesApi = api.injectEndpoints({
   endpoints: build => ({
-    getChatContacts: build.query<ContactCard[], { 
-      search?: string; 
-      studentContextId?: string;
-      program_id?: string;
-      segment_id?: string;
-      medium_id?: string;
-      section_id?: string;
-      admission_number?: string;
-    }>({
+    getChatContacts: build.query<
+      ContactCard[],
+      {
+        search?: string
+        studentContextId?: string
+        program_id?: string
+        segment_id?: string
+        medium_id?: string
+        section_id?: string
+        admission_number?: string
+      }
+    >({
       query: ({ search, studentContextId, program_id, segment_id, medium_id, section_id, admission_number }) => ({
         url: '/common/chat/contacts',
         method: 'GET',

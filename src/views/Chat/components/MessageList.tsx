@@ -1,7 +1,8 @@
-import React from 'react'
 import { Box, Skeleton, Divider, Chip, Typography } from '@mui/material'
+import React from 'react'
 
 import { useChatContext } from '../context/ChatContext'
+
 import MessageBubble from './MessageBubble'
 
 const MessageList: React.FC = () => {
@@ -37,17 +38,12 @@ const MessageList: React.FC = () => {
               key={item}
               sx={{ display: 'flex', alignSelf: item % 2 === 0 ? 'flex-end' : 'flex-start', maxWidth: '70%' }}
             >
-              <Skeleton
-                variant='rectangular'
-                width={150 + (item * 20)}
-                height={60}
-                sx={{ borderRadius: 2 }}
-              />
+              <Skeleton variant='rectangular' width={150 + item * 20} height={60} sx={{ borderRadius: 2 }} />
             </Box>
           ))}
         </Box>
       ) : displayMessages && displayMessages.length > 0 ? (
-        displayMessages.map((msg) => {
+        displayMessages.map(msg => {
           // Show "New Messages" divider before the first unread message
           const showUnreadDivider = firstUnreadMessageId && msg.message_id === firstUnreadMessageId
 

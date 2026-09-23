@@ -1,19 +1,20 @@
-import React from 'react'
 import { Box, Typography, IconButton, Tooltip, Checkbox } from '@mui/material'
-import ShareOutlineIcon from 'mdi-material-ui/ShareOutline'
-import ReplyIcon from 'mdi-material-ui/Reply'
-import ClockOutlineIcon from 'mdi-material-ui/ClockOutline'
-import AlertCircleOutlineIcon from 'mdi-material-ui/AlertCircleOutline'
-import CheckAllIcon from 'mdi-material-ui/CheckAll'
-import CheckIcon from 'mdi-material-ui/Check'
-import DotsVerticalIcon from 'mdi-material-ui/DotsVertical'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import AlertCircleOutlineIcon from 'mdi-material-ui/AlertCircleOutline'
+import CheckIcon from 'mdi-material-ui/Check'
+import CheckAllIcon from 'mdi-material-ui/CheckAll'
+import ClockOutlineIcon from 'mdi-material-ui/ClockOutline'
+import DotsVerticalIcon from 'mdi-material-ui/DotsVertical'
+import ReplyIcon from 'mdi-material-ui/Reply'
+import ShareOutlineIcon from 'mdi-material-ui/ShareOutline'
+import React from 'react'
 
 dayjs.extend(customParseFormat)
 
-import { useChatContext } from '../context/ChatContext'
 import { MessageDetail } from 'src/store/services/chatServices'
+
+import { useChatContext } from '../context/ChatContext'
 
 interface MessageBubbleProps {
   msg: MessageDetail
@@ -137,7 +138,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ msg }) => {
           {!isDeleted && msg.message_type === 'video' && msg.media_url && (
             <Box sx={{ maxWidth: 340, mb: 1 }}>
               <video controls src={msg.media_url} style={{ width: '100%', borderRadius: 8 }}>
-                <track kind="captions" srcLang="en" label="English" />
+                <track kind='captions' srcLang='en' label='English' />
               </video>
             </Box>
           )}

@@ -39,7 +39,12 @@ const ChatThread: React.FC = () => {
           personnel.
         </Typography>
         {isAuthorised(PermissionLabels.chat.direct.create) && (
-          <Button variant='contained' startIcon={<PlusIcon />} sx={{ mt: 2 }} onClick={() => setOpenNewChatDialog(true)}>
+          <Button
+            variant='contained'
+            startIcon={<PlusIcon />}
+            sx={{ mt: 2 }}
+            onClick={() => setOpenNewChatDialog(true)}
+          >
             Start New Chat
           </Button>
         )}

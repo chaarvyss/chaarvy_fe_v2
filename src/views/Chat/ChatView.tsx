@@ -1,11 +1,11 @@
-import React from 'react'
 import { Box, Card, Grid, Typography, FormControl, Select, MenuItem } from '@mui/material'
 import AccountSchoolIcon from 'mdi-material-ui/AccountSchool'
+import React from 'react'
 
-import { ChatProvider, useChatContext } from './context/ChatContext'
+import ChatDialogs from './components/ChatDialogs'
 import ChatSidebar from './components/ChatSidebar'
 import ChatThread from './components/ChatThread'
-import ChatDialogs from './components/ChatDialogs'
+import { ChatProvider, useChatContext } from './context/ChatContext'
 
 const ChatViewLayout: React.FC = () => {
   const { myKids, activeStudentId, setActiveStudentId, activeConversationId } = useChatContext()
@@ -32,10 +32,7 @@ const ChatViewLayout: React.FC = () => {
             </Typography>
           </Box>
           <FormControl size='small' sx={{ minWidth: 260 }}>
-            <Select
-              value={activeStudentId || ''}
-              onChange={e => setActiveStudentId(e.target.value as string)}
-            >
+            <Select value={activeStudentId || ''} onChange={e => setActiveStudentId(e.target.value as string)}>
               {myKids.map((k: any) => (
                 <MenuItem key={k.student_id} value={k.student_id}>
                   {k.student_name} ({k.section_name || 'Class'})
