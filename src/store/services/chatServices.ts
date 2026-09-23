@@ -99,8 +99,8 @@ const chatServicesApi = api.injectEndpoints({
       // Merge incoming paginated messages with the existing cached messages
       merge: (currentCache, newItems, { arg }) => {
         if (arg.before_timestamp) {
-          // If we requested older messages (pagination), append them to the end of the cache (since older messages go at the top of the UI)
-          currentCache.push(...newItems)
+          // If we requested older messages (pagination), prepend them to the start of the cache (since older messages go at the top of the UI)
+          currentCache.unshift(...newItems)
         } else {
           // If it's a fresh fetch (e.g. websocket invalidation or first load), replace the cache
           return newItems

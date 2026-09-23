@@ -4,7 +4,7 @@ import { persistStore, persistReducer } from 'redux-persist'
 import { rootReducer, persistConfig } from './reducers'
 import api from './services/api'
 
-const persistedReducer = persistReducer(persistConfig, rootReducer)
+const persistedReducer = persistReducer<any, any>(persistConfig, rootReducer)
 
 const store = configureStore({
   devTools: true,

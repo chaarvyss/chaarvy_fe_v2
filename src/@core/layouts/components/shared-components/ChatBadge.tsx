@@ -18,7 +18,7 @@ const ChatBadge = () => {
   // Real-time WebSocket listener that triggers RTK query cache invalidation globally
   useChatSocket()
 
-  const { data: conversations } = useGetConversationsQuery({})
+  const { data: conversations } = useGetConversationsQuery({}, { refetchOnMountOrArgChange: true })
 
   const totalUnread = useMemo(() => {
     if (!conversations?.length) return 0

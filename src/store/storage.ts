@@ -27,19 +27,21 @@ const createNoopStorage = () => {
 const createSafeStorage = () => {
   return {
     getItem(key: string) {
-      return localforage.getItem(key).catch((err) => {
+      return localforage.getItem(key).catch(err => {
         console.warn('Storage getItem error:', err)
+
         return null
       })
     },
     setItem(key: string, value: any) {
-      return localforage.setItem(key, value).catch((err) => {
+      return localforage.setItem(key, value).catch(err => {
         console.warn('Storage setItem error:', err)
+
         return value
       })
     },
     removeItem(key: string) {
-      return localforage.removeItem(key).catch((err) => {
+      return localforage.removeItem(key).catch(err => {
         console.warn('Storage removeItem error:', err)
       })
     }

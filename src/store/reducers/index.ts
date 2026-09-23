@@ -15,7 +15,7 @@ const encryptor = encryptTransform({
 export const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['permission'],
+  whitelist: ['permission', api.reducerPath],
   transforms: [encryptor]
 }
 

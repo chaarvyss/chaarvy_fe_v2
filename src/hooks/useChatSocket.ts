@@ -3,7 +3,10 @@ import { useDispatch } from 'react-redux'
 
 import { sessionStorageKeys } from 'src/lib/enums'
 import api from 'src/store/services/api'
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 
+dayjs.extend(customParseFormat)
 export const useChatSocket = (conversationId?: string) => {
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline'>('offline')
   const socket = useRef<WebSocket | null>(null)
@@ -58,22 +61,69 @@ export const useChatSocket = (conversationId?: string) => {
           const update = JSON.parse(event.data)
 
           if (update.event === 'presence:update' && update.user_id) {
-            // Update Redux state dynamically for online users
             dispatch({
               type: 'chat/setUserOnlineStatus',
               payload: { userId: update.user_id, isOnline: update.status === 'online' }
             })
+          } else if (update.event === 'message:new') {
+            const msg = update.message
+            const convId = update.conversation_id
+            const myId = sessionStorage.getItem('uid')
+
+            // Format date for UI
+            if (msg.created_at) {
+              msg.created_at = dayjs(msg.created_at).format('DD-MM-YYYY HH:mm:ss')
+            }
+            msg.is_mine = String(msg.sender_id) === myId
+
+            // Update messages list manually to avoid API call
+            dispatch(
+              api.util.updateQueryData('getConversationMessages', { conversationId: convId }, draft => {
+                const exists = draft.find(m => m.message_id === msg.message_id)
+                if (!exists) {
+                  draft.push(msg)
+                }
+              })
+            )
+
+            // Update conversation list preview manually (optimistic)
+            dispatch(
+              api.util.updateQueryData('getConversations', {}, draft => {
+                const conv = draft.find(c => c.conversation_id === convId)
+                if (conv) {
+                  conv.last_message_preview = msg.content || 'Attachment'
+                  conv.last_message_at = msg.created_at
+                  if (!msg.is_mine) {
+                    conv.unread_count = (conv.unread_count || 0) + 1
+                  }
+                }
+              })
+            )
+            
+            // To ensure 100% accuracy of the unread badge (especially for parents with different cache keys),
+            // if this is an incoming message from someone else, we trigger a background sync of the conversation list.
+            if (!msg.is_mine) {
+               dispatch(api.util.invalidateTags(['Conversations' as any]))
+            }
+          } else if (update.event === 'message:edit') {
+            const convId = update.conversation_id
+            dispatch(
+              api.util.updateQueryData('getConversationMessages', { conversationId: convId }, draft => {
+                const msg = draft.find(m => m.message_id === update.message_id)
+                if (msg) {
+                  msg.content = update.content
+                  msg.is_edited = 1
+                }
+              })
+            )
           } else {
-            // Any other incoming event should invalidate the conversations list to update unread counts and latest messages
+            // For other events like message:deleted or read receipts, fallback to invalidation
             dispatch(api.util.invalidateTags(['Conversations' as any]))
 
             const convId = update.conversation_id || update.data?.conversation_id
-
-            // If we receive a message for a specific conversation, invalidate that conversation's messages
             if (convId) {
               dispatch(api.util.invalidateTags([{ type: 'Messages' as any, id: convId }]))
             } else if (conversationId) {
-              // Fallback: invalidate the currently active conversation just in case
               dispatch(api.util.invalidateTags([{ type: 'Messages' as any, id: conversationId }]))
             }
           }
