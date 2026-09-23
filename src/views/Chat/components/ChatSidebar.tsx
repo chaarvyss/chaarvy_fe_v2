@@ -23,6 +23,9 @@ import React from 'react'
 
 dayjs.extend(customParseFormat)
 
+import { PermissionLabels } from 'src/constants/permissions'
+import { isAuthorised } from 'src/lib/util/permissionCheck'
+
 import { useChatContext } from '../context/ChatContext'
 
 const ChatSidebar: React.FC = () => {
@@ -35,6 +38,7 @@ const ChatSidebar: React.FC = () => {
     loadingConversations,
     setOpenNewChatDialog,
     setOpenNewGroupDialog,
+    setOpenNewBroadcastDialog,
     onlineUsers
   } = useChatContext()
 
@@ -47,16 +51,27 @@ const ChatSidebar: React.FC = () => {
             Campus Chat
           </Typography>
           <Box>
-            <Tooltip title='Create Group'>
-              <IconButton size='small' onClick={() => setOpenNewGroupDialog(true)} sx={{ mr: 0.5 }}>
-                <AccountMultiplePlusIcon fontSize='small' />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title='Start Chat'>
-              <IconButton size='small' color='primary' onClick={() => setOpenNewChatDialog(true)}>
-                <PlusIcon />
-              </IconButton>
-            </Tooltip>
+            {isAuthorised(PermissionLabels.chat.group.create) && (
+              <Tooltip title='Create Group'>
+                <IconButton size='small' onClick={() => setOpenNewGroupDialog(true)} sx={{ mr: 0.5 }}>
+                  <AccountMultiplePlusIcon fontSize='small' />
+                </IconButton>
+              </Tooltip>
+            )}
+            {isAuthorised(PermissionLabels.chat.broadcast.create) && (
+              <Tooltip title='Create Broadcast'>
+                <IconButton size='small' onClick={() => setOpenNewBroadcastDialog(true)} sx={{ mr: 0.5 }}>
+                  <BullhornOutlineIcon fontSize='small' />
+                </IconButton>
+              </Tooltip>
+            )}
+            {isAuthorised(PermissionLabels.chat.direct.create) && (
+              <Tooltip title='Start Chat'>
+                <IconButton size='small' color='primary' onClick={() => setOpenNewChatDialog(true)}>
+                  <PlusIcon />
+                </IconButton>
+              </Tooltip>
+            )}
           </Box>
         </Box>
         <TextField

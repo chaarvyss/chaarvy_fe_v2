@@ -1,12 +1,16 @@
-import React from 'react'
 import { Box, Typography, Button, Avatar, LinearProgress } from '@mui/material'
 import BullhornOutlineIcon from 'mdi-material-ui/BullhornOutline'
 import PlusIcon from 'mdi-material-ui/Plus'
+import React from 'react'
+
+import { PermissionLabels } from 'src/constants/permissions'
+import { isAuthorised } from 'src/lib/util/permissionCheck'
 
 import { useChatContext } from '../context/ChatContext'
+
 import ChatThreadHeader from './ChatThreadHeader'
-import MessageList from './MessageList'
 import MessageComposer from './MessageComposer'
+import MessageList from './MessageList'
 
 const ChatThread: React.FC = () => {
   const { activeConversation, setOpenNewChatDialog, fetchingMessages, markingRead, loadingMessages } = useChatContext()
@@ -31,11 +35,14 @@ const ChatThread: React.FC = () => {
           Welcome to Campus Internal Chat
         </Typography>
         <Typography variant='body2' color='text.secondary' sx={{ maxWidth: 400 }}>
-          Select a conversation from the list or start a new chat with your classmates, teachers, or transport personnel.
+          Select a conversation from the list or start a new chat with your classmates, teachers, or transport
+          personnel.
         </Typography>
-        <Button variant='contained' startIcon={<PlusIcon />} sx={{ mt: 2 }} onClick={() => setOpenNewChatDialog(true)}>
-          Start New Chat
-        </Button>
+        {isAuthorised(PermissionLabels.chat.direct.create) && (
+          <Button variant='contained' startIcon={<PlusIcon />} sx={{ mt: 2 }} onClick={() => setOpenNewChatDialog(true)}>
+            Start New Chat
+          </Button>
+        )}
       </Box>
     )
   }
@@ -45,7 +52,23 @@ const ChatThread: React.FC = () => {
       <ChatThreadHeader />
       {(fetchingMessages || markingRead) && !loadingMessages && <LinearProgress sx={{ height: 3 }} />}
       <MessageList />
-      <MessageComposer />
+      {activeConversation.is_inactive ? (
+        <Box
+          sx={{
+            p: 2,
+            textAlign: 'center',
+            bgcolor: 'background.default',
+            borderTop: '1px solid',
+            borderColor: 'divider'
+          }}
+        >
+          <Typography variant='body2' color='text.secondary'>
+            This user is deactivated or no longer active. You cannot send new messages.
+          </Typography>
+        </Box>
+      ) : (
+        <MessageComposer />
+      )}
     </>
   )
 }

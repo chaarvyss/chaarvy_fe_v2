@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Menu,
   MenuItem,
@@ -22,14 +21,17 @@ import {
   Chip,
   Alert
 } from '@mui/material'
-import ReplyIcon from 'mdi-material-ui/Reply'
-import PencilOutlineIcon from 'mdi-material-ui/PencilOutline'
-import ShareOutlineIcon from 'mdi-material-ui/ShareOutline'
+import BullhornOutlineIcon from 'mdi-material-ui/BullhornOutline'
 import DeleteOutlineIcon from 'mdi-material-ui/DeleteOutline'
 import MagnifyIcon from 'mdi-material-ui/Magnify'
-import BullhornOutlineIcon from 'mdi-material-ui/BullhornOutline'
+import PencilOutlineIcon from 'mdi-material-ui/PencilOutline'
+import ReplyIcon from 'mdi-material-ui/Reply'
+import ShareOutlineIcon from 'mdi-material-ui/ShareOutline'
+import React from 'react'
 
 import { useChatContext } from '../context/ChatContext'
+
+import ChatAdvancedFilters from './ChatAdvancedFilters'
 
 const ChatDialogs: React.FC = () => {
   const {
@@ -63,11 +65,23 @@ const ChatDialogs: React.FC = () => {
     setSelectedMemberIds,
     handleCreateGroup,
     creatingGroup,
+    openNewBroadcastDialog,
+    setOpenNewBroadcastDialog,
+    creatingBroadcast,
+    handleCreateBroadcast,
     forwardDialogMsgId,
     sortedConversations,
     handleForwardMessage,
     displayMessages
   } = useChatContext()
+
+  const [showAdvancedFiltersChat, setShowAdvancedFiltersChat] = React.useState(false)
+  const [showAdvancedFiltersGroup, setShowAdvancedFiltersGroup] = React.useState(false)
+  const [showAdvancedFiltersBroadcast, setShowAdvancedFiltersBroadcast] = React.useState(false)
+
+  const registeredContacts = React.useMemo(() => {
+    return contacts?.filter(c => !c.sub_text?.includes('(Not Registered on App)')) || []
+  }, [contacts])
 
   return (
     <>
@@ -167,6 +181,7 @@ const ChatDialogs: React.FC = () => {
               startAdornment: <MagnifyIcon fontSize='small' sx={{ mr: 1, color: 'text.secondary' }} />
             }}
           />
+          <ChatAdvancedFilters showFilters={showAdvancedFiltersChat} setShowFilters={setShowAdvancedFiltersChat} />
           {loadingContacts ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
               <CircularProgress size={28} />
@@ -240,12 +255,46 @@ const ChatDialogs: React.FC = () => {
             onChange={e => setGroupDescription(e.target.value)}
             sx={{ mb: 2 }}
           />
-          <Typography variant='subtitle2' sx={{ mb: 1, fontWeight: 600 }}>
-            Select Members:
-          </Typography>
+          <TextField
+            fullWidth
+            size='small'
+            placeholder='Search to add members...'
+            value={contactSearch}
+            onChange={e => setContactSearch(e.target.value)}
+            sx={{ mb: 1.5 }}
+            InputProps={{
+              startAdornment: <MagnifyIcon fontSize='small' sx={{ mr: 1, color: 'text.secondary' }} />
+            }}
+          />
+          <ChatAdvancedFilters showFilters={showAdvancedFiltersGroup} setShowFilters={setShowAdvancedFiltersGroup} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
+              Select Members:
+            </Typography>
+            <Button
+              size='small'
+              onClick={() => {
+                const visibleIds = registeredContacts.map(c => c.id)
+                const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedMemberIds.includes(id))
+
+                if (allVisibleSelected) {
+                  // Deselect visible
+                  setSelectedMemberIds(selectedMemberIds.filter(id => !visibleIds.includes(id)))
+                } else {
+                  // Select all visible (union)
+                  const newIds = new Set([...selectedMemberIds, ...visibleIds])
+                  setSelectedMemberIds(Array.from(newIds))
+                }
+              }}
+            >
+              {registeredContacts.length > 0 && registeredContacts.every(c => selectedMemberIds.includes(c.id))
+                ? 'Deselect All'
+                : 'Select All'}
+            </Button>
+          </Box>
           <Box sx={{ maxHeight: 240, overflowY: 'auto', border: 1, borderColor: 'divider', borderRadius: 1 }}>
             <List dense disablePadding>
-              {contacts?.map(c => {
+              {registeredContacts.map(c => {
                 const isSelected = selectedMemberIds.includes(c.id)
 
                 return (
@@ -279,6 +328,110 @@ const ChatDialogs: React.FC = () => {
         </DialogActions>
       </Dialog>
 
+      {/* CREATE BROADCAST MODAL */}
+      <Dialog open={openNewBroadcastDialog} onClose={() => setOpenNewBroadcastDialog(false)} fullWidth maxWidth='sm'>
+        <DialogTitle>Send Broadcast</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            size='small'
+            label='Broadcast Title'
+            value={groupTitle}
+            onChange={e => setGroupTitle(e.target.value)}
+            sx={{ mt: 1.5, mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            size='small'
+            label='Broadcast Message'
+            value={groupDescription}
+            onChange={e => setGroupDescription(e.target.value)}
+            multiline
+            minRows={3}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            size='small'
+            placeholder='Search recipients...'
+            value={contactSearch}
+            onChange={e => setContactSearch(e.target.value)}
+            sx={{ mb: 1.5 }}
+            InputProps={{
+              startAdornment: <MagnifyIcon fontSize='small' sx={{ mr: 1, color: 'text.secondary' }} />
+            }}
+          />
+          <ChatAdvancedFilters
+            showFilters={showAdvancedFiltersBroadcast}
+            setShowFilters={setShowAdvancedFiltersBroadcast}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
+              Select Recipients ({selectedMemberIds.length}):
+            </Typography>
+            <Button
+              size='small'
+              onClick={() => {
+                const visibleIds = registeredContacts.map(c => c.id)
+                const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedMemberIds.includes(id))
+
+                if (allVisibleSelected) {
+                  // Deselect visible
+                  setSelectedMemberIds(selectedMemberIds.filter(id => !visibleIds.includes(id)))
+                } else {
+                  // Select all visible (union)
+                  const newIds = new Set([...selectedMemberIds, ...visibleIds])
+                  setSelectedMemberIds(Array.from(newIds))
+                }
+              }}
+            >
+              {registeredContacts.length > 0 && registeredContacts.every(c => selectedMemberIds.includes(c.id))
+                ? 'Deselect All'
+                : 'Select All'}
+            </Button>
+          </Box>
+          <Box sx={{ maxHeight: 240, overflowY: 'auto', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+            <List dense disablePadding>
+              {registeredContacts.map(c => {
+                const isSelected = selectedMemberIds.includes(c.id)
+
+                return (
+                  <ListItem key={c.id} disablePadding>
+                    <ListItemButton
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedMemberIds(selectedMemberIds.filter(id => id !== c.id))
+                        } else {
+                          setSelectedMemberIds([...selectedMemberIds, c.id])
+                        }
+                      }}
+                    >
+                      <ListItemAvatar>
+                        <Avatar sx={{ width: 28, height: 28 }}>{c.name[0]}</Avatar>
+                      </ListItemAvatar>
+                      <ListItemText primary={c.name} secondary={c.category} />
+                      {isSelected && <Chip size='small' color='primary' label='Selected' sx={{ height: 20 }} />}
+                    </ListItemButton>
+                  </ListItem>
+                )
+              })}
+            </List>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenNewBroadcastDialog(false)}>Cancel</Button>
+          <Button
+            variant='contained'
+            onClick={handleCreateBroadcast}
+            disabled={
+              !groupTitle.trim() || !groupDescription.trim() || selectedMemberIds.length === 0 || creatingBroadcast
+            }
+          >
+            {creatingBroadcast ? 'Sending...' : `Send Broadcast (${selectedMemberIds.length})`}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* FORWARD MODAL */}
       <Dialog open={!!forwardDialogMsgId} onClose={() => setForwardDialogMsgId(null)} fullWidth maxWidth='sm'>
         <DialogTitle>Forward Message To...</DialogTitle>
@@ -286,7 +439,10 @@ const ChatDialogs: React.FC = () => {
           <List>
             {sortedConversations.map(c => (
               <ListItem key={c.conversation_id} disablePadding>
-                <ListItemButton onClick={() => handleForwardMessage(c.conversation_id)} sx={{ borderRadius: 1, mb: 0.5 }}>
+                <ListItemButton
+                  onClick={() => handleForwardMessage(c.conversation_id)}
+                  sx={{ borderRadius: 1, mb: 0.5 }}
+                >
                   <ListItemAvatar>
                     <Avatar src={c.avatar_url || undefined}>
                       {c.conversation_type === 'channel' ? <BullhornOutlineIcon /> : c.title[0]}

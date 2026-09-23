@@ -1,12 +1,13 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useTheme, useMediaQuery } from '@mui/material'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
 dayjs.extend(customParseFormat)
 
 import { useChatSocket } from 'src/hooks/useChatSocket'
-import { RootState } from 'src/store'
+import { RootState, AppDispatch } from 'src/store'
 import api from 'src/store/services/api'
 import {
   useGetConversationsQuery,
@@ -15,16 +16,15 @@ import {
   useGetChatContactsQuery,
   useStartDirectChatMutation,
   useCreateGroupMutation,
+  useCreateBroadcastMutation,
   useDeleteChatMessageMutation,
   useMarkConversationReadMutation,
   useGetMyKidsQuery,
   ContactCard,
   MessageDetail
 } from 'src/store/services/chatServices'
-import { useTheme, useMediaQuery } from '@mui/material'
 
 interface ChatContextProps {
-  // State
   activeConversationId: string | null
   setActiveConversationId: (id: string | null) => void
   activeStudentId: string | null
@@ -38,7 +38,7 @@ interface ChatContextProps {
   filePreviewUrl: string | null
   setFilePreviewUrl: (url: string | null) => void
   uploading: boolean
-  
+
   // New Feature States
   showEmojiPicker: boolean
   setShowEmojiPicker: (show: boolean) => void
@@ -48,27 +48,39 @@ interface ChatContextProps {
   setEditingMessageId: (id: string | null) => void
   forwardDialogMsgId: string | null
   setForwardDialogMsgId: (id: string | null) => void
-  
+
   // Selection mode
   isSelectionMode: boolean
   setIsSelectionMode: (mode: boolean) => void
   selectedMessageIds: string[]
   setSelectedMessageIds: (ids: string[]) => void
-  
+
   // Dialog states
   openNewChatDialog: boolean
   setOpenNewChatDialog: (open: boolean) => void
   openNewGroupDialog: boolean
   setOpenNewGroupDialog: (open: boolean) => void
+  openNewBroadcastDialog: boolean
+  setOpenNewBroadcastDialog: (open: boolean) => void
   contactSearch: string
   setContactSearch: (search: string) => void
+  contactFilterProgram: string
+  setContactFilterProgram: (val: string) => void
+  contactFilterSegment: string
+  setContactFilterSegment: (val: string) => void
+  contactFilterMedium: string
+  setContactFilterMedium: (val: string) => void
+  contactFilterSection: string
+  setContactFilterSection: (val: string) => void
+  contactFilterAdmission: string
+  setContactFilterAdmission: (val: string) => void
   groupTitle: string
   setGroupTitle: (title: string) => void
   groupDescription: string
   setGroupDescription: (desc: string) => void
   selectedMemberIds: string[]
   setSelectedMemberIds: (ids: string[]) => void
-  
+
   // Message Action Menu
   anchorEl: HTMLElement | null
   setAnchorEl: (el: HTMLElement | null) => void
@@ -78,7 +90,7 @@ interface ChatContextProps {
   setOpenDeleteConfirm: (open: boolean) => void
   deleteMode: 'me' | 'everyone'
   setDeleteMode: (mode: 'me' | 'everyone') => void
-  
+
   // Data
   myKids: any[]
   conversations: any[]
@@ -96,19 +108,21 @@ interface ChatContextProps {
   markingRead: boolean
   snapshotUnreadCount: number
   firstUnreadMessageId: string | null
-  
+
   // Refs
   messagesEndRef: React.RefObject<HTMLDivElement>
   unreadDividerRef: React.RefObject<HTMLDivElement>
   fileInputRef: React.RefObject<HTMLInputElement>
   messageContainerRef: React.RefObject<HTMLDivElement>
-  
+
   // Handlers
   handleSendMessage: () => Promise<void>
   handleResend: (msg: MessageDetail) => void
   handleForwardMessage: (targetConversationId: string) => void
   handleStartDirectChat: (contact: ContactCard) => Promise<void>
   handleCreateGroup: () => Promise<void>
+  creatingBroadcast: boolean
+  handleCreateBroadcast: () => Promise<void>
   handleConfirmDelete: () => Promise<void>
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   handleScroll: (e: React.UIEvent<HTMLDivElement>) => void
@@ -134,12 +148,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [selectedMessageIds, setSelectedMessageIds] = useState<string[]>([])
 
   const { emitMessage } = useChatSocket()
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const onlineUsers = useSelector((state: RootState) => state.chat?.onlineUsers || {})
 
   const [openNewChatDialog, setOpenNewChatDialog] = useState(false)
   const [openNewGroupDialog, setOpenNewGroupDialog] = useState(false)
+  const [openNewBroadcastDialog, setOpenNewBroadcastDialog] = useState(false)
   const [contactSearch, setContactSearch] = useState('')
+  const [contactFilterProgram, setContactFilterProgram] = useState('')
+  const [contactFilterSegment, setContactFilterSegment] = useState('')
+  const [contactFilterMedium, setContactFilterMedium] = useState('')
+  const [contactFilterSection, setContactFilterSection] = useState('')
+  const [contactFilterAdmission, setContactFilterAdmission] = useState('')
   const [groupTitle, setGroupTitle] = useState('')
   const [groupDescription, setGroupDescription] = useState('')
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([])
@@ -188,6 +208,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             newOptimistic.splice(matchIdx, 1)
           }
         }
+
         return newOptimistic
       })
     }
@@ -195,17 +216,24 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const displayMessages = useMemo(() => {
     if (!messages) return optimisticMessages
+
     return [...messages, ...optimisticMessages]
   }, [messages, optimisticMessages])
 
   const { data: contacts = [], isLoading: loadingContacts } = useGetChatContactsQuery({
     search: contactSearch,
-    studentContextId: activeStudentId || undefined
+    studentContextId: activeStudentId || undefined,
+    program_id: contactFilterProgram || undefined,
+    segment_id: contactFilterSegment || undefined,
+    medium_id: contactFilterMedium || undefined,
+    section_id: contactFilterSection || undefined,
+    admission_number: contactFilterAdmission || undefined
   })
 
   const [, { isLoading: sendingMessage }] = useSendChatMessageMutation()
   const [startDirectChat] = useStartDirectChatMutation()
   const [createGroup, { isLoading: creatingGroup }] = useCreateGroupMutation()
+  const [createBroadcast, { isLoading: creatingBroadcast }] = useCreateBroadcastMutation()
   const [deleteMessage] = useDeleteChatMessageMutation()
   const [, { isLoading: markingRead }] = useMarkConversationReadMutation()
 
@@ -218,9 +246,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sortedConversations = useMemo(() => {
     if (!conversations) return []
+
     return [...conversations].sort((a, b) => {
       const timeA = a.last_message_at ? dayjs(a.last_message_at, 'DD-MM-YYYY HH:mm:ss').valueOf() : 0
       const timeB = b.last_message_at ? dayjs(b.last_message_at, 'DD-MM-YYYY HH:mm:ss').valueOf() : 0
+
       return timeB - timeA
     })
   }, [conversations])
@@ -276,6 +306,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           )
         }
       }, 300)
+
       return () => clearTimeout(timer)
     }
   }, [activeConversationId, messages, emitMessage, activeStudentId, dispatch])
@@ -287,6 +318,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (scrollDiff > 0 && container.scrollTop <= 1) {
         container.scrollTop = scrollDiff
       }
+
       return
     }
 
@@ -300,6 +332,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (messages && messages.length > 0) {
       const timer = setTimeout(handleScrollToPosition, 100)
+
       return () => clearTimeout(timer)
     }
   }, [messages, handleScrollToPosition])
@@ -455,11 +488,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleCreateGroup = async () => {
     if (!groupTitle.trim()) return
     try {
-      const members = selectedMemberIds.map(uid => ({
-        user_id: uid,
-        user_type: 'staff',
-        role: 'member'
-      }))
+      const members = selectedMemberIds.map(uid => {
+        const contact = contacts?.find(c => c.id === uid)
+
+        return {
+          user_id: uid,
+          user_type: contact?.user_type || 'staff',
+          role: 'member'
+        }
+      })
 
       const res = await createGroup({
         title: groupTitle.trim(),
@@ -469,6 +506,39 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setActiveConversationId(res.conversation_id)
       setOpenNewGroupDialog(false)
+      setGroupTitle('')
+      setGroupDescription('')
+      setSelectedMemberIds([])
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleCreateBroadcast = async () => {
+    if (!groupTitle.trim() || !groupDescription.trim()) return
+    try {
+      const members = selectedMemberIds.map(uid => {
+        const contact = contacts?.find(c => c.id === uid)
+
+        return {
+          user_id: uid,
+          user_type: contact?.user_type || 'staff',
+          role: 'member'
+        }
+      })
+
+      const res = await createBroadcast({
+        title: groupTitle.trim(),
+        content: groupDescription.trim(),
+        program_id: contactFilterProgram || undefined,
+        segment_id: contactFilterSegment || undefined,
+        section_id: contactFilterSection || undefined,
+        medium_id: contactFilterMedium || undefined,
+        member_ids: members.length > 0 ? members : undefined
+      }).unwrap()
+
+      setActiveConversationId(res.conversation_id)
+      setOpenNewBroadcastDialog(false)
       setGroupTitle('')
       setGroupDescription('')
       setSelectedMemberIds([])
@@ -489,6 +559,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSelectedMessageIds([])
       setIsSelectionMode(false)
       setOpenDeleteConfirm(false)
+
       return
     }
 
@@ -527,29 +598,63 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const value = {
-    activeConversationId, setActiveConversationId,
-    activeStudentId, setActiveStudentId,
-    searchQuery, setSearchQuery,
-    messageText, setMessageText,
-    selectedFile, setSelectedFile,
-    filePreviewUrl, setFilePreviewUrl,
+    activeConversationId,
+    setActiveConversationId,
+    activeStudentId,
+    setActiveStudentId,
+    searchQuery,
+    setSearchQuery,
+    messageText,
+    setMessageText,
+    selectedFile,
+    setSelectedFile,
+    filePreviewUrl,
+    setFilePreviewUrl,
     uploading,
-    showEmojiPicker, setShowEmojiPicker,
-    replyToMessage, setReplyToMessage,
-    editingMessageId, setEditingMessageId,
-    forwardDialogMsgId, setForwardDialogMsgId,
-    isSelectionMode, setIsSelectionMode,
-    selectedMessageIds, setSelectedMessageIds,
-    openNewChatDialog, setOpenNewChatDialog,
-    openNewGroupDialog, setOpenNewGroupDialog,
-    contactSearch, setContactSearch,
-    groupTitle, setGroupTitle,
-    groupDescription, setGroupDescription,
-    selectedMemberIds, setSelectedMemberIds,
-    anchorEl, setAnchorEl,
-    selectedMessageId, setSelectedMessageId,
-    openDeleteConfirm, setOpenDeleteConfirm,
-    deleteMode, setDeleteMode,
+    showEmojiPicker,
+    setShowEmojiPicker,
+    replyToMessage,
+    setReplyToMessage,
+    editingMessageId,
+    setEditingMessageId,
+    forwardDialogMsgId,
+    setForwardDialogMsgId,
+    isSelectionMode,
+    setIsSelectionMode,
+    selectedMessageIds,
+    setSelectedMessageIds,
+    openNewChatDialog,
+    setOpenNewChatDialog,
+    openNewGroupDialog,
+    setOpenNewGroupDialog,
+    openNewBroadcastDialog,
+    setOpenNewBroadcastDialog,
+    contactSearch,
+    setContactSearch,
+    contactFilterProgram,
+    setContactFilterProgram,
+    contactFilterSegment,
+    setContactFilterSegment,
+    contactFilterMedium,
+    setContactFilterMedium,
+    contactFilterSection,
+    setContactFilterSection,
+    contactFilterAdmission,
+    setContactFilterAdmission,
+    groupTitle,
+    setGroupTitle,
+    groupDescription,
+    setGroupDescription,
+    selectedMemberIds,
+    setSelectedMemberIds,
+    anchorEl,
+    setAnchorEl,
+    selectedMessageId,
+    setSelectedMessageId,
+    openDeleteConfirm,
+    setOpenDeleteConfirm,
+    deleteMode,
+    setDeleteMode,
     myKids: myKids || [],
     conversations: conversations || [],
     sortedConversations,
@@ -574,17 +679,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     handleResend,
     handleForwardMessage,
     handleStartDirectChat,
+    creatingGroup,
+    creatingBroadcast,
     handleCreateGroup,
+    handleCreateBroadcast,
     handleConfirmDelete,
     handleFileChange,
     handleScroll
   }
 
-  return (
-    <ChatContext.Provider value={value}>
-      {children}
-    </ChatContext.Provider>
-  )
+  return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>
 }
 
 export const useChatContext = () => {
@@ -592,5 +696,6 @@ export const useChatContext = () => {
   if (!context) {
     throw new Error('useChatContext must be used within a ChatProvider')
   }
+
   return context
 }

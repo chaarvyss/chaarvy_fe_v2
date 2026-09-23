@@ -47,6 +47,7 @@ export interface ConversationDetail {
   last_message_at?: string
   is_announcement_only: number
   student_context_id?: string
+  is_inactive?: boolean
 }
 
 export interface KidSummary {
@@ -70,11 +71,19 @@ export interface ParticipantDetail {
 
 export const chatServicesApi = api.injectEndpoints({
   endpoints: build => ({
-    getChatContacts: build.query<ContactCard[], { search?: string; studentContextId?: string }>({
-      query: ({ search, studentContextId }) => ({
+    getChatContacts: build.query<ContactCard[], { 
+      search?: string; 
+      studentContextId?: string;
+      program_id?: string;
+      segment_id?: string;
+      medium_id?: string;
+      section_id?: string;
+      admission_number?: string;
+    }>({
+      query: ({ search, studentContextId, program_id, segment_id, medium_id, section_id, admission_number }) => ({
         url: '/common/chat/contacts',
         method: 'GET',
-        params: { search },
+        params: { search, program_id, segment_id, medium_id, section_id, admission_number },
         headers: studentContextId ? { 'X-Active-Student-Id': studentContextId } : {}
       }),
       providesTags: ['Contacts' as any]
@@ -229,6 +238,30 @@ export const chatServicesApi = api.injectEndpoints({
       invalidatesTags: ['Conversations' as any]
     }),
 
+    createBroadcast: build.mutation<
+      { conversation_id: string; message: string },
+      {
+        title: string
+        content: string
+        message_type?: 'text' | 'image' | 'video' | 'file'
+        media_url?: string
+        media_meta?: any
+        program_id?: string
+        segment_id?: string
+        section_id?: string
+        medium_id?: string
+        target_roles?: string[]
+        member_ids?: Array<{ user_id: string; user_type: string; role?: string }>
+      }
+    >({
+      query: body => ({
+        url: '/common/chat/broadcast',
+        method: 'POST',
+        body
+      }),
+      invalidatesTags: ['Conversations' as any]
+    }),
+
     deleteChatMessage: build.mutation<
       { message: string },
       {
@@ -297,6 +330,7 @@ export const {
   useSendChatMessageMutation,
   useStartDirectChatMutation,
   useCreateGroupMutation,
+  useCreateBroadcastMutation,
   useDeleteChatMessageMutation,
   useMarkConversationReadMutation,
   useGetMyKidsQuery

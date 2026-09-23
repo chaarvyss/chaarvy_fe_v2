@@ -34,7 +34,8 @@ export const PermissionLabels = {
     expenses: 'nav:expenses',
     vendors: 'nav:vendors',
     timetable: 'nav:time_table',
-    holidays: 'nav:holidays'
+    holidays: 'nav:holidays',
+    chat: 'nav:chat'
   },
   dashboard: {
     studentCount: 'dashboard:student_count',
@@ -246,6 +247,21 @@ export const PermissionLabels = {
     edit: 'expenses:edit',
     view: {
       list: 'expenses:view:list'
+    }
+  },
+  chat: {
+    access: 'chat:access',
+    direct: {
+      create: 'chat:direct:create'
+    },
+    group: {
+      create: 'chat:group:create'
+    },
+    broadcast: {
+      create: 'chat:broadcast:create'
+    },
+    media: {
+      send: 'chat:media:send'
     }
   }
 }
