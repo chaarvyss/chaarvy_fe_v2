@@ -1,6 +1,7 @@
 import { Theme } from '@mui/material/styles'
 
 import { Settings } from 'src/@core/context/settingsContext'
+import ChatBadge from 'src/@core/layouts/components/shared-components/ChatBadge'
 import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
 import UserDropdown from 'src/@core/layouts/components/shared-components/UserDropdown'
 import { MenuIcon } from 'src/utils/mdiElements'
@@ -36,6 +37,7 @@ const AppBarContent = (props: Props) => {
         </Box>
         <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
           <ModeToggler settings={settings} saveSettings={saveSettings} />
+          <ChatBadge />
           {/* <NotificationDropdown /> */}
           <UserDropdown />
         </Box>

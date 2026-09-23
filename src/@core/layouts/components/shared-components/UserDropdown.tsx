@@ -6,6 +6,7 @@ import { styled } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useState, SyntheticEvent, Fragment } from 'react'
 
+import { useSettings } from 'src/@core/hooks/useSettings'
 import { PagePath } from 'src/constants/pagePathConstants'
 import ChaarvyAvatar from 'src/reusable_components/chaarvyAvatar'
 import GetChaarvyIcons from 'src/utils/icons'
@@ -25,6 +26,15 @@ const UserDropdown = () => {
 
   // ** Hooks
   const router = useRouter()
+  const { settings } = useSettings()
+
+  const userName = settings.current_username || 'User'
+  const initials = userName
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 
   const handleDropdownOpen = (event: SyntheticEvent) => {
     setAnchorEl(event.currentTarget)
@@ -50,11 +60,19 @@ const UserDropdown = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <ChaarvyAvatar
-          alt='John Doe'
+          alt={userName}
           onClick={handleDropdownOpen}
-          sx={{ width: 40, height: 40 }}
-          src='/images/avatars/1.png'
-        />
+          sx={{
+            width: 40,
+            height: 40,
+            bgcolor: 'primary.main',
+            color: 'primary.contrastText',
+            fontSize: '0.95rem',
+            fontWeight: 600
+          }}
+        >
+          {initials}
+        </ChaarvyAvatar>
       </Badge>
       <Menu
         anchorEl={anchorEl}

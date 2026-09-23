@@ -34,7 +34,10 @@ export enum CacheTag {
   ClassTimetable = 'classTimetable',
   TopicQuestions = 'topicQuestions',
   FacultyTopicSchedule = 'facultyTopicSchedule',
-  Holidays = 'holidays'
+  Holidays = 'holidays',
+  Conversations = 'Conversations',
+  Contacts = 'Contacts',
+  Messages = 'Messages'
 }
 
 export enum CommonCacheTag {
