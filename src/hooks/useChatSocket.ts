@@ -1,17 +1,18 @@
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useDispatch } from 'react-redux'
 
 import { sessionStorageKeys } from 'src/lib/enums'
-import api from 'src/store/services/api'
-import dayjs from 'dayjs'
-import customParseFormat from 'dayjs/plugin/customParseFormat'
+import { AppDispatch } from 'src/store'
+import { chatServicesApi as api } from 'src/store/services/chatServices'
 
 dayjs.extend(customParseFormat)
 export const useChatSocket = (conversationId?: string) => {
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline'>('offline')
   const socket = useRef<WebSocket | null>(null)
   const messageQueue = useRef<any[]>([])
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   useEffect(() => {
     let reconnectTimer: NodeJS.Timeout
@@ -63,7 +64,12 @@ export const useChatSocket = (conversationId?: string) => {
           if (update.event === 'presence:update' && update.user_id) {
             dispatch({
               type: 'chat/setUserOnlineStatus',
-              payload: { userId: update.user_id, isOnline: update.status === 'online' }
+              payload: { userId: String(update.user_id), isOnline: update.status === 'online' }
+            })
+          } else if (update.event === 'presence:sync' && update.online_users) {
+            dispatch({
+              type: 'chat/setAllOnlineUsers',
+              payload: update.online_users.map(String)
             })
           } else if (update.event === 'message:new') {
             const msg = update.message
@@ -99,11 +105,11 @@ export const useChatSocket = (conversationId?: string) => {
                 }
               })
             )
-            
+
             // To ensure 100% accuracy of the unread badge (especially for parents with different cache keys),
             // if this is an incoming message from someone else, we trigger a background sync of the conversation list.
             if (!msg.is_mine) {
-               dispatch(api.util.invalidateTags(['Conversations' as any]))
+              dispatch(api.util.invalidateTags(['Conversations' as any]))
             }
           } else if (update.event === 'message:edit') {
             const convId = update.conversation_id

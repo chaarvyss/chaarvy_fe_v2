@@ -19,9 +19,16 @@ const chatSlice = createSlice({
       action.payload.forEach(userId => {
         state.onlineUsers[userId] = true
       })
+    },
+    setAllOnlineUsers: (state, action: PayloadAction<string[]>) => {
+      const newState: Record<string, boolean> = {}
+      action.payload.forEach(userId => {
+        newState[userId] = true
+      })
+      state.onlineUsers = newState
     }
   }
 })
 
-export const { setUserOnlineStatus, setMultipleUsersOnline } = chatSlice.actions
+export const { setUserOnlineStatus, setMultipleUsersOnline, setAllOnlineUsers } = chatSlice.actions
 export default chatSlice.reducer

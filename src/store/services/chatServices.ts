@@ -41,6 +41,7 @@ export interface ConversationDetail {
   title: string
   description?: string
   avatar_url?: string
+  other_user_id?: string
   unread_count: number
   last_message_preview?: string
   last_message_at?: string
@@ -59,7 +60,15 @@ export interface KidSummary {
   is_primary?: number
 }
 
-const chatServicesApi = api.injectEndpoints({
+export interface ParticipantDetail {
+  user_id: string
+  user_type: string
+  role: string
+  name: string
+  avatar_url?: string
+}
+
+export const chatServicesApi = api.injectEndpoints({
   endpoints: build => ({
     getChatContacts: build.query<ContactCard[], { search?: string; studentContextId?: string }>({
       query: ({ search, studentContextId }) => ({
@@ -78,6 +87,20 @@ const chatServicesApi = api.injectEndpoints({
         headers: studentContextId ? { 'X-Active-Student-Id': studentContextId } : {}
       }),
       providesTags: ['Conversations' as any]
+    }),
+
+    getConversationParticipants: build.query<
+      ParticipantDetail[],
+      { conversationId: string; studentContextId?: string }
+    >({
+      query: ({ conversationId, studentContextId }) => ({
+        url: `/common/chat/conversations/${conversationId}/participants`,
+        method: 'GET',
+        headers: studentContextId ? { 'X-Active-Student-Id': studentContextId } : {}
+      }),
+      providesTags: (result, error, { conversationId }) => [
+        { type: 'Conversations' as any, id: `${conversationId}-participants` }
+      ]
     }),
 
     getConversationMessages: build.query<
@@ -111,6 +134,40 @@ const chatServicesApi = api.injectEndpoints({
       forceRefetch({ currentArg, previousArg }) {
         return currentArg?.before_timestamp !== previousArg?.before_timestamp
       }
+    }),
+
+    addConversationParticipants: build.mutation<
+      any,
+      {
+        conversationId: string
+        members: { user_id: string; user_type: string; role: string }[]
+        share_history?: boolean
+      }
+    >({
+      query: ({ conversationId, members, share_history }) => ({
+        url: `/common/chat/group/${conversationId}/members`,
+        method: 'POST',
+        body: { members, share_history }
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        { type: 'Conversations' as any, id: `${conversationId}-participants` }
+      ]
+    }),
+
+    removeConversationParticipant: build.mutation<
+      any,
+      {
+        conversationId: string
+        targetUserId: string
+      }
+    >({
+      query: ({ conversationId, targetUserId }) => ({
+        url: `/common/chat/group/${conversationId}/members/${targetUserId}`,
+        method: 'DELETE'
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        { type: 'Conversations' as any, id: `${conversationId}-participants` }
+      ]
     }),
 
     sendChatMessage: build.mutation<
@@ -233,6 +290,9 @@ const chatServicesApi = api.injectEndpoints({
 export const {
   useGetChatContactsQuery,
   useGetConversationsQuery,
+  useGetConversationParticipantsQuery,
+  useAddConversationParticipantsMutation,
+  useRemoveConversationParticipantMutation,
   useGetConversationMessagesQuery,
   useSendChatMessageMutation,
   useStartDirectChatMutation,

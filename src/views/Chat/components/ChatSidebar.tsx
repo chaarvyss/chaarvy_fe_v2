@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Box,
   Typography,
@@ -14,12 +13,13 @@ import {
   CircularProgress,
   Tooltip
 } from '@mui/material'
-import MagnifyIcon from 'mdi-material-ui/Magnify'
-import PlusIcon from 'mdi-material-ui/Plus'
-import AccountMultiplePlusIcon from 'mdi-material-ui/AccountMultiplePlus'
-import BullhornOutlineIcon from 'mdi-material-ui/BullhornOutline'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import AccountMultiplePlusIcon from 'mdi-material-ui/AccountMultiplePlus'
+import BullhornOutlineIcon from 'mdi-material-ui/BullhornOutline'
+import MagnifyIcon from 'mdi-material-ui/Magnify'
+import PlusIcon from 'mdi-material-ui/Plus'
+import React from 'react'
 
 dayjs.extend(customParseFormat)
 
@@ -34,7 +34,8 @@ const ChatSidebar: React.FC = () => {
     sortedConversations,
     loadingConversations,
     setOpenNewChatDialog,
-    setOpenNewGroupDialog
+    setOpenNewGroupDialog,
+    onlineUsers
   } = useChatContext()
 
   return (
@@ -115,9 +116,26 @@ const ChatSidebar: React.FC = () => {
                             >
                               <ListItemAvatar>
                                 <Badge badgeContent={conv.unread_count} color='error'>
-                                  <Avatar src={conv.avatar_url || undefined}>
-                                    {conv.conversation_type === 'channel' ? <BullhornOutlineIcon /> : conv.title[0]}
-                                  </Avatar>
+                                  <Badge
+                                    overlap='circular'
+                                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                                    variant='dot'
+                                    color={
+                                      conv.other_user_id && onlineUsers[conv.other_user_id] ? 'success' : 'warning'
+                                    }
+                                    sx={{
+                                      '& .MuiBadge-badge': {
+                                        boxShadow: theme => `0 0 0 2px ${theme.palette.background.paper}`,
+                                        width: 10,
+                                        height: 10,
+                                        borderRadius: '50%'
+                                      }
+                                    }}
+                                  >
+                                    <Avatar src={conv.avatar_url || undefined}>
+                                      {conv.conversation_type === 'channel' ? <BullhornOutlineIcon /> : conv.title[0]}
+                                    </Avatar>
+                                  </Badge>
                                 </Badge>
                               </ListItemAvatar>
                               <ListItemText
