@@ -1,3 +1,10 @@
+## [1.20.1](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.20.0...v1.20.1) (2026-09-23)
+
+
+### Bug Fixes
+
+* **FixSiteCrash:** AC-103: Fix error    netlify storage related ([#75](https://github.com/chaarvyss/chaarvy_fe_v2/issues/75)) ([abd0324](https://github.com/chaarvyss/chaarvy_fe_v2/commit/abd0324906a736a9c76748ceb4f220bf6fdb3cbc))
+
 # [1.20.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.19.0...v1.20.0) (2026-09-23)
 
 
