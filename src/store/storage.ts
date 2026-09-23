@@ -1,13 +1,15 @@
 import localforage from 'localforage'
 
-try {
-  localforage.config({
-    driver: [localforage.INDEXEDDB, localforage.LOCALSTORAGE],
-    name: 'chaarvy_app',
-    storeName: 'redux_persist_store'
-  })
-} catch (e) {
-  console.warn('localforage config error:', e)
+if (typeof window !== 'undefined') {
+  try {
+    localforage.config({
+      driver: [localforage.INDEXEDDB, localforage.LOCALSTORAGE],
+      name: 'chaarvy_app',
+      storeName: 'redux_persist_store'
+    })
+  } catch (e) {
+    console.warn('localforage config error:', e)
+  }
 }
 
 const createNoopStorage = () => {
