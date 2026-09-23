@@ -8,7 +8,6 @@ dayjs.extend(customParseFormat)
 
 import { useChatSocket } from 'src/hooks/useChatSocket'
 import { RootState, AppDispatch } from 'src/store'
-import api from 'src/store/services/api'
 import {
   useGetConversationsQuery,
   useGetConversationMessagesQuery,
@@ -21,7 +20,8 @@ import {
   useMarkConversationReadMutation,
   useGetMyKidsQuery,
   ContactCard,
-  MessageDetail
+  MessageDetail,
+  chatServicesApi
 } from 'src/store/services/chatServices'
 
 interface ChatContextProps {
@@ -292,14 +292,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // Optimistically clear the unread count in both cache variants
         dispatch(
-          api.util.updateQueryData('getConversations', {}, draft => {
+          chatServicesApi.util.updateQueryData('getConversations', {}, draft => {
             const conv = draft.find(c => c.conversation_id === activeConversationId)
             if (conv) conv.unread_count = 0
           })
         )
         if (activeStudentId) {
           dispatch(
-            api.util.updateQueryData('getConversations', { studentContextId: activeStudentId }, draft => {
+            chatServicesApi.util.updateQueryData('getConversations', { studentContextId: activeStudentId }, draft => {
               const conv = draft.find(c => c.conversation_id === activeConversationId)
               if (conv) conv.unread_count = 0
             })
@@ -679,7 +679,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     handleResend,
     handleForwardMessage,
     handleStartDirectChat,
-    creatingGroup,
     creatingBroadcast,
     handleCreateGroup,
     handleCreateBroadcast,

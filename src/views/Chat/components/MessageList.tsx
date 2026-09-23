@@ -39,7 +39,7 @@ const MessageList: React.FC = () => {
             >
               <Skeleton
                 variant='rectangular'
-                width={Math.floor(Math.random() * 100) + 150}
+                width={150 + (item * 20)}
                 height={60}
                 sx={{ borderRadius: 2 }}
               />
@@ -47,7 +47,7 @@ const MessageList: React.FC = () => {
           ))}
         </Box>
       ) : displayMessages && displayMessages.length > 0 ? (
-        displayMessages.map((msg, index) => {
+        displayMessages.map((msg) => {
           // Show "New Messages" divider before the first unread message
           const showUnreadDivider = firstUnreadMessageId && msg.message_id === firstUnreadMessageId
 

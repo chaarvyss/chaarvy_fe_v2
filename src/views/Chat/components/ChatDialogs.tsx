@@ -83,6 +83,63 @@ const ChatDialogs: React.FC = () => {
     return contacts?.filter(c => !c.sub_text?.includes('(Not Registered on App)')) || []
   }, [contacts])
 
+  const renderContactSelection = (titleLabel: string) => (
+    <>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+        <Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
+          {titleLabel}
+        </Typography>
+        <Button
+          size='small'
+          onClick={() => {
+            const visibleIds = registeredContacts.map(c => c.id)
+            const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedMemberIds.includes(id))
+
+            if (allVisibleSelected) {
+              // Deselect visible
+              setSelectedMemberIds(selectedMemberIds.filter(id => !visibleIds.includes(id)))
+            } else {
+              // Select all visible (union)
+              const newIds = new Set([...selectedMemberIds, ...visibleIds])
+              setSelectedMemberIds(Array.from(newIds))
+            }
+          }}
+        >
+          {registeredContacts.length > 0 && registeredContacts.every(c => selectedMemberIds.includes(c.id))
+            ? 'Deselect All'
+            : 'Select All'}
+        </Button>
+      </Box>
+      <Box sx={{ maxHeight: 240, overflowY: 'auto', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+        <List dense disablePadding>
+          {registeredContacts.map(c => {
+            const isSelected = selectedMemberIds.includes(c.id)
+
+            return (
+              <ListItem key={c.id} disablePadding>
+                <ListItemButton
+                  onClick={() => {
+                    if (isSelected) {
+                      setSelectedMemberIds(selectedMemberIds.filter(id => id !== c.id))
+                    } else {
+                      setSelectedMemberIds([...selectedMemberIds, c.id])
+                    }
+                  }}
+                >
+                  <ListItemAvatar>
+                    <Avatar sx={{ width: 28, height: 28 }}>{c.name[0]}</Avatar>
+                  </ListItemAvatar>
+                  <ListItemText primary={c.name} secondary={c.category} />
+                  {isSelected && <Chip size='small' color='primary' label='Selected' sx={{ height: 20 }} />}
+                </ListItemButton>
+              </ListItem>
+            )
+          })}
+        </List>
+      </Box>
+    </>
+  )
+
   return (
     <>
       {/* Message Options Menu */}
@@ -267,58 +324,7 @@ const ChatDialogs: React.FC = () => {
             }}
           />
           <ChatAdvancedFilters showFilters={showAdvancedFiltersGroup} setShowFilters={setShowAdvancedFiltersGroup} />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-            <Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
-              Select Members:
-            </Typography>
-            <Button
-              size='small'
-              onClick={() => {
-                const visibleIds = registeredContacts.map(c => c.id)
-                const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedMemberIds.includes(id))
-
-                if (allVisibleSelected) {
-                  // Deselect visible
-                  setSelectedMemberIds(selectedMemberIds.filter(id => !visibleIds.includes(id)))
-                } else {
-                  // Select all visible (union)
-                  const newIds = new Set([...selectedMemberIds, ...visibleIds])
-                  setSelectedMemberIds(Array.from(newIds))
-                }
-              }}
-            >
-              {registeredContacts.length > 0 && registeredContacts.every(c => selectedMemberIds.includes(c.id))
-                ? 'Deselect All'
-                : 'Select All'}
-            </Button>
-          </Box>
-          <Box sx={{ maxHeight: 240, overflowY: 'auto', border: 1, borderColor: 'divider', borderRadius: 1 }}>
-            <List dense disablePadding>
-              {registeredContacts.map(c => {
-                const isSelected = selectedMemberIds.includes(c.id)
-
-                return (
-                  <ListItem key={c.id} disablePadding>
-                    <ListItemButton
-                      onClick={() => {
-                        if (isSelected) {
-                          setSelectedMemberIds(selectedMemberIds.filter(id => id !== c.id))
-                        } else {
-                          setSelectedMemberIds([...selectedMemberIds, c.id])
-                        }
-                      }}
-                    >
-                      <ListItemAvatar>
-                        <Avatar sx={{ width: 28, height: 28 }}>{c.name[0]}</Avatar>
-                      </ListItemAvatar>
-                      <ListItemText primary={c.name} secondary={c.category} />
-                      {isSelected && <Chip size='small' color='primary' label='Selected' sx={{ height: 20 }} />}
-                    </ListItemButton>
-                  </ListItem>
-                )
-              })}
-            </List>
-          </Box>
+          {renderContactSelection('Select Members:')}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenNewGroupDialog(false)}>Cancel</Button>
@@ -365,58 +371,7 @@ const ChatDialogs: React.FC = () => {
             showFilters={showAdvancedFiltersBroadcast}
             setShowFilters={setShowAdvancedFiltersBroadcast}
           />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-            <Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
-              Select Recipients ({selectedMemberIds.length}):
-            </Typography>
-            <Button
-              size='small'
-              onClick={() => {
-                const visibleIds = registeredContacts.map(c => c.id)
-                const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedMemberIds.includes(id))
-
-                if (allVisibleSelected) {
-                  // Deselect visible
-                  setSelectedMemberIds(selectedMemberIds.filter(id => !visibleIds.includes(id)))
-                } else {
-                  // Select all visible (union)
-                  const newIds = new Set([...selectedMemberIds, ...visibleIds])
-                  setSelectedMemberIds(Array.from(newIds))
-                }
-              }}
-            >
-              {registeredContacts.length > 0 && registeredContacts.every(c => selectedMemberIds.includes(c.id))
-                ? 'Deselect All'
-                : 'Select All'}
-            </Button>
-          </Box>
-          <Box sx={{ maxHeight: 240, overflowY: 'auto', border: 1, borderColor: 'divider', borderRadius: 1 }}>
-            <List dense disablePadding>
-              {registeredContacts.map(c => {
-                const isSelected = selectedMemberIds.includes(c.id)
-
-                return (
-                  <ListItem key={c.id} disablePadding>
-                    <ListItemButton
-                      onClick={() => {
-                        if (isSelected) {
-                          setSelectedMemberIds(selectedMemberIds.filter(id => id !== c.id))
-                        } else {
-                          setSelectedMemberIds([...selectedMemberIds, c.id])
-                        }
-                      }}
-                    >
-                      <ListItemAvatar>
-                        <Avatar sx={{ width: 28, height: 28 }}>{c.name[0]}</Avatar>
-                      </ListItemAvatar>
-                      <ListItemText primary={c.name} secondary={c.category} />
-                      {isSelected && <Chip size='small' color='primary' label='Selected' sx={{ height: 20 }} />}
-                    </ListItemButton>
-                  </ListItem>
-                )
-              })}
-            </List>
-          </Box>
+          {renderContactSelection(`Select Recipients (${selectedMemberIds.length}):`)}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenNewBroadcastDialog(false)}>Cancel</Button>

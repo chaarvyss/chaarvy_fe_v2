@@ -42,6 +42,90 @@ const ChatSidebar: React.FC = () => {
     onlineUsers
   } = useChatContext()
 
+  const renderConversation = (conv: any) => {
+    const isSelected = conv.conversation_id === activeConversationId
+    const isDirect = conv.conversation_type === 'direct'
+
+    return (
+      <ListItem
+        key={conv.conversation_id}
+        disablePadding
+        sx={{
+          bgcolor: isSelected ? 'action.selected' : 'inherit',
+          borderLeft: isSelected ? 4 : 0,
+          borderColor: 'primary.main'
+        }}
+      >
+        <ListItemButton
+          onClick={() => setActiveConversationId(conv.conversation_id)}
+          sx={{ py: 1.5 }}
+        >
+          <ListItemAvatar>
+            <Badge badgeContent={conv.unread_count} color='error'>
+              {isDirect ? (
+                <Badge
+                  overlap='circular'
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  variant='dot'
+                  color={
+                    conv.other_user_id && onlineUsers[conv.other_user_id] ? 'success' : 'warning'
+                  }
+                  sx={{
+                    '& .MuiBadge-badge': {
+                      boxShadow: theme => `0 0 0 2px ${theme.palette.background.paper}`,
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%'
+                    }
+                  }}
+                >
+                  <Avatar src={conv.avatar_url || undefined}>
+                    {conv.conversation_type === 'channel' ? <BullhornOutlineIcon /> : conv.title[0]}
+                  </Avatar>
+                </Badge>
+              ) : (
+                <Avatar src={conv.avatar_url || undefined}>
+                  {conv.conversation_type === 'channel' ? <BullhornOutlineIcon /> : conv.title[0]}
+                </Avatar>
+              )}
+            </Badge>
+          </ListItemAvatar>
+          <ListItemText
+            primary={
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography
+                  variant='subtitle2'
+                  noWrap
+                  sx={{ fontWeight: conv.unread_count > 0 ? 700 : 500 }}
+                >
+                  {conv.title}
+                </Typography>
+                <Typography
+                  variant='caption'
+                  sx={{ color: 'text.secondary', minWidth: 60, textAlign: 'right' }}
+                >
+                  {conv.last_message_at
+                    ? dayjs(conv.last_message_at, 'DD-MM-YYYY HH:mm:ss').format('MMM D')
+                    : ''}
+                </Typography>
+              </Box>
+            }
+            secondary={
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                noWrap
+                sx={{ fontWeight: conv.unread_count > 0 ? 600 : 400 }}
+              >
+                {conv.last_message_preview || 'No messages yet'}
+              </Typography>
+            }
+          />
+        </ListItemButton>
+      </ListItem>
+    )
+  }
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Header & Actions */}
@@ -112,82 +196,7 @@ const ChatSidebar: React.FC = () => {
                       >
                         Direct Messages
                       </Typography>
-                      {dms.map(conv => {
-                        const isSelected = conv.conversation_id === activeConversationId
-
-                        return (
-                          <ListItem
-                            key={conv.conversation_id}
-                            disablePadding
-                            sx={{
-                              bgcolor: isSelected ? 'action.selected' : 'inherit',
-                              borderLeft: isSelected ? 4 : 0,
-                              borderColor: 'primary.main'
-                            }}
-                          >
-                            <ListItemButton
-                              onClick={() => setActiveConversationId(conv.conversation_id)}
-                              sx={{ py: 1.5 }}
-                            >
-                              <ListItemAvatar>
-                                <Badge badgeContent={conv.unread_count} color='error'>
-                                  <Badge
-                                    overlap='circular'
-                                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                                    variant='dot'
-                                    color={
-                                      conv.other_user_id && onlineUsers[conv.other_user_id] ? 'success' : 'warning'
-                                    }
-                                    sx={{
-                                      '& .MuiBadge-badge': {
-                                        boxShadow: theme => `0 0 0 2px ${theme.palette.background.paper}`,
-                                        width: 10,
-                                        height: 10,
-                                        borderRadius: '50%'
-                                      }
-                                    }}
-                                  >
-                                    <Avatar src={conv.avatar_url || undefined}>
-                                      {conv.conversation_type === 'channel' ? <BullhornOutlineIcon /> : conv.title[0]}
-                                    </Avatar>
-                                  </Badge>
-                                </Badge>
-                              </ListItemAvatar>
-                              <ListItemText
-                                primary={
-                                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <Typography
-                                      variant='subtitle2'
-                                      noWrap
-                                      sx={{ fontWeight: conv.unread_count > 0 ? 700 : 500 }}
-                                    >
-                                      {conv.title}
-                                    </Typography>
-                                    <Typography
-                                      variant='caption'
-                                      sx={{ color: 'text.secondary', minWidth: 60, textAlign: 'right' }}
-                                    >
-                                      {conv.last_message_at
-                                        ? dayjs(conv.last_message_at, 'DD-MM-YYYY HH:mm:ss').format('MMM D')
-                                        : ''}
-                                    </Typography>
-                                  </Box>
-                                }
-                                secondary={
-                                  <Typography
-                                    variant='body2'
-                                    color='text.secondary'
-                                    noWrap
-                                    sx={{ fontWeight: conv.unread_count > 0 ? 600 : 400 }}
-                                  >
-                                    {conv.last_message_preview || 'No messages yet'}
-                                  </Typography>
-                                }
-                              />
-                            </ListItemButton>
-                          </ListItem>
-                        )
-                      })}
+                      {dms.map(renderConversation)}
                     </>
                   )}
 
@@ -199,65 +208,7 @@ const ChatSidebar: React.FC = () => {
                       >
                         Groups & Channels
                       </Typography>
-                      {groups.map(conv => {
-                        const isSelected = conv.conversation_id === activeConversationId
-
-                        return (
-                          <ListItem
-                            key={conv.conversation_id}
-                            disablePadding
-                            sx={{
-                              bgcolor: isSelected ? 'action.selected' : 'inherit',
-                              borderLeft: isSelected ? 4 : 0,
-                              borderColor: 'primary.main'
-                            }}
-                          >
-                            <ListItemButton
-                              onClick={() => setActiveConversationId(conv.conversation_id)}
-                              sx={{ py: 1.5 }}
-                            >
-                              <ListItemAvatar>
-                                <Badge badgeContent={conv.unread_count} color='error'>
-                                  <Avatar src={conv.avatar_url || undefined}>
-                                    {conv.conversation_type === 'channel' ? <BullhornOutlineIcon /> : conv.title[0]}
-                                  </Avatar>
-                                </Badge>
-                              </ListItemAvatar>
-                              <ListItemText
-                                primary={
-                                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <Typography
-                                      variant='subtitle2'
-                                      noWrap
-                                      sx={{ fontWeight: conv.unread_count > 0 ? 700 : 500 }}
-                                    >
-                                      {conv.title}
-                                    </Typography>
-                                    <Typography
-                                      variant='caption'
-                                      sx={{ color: 'text.secondary', minWidth: 60, textAlign: 'right' }}
-                                    >
-                                      {conv.last_message_at
-                                        ? dayjs(conv.last_message_at, 'DD-MM-YYYY HH:mm:ss').format('MMM D')
-                                        : ''}
-                                    </Typography>
-                                  </Box>
-                                }
-                                secondary={
-                                  <Typography
-                                    variant='body2'
-                                    color='text.secondary'
-                                    noWrap
-                                    sx={{ fontWeight: conv.unread_count > 0 ? 600 : 400 }}
-                                  >
-                                    {conv.last_message_preview || 'No messages yet'}
-                                  </Typography>
-                                }
-                              />
-                            </ListItemButton>
-                          </ListItem>
-                        )
-                      })}
+                      {groups.map(renderConversation)}
                     </>
                   )}
                 </>

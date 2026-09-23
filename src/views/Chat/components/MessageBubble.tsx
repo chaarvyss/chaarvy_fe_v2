@@ -136,7 +136,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ msg }) => {
           {/* Video Attachment */}
           {!isDeleted && msg.message_type === 'video' && msg.media_url && (
             <Box sx={{ maxWidth: 340, mb: 1 }}>
-              <video controls src={msg.media_url} style={{ width: '100%', borderRadius: 8 }} />
+              <video controls src={msg.media_url} style={{ width: '100%', borderRadius: 8 }}>
+                <track kind="captions" srcLang="en" label="English" />
+              </video>
             </Box>
           )}
 

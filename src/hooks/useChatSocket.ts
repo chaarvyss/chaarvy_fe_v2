@@ -85,7 +85,7 @@ export const useChatSocket = (conversationId?: string) => {
             // Update messages list manually to avoid API call
             dispatch(
               api.util.updateQueryData('getConversationMessages', { conversationId: convId }, draft => {
-                const exists = draft.find(m => m.message_id === msg.message_id)
+                const exists = draft.some(m => m.message_id === msg.message_id)
                 if (!exists) {
                   draft.push(msg)
                 }
