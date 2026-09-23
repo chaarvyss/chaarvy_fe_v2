@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.19.0...v1.20.0) (2026-09-23)
+
+
+### Features
+
+* **ChatFeature:** AC-100 chatting feature almost completed ([#74](https://github.com/chaarvyss/chaarvy_fe_v2/issues/74)) ([5e0f6d2](https://github.com/chaarvyss/chaarvy_fe_v2/commit/5e0f6d2933d387ea392dbd7a769ba34472845ddc))
+
 # [1.19.0](https://github.com/chaarvyss/chaarvy_fe_v2/compare/v1.18.15...v1.19.0) (2026-09-22)
 
 
