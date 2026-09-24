@@ -1,0 +1,87 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "Chaarvy doc",
+  "theme": "almond",
+  "favicon": "https://media.brand.dev/c7260861-e8dd-4f9e-b891-a953a69626ec.png",
+  "colors": {
+    "primary": "#3c83f6",
+    "light": "#fc5e11",
+    "dark": "#fa4763"
+  },
+  "navbar": {
+    "primary": {
+      "type": "button",
+      "label": "Get Started",
+      "href": "/quickstart"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "dashboard-overview"
+            ]
+          },
+          {
+            "group": "Student Management",
+            "pages": [
+              "students/admissions",
+              "students/admission-form",
+              "students/payments",
+              "students/referrals"
+            ]
+          },
+          {
+            "group": "Academics",
+            "pages": [
+              "academics/programs",
+              "academics/subjects",
+              "academics/timetable",
+              "academics/attendance",
+              "academics/topics-question-bank"
+            ]
+          },
+          {
+            "group": "Faculty",
+            "pages": [
+              "faculty/schedule-planner",
+              "faculty/attendance-log"
+            ]
+          },
+          {
+            "group": "Transportation",
+            "pages": [
+              "transportation/overview",
+              "transportation/live-tracking",
+              "transportation/vehicles-drivers"
+            ]
+          },
+          {
+            "group": "Accounts",
+            "pages": [
+              "accounts/expenses",
+              "accounts/vendors"
+            ]
+          },
+          {
+            "group": "Administration",
+            "pages": [
+              "admin/users-roles",
+              "admin/fees-types",
+              "admin/books-stationary",
+              "admin/holidays",
+              "admin/reports",
+              "admin/college-profile"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "projectType": "saas",
+  "projectName": "Chaarvy",
+  "projectDescription": "Chaarvy is an all-in-one college management platform that streamlines student admissions, fee collection, academics, faculty scheduling, transportation, and accounts for educational institutions.",
+  "theme": "almond",
+  "primaryColor": "#3c83f6",
+  "lightColor": "#fc5e11",
+  "darkColor": "#fa4763",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "dashboard-overview"
+            ]
+          },
+          {
+            "group": "Student Management",
+            "pages": [
+              "students/admissions",
+              "students/admission-form",
+              "students/payments",
+              "students/referrals"
+            ]
+          },
+          {
+            "group": "Academics",
+            "pages": [
+              "academics/programs",
+              "academics/subjects",
+              "academics/timetable",
+              "academics/attendance",
+              "academics/topics-question-bank"
+            ]
+          },
+          {
+            "group": "Faculty",
+            "pages": [
+              "faculty/schedule-planner",
+              "faculty/attendance-log"
+            ]
+          },
+          {
+            "group": "Transportation",
+            "pages": [
+              "transportation/overview",
+              "transportation/live-tracking",
+              "transportation/vehicles-drivers"
+            ]
+          },
+          {
+            "group": "Accounts",
+            "pages": [
+              "accounts/expenses",
+              "accounts/vendors"
+            ]
+          },
+          {
+            "group": "Administration",
+            "pages": [
+              "admin/users-roles",
+              "admin/fees-types",
+              "admin/books-stationary",
+              "admin/holidays",
+              "admin/reports",
+              "admin/college-profile"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Student admissions with multi-step enrollment form",
+    "Fee management with payment collection and receipts",
+    "Program and curriculum management with segments, mediums, and sections",
+    "Attendance tracking with daily register and log history",
+    "Faculty schedule planner with calendar view",
+    "Question bank and topic management for faculty",
+    "Timetable creation and management",
+    "Transportation management with live vehicle tracking",
+    "Expense and vendor management",
+    "Role-based access control with granular permissions",
+    "Dashboard with real-time enrollment, payment, and attendance stats",
+    "PDF template designer for admission letters and receipts",
+    "Google Calendar integration",
+    "Books and stationary inventory management"
+  ],
+  "publicApiSurface": [
+    "POST inter/auth/login",
+    "POST inter/auth/change-password",
+    "GET inter/dash_board/students_count",
+    "GET inter/dash_board/payment_count",
+    "GET inter/admissions/admissions-list",
+    "POST inter/admissions/create-update-admission",
+    "POST inter/fees/record-transaction",
+    "GET inter/fees/get-student-pending-fees-details",
+    "POST inter/attendence/record-student-attendence",
+    "GET inter/attendence/get-students",
+    "GET inter/faculty/topics",
+    "POST inter/faculty/create_update_topic",
+    "GET inter/admin/get-class-timetable",
+    "POST inter/admin/create-update-timetable",
+    "GET inter/admin/holidays",
+    "POST inter/report/admission-report",
+    "GET inter/view/vehicle-details",
+    "GET inter/view/route-details"
+  ]
+}

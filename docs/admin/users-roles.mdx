@@ -1,0 +1,77 @@
+---
+title: "Manage Users, Roles, and Permissions in Chaarvy Admin"
+sidebarTitle: "Users & Roles"
+description: "Create user accounts, assign roles with predefined permissions, and fine-tune access for individual staff members across your institution."
+---
+
+Chaarvy gives you full control over who can access your platform and what they can do. You can create user accounts, assign roles with predefined permissions, and fine-tune access for individual users — all from the Admin panel.
+
+## Managing Users
+
+Navigate to **Admin → Users** to view and manage all user accounts in your institution.
+
+<Steps>
+  <Step title="Add a new user">
+    Click **Add User** to open the user creation form. Enter the user's full name, username, mobile number, and email address, then assign them a role. Click **Create User** to save the account.
+  </Step>
+  <Step title="Search and filter users">
+    Use the search bar to find users by name. You can also filter the list by **status** (active or inactive) or by **role** to quickly locate the right accounts.
+  </Step>
+  <Step title="Activate or deactivate a user">
+    To change a user's access status, locate the user in the list and toggle their status. Deactivated users cannot log in until you reactivate their account. No data is lost when deactivating.
+  </Step>
+</Steps>
+
+## User Profiles
+
+Each user has a profile page where you can view and update their personal information.
+
+<Steps>
+  <Step title="View and edit user details">
+    Click on any user's name to open their profile. From here you can update their personal details such as name, username, mobile number, and email address.
+  </Step>
+  <Step title="Upload a profile avatar">
+    On the profile page, click the avatar area to select and upload a profile picture. Once you've chosen an image, click the save icon to apply it.
+  </Step>
+  <Step title="Manage address information">
+    Select the **Address** tab on the user's profile to add or update the user's residential address details.
+  </Step>
+</Steps>
+
+## Roles
+
+Roles let you group permissions together so you can assign consistent access to users who share the same responsibilities.
+
+Navigate to **Admin → Roles** to manage your institution's roles.
+
+<Steps>
+  <Step title="Create a new role">
+    Click **Create Role** and enter a name for the role (for example, *Registrar*, *Accounts Officer*, or *Faculty Coordinator*).
+  </Step>
+  <Step title="Define default permissions">
+    After creating the role, open it and configure its **default permissions**. These permissions apply automatically to every user assigned to this role.
+  </Step>
+  <Step title="Understand how roles work">
+    Roles determine what each user can see and do in Chaarvy. A user assigned the *Accounts Officer* role, for instance, will only have access to the modules and actions permitted by that role — unless you override permissions individually.
+  </Step>
+</Steps>
+
+## Individual Permission Overrides
+
+Sometimes a specific user needs slightly more or less access than their role provides. Chaarvy lets you override permissions at the individual user level without changing the role itself.
+
+<Steps>
+  <Step title="Open the user's profile">
+    Navigate to **Admin → Users** and click the user whose permissions you want to adjust.
+  </Step>
+  <Step title="Go to the Permissions tab">
+    Select the **Permissions** tab on the user's profile page. Here you'll see all permissions inherited from their role.
+  </Step>
+  <Step title="Override individual permissions">
+    Toggle specific permissions on or off to grant or restrict access for this user only. These overrides take precedence over the role defaults and do not affect other users with the same role.
+  </Step>
+</Steps>
+
+<Note>
+  Managing users and roles requires specific permissions. To add users, you need the `users:add_user` permission. To view and update user permissions, you need `users:user_permissions:view` and `users:user_permissions:update`. For roles, you need `roles:create_role` to create new roles and `roles:update:role_default_permissions` to modify their default permissions. These are permission names within Chaarvy's access control system — contact your system administrator if you don't have the required access.
+</Note>

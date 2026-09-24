@@ -1,0 +1,93 @@
+---
+title: "Build and Manage Weekly Class Timetables in Chaarvy"
+sidebarTitle: "Timetable"
+description: "Design weekly class timetables by program and segment, set up period templates, assign subjects to time slots, and resolve scheduling conflicts."
+---
+
+The Timetable module in Chaarvy gives you a structured way to plan the weekly teaching schedule for every class in your institution. By combining period templates with subject-to-slot assignments, you can produce a complete, conflict-free timetable in minutes — and view any faculty member's full weekly schedule at a glance.
+
+## Understanding Period Templates
+
+Before you can assign subjects to time slots, Chaarvy needs to know what those time slots look like. A **period template** defines the daily schedule of periods for a class — the start time, end time, and label for each slot (for example, *Period 1: 9:00 AM – 9:50 AM*).
+
+<Steps>
+  <Step title="Open the Template Designer">
+    Navigate to **Academics → Timetable** in the sidebar. On the main timetable page, click the **Template Designer** button in the top-right area.
+  </Step>
+  <Step title="Create a new template">
+    Click **Add Template**, give it a descriptive name (for example, *Standard Day — 6 Periods*), and add each period with its start time, end time, and period label.
+  </Step>
+  <Step title="Include breaks if needed">
+    Add non-teaching intervals such as a lunch break or short recess as separate entries. Marking them clearly prevents subjects from being accidentally scheduled during those times.
+  </Step>
+  <Step title="Save the template">
+    Click **Save**. The template is now available to apply when creating timetables for any class.
+  </Step>
+</Steps>
+
+<Info>
+  You can create multiple period templates to accommodate classes that follow a different daily schedule — for example, a half-day schedule for certain programs or a different slot arrangement for lab-heavy courses.
+</Info>
+
+## Creating a Timetable
+
+With a period template in place and subjects assigned to the relevant program segment, you are ready to build the timetable.
+
+<Steps>
+  <Step title="Open the Timetable module">
+    Navigate to **Academics → Timetable** in the sidebar. The page shows all active programs as cards.
+  </Step>
+  <Step title="Select a program">
+    Click the program card you want to schedule (for example, *B.Com*). Chaarvy then displays the available segments for that program.
+  </Step>
+  <Step title="Select a segment">
+    Choose the segment you want to build the timetable for (for example, *Semester 2*). The timetable scheduler opens for that program and segment.
+  </Step>
+  <Step title="Apply a period template">
+    If no template is applied yet, select the appropriate **Period Template** from the dropdown. The timetable grid updates to show the correct number of periods per day.
+  </Step>
+  <Step title="Assign subjects to slots">
+    Click on an empty slot in the grid. A picker appears showing the subjects assigned to this program segment. Select the subject and the faculty member who will teach that slot, then confirm.
+  </Step>
+  <Step title="Fill in the remaining slots">
+    Repeat for every period across each day of the week. You can leave slots empty for free periods or breaks.
+  </Step>
+  <Step title="Save the timetable">
+    Click **Save Timetable** once all slots are assigned. The timetable becomes active and is visible to faculty and students.
+  </Step>
+</Steps>
+
+## Checking Faculty Availability
+
+Chaarvy automatically checks for scheduling conflicts as you assign subjects to slots. If a faculty member is already assigned to another class during the same period, the system flags the conflict before you can confirm the assignment.
+
+<CardGroup cols={2}>
+  <Card title="Conflict detected" icon="triangle-exclamation">
+    When you select a faculty member for a slot and they are already scheduled elsewhere at that time, Chaarvy displays a conflict warning. Choose a different faculty member or adjust the conflicting slot to resolve it.
+  </Card>
+  <Card title="No conflict" icon="circle-check">
+    When the selected faculty member is free during the chosen slot, the assignment proceeds normally and the slot is filled.
+  </Card>
+</CardGroup>
+
+Reviewing availability before finalising the timetable prevents double-booking and ensures every class has a confirmed teacher for each period.
+
+## Viewing the Faculty Timetable
+
+Once timetables are saved, you can view an individual faculty member's consolidated weekly schedule across all the classes they teach.
+
+<Steps>
+  <Step title="Open Faculty Timetable view">
+    In the Timetable module, switch to the **Faculty Timetable** tab.
+  </Step>
+  <Step title="Select a faculty member">
+    Choose the faculty member from the dropdown. Chaarvy displays their full weekly schedule, showing every class they are assigned to, the subject, and the time slot.
+  </Step>
+  <Step title="Review and share">
+    Use the timetable view to verify workload balance, identify free periods, or share the schedule with the faculty member directly.
+  </Step>
+</Steps>
+
+<Warning>
+  Always click **Save Timetable** before navigating away from the timetable editor. Chaarvy does not auto-save slot assignments — any unsaved changes will be lost if you leave the page or refresh your browser.
+</Warning>
