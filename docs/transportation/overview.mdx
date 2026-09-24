@@ -1,61 +1,61 @@
 ---
-title: "Manage Your Student Transportation Routes and Vehicles"
+title: "Transportation overview"
 sidebarTitle: "Overview"
-description: "Manage routes, vehicles, drivers, and live tracking for your institution's entire student transportation operation, all from one place."
+description: "Learn the current status of the Transportation module in Chaarvy and what it is planned to cover."
 ---
 
-The Transportation module gives you a unified view of every route, vehicle, and student movement across your institution. From a single dashboard you can monitor which vehicles are running, how many students are on board, and where each vehicle is right now — so you can respond quickly to any situation on the road.
+<Warning>
+The Transportation module is not shown in the sidebar menu and may be unavailable in your account. Its screens are still in development. They show sample data or empty lists, and they do not save or load your institution's records yet.
+</Warning>
 
-## Transportation Dashboard
+The Transportation module is intended to help you manage school vehicles, drivers, transport vendors, and routes. This page describes what the module's screens currently contain, so you know what to expect if your account has access to them.
 
-The dashboard table lists every active route currently in operation and refreshes automatically as vehicles move through their routes. Each row gives you the information you need at a glance.
+## Transportation dashboard
 
-| Column | What it shows | What to click for |
-|---|---|---|
-| **Route Name** | The name of the active route | Stop sequence and boarding points |
-| **Vehicle** | The vehicle assigned to the route | Full vehicle details |
-| **Students on Board** | Number of students currently on the vehicle | The student list for that vehicle |
-| **Current Location** | Last reported position of the vehicle | — |
+The dashboard screen is titled **Dashboard - Transportation**. It shows summary cards and a status table.
 
-<Steps>
-  <Step title="Open the Transportation Dashboard">
-    Navigate to **Transportation** in the main sidebar. The dashboard loads automatically and displays all active routes.
-  </Step>
-  <Step title="View route details">
-    Click any **Route Name** in the table. The Route Details panel opens and shows each stop on the route along with its boarding points.
-  </Step>
-  <Step title="View vehicle details">
-    Click the **Vehicle** name in any row. The Vehicle Details panel shows the registration number, type, capacity, and assigned driver.
-  </Step>
-  <Step title="See which students are on board">
-    Click the **Students on Board** count in any row. The student list opens and shows every student currently riding that vehicle.
-  </Step>
-</Steps>
+### Summary cards
 
-## Setting Up Routes
+| Card | Details shown |
+|---|---|
+| **Vechicles in Operation** | **Completed** and **Pending** counts |
+| **Drivers** | **Active**, **Inactive**, **On Leave**, and **Contractual** counts |
+| **Vendors** | **Active** and **Inactive** counts |
+| **Passengers** | A chart split into **Paid**, **Close to Due**, and **Overdue** |
 
-Before vehicles appear on the dashboard, you need to configure at least one route and its associated boarding points in the Admin section.
+<Note>
+The numbers on these cards are placeholder values. They do not reflect your institution's data.
+</Note>
 
-<Steps>
-  <Step title="Create a route">
-    Go to **Admin → Routes**. Click **Add Route**, enter the route name and any relevant details, then save.
-  </Step>
-  <Step title="Add boarding points">
-    Go to **Admin → Boarding Points**. Add each stop where students board or alight, then link those points to the appropriate route.
-  </Step>
-</Steps>
+### Current transportation status table
 
-<Info>
-  Routes and boarding points you configure in Admin appear automatically in the Transportation Dashboard once vehicles begin their runs.
-</Info>
+The table lists routes with the following columns:
 
-## Explore the Transportation Module
+| Column | What it shows |
+|---|---|
+| **S.No** | Row number |
+| **Route** | Route name |
+| **Vehicle** | Vehicle assigned to the route |
+| **Students Onboard** | Students on board compared to capacity, for example 15/20 |
+| **Current Location** | Last known location of the vehicle |
+
+You can click some cells to open a detail window:
+
+- Click a **Route** to open **Route Details**.
+- Click a **Vehicle** to open **Vehicle Details**. This window is designed to show **Vehicle Number**, **Driver Name**, **Driver Contact**, **Route**, **Students Onboard**, and **Current Location**.
+- Click a **Students Onboard** value to open **Students in Route**.
+
+<Note>
+The rows in this table are sample entries. The detail windows may show a "not found" message because the sample rows are not linked to real records.
+</Note>
+
+## Other transportation screens
 
 <CardGroup cols={2}>
-  <Card title="Live Tracking" icon="map-location-dot" href="/transportation/live-tracking">
-    Watch every active vehicle move across an interactive map in real time.
+  <Card title="Live tracking" icon="map-location-dot" href="/transportation/live-tracking">
+    A prototype map for viewing vehicle positions.
   </Card>
-  <Card title="Vehicles & Drivers" icon="bus" href="/transportation/vehicles-drivers">
-    Add and manage your vehicle fleet, drivers, and transport vendors.
+  <Card title="Vehicles, drivers, and vendors" icon="bus" href="/transportation/vehicles-drivers">
+    List screens for vehicles, drivers, and transport vendors.
   </Card>
 </CardGroup>

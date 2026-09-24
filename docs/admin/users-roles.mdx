@@ -1,77 +1,179 @@
 ---
-title: "Manage Users, Roles, and Permissions in Chaarvy Admin"
-sidebarTitle: "Users & Roles"
-description: "Create user accounts, assign roles with predefined permissions, and fine-tune access for individual staff members across your institution."
+title: "Manage users, roles, and permissions"
+sidebarTitle: "Users and roles"
+description: "Create staff user accounts, group permissions into roles, override permissions for individual users, and assign subjects to faculty."
 ---
 
-Chaarvy gives you full control over who can access your platform and what they can do. You can create user accounts, assign roles with predefined permissions, and fine-tune access for individual users — all from the Admin panel.
+Use the **Users** and **Roles** pages to control who can sign in to Chaarvy and what they can access. A role holds a default set of permissions. Each user gets one role, and you can adjust permissions for an individual user without changing the role.
 
-## Managing Users
+## Users
 
-Navigate to **Admin → Users** to view and manage all user accounts in your institution.
+Go to **Administration** > **Users**. The page shows a **Users** table with two summary cards at the top:
+
+- **Total Users**: the number of users in your institution.
+- **Filtered Users**: the number of users that match the current filters.
+
+The table has these columns:
+
+| Column | Description |
+| --- | --- |
+| **Name** | The user's profile picture, name, and mobile number. |
+| **Role** | The role assigned to the user. |
+| **Email** | The user's email address. |
+| **Status** | **Active** or **Inactive**. |
+
+By default, the list shows active users.
+
+### Create a user
 
 <Steps>
-  <Step title="Add a new user">
-    Click **Add User** to open the user creation form. Enter the user's full name, username, mobile number, and email address, then assign them a role. Click **Create User** to save the account.
+  <Step title="Open the form">
+    Click **Create User**. The **New User** panel opens.
   </Step>
-  <Step title="Search and filter users">
-    Use the search bar to find users by name. You can also filter the list by **status** (active or inactive) or by **role** to quickly locate the right accounts.
+  <Step title="Enter the user's details">
+    Fill in these fields:
+    - **Name** (required)
+    - **Username** (required)
+    - **Mobile**
+    - **Email** (required)
+    - **Role** (required): choose from the roles on the **Roles** page.
   </Step>
-  <Step title="Activate or deactivate a user">
-    To change a user's access status, locate the user in the list and toggle their status. Deactivated users cannot log in until you reactivate their account. No data is lost when deactivating.
+  <Step title="Save">
+    Click **Create User**.
   </Step>
 </Steps>
 
-## User Profiles
+### Filter the list
 
-Each user has a profile page where you can view and update their personal information.
+Click the filter icon to open the **Filters** panel. You can filter by:
+
+- **Search**
+- **Status**: **Active** or **Inactive**
+- **Role**
+
+Click **Search** to apply the filters, or **Reset** to clear them.
+
+### Activate or deactivate a user
+
+Click the **Active** or **Inactive** chip in the **Status** column. The status switches to the other value.
+
+## User profile
+
+Click a user's name in the table to open the **User Profile** window.
+
+The left panel shows the user's picture and a summary: **Name**, **Username**, **Mobile**, **Email**, **Role**, and **Joining Date**.
+
+### Change the profile picture
 
 <Steps>
-  <Step title="View and edit user details">
-    Click on any user's name to open their profile. From here you can update their personal details such as name, username, mobile number, and email address.
+  <Step title="Choose an image">
+    Click the pencil icon on the picture and select a PNG or JPEG image.
   </Step>
-  <Step title="Upload a profile avatar">
-    On the profile page, click the avatar area to select and upload a profile picture. Once you've chosen an image, click the save icon to apply it.
+  <Step title="Save the image">
+    Click the save icon that appears next to the picture.
   </Step>
-  <Step title="Manage address information">
-    Select the **Address** tab on the user's profile to add or update the user's residential address details.
+</Steps>
+
+The profile has four tabs.
+
+<Tabs>
+  <Tab title="User Details">
+    Edit **Name**, **Username**, **Mobile**, **Email**, and **Role**. When you change a value, an **Update Profile** button appears. Click it to save.
+  </Tab>
+  <Tab title="Address">
+    Enter the user's address:
+    - **Door No** (required)
+    - **House / Apartment** (required)
+    - **Street** (required)
+    - **Landmark**
+    - **Village / City** (required)
+    - **State** (required)
+    - **District** (required)
+    - **Pincode** (required, exactly 6 digits)
+
+    Click **Submit** to save.
+  </Tab>
+  <Tab title="Permissions">
+    Override the permissions this user gets from their role. See [Override permissions for a user](#override-permissions-for-a-user).
+  </Tab>
+  <Tab title="Faculty Assignment">
+    Assign the programs and subjects a faculty member teaches. See [Assign subjects to faculty](#assign-subjects-to-faculty).
+  </Tab>
+</Tabs>
+
+### Override permissions for a user
+
+<Steps>
+  <Step title="Open the Permissions tab">
+    In the user's profile, select the **Permissions** tab. The checkboxes show the user's current permissions.
+  </Step>
+  <Step title="Change permissions">
+    Select or clear checkboxes to grant or remove access. See [How the permissions editor works](#how-the-permissions-editor-works).
+  </Step>
+  <Step title="Save">
+    Click **Submit**.
+  </Step>
+</Steps>
+
+These changes apply only to this user. Other users with the same role are not affected.
+
+### Assign subjects to faculty
+
+The **Faculty Assignment** tab opens the **Faculty Subject Assignment** window.
+
+<Steps>
+  <Step title="Select a medium">
+    Choose a value in **1. Select Medium**. Any programs and subjects already assigned to the user for that medium are preselected.
+  </Step>
+  <Step title="Select programs">
+    Choose one or more programs in **2. Select Programs**.
+  </Step>
+  <Step title="Select subjects">
+    Choose one or more subjects in **3. Select Subjects**. Only subjects linked to the selected programs are listed.
+  </Step>
+  <Step title="Mark assignments in the grid">
+    A grid lists subjects against each program's segments. Tick the cells for the subjects this faculty member teaches.
+  </Step>
+  <Step title="Save">
+    Click the save icon above the grid. The icon is disabled until you make a change.
   </Step>
 </Steps>
 
 ## Roles
 
-Roles let you group permissions together so you can assign consistent access to users who share the same responsibilities.
+Go to **Administration** > **Roles**. The **Roles** table lists each role with its number (**#**), **Role** name, and an **Action** column.
 
-Navigate to **Admin → Roles** to manage your institution's roles.
+### Create a role
 
 <Steps>
-  <Step title="Create a new role">
-    Click **Create Role** and enter a name for the role (for example, *Registrar*, *Accounts Officer*, or *Faculty Coordinator*).
+  <Step title="Open the form">
+    Click **Create Role**. The **Create Role** window opens.
   </Step>
-  <Step title="Define default permissions">
-    After creating the role, open it and configure its **default permissions**. These permissions apply automatically to every user assigned to this role.
+  <Step title="Name the role">
+    Enter a name in **Role Name**.
   </Step>
-  <Step title="Understand how roles work">
-    Roles determine what each user can see and do in Chaarvy. A user assigned the *Accounts Officer* role, for instance, will only have access to the modules and actions permitted by that role — unless you override permissions individually.
+  <Step title="Choose default permissions">
+    Select the permissions that users with this role should have. See [How the permissions editor works](#how-the-permissions-editor-works).
+  </Step>
+  <Step title="Save">
+    Click **Submit**. You must enter a role name before the role saves.
   </Step>
 </Steps>
 
-## Individual Permission Overrides
+### Edit a role
 
-Sometimes a specific user needs slightly more or less access than their role provides. Chaarvy lets you override permissions at the individual user level without changing the role itself.
+Click the pencil icon in the **Action** column. The **Edit Role** window opens with the role's name and current permissions. Make your changes and click **Submit**.
 
-<Steps>
-  <Step title="Open the user's profile">
-    Navigate to **Admin → Users** and click the user whose permissions you want to adjust.
-  </Step>
-  <Step title="Go to the Permissions tab">
-    Select the **Permissions** tab on the user's profile page. Here you'll see all permissions inherited from their role.
-  </Step>
-  <Step title="Override individual permissions">
-    Toggle specific permissions on or off to grant or restrict access for this user only. These overrides take precedence over the role defaults and do not affect other users with the same role.
-  </Step>
-</Steps>
+## How the permissions editor works
 
-<Note>
-  Managing users and roles requires specific permissions. To add users, you need the `users:add_user` permission. To view and update user permissions, you need `users:user_permissions:view` and `users:user_permissions:update`. For roles, you need `roles:create_role` to create new roles and `roles:update:role_default_permissions` to modify their default permissions. These are permission names within Chaarvy's access control system — contact your system administrator if you don't have the required access.
-</Note>
+The same editor appears in the **Create Role** and **Edit Role** windows and on a user's **Permissions** tab.
+
+- Permissions are grouped into collapsible sections, such as **Nav**, **Users**, **Roles**, and **College profile**. Expand a section to see its individual permissions.
+- The **Nav** section controls which sidebar menu items are available, such as **Users**, **Holidays**, or **Reports**.
+- A module's section appears only after you select its menu item in the **Nav** section.
+- If you clear a menu item in **Nav**, all permissions in that module's section are cleared too.
+- Use the checkbox on a section header to select or clear every permission in that section.
+
+<Tip>
+  Create roles for common job functions first. Then use the user's **Permissions** tab only for exceptions.
+</Tip>

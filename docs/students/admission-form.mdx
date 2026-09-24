@@ -1,98 +1,140 @@
 ---
-title: "Create a New Student Admission — Step-by-Step Guide"
-sidebarTitle: "Admission Form"
-description: "Walk through the five-step admission form to enroll a new student, capture personal details, assign courses, and record fee information."
+title: "Fill in the admission form"
+sidebarTitle: "Admission form"
+description: "Enroll a new student or update an existing admission using the five tabs of the admission form, from base details to the final fee structure."
 ---
 
-The admission form guides you through everything needed to enroll a new student in your institution. It is organised into five tabs — from basic identification all the way through to fees — so that no important detail is missed. Once you save a step, you can freely navigate between completed tabs to review or correct information before final submission.
+The admission form captures everything Chaarvy needs to enroll a student. It has five tabs:
 
-<Warning>
-  Complete all required fields on each step before clicking **Next**. The form will not advance if mandatory information is missing, and unsaved data on the current step may be lost if you navigate away from the page entirely.
-</Warning>
+1. **Student Base Details**
+2. **Student Details**
+3. **Student Address**
+4. **ADDON Courses**
+5. **Fees Details**
 
-## Completing the Admission Form
+## Open the form
 
-Navigate to **Student Management → Admissions** and click **New Admission** to open the form. Work through each tab in order.
+Go to **Student Management** > **Admissions**, then do one of the following:
 
-<Steps>
-  <Step title="Student Base Details">
-    Set up the student's core identity and program placement.
+- To create an admission, click **New Admission**.
+- To edit an admission, click the pencil icon in the **Actions** column of the student's row.
 
-    - **Student Name** — enter the student's full legal name as it should appear on official documents.
-    - **Photo Upload** — upload a recent passport-size photograph of the student. Accepted formats are JPG and PNG.
-    - **Program** — select the degree, diploma, or certificate program the student is enrolling in.
-    - **Segment** — choose the academic segment or year level within the program.
-    - **Medium** — select the language medium of instruction for this student.
-    - **Section** — assign the student to a class section.
+When you create a new admission, only the **Student Base Details** tab is available at first. The other tabs become available after the student is enrolled and the application processing fee is paid. Each tab is colored to show its status. A green tab indicates a completed section.
 
-    Once all required fields are filled, click **Next** to proceed to student details.
-  </Step>
+## Student base details
 
-  <Step title="Student Details">
-    Capture the student's demographic and academic background information.
+This tab creates the admission. Fields marked with an asterisk (*) are required.
 
-    - **Date of Birth** — enter the student's date of birth. This is used for age verification and official records.
-    - **Gender** — select the student's gender.
-    - **Blood Group** — record the student's blood group for health and emergency purposes.
-    - **Religion** — select the student's religion if required for institutional or government reporting.
-    - **Community** — specify the student's community category (for example, General, OBC, SC, ST) as relevant to your institution's requirements.
-    - **Qualified Exam** — record the last qualifying examination passed by the student, including marks or grade where applicable.
-    - **Occupation Information** — capture details about the student's or guardian's occupation if required for financial aid or records.
-
-    Click **Next** when all required fields are complete.
-  </Step>
-
-  <Step title="Student Address">
-    Record both the student's permanent home address and the address where they currently reside.
-
-    - **Permanent Address** — the student's long-term home address. Fill in the street, city, state, pin code, and country.
-    - **Correspondence Address** — the address to use for all official communication. If it is the same as the permanent address, use the **Copy from Permanent Address** option to auto-fill the fields.
-
-    Accurate address information is important for sending admission letters, fee notices, and other official correspondence.
-
-    Click **Next** to move on to add-on courses.
-  </Step>
-
-  <Step title="Add-On Courses">
-    Enroll the student in any optional courses offered alongside their primary program.
-
-    Browse the list of available add-on courses and select all that apply to this student. Each add-on course you select will be reflected in the fees breakdown on the next step.
-
-    If the student is not enrolling in any add-on courses, leave all options unselected and click **Next** to continue.
-  </Step>
-
-  <Step title="Fees Details">
-    Review the complete fee breakdown and set the payable amount for this admission.
-
-    The fees panel automatically calculates and displays:
-
-    - **Course Fees** — the standard tuition fee for the selected program.
-    - **Book Fees** — the cost of study materials associated with the program.
-    - **Add-On Course Fees** — fees for any add-on courses selected in the previous step.
-    - **Total Payable Amount** — the combined total. You can adjust the payable amount if a discount, scholarship, or instalment arrangement applies.
-
-    Confirm the fee details and click **Submit** to complete the admission record.
-  </Step>
-</Steps>
-
-<Tip>
-  The form saves your progress on each step as you advance. If you need to pause mid-way, you can navigate back to a completed tab to review or correct information without losing data already entered on later steps.
-</Tip>
-
----
-
-## Application Fees
-
-After you submit the admission form, a processing fee modal may appear depending on your institution's configuration. This step collects the application processing fee before the admission is finalised.
-
-- Review the processing fee amount shown in the modal.
-- Select the payment method and enter the relevant transaction details.
-- Click **Confirm Payment** to record the fee and complete the enrollment.
-
-Once the application fee is paid, the student's admission record becomes active and appears in the **Admissions** list.
-
----
+| Field | Required | Notes |
+|-------|----------|-------|
+| Photo | Yes | Click **Upload Photo** to select an image. |
+| **Admission number** | Yes | |
+| **Student Name** | Yes | Enter the name as per SSC records. |
+| **Student PEN number** | No | |
+| **Student Aapaar Number** | No | |
+| **Program / Group** | Yes | Lists active programs. |
+| **Class** | Yes | Lists the classes of the selected program. |
+| **Medium** | Yes | Lists the mediums available for the selected class. |
+| **Section** | Yes | Lists the sections available for the selected medium. |
+| **Gender** | Yes | |
+| **Date of Birth** | Yes | |
+| **Student Email** | Yes | Must be a valid email address. |
+| **Mobile number** | Yes | Must be a valid phone number. |
+| **Student Aadhar** | Yes | Must be 12 digits. |
+| **Referred by** | No | Select the user who referred the student. This value appears in [Referrals](/students/referrals). |
 
 <Note>
-  Creating a new admission requires the **admissions:create_admission** permission. If you do not see the **New Admission** button, contact your system administrator to request access.
+  Select the fields in order. **Class** options depend on **Program / Group**, **Medium** depends on **Class**, and **Section** depends on **Medium**.
 </Note>
+
+### Photo requirements
+
+Chaarvy compresses the image you select before saving it. The processed file must be between 50 KB and 500 KB. If it falls outside this range, an error appears and you need to choose a different image. Click the photo preview to view it at a larger size.
+
+### Save the base details
+
+For a new admission, the page shows the **Processing Fees** amount. Click **Enroll and Continue** to create the admission. When you edit an existing admission, the button reads **Save and Continue**.
+
+If any field is missing or invalid, Chaarvy shows the message **Please correct the errors before submitting.** and highlights the fields to fix.
+
+### Application processing fees
+
+If the application processing fee is not yet paid, the **Application Processing Fees** window opens after you click **Enroll and Continue**. It shows the fee amount that will be collected.
+
+- Click **Proceed to Pay** to open the payment page. After the payment, Chaarvy validates it and returns you to the **Student Details** tab of this admission.
+- Click **Skip now** to return to the **Admissions** list without paying.
+
+If you skip, you can pay later with the **Pay processing fees** button on the Admissions page. See [Pay pending processing fees](/students/admissions#pay-pending-processing-fees).
+
+## Student details
+
+All fields on this tab are optional.
+
+- **Qualified Exam**
+- **Hall ticket number**
+- **Year of pass**: choose from the last 10 years.
+- **Father Name**
+- **Father Occupation**
+- **Mother Name**
+- **Mother Occupation**
+- **Alternative number**: must be a valid mobile number if entered.
+- **Father Aadhar** and **Mother Aadhar**: must be valid Aadhar numbers if entered.
+- **Religion**
+- **Caste / Community**
+- **Sub caste**
+
+Click **Save and continue** to save and move to the **Student Address** tab.
+
+## Student address
+
+Enter the student's address. All fields except **Landmark** are required.
+
+- **Door No**
+- **House / Apartment**
+- **Street**
+- **Landmark**
+- **Village / City**
+- **State**
+- **District**
+- **Pincode**: must be exactly 6 digits.
+
+Click **Submit** to save the address and move to the **ADDON Courses** tab.
+
+## Add-on courses
+
+The **Enroll Addon courses** table lists the add-on courses available for the student, with these columns:
+
+- **Addon Course**
+- **Course fees**
+- **Seats available**
+
+To enroll the student, click **Enroll** on a course row. The button is disabled when no seats are available. After enrolling, the row shows an **Enrolled** tag. To remove the enrollment, click the **Enrolled** tag.
+
+If no courses are listed, the table shows **No Addon courses available for this student**.
+
+## Fees details
+
+This tab sets the final fee the student must pay. The page shows four summary cards:
+
+- **Actual fees**: the total standard fee.
+- **Payable fees**: the total the student will pay.
+- **Discount**: the difference between actual and payable fees.
+- **Discount%**: the discount as a percentage of the actual fees.
+
+The tab has three tables:
+
+<AccordionGroup>
+  <Accordion title="Course fees">
+    Lists each fee particular for the program with its **Actual fees**. Enter the amount the student will pay in the **Final Payable** field. The field is highlighted as an error if the amount is higher than the actual fee.
+  </Accordion>
+  <Accordion title="Books Fees">
+    Lists the books for the program with **Quantity** and **Price**. Use the **Selected** checkbox to include or exclude each book. Only selected books count toward the fees.
+  </Accordion>
+  <Accordion title="Addon Courses Fees">
+    Lists the add-on courses the student is enrolled in. Enter the amount the student will pay in the **Final Payable** field. If no courses are enrolled, the table shows **No Addon courses enrolled**.
+  </Accordion>
+</AccordionGroup>
+
+When the amounts are correct, click **Finalize**. If the fees were already saved, the button reads **Update Fees details** and is enabled only after you change something. The button is disabled if the total payable fees are higher than the actual fees.
+
+After you finalize the fees, you can collect payments against them. See [Collect payment](/students/payments).

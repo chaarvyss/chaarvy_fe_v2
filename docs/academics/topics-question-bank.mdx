@@ -1,74 +1,101 @@
 ---
-title: "Manage Teaching Topics and Question Banks for Exams"
-sidebarTitle: "Topics & Questions"
-description: "Create subject topics to organise your teaching content, build a reusable question bank with MCQs and theory questions, and group questions by marks."
+title: "Manage topics and question banks"
+sidebarTitle: "Topics and questions"
+description: "Create topics for each subject, organize questions into mark groups, and write MCQ and theory questions in every medium."
 ---
 
-The Topics and Question Bank module in Chaarvy helps faculty keep their teaching content organised and their exam preparation efficient. You create topics to structure what you teach within each subject, and then build a bank of questions under each topic that can be drawn on when generating question papers through the Schedule Planner. This page explains how to set up topics and populate the question bank.
+**Topics Management** helps faculty break each subject into topics and build a question bank for every topic. Questions are grouped by mark value and can be written in each medium the class is taught in.
 
-## Creating Topics
+Go to **Faculty Corner** > **Topics Management** to open it.
 
-Topics break a subject down into teachable units — similar to chapters or modules. Creating them in Chaarvy before adding questions keeps your question bank well-organised and makes it easy to pull questions on a specific area during exam planning.
+## Create a topic
 
 <Steps>
-  <Step title="Open the Topics module">
-    Log in as a faculty member and navigate to **Faculty → Topics** in the sidebar. You will see a list of all topics you have already created, grouped by subject.
+  <Step title="Choose the subject">
+    Select a **Program**, a **Class**, and a **Subject**. The **Class** list shows the program's segments. The **Subject** list shows the subjects assigned to that program segment. See [Subjects](/academics/subjects).
   </Step>
-  <Step title="Select the program, segment, and subject">
-    Use the filters at the top of the page to choose the **Program**, **Segment**, and **Subject** for which you want to create a topic. The topic list updates to show existing topics for that combination.
+  <Step title="Open the topic form">
+    Click **+ Add New Topic**. The button is enabled once you select all three fields.
   </Step>
-  <Step title="Click Add Topic">
-    Select the **Add Topic** button to open the topic creation form.
+  <Step title="Enter the details">
+    Type a **Topic Title**. You can also add a **Description (Optional)**.
   </Step>
-  <Step title="Enter topic details">
-    Fill in the following fields:
-    - **Topic Name** — a concise, descriptive title (for example, *Demand and Supply Analysis* or *Introduction to Recursion*).
-    - **Description** — a brief summary of what the topic covers. This helps colleagues and administrators understand the scope at a glance.
-    - Any additional fields configured by your institution, such as teaching hours or learning outcomes.
-  </Step>
-  <Step title="Save the topic">
-    Click **Save**. The topic now appears under the selected subject and is ready for questions to be added.
+  <Step title="Save">
+    Click **Save Topic**. The button is disabled until you enter a title.
   </Step>
 </Steps>
 
-## Building the Question Bank
+Your topics appear under **Configured Topics** as cards. Each card shows the title, the description, and the number of questions, for example **12 Qs**. If the subject has no topics yet, you see **No topics configured yet**.
 
-Each topic has its own question bank, organised into **mark groups**. A mark group bundles questions that carry the same number of marks — for example, all 1-mark questions in one group and all 5-mark questions in another. This structure lets you quickly assemble a balanced question paper during exam planning.
+To edit a topic, click the pencil icon on its card. Update the fields in the **Edit Topic** dialog, then click **Update Topic**.
+
+## Open a question bank
+
+Click a topic card, or its **Manage Question Bank →** link. The page changes to *topic name* **- Question Bank**. Click **← Back** to return to your topics.
+
+## Add a mark group
+
+A mark group holds questions of one question type. Every question in the group carries the same marks.
 
 <Steps>
-  <Step title="Open a topic's question bank">
-    From the Topics list, find the topic you want to populate and click **Question Bank** next to it. The question bank view opens, showing any mark groups and questions already added.
+  <Step title="Open the group form">
+    Click **+ Add New Mark Group**.
   </Step>
-  <Step title="Add a mark group">
-    Click **+ Add New Mark Group**, select the question type (which determines the marks per question), and click **Save Group**. The new group appears as a collapsible section in the question bank.
+  <Step title="Choose the question type">
+    Select a **Question Type**. The **Marks Each Question** field fills in automatically for that type and can't be edited.
   </Step>
-  <Step title="Add questions to a mark group">
-    Expand the mark group, then click **+ Add MCQ** to add a multiple-choice question or **+ Add Theory** to add a written-answer question.
-  </Step>
-  <Step title="Enter the question content">
-    For MCQ questions, type the question stem, add all answer options, and mark the correct one. For theory questions, enter the question text and, optionally, a model answer or key points.
-  </Step>
-  <Step title="Save the question">
-    Click **Save** on the question card. The question is added to the mark group and is immediately available for exam paper generation.
-  </Step>
-  <Step title="Repeat for all questions">
-    Continue adding questions across mark groups until the topic's bank is complete. A richer bank gives you more flexibility when customising question papers.
+  <Step title="Save">
+    Click **Save Group**. The group appears as an expandable section labeled with its type and **Marks Each**.
   </Step>
 </Steps>
 
-### Managing Mark Groups and Questions
+Each question type can be used once per topic. If you pick a type that already has a group, Chaarvy shows **Mark group already exists**.
 
-You can edit or remove mark groups and individual questions at any time using the action icons on each card:
+## Add questions
 
-<CardGroup cols={2}>
-  <Card title="Edit a mark group" icon="pen-to-square">
-    Click the edit icon on a mark group header to change its question type or marks value. This is useful if you need to reorganise your bank after a curriculum revision.
-  </Card>
-  <Card title="Delete a question or group" icon="trash">
-    Click the delete icon on any question or mark group header to remove it. Deleting a mark group removes all questions within it, so confirm before proceeding.
-  </Card>
-</CardGroup>
+<Steps>
+  <Step title="Expand the mark group">
+    Click the mark group to expand it.
+  </Step>
+  <Step title="Choose the question format">
+    Click **+ Add MCQ** for a multiple-choice question or **+ Add Theory** for a written-answer question.
+  </Step>
+  <Step title="Write the question">
+    Expand the new question. Under **Question Title**, fill in the **Question Text** field for each medium.
+  </Step>
+  <Step title="Add options for an MCQ">
+    For an MCQ, fill in **Option 1** to **Option 4** for each medium. Then pick the **Correct Answer** for each medium.
+  </Step>
+  <Step title="Save">
+    Click **Save Question** inside the question, or **Save** in its header.
+  </Step>
+</Steps>
 
-<Tip>
-  The question bank you build here feeds directly into the **Schedule Planner** module, where Chaarvy can automatically assemble a question paper by drawing from this bank based on topic, question type, and mark group. The more comprehensive your question bank, the more useful the auto-generation feature becomes — aim to add at least ten questions per topic before your first exam cycle.
-</Tip>
+Each question header shows its number, a preview of the text, its format (**MCQ** or **THEORY**), and a **Draft** or **Saved** tag. Unsaved questions are marked **Draft**.
+
+### Validation
+
+Chaarvy checks each question before saving:
+
+- The question needs question text in at least one medium.
+- An MCQ needs all 4 options filled in English.
+- An MCQ needs a correct answer selected in English.
+
+### Translate a question
+
+If the class has more than one medium, click **🌍 Auto-Translate** in the question header. Chaarvy translates the English question text, and the English MCQ options, into the other mediums. The button is disabled until the English question text is filled in. Review the translations, then save the question.
+
+## Edit or delete
+
+- **Edit a mark group**: click the pencil icon on the group header. Choose a new **Question Type** and click **Update Group**.
+- **Delete a mark group**: click the trash icon on the group header, then click **Delete** to confirm. This deletes the group and all its questions.
+- **Edit a question**: expand it, make your changes, then click **Update Question** or **Update**.
+- **Delete a question**: click **Remove** in the question header, then click **Delete** to confirm.
+
+<Warning>
+  Deleting a mark group or question can't be undone.
+</Warning>
+
+## Where topics are used
+
+Topics you create here are available to choose when you plan classes in the [Schedule planner](/faculty/schedule-planner).

@@ -1,83 +1,69 @@
 ---
-title: "Collect and Track Student Fee Payments in Chaarvy"
-sidebarTitle: "Payments"
-description: "View successful and failed fee transactions, collect outstanding amounts from students, and print payment receipts — all from one payments hub."
+title: "Collect student fee payments"
+sidebarTitle: "Collect payment"
+description: "Look up a student by admission number, review paid and pending fees, record a cash payment, and print receipts."
 ---
 
-The Payments module brings together everything your finance and administrative staff need to manage student fee collection. You can review a complete history of transactions, identify students with outstanding balances, accept payments at the counter, and generate official receipts — without switching between separate tools.
+Use **Collect Payment** to record fee payments against a student's enrollment and print receipts.
 
-## Viewing Payment History
+To open it, go to **Student Management** > **Collect Payment**. You can also click **Collect Payment** on the **Accounts** > **Payments** page. See [Payments](/accounts/payments).
 
-Navigate to **Admin → Payments** to access the payments list. The table shows all recorded fee transactions with the student's admission number, name, payment status, amount, and payment date displayed for each row.
-
-### Filtering Transactions
-
-Use the filter icon to open the filter panel. You can narrow results by:
-
-- **Search** — find a transaction by student name or admission number
-- **Date Range** — limit results to a specific time period
-- **Status** — show only successful or failed transactions
-
-### Printing a Receipt from History
-
-To reprint a receipt for a past transaction, locate the row in the payments list and click the receipt icon in the **Action** column. The receipt will open ready to print. This is useful when a student requests a duplicate receipt for a payment they made previously.
-
----
-
-## Collecting Payments
-
-To collect a fee payment from a student, use the **Collect Payment** workflow. You can reach it by clicking the **Collect Payment** button on the payments list, or by navigating directly to **Student Management → Payments → Pending Payments**.
+## Find the student
 
 <Steps>
-  <Step title="Search for the Student">
-    Enter the student's **Admission Number** in the search field and click **Search**. The page will display the student's details — name, father's name, and admission number — along with a breakdown of their fee records.
+  <Step title="Search by admission number">
+    Enter the student's admission number in the **Admission Number** field and click **Search**. If no student matches, the message **Details not found** appears.
   </Step>
+  <Step title="Review the student's fees">
+    The page shows the student's **Admission Number**, **Father Name**, and **Student Name**. Below that, a table lists each course enrollment with these columns:
 
-  <Step title="Review the Fee Breakdown">
-    The fee table shows each enrolled course along with the total amount due, the amount already paid, and the amount still pending. Review the outstanding balance with the student before proceeding.
-
-    Click the **Pending** amount for the relevant course to open the payment collection panel.
-  </Step>
-
-  <Step title="Enter Payment Details">
-    In the **Collect Fees** panel, fill in the following:
-
-    - **Amount** — the amount the student is paying now. This can be the full balance or a partial instalment if your institution allows instalments.
-    - **Payment Method** — select the method used (for example, Cash).
-    - **Payment Date** — confirm or adjust the date of the transaction.
-    - **Notes** — add any optional notes for your records.
-
-    Click **Collect Payment** to record the transaction. A receipt will be generated automatically once the payment is saved.
-  </Step>
-
-  <Step title="Print the Receipt">
-    After the payment is recorded, the receipt opens automatically for printing. Hand a copy to the student and retain one for your records if needed.
-
-    You can also reprint the receipt at any time from the **Admin → Payments** list.
+    | Column | Description |
+    |--------|-------------|
+    | **Course Name** | The program. |
+    | **Segment** | The class within the program. |
+    | **Medium** | The medium of instruction. |
+    | **Section** | The assigned section. |
+    | **Total** | The total payable fee. |
+    | **Paid** | The amount paid so far. Shown in green when greater than zero. |
+    | **Pending** | The amount still due. Shown in red when greater than zero. |
   </Step>
 </Steps>
 
-<Note>
-  Collecting payments requires specific permissions. Make sure your role includes:
-
-  - **collect_payment:search_pending_payment** — to search for and view pending balances
-  - **collect_payment:accept_payment** — to record a new payment transaction
-  - **collect_payment:print_receipt** — to print a receipt after payment
-
-  Contact your system administrator if any of these permissions are missing from your account.
-</Note>
-
----
-
-## Payment Receipts
-
-A payment receipt is generated automatically as soon as a transaction is recorded. Receipts can be printed from two places:
-
-- **During payment collection** — the receipt opens immediately after a payment is confirmed.
-- **From payment history** — click the receipt icon on any row in the **Admin → Payments** list to reprint it at any time.
-
-Each receipt includes the student's name and admission number, the program they are enrolled in, a line-by-line fee breakdown, the amount paid, the payment method, and the date of the transaction.
-
 <Tip>
-  If a student requests a duplicate receipt for a past payment, locate the original transaction in the **Admin → Payments** list and click the receipt icon in the Action column to reprint it.
+  The **Total** comes from the fees finalized on the **Fees Details** tab of the [admission form](/students/admission-form#fees-details).
 </Tip>
+
+## Record a payment
+
+<Steps>
+  <Step title="Open the Collect Fees window">
+    Click the **Pending** amount for the enrollment. The **Collect Fees** window opens and shows the **Pending Fees**.
+  </Step>
+  <Step title="Enter the payment details">
+    - **Amount**: the amount being paid now. It must be greater than zero and can't exceed the pending fees, so you can record a partial payment.
+    - **Payment Method**: select **Cash**.
+    - **Payment date**: defaults to today. Change it if needed.
+    - **Notes**: optional. Keep notes to 500 characters or fewer.
+  </Step>
+  <Step title="Collect the payment">
+    Click **Collect Payment**. The button stays disabled until you enter a valid amount and select a payment method.
+
+    After the payment is saved, Chaarvy shows **Payment recorded successfully**, generates the receipt, and opens your browser's print dialog.
+  </Step>
+</Steps>
+
+## View payment history and reprint receipts
+
+<Steps>
+  <Step title="Open the payment history">
+    Click the **Paid** amount for the enrollment. The **Payment History** window opens for that admission number.
+  </Step>
+  <Step title="Review past payments">
+    The table lists each payment with **Particulars**, **Paid on**, **Amount**, **Mode**, and **Notes**.
+  </Step>
+  <Step title="Reprint a receipt">
+    Click the download icon (**Download reciept**) on a row. The receipt opens in your browser's print dialog.
+  </Step>
+</Steps>
+
+If the receipt can't be generated, the message **Failed to generate reciept** appears.

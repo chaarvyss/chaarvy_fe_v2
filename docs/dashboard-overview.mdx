@@ -1,70 +1,85 @@
 ---
-title: "Chaarvy Dashboard: Real-Time Institution Insights"
+title: "Dashboard overview"
 sidebarTitle: "Dashboard"
-description: "The Chaarvy dashboard gives administrators and staff a live overview of enrollments, payments, attendance, expenses, and daily tasks."
+description: "Use the Chaarvy dashboard to view student, payment, stock, enrollment, cash flow, and expense widgets, manage your to-do list, and customize the layout."
 ---
 
-The Chaarvy dashboard is the first screen you see after logging in, and it is designed to give you an instant, real-time picture of your institution's health. Rather than digging through separate modules for each data point, the dashboard surfaces the metrics that matter most — all in one glance. Every widget on the dashboard reflects live data, so you can trust that what you see is always up to date.
+The dashboard is the first page you see after you sign in. To open it at any time, click **Dashboard** in the sidebar. It shows a set of widgets that summarize key data for your college.
 
-## Dashboard Widgets
+## Dashboard widgets
 
-The widgets displayed on your dashboard depend on the permissions assigned to your role. The table below describes every available widget and what it shows.
+Each widget appears only if your role has permission to view it. If your role allows none of them, the dashboard shows **No items to show**.
 
 | Widget | What it shows |
 |---|---|
-| **Student Count** | The total number of students currently enrolled in your institution. Click the widget to drill into the full student list. |
-| **Payments** | A summary of fee payments received, including total collected and any outstanding balances. Links through to the Accounts module. |
-| **Stationary Stock** | Current stock levels for stationery and supplies tracked in your inventory, helping you spot shortages early. |
-| **Student Enrollments** | A trend chart of new enrollments over time, so you can track intake momentum across admission cycles. |
-| **Cashflow** | A visual breakdown of income versus outgoings for the current period, giving finance staff a fast read on institutional liquidity. |
-| **Expenses** | Total expenses logged in the Accounts module for the current month, with a link to the full expense register. |
-| **To-Do** | Your personal task list. Create, update, and delete items to manage your daily workload without leaving the dashboard. |
-| **Attendance** | Today's attendance rate across all active classes. Colour coding highlights classes that fall below your institution's threshold. |
-| **Calendar** | Upcoming academic events, fee deadlines, and institutional milestones drawn from the platform's shared calendar. |
+| **Todo** | Your personal to-do list. See [Manage your to-do list](#manage-your-to-do-list). |
+| **Students** | A pie chart of students split into **Male** and **Female**. |
+| **Payments** | A horizontal stacked bar chart that summarizes payments. |
+| **Stationary stock** | A table of low stock books and stationery items, with the columns **#**, **Item**, and **Current Stock**. |
+| **Student enrollments** | A treemap of enrolled students. Boxes are grouped by program, segment, and medium, and each box is a section. Hover over a box to see **Total Students**, **Boys**, and **Girls**. |
+| **CashFlow** | An area chart that compares **Payments Accepted** with **Expenses** over a period. |
+| **Expenses** | An area chart of expenses over a period. |
 
 <Tip>
-  If you do not see a widget that is described above, it may be hidden because your role does not have permission to view that data. Ask your system administrator to review your role configuration under **Admin → Roles**.
+  If you expect to see a widget that is missing, ask your administrator to check your role under **Administration** > **Roles**. See [Users and roles](/admin/users-roles).
 </Tip>
 
-## Managing Your To-Do List
+## Change the period on cash flow and expenses
 
-The **To-Do** widget is a lightweight personal task manager built directly into your dashboard. You do not need a separate app to keep track of daily action items — everything lives alongside your institutional data.
+The **CashFlow** and **Expenses** widgets start with the current month. Each widget shows the totals for the selected period above the chart, such as **Total Payments Accepted** and **Total Expenses**.
 
-### Create a to-do item
+- **Date range:** Click the date field and select a start date and an end date. The chart updates after you pick both dates.
+- **Previous and next arrows:** Move the period back or forward by one week, month, or year, based on the selected step.
+- **Step menu:** Choose **Weekly Step**, **Monthly Step**, or **Yearly Step**. This resets the period to the current week, month, or year.
 
-1. Locate the **To-Do** widget on your dashboard.
-2. Click the **Add** button (the **+** icon) inside the widget.
-3. Type your task description in the input field that appears.
-4. Press **Enter** or click **Save** to add the item to your list.
+The chart groups data by day for ranges up to 60 days, by month for ranges up to a year, and by year for longer ranges. Hover over the chart to see the amounts for a point. If there is nothing to show, the widget displays **No data available for this period.**
 
-### Update a to-do item
+## Customize the layout
 
-1. Click the task text you want to edit.
-2. Modify the description directly in the inline editor.
-3. Click **Save** (or press **Enter**) to confirm the change.
+You can arrange the dashboard to suit how you work. Chaarvy saves your layout in your browser, so it applies only on the browser and device you use.
 
-You can also mark a task as complete by clicking the checkbox to its left. Completed tasks are visually struck through so you can see your progress at a glance.
+- **Move a widget:** Drag it by its title.
+- **Resize a widget:** Drag its bottom right corner.
+- **Hide a widget:** Hover over the widget and click the close icon in its top right corner.
+- **Restore a hidden widget:** Hidden widgets are listed next to **Hidden Widgets:** at the top of the dashboard. Click the matching **+ Add** button, for example **+ Add Todo**.
+- **Reset the layout:** Click **Reset** at the top right of the dashboard to restore the default positions, sizes, and widgets.
+
+## Manage your to-do list
+
+The **Todo** widget is a personal task list. Items are color coded by priority: **High** is red, **Medium** is orange, and **Low** is green. If you have no items, the widget shows **No todos. No need to hurry!**
+
+### Add a to-do item
+
+<Steps>
+  <Step title="Open the form">
+    In the **Todo** widget, click **New**. The **Todo Details** form opens.
+  </Step>
+  <Step title="Fill in the details">
+    Enter the **Title** and **Description**, select a **Priority** (**Low**, **Medium**, or **High**), and choose a **Due Date**. All fields are required. The due date can be from today up to two years ahead.
+  </Step>
+  <Step title="Save the item">
+    Click **Add Todo**.
+  </Step>
+</Steps>
+
+<Note>
+  You can have up to 10 to-do items. The **New** button is disabled when you reach this limit. Delete an item to add a new one.
+</Note>
+
+### Edit a to-do item
+
+1. Click the title or description of the item. The **Todo Details** form opens.
+2. Change the details.
+3. Click **Update Todo**.
+
+### Mark an item as done
+
+Select the checkbox next to the item. Chaarvy strikes through the title and dims the item. Clear the checkbox to mark it as not done.
 
 ### Delete a to-do item
 
-1. Hover over the task you want to remove.
-2. Click the **Delete** icon (trash can) that appears to the right of the item.
-3. The item is removed immediately — there is no confirmation prompt, so double-check before deleting.
+Click the trash icon on the item. Chaarvy deletes it right away, without asking you to confirm.
 
 <Warning>
-  Deleted to-do items cannot be recovered. If you accidentally remove a task, you will need to recreate it manually.
+  You cannot recover a deleted to-do item.
 </Warning>
-
-## Navigating from the Dashboard
-
-Every widget on the dashboard is interactive. Clicking a widget title or its embedded link takes you directly to the relevant module, so you can go from a high-level metric to the underlying detail in a single click. For example:
-
-- Click **Payments** to open the Accounts fee register.
-- Click **Student Count** to open the full Student Management list.
-- Click **Attendance** to see the class-by-class breakdown in the Academics module.
-
-This makes the dashboard your natural starting point for every working session — check the numbers, spot anything that needs attention, and jump straight to the right place.
-
-<Note>
-  Dashboard data refreshes automatically in real time. You do not need to reload the page to see updated figures — widgets reflect the latest state of your institution as soon as changes are saved anywhere in the platform.
-</Note>

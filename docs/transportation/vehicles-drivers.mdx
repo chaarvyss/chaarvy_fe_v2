@@ -1,81 +1,44 @@
 ---
-title: "Manage Your Vehicle Fleet, Drivers, and Transport Vendors"
-sidebarTitle: "Vehicles & Drivers"
-description: "Build and maintain your complete vehicle fleet — register buses, onboard drivers, assign them to routes, and manage transport vendors in one place."
+title: "Vehicles, drivers, and vendors"
+sidebarTitle: "Vehicles and drivers"
+description: "Learn what the vehicle, driver, and transport vendor screens in the Transportation module currently contain."
 ---
 
-Before any vehicle can appear on the live map or in the dashboard, you need to register it in the system along with its assigned driver. The Vehicles & Drivers section is where you build and maintain your full fleet directory, ensuring that every bus, van, or car your institution operates has accurate records attached to it.
-
-## Managing Vehicles
-
-The Vehicles list is your central registry of every transport vehicle your institution operates.
-
-<Steps>
-  <Step title="Open the Vehicles list">
-    Go to **Transportation → Vehicles** in the sidebar. The list shows all registered vehicles along with their status.
-  </Step>
-  <Step title="Add a new vehicle">
-    Click **Add Vehicle** and fill in the details:
-    - **Registration number** — the official plate number of the vehicle
-    - **Vehicle type** — for example, bus, mini-bus, or van
-    - **Capacity** — the maximum number of students the vehicle can carry
-
-    Save the record when you are done.
-  </Step>
-  <Step title="Edit a vehicle">
-    Click the vehicle row to open its details, make your changes, and save. Common updates include changing the capacity or correcting the registration number.
-  </Step>
-  <Step title="Deactivate a vehicle">
-    If a vehicle is taken out of service, open its record and set its status to **Inactive**. Inactive vehicles will not appear on the live tracking map or in route assignments.
-  </Step>
-</Steps>
-
-## Managing Drivers
-
-Keep your driver directory current so that every vehicle has a responsible person attached to it and parents can be informed who is driving their child's route.
-
-<Steps>
-  <Step title="Open the Drivers list">
-    Go to **Transportation → Drivers** in the sidebar.
-  </Step>
-  <Step title="Add a new driver">
-    Click **Add Driver** and enter the driver's details:
-    - **Full name**
-    - **License number** and expiry date
-    - **Contact number**
-
-    Save the record when complete.
-  </Step>
-  <Step title="Assign a driver to a vehicle">
-    Open the driver's record, select the vehicle you want to assign from the **Assigned Vehicle** field, and save. A driver can only be assigned to one vehicle at a time.
-  </Step>
-</Steps>
-
 <Warning>
-  If a driver's license is close to expiry, update the record promptly. Driving with an expired license may violate local regulations and could affect your institution's transport compliance status.
+These screens are part of the Transportation module, which is not shown in the sidebar menu and may be unavailable in your account. They are still in development. The lists are always empty, and you cannot add or save vehicles, drivers, or vendors yet.
 </Warning>
 
-## Vehicle Vendors
+The Transportation module includes three list screens: **Vehicles**, **Drivers**, and **Vendors**. They share the same layout.
 
-Vendors are the companies or individuals who supply, lease, or maintain vehicles for your institution. Keeping vendor records in Chaarvy means you always have contact and service details in one place.
+## Common layout
 
-<Steps>
-  <Step title="Open the Vendors list">
-    Go to **Transportation → Vendors** in the sidebar.
-  </Step>
-  <Step title="Add a new vendor">
-    Click **Add Vendor** and complete the form:
-    - **Vendor name** — the company or individual name
-    - **Contact number** — primary phone number for reaching the vendor
-    - **Email** — the vendor's email address
+Each screen shows:
 
-    Save the record when done.
-  </Step>
-  <Step title="Update a vendor record">
-    Click any vendor in the list to open their record, edit the relevant fields, and save. Keep contact details current so your team can reach vendors quickly when a vehicle needs attention.
-  </Step>
-</Steps>
+- Two summary counts at the top:
+  - **Vehicles**: **Total Vehicles** and **Active Vehicles**
+  - **Drivers**: **Total Drivers** and **Active Drivers**
+  - **Vendors**: **Total Vendors** and **Active Vendors**
+- A filter icon that opens a **Filters** panel with a search field and a status filter. The only status option is **Active**.
+- A table with a name column (**Vehicle**, **Driver**, or **Vendor**), **Status**, **Phone**, and an edit icon.
+
+Because the lists have no data, each table shows an empty message such as **No Vehicles Found**, **No Drivers Found**, or **No Vendors Found**.
+
+## Vendor form
+
+The **Vendors** screen has an **Add Vendor** button. It opens the **Add Vendor** panel with these fields:
+
+| Field | Rules |
+|---|---|
+| **Vehicle vendor name** | Required |
+| **Contact number** | Required |
+| **Email** | Required. Must be a valid email address. |
+
+The panel also includes an address section and a **Save** button.
+
+<Note>
+Clicking **Save** checks the required fields but does not store the vendor. The vendor does not appear in the list afterward.
+</Note>
 
 <Tip>
-  Review your vehicle and driver records at the start of each academic term. Accurate registrations, valid driver licenses, and up-to-date vendor contacts ensure that live tracking reflects your real-world fleet and that nothing falls through the cracks during a busy period.
+To record vendors for your general expenses today, use **Accounts** > **Vendors**. See [Vendors](/accounts/vendors).
 </Tip>
