@@ -1,79 +1,107 @@
 ---
-title: "Track and Manage Your Institution Expenses in Chaarvy"
+title: "Track expenses"
 sidebarTitle: "Expenses"
-description: "Record, categorise, and monitor institutional expenses — from petty cash to major purchases — with receipt attachment support and payment tracking."
+description: "Record institutional expenses with payee, category, payment mode, and attachments, then filter and review them in one list."
 ---
 
-The Expenses module gives your accounts team a single place to record every outgoing payment made by the institution. Whether you're logging a utility bill, a vendor payment, or a staff reimbursement, Chaarvy keeps an organised, searchable history of all expenses alongside their supporting documents.
+The **Expenses** page is where you record money your institution pays out. Each expense stores who paid, who received the payment, the category, the payment mode, and any receipts or invoices you attach.
 
-## Accounts Dashboard
+Go to **Accounts** > **Expenses** to open it.
 
-Before diving into individual expense records, the **Accounts Dashboard** gives you a financial snapshot of the institution at a glance. Navigate to **Accounts > Dashboard** to see:
+## Expense list
 
-- An **overall expenses chart** that visualises spending trends over time.
-- A **financial status overview** summarising income, expenditure, and balance figures.
+The **Total Expenses** card at the top of the page shows the total expense amount.
 
-Use the dashboard as your starting point each time you open the Accounts module — it surfaces the information you need to make quick decisions before drilling into specific records.
+The list shows these columns:
 
-## Viewing Expenses
+| Column | What it shows |
+|---|---|
+| **S#** | The row number. |
+| **Payment date** | The date of the expense. |
+| **Expense category** | The category of the expense. |
+| **Beneficiary name** | The payee who received the payment. |
+| **Beneficiary type** | The type of payee. |
+| **Amount** | The amount paid. |
+| **Payment mode** | How the payment was made. |
+| **Actions** | The edit (pencil) icon. Shown only if you have permission to edit expenses. |
 
-To see all recorded expenses, navigate to **Accounts > Expenses**. The expenses list displays every entry your team has logged, sorted by the most recent date by default.
-
-From the list view you can:
-
-- **Search** by keyword to locate a specific expense quickly.
-- **Filter** by expense category, date range, payment mode, or beneficiary type to narrow down results.
-- **Click any row** to open the full expense detail and view attached receipts or invoices.
-
-## Adding an Expense
+## Filter expenses
 
 <Steps>
-  <Step title="Open the Add Expense form">
-    From the **Accounts > Expenses** page, click the **Add Expense** button in the top-right corner. A form panel will open.
+  <Step title="Open the filters">
+    Click the filter icon in the table header. The **Filters** panel opens.
   </Step>
-  <Step title="Enter a description and date">
-    Fill in the **Description** field to briefly summarise what the expense is for. Then select the **Date** the expense was incurred.
+  <Step title="Choose your filters">
+    Set any combination of these filters:
+    - Date range: select a start and end date.
+    - **Beneficiary type**: select one or more types.
+    - **Payment mode**: select one or more modes.
+    - **Expense category**: select one or more categories.
   </Step>
-  <Step title="Select who paid and the payee">
-    Choose the staff member who made the payment from the **Paid By** dropdown. Then select the **Beneficiary Type** that best describes who received the payment, followed by the specific **Payee** within that type. These fields are used for reporting and audit purposes.
-  </Step>
-  <Step title="Select an expense category and payment mode">
-    Choose the appropriate **Expense Category** from the dropdown, then select the **Payment Mode** (for example, cash, bank transfer, or cheque) that reflects how the payment was made. If the category or payment mode you need does not exist yet, type the new name directly in the dropdown and use the inline **Add** option to create it on the spot — no separate settings page is needed.
-  </Step>
-  <Step title="Add a reference ID and notes">
-    Enter a **Reference ID** (such as a cheque number or transaction reference) for traceability, and add any additional **Notes** relevant to the expense.
-  </Step>
-  <Step title="Enter the amount">
-    Enter the **Amount** paid.
-  </Step>
-  <Step title="Attach receipts or invoices">
-    Click **Select Files** to attach supporting documents such as receipts, invoices, or purchase orders. You can attach multiple files in common formats (PDF, JPG, PNG). All attachments are stored securely and can be retrieved at any time from the expense record.
-  </Step>
-  <Step title="Save the expense">
-    Review the details and click **Add Expense**. The new expense immediately appears in the expenses list and contributes to the figures shown on the Accounts Dashboard.
+  <Step title="Apply the filters">
+    Click **Search** to update the list. Click **Reset** to clear all filters.
   </Step>
 </Steps>
 
-## Editing an Expense
+## Add an expense
 
-To correct or update an existing record, locate the expense in the list and click the **Edit** (pencil) icon. The same form used for adding an expense reopens with the existing values pre-filled. Make your changes and click **Update Expense** to apply them. You can also add or remove file attachments at this point.
+<Steps>
+  <Step title="Open the form">
+    Click **Add expense**. The **Add expense** panel opens.
+  </Step>
+  <Step title="Fill in the expense details">
+    Complete all of the following fields. Each one is required.
 
-<Warning>
-  Editing a saved expense changes the figures reflected on the Accounts Dashboard. Always double-check the amount and date before saving an update.
-</Warning>
+    | Field | Details |
+    |---|---|
+    | **Description** | A short summary of what the expense is for. |
+    | **Date** | The date of the expense. You can pick a date up to 5 years in the past or 1 year in the future. |
+    | **Paid by** | The user who made the payment. Type to search users. |
+    | **Benficery type** | The type of payee. |
+    | **Payee** | The person or party who received the payment. Available after you select a beneficiary type. Type to search. |
+    | **Expense Category** | The category of the expense. You can add a new category here. |
+    | **Reference id** | A reference for the payment, such as a transaction or cheque number. |
+    | **Notes** | Any additional details. |
+    | **Payment mode** | How the payment was made. You can add a new payment mode here. |
+    | **Amount** | The amount paid. |
+  </Step>
+  <Step title="Attach files (optional)">
+    In the **Attachments** section, click **Select Files** and choose one or more files. You can attach images and PDFs. To remove a file before saving, click the close icon next to it.
+  </Step>
+  <Step title="Save">
+    Click **Add expense**. If you attached files, a progress bar shows the upload for each file. A confirmation message appears when the expense is saved.
+  </Step>
+</Steps>
 
-## Expense Categories and Payment Modes
+### Add or rename categories and payment modes
 
-Chaarvy lets you manage expense categories, payment modes, and beneficiary types without leaving the expense form. When filling in any of these dropdown fields, type a name that does not yet exist and select the inline **Add** option that appears — the new entry is saved immediately and becomes available institution-wide for future expenses.
+You can manage expense categories and payment modes directly from the expense form.
 
-You can also rename any existing category or payment mode by clicking the **Edit** option next to it in the same dropdown, keeping your reference data tidy as the institution's needs change.
+- **Add a new entry**: In **Expense Category** or **Payment mode**, type the new name. Then select **Add expense category** or **Add new payment mode** from the list.
+- **Rename an entry**: Use the edit option next to an existing entry in the dropdown.
 
-<Info>
-  Beneficiary types work the same way — you can add or rename them inline from the **Beneficiary Type** dropdown while recording an expense.
-</Info>
+New and renamed entries are available for all future expenses.
+
+## Edit an expense
+
+1. Click the edit (pencil) icon in the expense's row. The **Update expense** panel opens with the current details and attachments filled in.
+2. Change the details you need.
+3. Manage attachments:
+   - Click a file name to view it. PDFs open in a new tab. Images open in a viewer.
+   - Click the close icon next to a file to remove it.
+   - Click **Select Files** to add more files.
+4. Click **Update expense**.
+
+<Note>
+  Removed attachments are deleted only when you click **Update expense**.
+</Note>
 
 ## Permissions
 
-<Note>
-  To add or edit expenses, your account must have the **expenses:add** and **expenses:edit** permissions assigned. To view the expenses list without making changes, the **expenses:view:list** permission is sufficient. Contact your system administrator if you cannot see the Add Expense button or the edit controls.
-</Note>
+What you can do on this page depends on your role:
+
+- **View list**: required to open the **Expenses** page.
+- **Add**: shows the **Add expense** button.
+- **Edit**: shows the **Actions** column with the edit icon.
+
+To change these permissions, see [Users and roles](/admin/users-roles).

@@ -1,38 +1,40 @@
 ---
-title: "Track Student Referrals and Source Attribution"
+title: "Track admission referrals"
 sidebarTitle: "Referrals"
-description: "Monitor where your student enrollments are coming from by reviewing referral sources, admission counts, and committed fees in the Referrals dashboard."
+description: "See how many admissions each referrer brought in and the admission fees committed through them."
 ---
 
-The Referrals feature helps your institution understand which channels and individuals are driving student enrollments. By tracking referral data in one place, you can evaluate the effectiveness of your outreach efforts, recognise high-performing referral sources, and make more informed decisions about where to focus recruitment activities.
+The referrals page summarizes admissions by the person who referred each student. The referrer is the user selected in the **Referred by** field of the [admission form](/students/admission-form#student-base-details).
 
-## Viewing the Referrals Summary
+To open it, go to **Student Management** > **Referrels**. The page title is **Admission referral summary**.
 
-Navigate to **Admin → Referrals** to open the referral summary dashboard. The table loads automatically and displays a summary row for each referrer your institution has recorded.
+## Summary cards
 
-### What the Dashboard Shows
+- **Total Admissions**: the total number of admissions across all referrers in the table.
+- **Total Fees**: the total committed admission fees across all referrers in the table.
 
-The summary table includes the following columns for each referrer:
+## Referral table
 
-- **Referee Name** — the name of the person or source that referred students to your institution.
-- **Total Admissions** — the number of students attributed to that referrer.
-- **Committed Admission Fees** — the total fee amount committed by students referred through that source.
+| Column | Description |
+|--------|-------------|
+| **S#** | Row number. |
+| **Referee Name** | The user who referred the students. |
+| **Total admissions** | The number of admissions referred by this user. |
+| **Committed Admission fees** | The total admission fees committed by the students this user referred. |
 
-Summary cards at the top of the page show the combined totals across all referrers — overall admissions referred and total fees committed — giving you a quick institution-wide overview.
+## Filter referrals
 
-### Filtering Referral Data
+<Steps>
+  <Step title="Open the filters">
+    Click the filter icon in the table header. The **Filters** panel opens.
+  </Step>
+  <Step title="Set your filters">
+    - **Referred by**: choose a referrer.
+    - **Date range**: click **Select date range** and pick a start and end date.
+  </Step>
+  <Step title="Apply the filters">
+    Click **Search** to apply the filters. Click **Reset** to clear them.
+  </Step>
+</Steps>
 
-Use the filter icon to open the filter panel, where you can narrow the table by:
-
-- **Referred By** — search for a specific referee by name.
-- **Date Range** — limit results to a particular enrollment period.
-
-<Info>
-  Referral data is recorded at the point of admission. Make sure staff filling in the admission form capture the referral source accurately so that the dashboard reflects a true picture of your enrollment channels.
-</Info>
-
----
-
-<Note>
-  Access to the Referrals dashboard requires the **referrels:view:list** permission. If you do not see the Referrals option under the Admin menu, ask your system administrator to grant you this permission.
-</Note>
+The summary cards update to match the filtered results.

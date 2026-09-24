@@ -21,15 +21,17 @@
         "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting Started",
+            "group": "Getting started",
             "pages": [
               "introduction",
               "quickstart",
-              "dashboard-overview"
+              "account-access",
+              "dashboard-overview",
+              "chat"
             ]
           },
           {
-            "group": "Student Management",
+            "group": "Student management",
             "pages": [
               "students/admissions",
               "students/admission-form",
@@ -66,18 +68,21 @@
             "group": "Accounts",
             "pages": [
               "accounts/expenses",
-              "accounts/vendors"
+              "accounts/vendors",
+              "accounts/payments"
             ]
           },
           {
             "group": "Administration",
             "pages": [
+              "admin/college-profile",
               "admin/users-roles",
               "admin/fees-types",
+              "admin/sections",
               "admin/books-stationary",
-              "admin/holidays",
+              "admin/addon-courses",
               "admin/reports",
-              "admin/college-profile"
+              "admin/holidays"
             ]
           }
         ]

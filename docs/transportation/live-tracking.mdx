@@ -1,50 +1,33 @@
 ---
-title: "Monitor School Vehicles in Real Time on the Live Map"
-sidebarTitle: "Live Tracking"
-description: "Monitor every active school vehicle on an interactive live map and review historical movement logs to keep your fleet accountable."
+title: "Live vehicle tracking"
+sidebarTitle: "Live tracking"
+description: "Learn what the prototype live tracking map in the Transportation module currently shows."
 ---
 
-Live Tracking gives you a real-time map view of every vehicle currently on the road. Instead of waiting for phone calls or manual check-ins, you can see exactly where each bus or van is at any moment — helping you reassure parents, coordinate pickups, and respond to delays before they become problems.
+<Warning>
+Live tracking is part of the Transportation module, which is not shown in the sidebar menu and may be unavailable in your account. The screen is a prototype. It tracks a fixed set of sample vehicles, not your institution's fleet.
+</Warning>
 
-## Accessing Live Tracking
+The live tracking screen is designed to show school vehicles on a map as they move along their routes.
 
-<Steps>
-  <Step title="Open Live Tracking">
-    In the main sidebar, go to **Transportation → Live Track**. The interactive map loads and immediately shows the current positions of all active vehicles.
-  </Step>
-  <Step title="Wait for the map to populate">
-    Vehicle pins appear on the map as soon as location data is received. If a vehicle has not yet started its route, it will not appear until it begins moving and reporting its position.
-  </Step>
-</Steps>
+## What the screen contains
 
-## What You See on the Map
+The screen is titled **Live Status**. It shows:
 
-The live map gives you a clear picture of your entire fleet at a glance.
+- **Active Vehicles**: the number of vehicles being tracked.
+- A **Show Map** button. Click it to display the map. Click **Hide Map** to hide it again.
 
-- **Vehicle pins** — Each active vehicle is represented by a pin at its current GPS position. Pins update automatically as the vehicle moves; you do not need to refresh the page.
-- **Multiple vehicles simultaneously** — All active vehicles are visible on the same map at the same time, so you can monitor your whole fleet without switching between views.
-- **Vehicle detail pop-up** — Click any vehicle pin to open a summary that shows the vehicle name, the route it is running, and the number of students currently on board.
+## Using the map
+
+When the map is visible, it shows:
+
+- A connection indicator. It reads **SERVER LIVE** when the map is connected to the location server, and **CONNECTING...** while it tries to connect.
+- A marker for each tracked vehicle, placed at the latest position received from the location server.
+- The planned route line and stops for each vehicle.
+- Zoom and navigation controls.
+
+A vehicle is treated as disconnected if the map has not received a position update for it in the last 30 seconds.
 
 <Note>
-  Live tracking requires each vehicle to have an active GPS device or location-reporting integration enabled. If a vehicle's pin is missing from the map, confirm that its GPS unit is powered on and transmitting.
+The vehicles, routes, and stops on this map are built-in sample data. You cannot add your own vehicles, filter the map, or view a movement history from this screen.
 </Note>
-
-## Vehicle Movement Log
-
-The movement log gives you a historical record of every position update received from your vehicles, which is useful for verifying routes, investigating incidents, or auditing trip times.
-
-<Steps>
-  <Step title="Open the movement log">
-    Go to **Transportation → Vehicle Movements** in the sidebar.
-  </Step>
-  <Step title="Filter the log">
-    Use the date, vehicle, or route filters to narrow the results to the trips you want to review.
-  </Step>
-  <Step title="Review the entries">
-    Each entry shows the vehicle, timestamp, and recorded location. You can use this data to confirm that a vehicle followed its assigned route.
-  </Step>
-</Steps>
-
-<Tip>
-  Cross-reference the movement log with the live dashboard to verify that reported student counts match the students assigned to each route for that day.
-</Tip>

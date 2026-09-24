@@ -1,47 +1,61 @@
 ---
-title: "Configure Fee Types for Programs and Enrollment in Chaarvy"
-sidebarTitle: "Fee Types"
-description: "Define and manage fee categories like tuition, exam, and lab fees that serve as building blocks for your institution's program fee structures."
+title: "Configure fee types"
+sidebarTitle: "Fee types"
+description: "Create, rename, and remove the fee categories your institution uses when it sets up program fees."
 ---
 
-Fee types are the categories your institution uses to classify charges — such as tuition fees, exam fees, or lab fees. Before you can configure fees for any academic program, you need to set up the relevant fee types here. Think of fee types as the building blocks that your program fee structures are assembled from.
+Fee types are the categories your institution uses to classify charges, such as tuition, exam, or lab fees. You use them when you set up fees for a program.
 
-## Creating a Fee Type
+Go to **Administration** > **Fees types**. The **Fees Types** page shows an editable table with a **#** column and a **Fees type** column.
 
-Navigate to **Admin → Fee Types** to manage your institution's fee categories.
+## How editing works
+
+You make all changes in the table first. Nothing is saved until you click **Submit**.
+
+- Rows are color-coded as **New Rows**, **Updated Rows**, and **Pending Deletions**.
+- Use the **Undo** and **Redo** icons to step back or forward through your edits.
+- Click **Reset** to discard all unsaved changes.
+
+## Add a fee type
 
 <Steps>
-  <Step title="Add a new row">
-    In the Fee Types table, click the **Add** button to insert a new row.
+  <Step title="Add a row">
+    Click **Add New Row** below the table.
   </Step>
-  <Step title="Enter the fee type name">
-    Type a clear, descriptive name for the fee category directly in the row. Common examples include:
-    - Tuition Fee
-    - Exam Fee
-    - Lab Fee
-    - Library Fee
-    - Sports Fee
-
-    Choose names that will be recognisable to the staff who configure program fees later.
+  <Step title="Enter the name">
+    Type the fee type name in the new row, for example *Tuition Fee* or *Exam Fee*.
   </Step>
-  <Step title="Save your changes">
-    Click **Save** to submit all pending additions and edits. A confirmation summary will indicate which entries were processed successfully.
+  <Step title="Submit">
+    Click **Submit**.
   </Step>
 </Steps>
 
-## Managing Fee Types
-
-Once fee types are created, you can rename or remove them directly from the same table.
+## Rename a fee type
 
 <Steps>
-  <Step title="Rename a fee type">
-    Click on any fee type name in the table to edit it inline. Update the name and click **Save** to apply the change. The update is reflected immediately wherever the fee type is already in use.
+  <Step title="Edit the row">
+    Click the pencil icon on the row and change the name.
   </Step>
-  <Step title="Delete a fee type">
-    Select the delete option next to a fee type to mark it for removal, then click **Save** to confirm. Fee types that are already linked to program fee configurations should be removed with care, as this may affect existing fee structures.
+  <Step title="Confirm the row">
+    Click the check icon to finish editing the row.
+  </Step>
+  <Step title="Submit">
+    Click **Submit**.
   </Step>
 </Steps>
+
+## Remove a fee type
+
+Click the delete icon on the row, then click **Submit**. The fee type is marked inactive.
+
+<Warning>
+  Check whether a fee type is used in any program fee structure before you remove it.
+</Warning>
+
+## Review the results
+
+After you click **Submit**, a **Process Summary** window shows the progress of your changes. It lists counts for **Creating**, **Updating**, **Skipped**, **Failed**, and **Exceptions**.
 
 <Tip>
-  Fee types you create here are used when building out fee structures for your academic programs. Head to the [Programs](/academics/programs) section to see how fee types map to per-program charges that appear on student fee invoices.
+  After you create fee types, set up program fees on the [Programs](/academics/programs) page.
 </Tip>

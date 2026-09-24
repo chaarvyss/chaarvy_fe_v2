@@ -1,75 +1,138 @@
 ---
-title: "Manage Student Admissions and Enrollment in Chaarvy"
+title: "Manage student admissions"
 sidebarTitle: "Admissions"
-description: "View, manage, and track all student admissions from one place — search by filters, review enrollment statuses, and print official admission letters."
+description: "Browse, filter, and edit student admissions, bulk upload students from Excel, pay pending processing fees, and drop students."
 ---
 
-The Admissions module gives your institution a centralised view of every student enrollment. From here you can browse all admissions, search for specific students, filter by program or status, update enrollment statuses, and print official admission letters — all without leaving the platform.
+The **Admissions** page lists every student admission in your institution. From here you can start a new admission, edit an existing one, import students in bulk, and pay pending application processing fees.
 
-## Viewing the Admissions List
+To open it, go to **Student Management** > **Admissions**.
 
-Navigate to **Student Management → Admissions** to open the admissions list. All admission records are displayed in a single table that you can search and filter to find exactly the records you need.
+## Admissions list
 
-### Filters and Search
+The top of the page shows two summary cards:
 
-Use the filter icon at the top of the list to open the filter panel. You can narrow results by:
+- **Total Admissions**: the number of admissions in your institution.
+- **Filtered Admissions**: the number of admissions that match your current filters.
 
-- **Search** — look up a student by name or enrollment number
-- **Program** — the degree or diploma the student is enrolled in
-- **Section** — the class section assigned to the student
-- **Referred By** — the referral source recorded at admission
-- **Status** — filter between active students and dropouts
+The table shows these columns:
 
-Apply one or more filters together to pinpoint the exact set of records you need.
+| Column | Description |
+|--------|-------------|
+| **Student Name** | The student's photo, name, and admission number. |
+| **Father Name** | The student's father's name. Hidden by default. |
+| **Date of Birth** | The student's date of birth. Hidden by default. |
+| **Program** | The program the student is enrolled in. |
+| **Class** | The class within the program. |
+| **Section** | The section the student is assigned to. |
+| **Status** | The admission status. |
+| **Phone** | The student's mobile number. Hidden by default. |
+| **Actions** | The edit (pencil) icon. |
 
-### Viewing Admission Details
+To choose which columns appear, click the **Show/Hide Columns** icon above the table. More records load automatically as you scroll down.
 
-Select any row in the list to open the full admission record. The detail view shows the student's personal information, program details, address, add-on courses, and fee summary all in one place.
+### Admission statuses
 
----
+The **Status** column shows one of these labels:
 
-## Admission Statuses
+- **Under process**
+- **Enrolled**
+- **Confirmed**
+- **Dropout**
 
-Every admission record carries a status that reflects the student's current relationship with your institution.
+### Filter admissions
 
-| Status | Meaning |
-|--------|---------|
-| **Under Process** | The admission has been initiated but not yet fully confirmed. |
-| **Enrolled** | The student's enrollment is recorded and in progress. |
-| **Confirmed** | The admission is fully confirmed and the student is attending. |
-| **Dropout** | The student has withdrawn or been removed from the program. |
+<Steps>
+  <Step title="Open the filters">
+    Click the filter icon in the table header. The **Filters** panel opens on the side.
+  </Step>
+  <Step title="Set your filters">
+    Use any combination of these fields:
 
-Keeping statuses accurate ensures your reporting, fee calculations, and headcount figures stay reliable.
+    - **Search**
+    - **Program**
+    - **Section**
+    - **Referred by**
+    - **Status**: choose **Active** or **Dropouts**.
+  </Step>
+  <Step title="Apply the filters">
+    Click **Search** to apply the filters. Click **Reset** to clear them.
+  </Step>
+</Steps>
 
----
+## Add or edit an admission
 
-## Available Actions
+- To start a new admission, click **New Admission**. The admission form opens.
+- To edit an existing admission, click the pencil icon in the **Actions** column of that row.
 
-Depending on your permissions, you can perform the following actions from the admissions list or the individual admission detail view.
+For details on each tab of the form, see [Admission form](/students/admission-form).
 
-<CardGroup cols={3}>
-  <Card title="Print Admission Letter" icon="print">
-    Generate and print the official admission letter for a student to share with them or retain for institutional records.
-  </Card>
-  <Card title="Update Admission Status" icon="arrow-right-arrow-left">
-    Change a student's status to reflect enrollment changes such as re-admission or confirmation.
-  </Card>
-  <Card title="Drop Admission" icon="user-minus">
-    Mark an admission as dropped when a student withdraws or is removed from a program.
-  </Card>
-</CardGroup>
+## Drop a student
 
-To perform an action, open the admission record and select the corresponding option from the actions menu at the top of the detail view.
+<Steps>
+  <Step title="Open the admission details">
+    Click the student's name in the **Student Name** column. The **Admission details** window opens.
+  </Step>
+  <Step title="Drop the student">
+    Click **Drop student**. The window closes after the student is dropped.
+  </Step>
+</Steps>
 
----
+<Warning>
+  The student is dropped as soon as you click **Drop student**. No confirmation prompt appears.
+</Warning>
 
-<Note>
-  The actions available to you depend on the permissions assigned to your role. Your administrator controls access to the following:
+To see dropped students later, filter the list with **Status** set to **Dropouts**.
 
-  - **admissions:list:view:active** — view active admissions
-  - **admissions:list:view:inactive** — view inactive admissions
-  - **admissions:update_admission_status** — change a student's enrollment status
-  - **admissions:print_admission_letter** — generate and print an admission letter
+## Pay pending processing fees
 
-  Contact your institution's system administrator if you need access to any of these actions.
-</Note>
+If one or more admissions still have an unpaid application processing fee, a **Pay processing fees** button appears in the table header.
+
+1. Click **Pay processing fees**. The label changes to **Generating Payment Link...** while the link is created.
+2. Complete the payment on the payment page that opens. This payment covers all admissions with a pending processing fee.
+3. After payment, Chaarvy shows **Validating Payment...** and then returns you to the **Admissions** page.
+
+## Bulk upload students
+
+Use **Bulk Upload** to create or update many student admissions and their fees from an Excel file. Click **Bulk Upload** in the table header to open the **Bulk Upload Students & Fees** window.
+
+<Steps>
+  <Step title="Download the template">
+    Under **Step 1: Download Template**, click **Download Template (.xlsx)**.
+
+    To update existing students, select **Include active records (for update)** before you download. The template then includes your current active records.
+  </Step>
+  <Step title="Fill in and select the spreadsheet">
+    Complete the template. Then, under **Step 2: Select or Drop Completed Spreadsheet**, click the upload area to browse, or drag and drop the file.
+
+    Only `.xlsx` files are accepted. Chaarvy validates the file automatically as soon as you select it.
+  </Step>
+  <Step title="Review the validation results">
+    Under **Step 3: Validation Results**, check the **Total Rows**, **Valid**, and **Errors** counts.
+
+    A fee summary shows **Course Fees**, **Addon Fees**, **Books Fees**, and **Grand Total Payable** for the valid rows. Click **Show Preview of Valid Rows** to see each valid row with its admission number, student name, course fees, add-on courses, and payable amount.
+
+    If any rows have errors, click **Download Error Sheet to Fix** to get a spreadsheet of the rows you need to correct.
+  </Step>
+  <Step title="Choose an upload mode">
+    Under **Upload Mode**, select one option:
+
+    - **Skip errors and import valid rows (Recommended)**: imports the valid rows and skips rows with errors.
+    - **All-or-nothing**: rejects the whole upload if any row has an error.
+
+    You can't import in **All-or-nothing** mode while the file has errors.
+  </Step>
+  <Step title="Import">
+    Click **Confirm & Import**. The button shows how many students will be imported. The admissions list refreshes when the import finishes.
+  </Step>
+</Steps>
+
+<Tip>
+  To correct errors, fix the rows in the downloaded error sheet, then select the corrected file again. Chaarvy validates the new file automatically.
+</Tip>
+
+## Related pages
+
+- [Admission form](/students/admission-form)
+- [Collect payment](/students/payments)
+- [Referrals](/students/referrals)
