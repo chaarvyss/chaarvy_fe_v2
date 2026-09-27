@@ -1,73 +1,95 @@
 ---
-title: "Plan and Manage Your Teaching Schedule with Chaarvy"
-sidebarTitle: "Schedule Planner"
-description: "Use Chaarvy's Schedule Planner to map out your teaching sessions by subject and topic, and generate question papers directly from your planned syllabus."
+title: "Plan your teaching schedule"
+sidebarTitle: "Schedule planner"
+description: "Use the Schedule Planner to assign syllabus topics to dates and periods, track topic coverage, and mark topics complete."
 ---
 
-The Schedule Planner gives you a clear, calendar-based view of your entire teaching timeline. From a single screen, you can plan upcoming sessions, update existing entries when your schedule changes, and generate ready-to-print question papers drawn directly from your topic question bank — all without leaving the planner.
+The Schedule Planner is a calendar where you assign syllabus topics to specific dates and periods. You can use it to plan upcoming classes, reschedule topics, and track which topics are completed, pending, or overdue.
 
-## Viewing Your Schedule
+Go to **Faculty Corner** > **Schedule Planner** to open it.
 
-Navigate to **Faculty → Schedule Planner** to open the calendar view. You can switch between **Week** and **Month** views using the toggle in the top-right of the calendar, and use the arrow buttons to navigate forward or backward. A coverage bar at the top of the page summarises how many topics are completed, pending, or overdue across your planned sessions.
+## Understand the planner
 
-Cells that already have a planned session display the subject and topic at a glance, so you can see your upcoming workload across the week or month at once. Completed sessions are visually distinguished from upcoming ones, making it easy to track your progress through the syllabus.
+### Coverage progress
 
-## Planning a New Session
+The **Coverage Progress** bar at the top of the page shows the percentage of planned topics that are completed, for example `60% (6/10)`. Hover over the bar to see the **Completed**, **Pending**, and **Overdue** counts.
+
+The counts cover the topics planned in the date range currently shown on the calendar. A topic is overdue when its date has passed and it is not marked complete.
+
+### Calendar views
+
+Use the **Week** and **Month** toggle to switch views. The planner opens in **Week** view.
+
+- Click the left and right arrows to move to the previous or next week or month.
+- Click **Today** to return to the current date.
+
+**Week** view shows a grid of days and period slots. **Month** view shows each day as a single cell with its planned topics listed.
+
+### What the calendar shows
+
+| Item | What it means |
+|---|---|
+| Blue topic block | A planned topic that is pending. |
+| Green topic block with a check mark | A topic marked complete. |
+| Red topic block | An overdue topic. Its date has passed and it is not complete. |
+| **Weekend** label | Sunday. You can't schedule topics on Sundays. |
+| Holiday name | A holiday from **Administration** > **Holidays**. You can't schedule topics on holidays. |
+| **Need a topic** | In **Week** view, a period that has a class in your timetable but no topic planned. Hover over it to see the program, segment, medium, and subject from your timetable. |
+| **Need topic** count | In **Month** view, the number of timetable classes on that day with no topic planned. |
+
+Hover over a topic block to see the topic name and subject.
+
+## Plan a topic
 
 <Steps>
   <Step title="Open the planning panel">
-    Click the **+ Plan Schedule** button at the top of the page, or click directly on an empty cell in the calendar for the date and period you want to schedule. The **Plan New Schedule** panel slides open on the right.
+    Click **+ Plan Schedule**, or click an empty period (in **Week** view) or a day (in **Month** view). The **Plan New Schedule** panel opens on the right. You can't click past dates or break periods to plan a topic.
   </Step>
-  <Step title="Fill in the session details">
-    In the panel, fill in the following required fields:
-    - **Date** — the date of the session (Sundays and holidays are automatically disabled)
-    - **Period** — the period slot for the session (e.g., Period 2, 09:00 – 09:45)
-    - **Program** — the academic programme this session belongs to
-    - **Segment** — the year or semester within that programme
-    - **Subject** — the subject you will teach
-    - **Medium** — the language of instruction
-    - **Section** — the student section attending this session
-    - **Topic** — the specific topic from the subject's syllabus (searchable)
+  <Step title="Fill in the details">
+    Complete all of the following fields. Each one is required.
 
-    If your timetable is already configured, some fields may be pre-filled automatically based on your assigned timetable. You can edit any pre-filled value before saving.
-  </Step>
-  <Step title="Save the session">
-    Click **Add Schedule** to add the session to the calendar. The cell updates immediately to show the subject and topic you just planned.
-  </Step>
-</Steps>
+    | Field | Details |
+    |---|---|
+    | **Date** | Past dates, Sundays, and holidays can't be selected. |
+    | **Period** | Shows each period slot with its start and end time. Breaks aren't listed. |
+    | **Program** | The program for the class. |
+    | **Segment** | Available after you select a program. |
+    | **Subject** | Lists subjects for the selected program and segment. |
+    | **Medium** | Lists mediums for the selected program and segment. |
+    | **Section** | Available after you select a medium. |
+    | **Topic** | Available after you select a subject. Type to search by topic name. Each topic shows its question count, if it has questions. |
 
-## Updating a Scheduled Session
-
-If you need to change any detail of an already-planned session — for example, swapping a date or period — you can edit it directly from the calendar.
-
-<Steps>
-  <Step title="Click the existing entry">
-    On the calendar, click the cell of the session you want to edit. The **Schedule Details** panel opens, showing the session's current date, period, topic, and completion status.
+    If you opened the panel from a period that has a class in your timetable, the panel shows **Pre-filled from your Timetable (Editable)**. The program, segment, subject, medium, and section are filled in for you. You can change any of them. You always select the topic yourself.
   </Step>
-  <Step title="Make your changes">
-    Update the **Date** or **Period** fields as needed. You can also toggle the session's completion status using the **Mark Complete** or **Mark Pending** button.
-  </Step>
-  <Step title="Save your changes">
-    Click **Done** to close the panel. Changes are saved as you make them. To permanently remove the session from your schedule, click **Delete Schedule** at the bottom of the panel.
-  </Step>
-</Steps>
-
-## Generating a Question Paper
-
-The Schedule Planner integrates a Question Paper Generator that pulls questions directly from your topic question banks. Use it to compose and print exam papers without switching to a separate tool.
-
-<Steps>
-  <Step title="Open the Question Paper Generator">
-    From within the Schedule Planner, click the **Question Paper Generator** option. The generator opens with a list of topics drawn from your planned sessions for the selected subject.
-  </Step>
-  <Step title="Select topics">
-    Check the boxes next to every topic you want to include in the paper. Each topic shows the number of available questions in the bank, so you can plan coverage confidently.
-  </Step>
-  <Step title="Preview and print">
-    Click **Generate Preview** to see the composed question paper — complete with section headers and answer-space formatting. When you are satisfied, click **Print Question Paper** to send it to your printer or save it as a PDF.
+  <Step title="Save">
+    Click **Add Schedule**. The button stays disabled until all fields are filled in. The topic then appears on the calendar.
   </Step>
 </Steps>
 
 <Note>
-  If your account has the **`schedule_planner:can_plan_others`** permission, you can plan and edit sessions on behalf of other faculty members. A faculty selector dropdown will appear at the top of the planner, letting you switch between users. Administrators typically hold this permission and use it to manage department-wide timetables from a central location. If you believe you should have this access but do not, contact your institution's Chaarvy administrator.
+  Topics come from **Faculty Corner** > **Topics Management**. If the topic list is empty, add topics for the subject first. See [Topics and question bank](/academics/topics-question-bank).
 </Note>
+
+## Update a planned topic
+
+Click a topic block on the calendar to open the **Schedule Details** panel. The panel shows the topic name with its program, segment, section, and subject.
+
+You can make these changes:
+
+- **Date**: Pick a new date. Past dates, Sundays, and holidays can't be selected.
+- **Period**: Pick a different period slot.
+- **Topic Status**: Click **Mark Complete** to mark the topic as completed. Click **Mark Pending** to undo it.
+
+Each change saves as soon as you make it. Click **Done** to close the panel.
+
+To remove the topic from the calendar, click **Delete Schedule**.
+
+<Warning>
+  **Delete Schedule** removes the topic right away. There is no confirmation step.
+</Warning>
+
+## Plan for other faculty members
+
+The user selector next to **+ Plan Schedule** shows whose schedule you are viewing. By default, it shows your own schedule.
+
+If your role has the `schedule_planner:can_plan_others` permission, you can select another user from this list. The calendar, coverage, and timetable details then switch to that user, and any topics you plan are saved to their schedule. Without this permission, the selector is disabled.

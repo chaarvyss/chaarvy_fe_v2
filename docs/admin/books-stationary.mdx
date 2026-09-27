@@ -1,47 +1,90 @@
 ---
-title: "Manage Books and Stationery Inventory in Chaarvy Admin"
-sidebarTitle: "Books & Stationery"
-description: "Add and manage books and stationery items, track available quantities and prices, and link materials to programs for accurate admission fee breakdowns."
+title: "Manage books and stationery"
+sidebarTitle: "Books and stationery"
+description: "Add books and stationery items, set prices and stock, link items to programs, and bulk upload your catalog from Excel."
 ---
 
-Chaarvy's Books & Stationery module lets you maintain a centralised inventory of all physical materials your institution provides to students — from textbooks and reference books to notebooks and other stationery. Keeping this list up to date ensures accurate fee breakdowns and smooth resource planning.
+The **Books & Stationary** page holds your catalog of books and stationery items. Each item has a price and a stock count. An item is either common to all programs or linked to specific programs, a segment, and a medium.
 
-## Adding Items
+Go to **Administration** > **Books & Stationary**.
 
-Navigate to **Admin → Books & Stationery** to view and manage your inventory.
+## The books list
+
+The **Books** table has these columns:
+
+| Column | Description |
+| --- | --- |
+| **#** | Row number. |
+| **Book Name** | The item name. Below it, you see **Common book**, or the linked programs, segment, and medium. |
+| **Available qty** | Current stock. |
+| **Price** | Unit price. |
+| **Actions** | Pencil icon to edit the item. |
+
+### Filter the list
+
+Click the filter icon to open the **Filters** panel. You can filter by **Search**, **Program**, and **Segment**. Click **Search** to apply the filters, or **Reset** to clear them.
+
+## Add or update items
+
+Items are added and edited in the **Update Books and Stationary Details** window.
 
 <Steps>
-  <Step title="Open the Add Books form">
-    Click **Add Books** to open the item creation form.
+  <Step title="Open the window">
+    Click **Add books**. To edit an existing item, click the pencil icon in its row instead.
   </Step>
-  <Step title="Enter item details">
-    Fill in the required information:
-    - **Book Name** — the full name of the book or stationery item (for example, *Engineering Mathematics Vol. 1* or *A4 Notebook*).
-    - **Available Quantity** — the current stock count for this item.
-    - **Price** — the unit price charged to students.
-    - **Program association** — choose whether the item is a **common** item (available across all programs) or a **specific** item linked to a particular program, segment, and medium.
+  <Step title="Choose the item type">
+    Select one option:
+    - **Specific**: the items belong to particular programs, a segment, and a medium.
+    - **Common**: the items apply to all programs.
   </Step>
-  <Step title="Save the item">
-    Click **Save** to add the item to your inventory. It will appear in the list immediately and be available for use in program fee configurations.
+  <Step title="Choose where the items belong (Specific only)">
+    Select one or more values in **Program**, then a **Segment** and a **Medium**. The table appears after you select all three.
+  </Step>
+  <Step title="Edit the table">
+    The table lists existing items for your selection, with **Book Name**, **Price**, and **Stock** columns.
+    - Click **Add New Row** to add an item.
+    - Click the pencil icon on a row to change it, then the check icon to finish.
+    - Click the delete icon to remove an item from the current selection.
+    - Use **Undo**, **Redo**, or **Reset** to correct mistakes.
+  </Step>
+  <Step title="Submit">
+    Click **Submit**. A **Process Summary** window shows counts for **Creating**, **Updating**, **Skipped**, **Failed**, and **Exceptions**.
   </Step>
 </Steps>
 
-## Browsing and Filtering Inventory
+<Note>
+  When you add a new item with several programs selected, Chaarvy links the item to each selected program. When you edit an existing specific item, clearing a program from **Program** removes the item's link to that program.
+</Note>
 
-The inventory list gives you a snapshot of all items and their current associations.
+## Bulk upload
+
+Use **Bulk Upload** to add or update many items at once from an Excel (.xlsx) workbook. The window is titled **Bulk Upload Books & Curriculum**.
+
+The workbook has two sheets:
+
+- **Books_Master**: the stock catalog, with Book Name, Medium, Price, and Available Qty. Each book appears once per medium.
+- **Book_Mappings**: the curriculum assignments, with Program(s), Segment(s), and Is Common. You can enter several programs separated by commas, or use `All Programs`.
 
 <Steps>
-  <Step title="Search and filter items">
-    Use the search bar and filter options — including program, segment, and medium — to narrow down the list and find specific items quickly.
+  <Step title="Download the template">
+    Under **Step 1: Download Template**, click **Download Template (.xlsx)**. Turn on **Include active records (for update)** to download your current books so you can edit them.
   </Step>
-  <Step title="Understand item associations">
-    Each row in the list shows the book name along with its association: items marked **Common book** are shared across all programs, while other items display the specific program, segment, and medium they belong to.
+  <Step title="Upload the completed file">
+    Under **Step 2: Select or Drop Completed Spreadsheet**, click the area or drag your .xlsx file onto it. Chaarvy validates the file as soon as you select it.
   </Step>
-  <Step title="Edit item details">
-    Click the edit icon next to any item to update its name, quantity, price, or program association. Use this to correct errors or reflect changes such as a new edition of a textbook or updated stock levels.
+  <Step title="Review the validation results">
+    **Step 3: Validation Results** shows **Total Rows**, **Valid**, and **Errors**. If there are errors, the first few are listed. Click **Download Error Sheet to Fix** to get a copy of the file with all errors.
+  </Step>
+  <Step title="Choose an upload mode">
+    Select one option:
+    - **Skip errors and import valid rows (Recommended)**: imports only the valid rows.
+    - **All-or-nothing**: rejects the whole upload if any row has an error. You can't use this mode while errors remain.
+  </Step>
+  <Step title="Import">
+    Click **Confirm & Import**. The button shows how many valid books will be imported.
   </Step>
 </Steps>
 
 <Tip>
-  You can link books and stationery items to specific academic programs so they are automatically included in the admission fee breakdown presented to students. Configure these links when adding or editing an item, or manage them in the Program settings under the Academics section.
+  You can also download the books template from **Administration** > **Reports**. See [Reports](/admin/reports).
 </Tip>

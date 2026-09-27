@@ -1,50 +1,70 @@
 ---
-title: "Create and Assign Subjects to Programs and Faculty"
+title: "Create subjects and assign them to programs"
 sidebarTitle: "Subjects"
-description: "Set up subjects in Chaarvy, map them to the right program segments, and assign them to faculty so teaching responsibilities are clear and traceable."
+description: "Add subjects, manage their status, and map them to program segments with the subject assignment matrix."
 ---
 
-Subjects sit at the heart of your academic calendar in Chaarvy. Before you can build a timetable, record attendance, or organise teaching topics, each subject must exist in the system and be connected to the correct program segment and teaching faculty. This page walks you through the full lifecycle of a subject.
+Subjects must exist in Chaarvy before you can schedule them in a timetable or create topics for them. After you create a subject, assign it to the program segments where it's taught.
 
-## Creating a Subject
+In the app, subjects live under the **Administration** menu. Go to **Administration** > **Subjects** to open the subjects list.
+
+## The subjects list
+
+The table shows these columns:
+
+- **S#**
+- **Subject Name**
+- **Status**: shows **Active** or **Inactive**. Click the chip to switch it.
+- **Actions**: a pencil icon to edit the subject.
+
+By default, the list shows only active subjects.
+
+- To search, type in the **Search...** box.
+- To filter by status, click the filter icon. In the **Filters** panel, choose **Active** or **Inactive**, then click **Search**. Click **Reset** to clear the filter.
+
+## Add a subject
 
 <Steps>
-  <Step title="Open the Subjects module">
-    From the Admin sidebar, navigate to **Subjects**. The list shows all subjects currently configured in your institution.
+  <Step title="Open the Add Subject panel">
+    Click **Add Subject**. A side panel opens.
   </Step>
-  <Step title="Click Add Subject">
-    Select the **Add Subject** button to open the subject creation form.
+  <Step title="Enter the name">
+    Type the name in the **Subject Name** field. This field is required.
   </Step>
-  <Step title="Enter subject details">
-    Fill in the required fields:
-    - **Subject Name** — the full name as it should appear in timetables and reports (for example, *Mathematical Analysis* or *Organisational Behaviour*).
-    - **Subject Code** — a short identifier used in timetable slots and transcripts (for example, *MA201*).
-    - Any additional fields your institution has configured, such as credit hours or subject type.
-  </Step>
-  <Step title="Save the subject">
-    Click **Save**. The subject is now available to be assigned to program segments.
+  <Step title="Save">
+    Click **Submit**.
   </Step>
 </Steps>
 
-## Assigning Subjects to Program Segments
+To rename a subject, click the pencil icon in its row. The **Update Subject** panel opens. Change the **Subject Name** and click **Submit**.
 
-Once your subjects are created, you map them to program segments using the **Subject Assignment** tool. This tells Chaarvy which subjects belong to which programs and segments, making them available for timetable building and attendance tracking.
+## Assign subjects to program segments
+
+The **Subject Assignment** matrix links subjects to the program segments where they're taught.
 
 <Steps>
   <Step title="Open Subject Assignment">
-    From the Subjects list, click the **Assign Subjects** button. The Subject Assignment panel opens.
+    Click **Assign Subjects**. The **Subject Assignment** dialog opens.
   </Step>
-  <Step title="Select programs and subjects">
-    Use the **Select Programs** and **Select Subjects** filters to choose the programs and subjects you want to work with. The assignment matrix below updates to show the relevant combinations.
+  <Step title="Choose programs and subjects">
+    Use **Select Programs** and **Select Subjects** to pick what appears in the matrix. Only active subjects are available.
   </Step>
-  <Step title="Mark assignments in the matrix">
-    The matrix displays programs and their segments as rows, with subjects as columns. Check the box at each intersection where a subject should be taught for a given program segment.
+  <Step title="Mark assignments">
+    Each row is a subject. Columns are grouped by program, with one column per segment. Select the checkbox where a subject is taught in that segment. Changed cells are highlighted.
   </Step>
-  <Step title="Save the assignments">
-    Click **Save** to apply all changes. The selected subjects are now linked to the chosen program segments and will appear when building those segments' timetables.
+  <Step title="Save">
+    Click the save icon above the matrix. Its tooltip reads **Save changes** when you have unsaved edits.
   </Step>
 </Steps>
 
-<Note>
-  Subject assignments are used by other Chaarvy modules automatically. When you build a **Timetable**, only subjects that have been assigned to the selected program segment are available to place in time slots. When faculty open the **Attendance Register**, they see only the classes for subjects assigned to them — so keeping assignments accurate is essential for both scheduling and daily attendance tracking.
-</Note>
+### Shortcuts in the matrix
+
+- Select the checkbox next to a segment name to assign every listed subject to that segment.
+- Select the checkbox next to a subject name to assign that subject to every listed segment.
+- Select the checkbox in the **Subjects** header to select every cell.
+- Click a segment name to copy its assignments. Choose the target segments, then click **Apply and Continue**.
+
+## Where subject assignments are used
+
+- **Topics Management**: only subjects assigned to the selected program and segment appear in the **Subject** list. See [Topics and question bank](/academics/topics-question-bank).
+- **Time Table**: the subject picker lists subjects for the selected class. See [Timetable](/academics/timetable).
