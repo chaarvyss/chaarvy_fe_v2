@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AcadPro by Chaarvy | The Next-Gen Educational ERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                            950: '#082f49',
+                        }
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-brand-950 text-gray-200 font-sans antialiased overflow-x-hidden selection:bg-brand-500 selection:text-white">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-panel border-b-0 border-white/10 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-blue-600 flex items-center justify-center font-heading font-bold text-white text-xl">A</div>
+                <span class="text-2xl font-heading font-bold text-white tracking-tight">AcadPro</span>
+            </div>
+            <div class="hidden md:flex gap-8 text-sm font-medium">
+                <a href="#features" class="hover:text-white transition-colors">Features</a>
+                <a href="#comparison" class="hover:text-white transition-colors">Why Us vs Them</a>
+                <a href="#tech" class="hover:text-white transition-colors">Technology</a>
+            </div>
+            <button class="bg-white text-brand-950 px-5 py-2 rounded-full font-semibold hover:bg-brand-50 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                Book Demo
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+        <!-- Animated Background Blobs -->
+        <div class="absolute top-0 -left-4 w-72 h-72 bg-brand-500 rounded-full mix-blend-screen filter blur-[100px] opacity-40 animate-blob"></div>
+        <div class="absolute top-0 -right-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-screen filter blur-[100px] opacity-40 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-8 left-20 w-72 h-72 bg-indigo-500 rounded-full mix-blend-screen filter blur-[100px] opacity-40 animate-blob animation-delay-4000"></div>
+
+        <div class="relative z-10 max-w-5xl mx-auto px-6 text-center">
+            <div class="inline-block mb-4 px-4 py-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-100 text-sm font-medium backdrop-blur-md animate-fade-in-up">
+                ✨ The Operating System for Modern Education
+            </div>
+            <h1 class="text-6xl md:text-8xl font-heading font-extrabold text-white tracking-tight leading-[1.1] mb-6 animate-fade-in-up" style="animation-delay: 0.1s;">
+                Run your entire campus <br/>
+                <span class="bg-gradient-to-r from-brand-400 via-blue-400 to-indigo-400 text-gradient">without the chaos.</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-10 leading-relaxed animate-fade-in-up" style="animation-delay: 0.2s;">
+                AcadPro unifies Admissions, Live Classes, Finance, Real-time Chat, and Transportation into one blazingly fast, multi-tenant platform. Stop paying for 5 different software subscriptions.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style="animation-delay: 0.3s;">
+                <button class="bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-full text-lg font-bold transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(14,165,233,0.4)]">
+                    Schedule a Live Tour
+                </button>
+                <button class="glass-panel text-white hover:bg-white/10 px-8 py-4 rounded-full text-lg font-bold transition-all">
+                    Explore Modules
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section id="features" class="py-24 bg-brand-900/20 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-heading font-bold text-white mb-4">Everything you need. Nothing you don't.</h2>
+                <p class="text-lg text-gray-400">A completely integrated ecosystem engineered for massive scale.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Feature 1 -->
+                <div class="glass-panel p-8 rounded-2xl hover:bg-white/5 transition-all group">
+                    <div class="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Real-time Unified Chat</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Built on blazing fast WebSockets. Teachers, Parents, and Admins can communicate instantly with presence indicators, read receipts, and group broadcasts.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-panel p-8 rounded-2xl hover:bg-white/5 transition-all group">
+                    <div class="w-12 h-12 bg-purple-500/20 text-purple-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Hybrid LMS & Live Classes</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Host secure, uninterrupted live video sessions or stream recorded lectures. A dedicated Learning Management System directly integrated with student profiles.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-panel p-8 rounded-2xl hover:bg-white/5 transition-all group">
+                    <div class="w-12 h-12 bg-green-500/20 text-green-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Dynamic JSON-to-PDF Engine</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Design custom report cards, fee receipts, and ID cards with our visual Template Designer. Generate thousands of high-quality PDFs instantly.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="glass-panel p-8 rounded-2xl hover:bg-white/5 transition-all group">
+                    <div class="w-12 h-12 bg-orange-500/20 text-orange-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Live Transport GPS Tracking</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Give parents absolute peace of mind. Live bus tracking, dynamic route mapping, and automated arrival alerts built directly into the parent portal.</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="glass-panel p-8 rounded-2xl hover:bg-white/5 transition-all group">
+                    <div class="w-12 h-12 bg-pink-500/20 text-pink-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Automated Finance & Fees</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Automate invoicing, track pending dues, and accept online payments seamlessly. Keep your cash flow healthy with automated reminders.</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="glass-panel p-8 rounded-2xl hover:bg-white/5 transition-all group">
+                    <div class="w-12 h-12 bg-yellow-500/20 text-yellow-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Deep Role-Based Access</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Enterprise-grade security. Control exactly who sees what with granular permissions across Admins, Faculty, Students, and Parents in a multi-tenant DB.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section id="comparison" class="py-24 relative overflow-hidden">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-heading font-bold text-white mb-4">Why upgrade from Legacy ERPs?</h2>
+                <p class="text-lg text-gray-400">See how AcadPro crushes the competition (like Fedena, Teachmint, and PowerSchool).</p>
+            </div>
+
+            <div class="glass-panel rounded-2xl overflow-hidden border border-white/10">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white/5 text-sm uppercase tracking-wider text-gray-400 border-b border-white/10">
+                            <th class="p-6 font-medium">Feature</th>
+                            <th class="p-6 font-medium border-l border-white/10 text-brand-400 bg-brand-500/5">AcadPro</th>
+                            <th class="p-6 font-medium border-l border-white/10">Legacy ERPs</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-300">
+                        <tr class="border-b border-white/10 hover:bg-white/5 transition-colors">
+                            <td class="p-6 font-medium text-white flex items-center gap-3">
+                                <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                UI / UX Speed
+                            </td>
+                            <td class="p-6 border-l border-white/10 bg-brand-500/5 text-brand-100 font-semibold">Instant (Next.js SPA)</td>
+                            <td class="p-6 border-l border-white/10 text-gray-500">Slow, multi-page reloads</td>
+                        </tr>
+                        <tr class="border-b border-white/10 hover:bg-white/5 transition-colors">
+                            <td class="p-6 font-medium text-white flex items-center gap-3">
+                                <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                                Communication
+                            </td>
+                            <td class="p-6 border-l border-white/10 bg-brand-500/5 text-brand-100 font-semibold">Real-time WebSockets & Presence</td>
+                            <td class="p-6 border-l border-white/10 text-gray-500">Basic email / slow SMS</td>
+                        </tr>
+                        <tr class="border-b border-white/10 hover:bg-white/5 transition-colors">
+                            <td class="p-6 font-medium text-white flex items-center gap-3">
+                                <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Document Generation
+                            </td>
+                            <td class="p-6 border-l border-white/10 bg-brand-500/5 text-brand-100 font-semibold">Custom visual JSON-to-PDF builder</td>
+                            <td class="p-6 border-l border-white/10 text-gray-500">Hardcoded, requires dev support</td>
+                        </tr>
+                        <tr class="border-b border-white/10 hover:bg-white/5 transition-colors">
+                            <td class="p-6 font-medium text-white flex items-center gap-3">
+                                <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                Academic Hierarchy
+                            </td>
+                            <td class="p-6 border-l border-white/10 bg-brand-500/5 text-brand-100 font-semibold">Infinite (Program > Segment > Medium)</td>
+                            <td class="p-6 border-l border-white/10 text-gray-500">Rigid Standard/Section only</td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="p-6 font-medium text-white flex items-center gap-3">
+                                <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>
+                                Data Architecture
+                            </td>
+                            <td class="p-6 border-l border-white/10 bg-brand-500/5 text-brand-100 font-semibold">True Multi-Tenant Isolation</td>
+                            <td class="p-6 border-l border-white/10 text-gray-500">Shared tables, high risk</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack / CTA -->
+    <section id="tech" class="py-24 bg-gradient-to-t from-black to-transparent">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="text-3xl font-heading font-bold text-white mb-8">Powered by Modern Technology</h2>
+            <div class="flex flex-wrap justify-center gap-4 mb-16">
+                <span class="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm font-medium">React + Next.js</span>
+                <span class="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm font-medium">FastAPI (Python)</span>
+                <span class="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm font-medium">WebSockets</span>
+                <span class="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm font-medium">SQLAlchemy</span>
+                <span class="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm font-medium">Docker Containerized</span>
+            </div>
+            
+            <div class="glass-panel p-10 rounded-3xl border border-brand-500/30 relative overflow-hidden">
+                <div class="absolute inset-0 bg-brand-500/10"></div>
+                <div class="relative z-10">
+                    <h2 class="text-4xl font-heading font-extrabold text-white mb-6">Ready to bring your school into the future?</h2>
+                    <p class="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
+                        Stop managing paperwork and start managing success. Join the educational leaders who trust AcadPro to streamline their operations.
+                    </p>
+                    <button class="bg-brand-500 hover:bg-brand-400 text-white px-10 py-4 rounded-full text-lg font-bold transition-all shadow-[0_0_20px_rgba(14,165,233,0.3)]">
+                        Contact Sales (99999-00000)
+                    </button>
+                    <p class="mt-4 text-sm text-gray-500">support@chaarvyss.in | acadpro.docs.chaarvyss.in</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="border-t border-white/10 py-8 text-center text-gray-600 text-sm">
+        <p>&copy; 2026 Chaarvy Software Solutions. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
