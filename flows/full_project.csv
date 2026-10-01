@@ -1,0 +1,92 @@
+# label: %name%
+# style: shape=rectangle;rounded=1;fillColor=%fill%;strokeColor=%stroke%;fontColor=#000000;
+# connect: {"from": "parent", "to": "id", "invert": true, "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;"}
+# width: auto
+# height: auto
+# padding: 15
+# nodespacing: 40
+# levelspacing: 60
+# layout: horizontalflow
+id,name,parent,fill,stroke
+1,User Login,,#d5e8d4,#82b366
+2,Dashboard,1,#dae8fc,#6c8ebf
+3,401,2,#e1d5e7,#9673a6
+4,404,2,#e1d5e7,#9673a6
+5,500,2,#e1d5e7,#9673a6
+6,Academics,2,#e1d5e7,#9673a6
+7,Attendence,6,#ffffff,#000000
+8,AttendenceCompletionProgress,7,#ffffff,#000000
+9,StudentAttendence,7,#ffffff,#000000
+10,TimeTable,6,#ffffff,#000000
+11,FacultyTimeTable,10,#ffffff,#000000
+12,timeTableTemplate,10,#ffffff,#000000
+13,timeTableUpdater,10,#ffffff,#000000
+14,Accounts,2,#e1d5e7,#9673a6
+15,dashboard,14,#ffffff,#000000
+16,Expenses,14,#ffffff,#000000
+17,addExpense,16,#ffffff,#000000
+18,Vendors,14,#ffffff,#000000
+19,AddVendor,18,#ffffff,#000000
+20,Admin,2,#e1d5e7,#9673a6
+21,AddOnCourse,20,#ffffff,#000000
+22,Books,20,#ffffff,#000000
+23,add_books,22,#ffffff,#000000
+24,BooksBulkUploadModal,22,#ffffff,#000000
+25,Components,22,#ffffff,#000000
+26,helpers.ts,22,#ffffff,#000000
+27,FeesTypes,20,#ffffff,#000000
+28,Holidays,20,#ffffff,#000000
+29,AddUpdateHolidayModal,28,#ffffff,#000000
+30,Programs,20,#ffffff,#000000
+31,Modals,30,#ffffff,#000000
+32,reports,20,#ffffff,#000000
+33,Subjects,20,#ffffff,#000000
+34,AddUpdateSubject,33,#ffffff,#000000
+35,subjectAssignment,33,#ffffff,#000000
+36,Users,20,#ffffff,#000000
+37,createUsers,36,#ffffff,#000000
+38,subjectAssignment,36,#ffffff,#000000
+39,userPermissions,36,#ffffff,#000000
+40,userProfile,36,#ffffff,#000000
+41,calendar,2,#e1d5e7,#9673a6
+42,integration,41,#ffffff,#000000
+43,changePassword,2,#e1d5e7,#9673a6
+44,chat,2,#e1d5e7,#9673a6
+45,ChatView,44,#ffffff,#000000
+46,components,44,#ffffff,#000000
+47,AddParticipantDialog,46,#ffffff,#000000
+48,ChatAdvancedFilters,46,#ffffff,#000000
+49,ChatDialogs,46,#ffffff,#000000
+50,ChatSidebar,46,#ffffff,#000000
+51,ChatThread,46,#ffffff,#000000
+52,ChatThreadHeader,46,#ffffff,#000000
+53,MessageBubble,46,#ffffff,#000000
+54,MessageComposer,46,#ffffff,#000000
+55,MessageList,46,#ffffff,#000000
+56,context,44,#ffffff,#000000
+57,ChatContext,56,#ffffff,#000000
+58,collegeProfile,2,#e1d5e7,#9673a6
+59,dashboard,2,#e1d5e7,#9673a6
+60,Faculty,2,#e1d5e7,#9673a6
+61,SchedulePlanner,60,#ffffff,#000000
+62,components,61,#ffffff,#000000
+63,hooks,61,#ffffff,#000000
+64,QuestionPaperGenerator,61,#ffffff,#000000
+65,types.ts,61,#ffffff,#000000
+66,Topics,60,#ffffff,#000000
+67,components,66,#ffffff,#000000
+68,TopicQuestionBank,66,#ffffff,#000000
+69,forgot_password,2,#e1d5e7,#9673a6
+70,Master,2,#e1d5e7,#9673a6
+71,helpVideosUploader,70,#ffffff,#000000
+72,StudentManagement,2,#e1d5e7,#9673a6
+73,StudentBulkUploadModal,72,#ffffff,#000000
+74,viewAdmissionModal,72,#ffffff,#000000
+75,td,2,#e1d5e7,#9673a6
+76,Transportation,2,#e1d5e7,#9673a6
+77,Dashboard,76,#ffffff,#000000
+78,CurrentTransportationStatus,77,#ffffff,#000000
+79,Modals,77,#ffffff,#000000
+80,VehicleVendors,76,#ffffff,#000000
+81,addAndUpdateVehicleVendor,80,#ffffff,#000000
+82,validatePayment,2,#e1d5e7,#9673a6

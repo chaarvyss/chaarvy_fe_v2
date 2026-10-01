@@ -1,0 +1,162 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="page_main" name="Main Navigation">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="m_1" value="Dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;" vertex="1" parent="1">
+          <mxGeometry x="300" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m_2" value="Administration\n(Click to View)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;" link="data:page/id,page_admin" vertex="1" parent="1">
+          <mxGeometry x="100" y="200" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m_3" value="Student Management\n(Click to View)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;" link="data:page/id,page_sm" vertex="1" parent="1">
+          <mxGeometry x="300" y="200" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m_4" value="Faculty & Accounts\n(Click to View)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;" link="data:page/id,page_fac" vertex="1" parent="1">
+          <mxGeometry x="500" y="200" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_m1" edge="1" parent="1" source="m_1" target="m_2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_m2" edge="1" parent="1" source="m_1" target="m_3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_m3" edge="1" parent="1" source="m_1" target="m_4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page_sm" name="Student Management">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="s_back" value="Back to Main" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;" link="data:page/id,page_main" vertex="1" parent="1">
+          <mxGeometry x="50" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s_1" value="Student Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;" vertex="1" parent="1">
+          <mxGeometry x="300" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s_2" value="Admissions\n(Click for Logic)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;" link="data:page/id,page_adm" vertex="1" parent="1">
+          <mxGeometry x="300" y="200" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s_3" value="Collect Payment\nLogic: Fetch Dues -> Generate Receipt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;" vertex="1" parent="1">
+          <mxGeometry x="100" y="200" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_s1" edge="1" parent="1" source="s_1" target="s_2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_s2" edge="1" parent="1" source="s_1" target="s_3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page_adm" name="Admission Form Logic">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="a_back" value="Back to SM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;" link="data:page/id,page_sm" vertex="1" parent="1">
+          <mxGeometry x="50" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_1" value="Check application_id" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;" vertex="1" parent="1">
+          <mxGeometry x="300" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_2" value="BE: Fetch Tabs Status" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;" vertex="1" parent="1">
+          <mxGeometry x="100" y="200" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_3" value="Disable Tabs if Null" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;" vertex="1" parent="1">
+          <mxGeometry x="500" y="200" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_4" value="Tab 1: Base Details -> BE Submit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;" vertex="1" parent="1">
+          <mxGeometry x="300" y="350" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_5" value="Enable Next Tabs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;" vertex="1" parent="1">
+          <mxGeometry x="300" y="500" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a1" edge="1" parent="1" source="a_1" target="a_2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a2" edge="1" parent="1" source="a_1" target="a_3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a3" edge="1" parent="1" source="a_2" target="a_4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a4" edge="1" parent="1" source="a_3" target="a_4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a5" edge="1" parent="1" source="a_4" target="a_5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page_admin" name="Users & Roles Logic">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="u_back" value="Back to Main" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;" link="data:page/id,page_main" vertex="1" parent="1">
+          <mxGeometry x="50" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="u_1" value="Users Module" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;" vertex="1" parent="1">
+          <mxGeometry x="300" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="u_2" value="Users Table\nBE: /api/users/list" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;" vertex="1" parent="1">
+          <mxGeometry x="300" y="200" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="u_3" value="Create User Form\nDrawer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;" vertex="1" parent="1">
+          <mxGeometry x="100" y="350" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="u_4" value="Submit -> BE: Save" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;" vertex="1" parent="1">
+          <mxGeometry x="100" y="500" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="u_5" value="Toggle Status\nBE: Active/Inactive" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;" vertex="1" parent="1">
+          <mxGeometry x="500" y="350" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_u1" edge="1" parent="1" source="u_1" target="u_2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_u2" edge="1" parent="1" source="u_2" target="u_3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_u3" edge="1" parent="1" source="u_3" target="u_4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_u4" edge="1" parent="1" source="u_2" target="u_5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page_fac" name="Faculty Corner">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="f_back" value="Back to Main" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;" link="data:page/id,page_main" vertex="1" parent="1">
+          <mxGeometry x="50" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="f_1" value="Faculty Topics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;" vertex="1" parent="1">
+          <mxGeometry x="300" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="f_2" value="Create Topic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;" vertex="1" parent="1">
+          <mxGeometry x="300" y="200" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="f_3" value="BE: Update Syllabus" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;" vertex="1" parent="1">
+          <mxGeometry x="300" y="350" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f1" edge="1" parent="1" source="f_1" target="f_2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f2" edge="1" parent="1" source="f_2" target="f_3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
