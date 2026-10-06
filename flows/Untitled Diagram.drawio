@@ -292,18 +292,27 @@
     </mxGraphModel>
   </diagram>
   <diagram id="EYDlRSI6UMn4rhyHYsIq" name="Dashboard">
-    <mxGraphModel dx="1005" dy="454" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="766" dy="454" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="3nm18HlDRUqulT9RgQ8B-3" edge="1" parent="1" source="3nm18HlDRUqulT9RgQ8B-1" style="edgeStyle=none;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;elbow=vertical;" target="3nm18HlDRUqulT9RgQ8B-2" value="">
+        <mxCell id="3nm18HlDRUqulT9RgQ8B-3" edge="1" parent="1" source="MPfwvdz6KYzWW_T12X2h-1" style="edgeStyle=none;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;elbow=vertical;" target="3nm18HlDRUqulT9RgQ8B-2" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="3nm18HlDRUqulT9RgQ8B-1" parent="1" style="html=1;whiteSpace=wrap;" value="User login" vertex="1">
-          <mxGeometry height="50" width="110" x="40" y="40" as="geometry" />
+        <mxCell id="3nm18HlDRUqulT9RgQ8B-1" parent="1" style="html=1;whiteSpace=wrap;fontSize=10;" value="User login" vertex="1">
+          <mxGeometry height="20" width="110" x="30" y="10" as="geometry" />
         </mxCell>
-        <mxCell id="3nm18HlDRUqulT9RgQ8B-2" parent="1" style="html=1;whiteSpace=wrap;" value="Landing page" vertex="1">
-          <mxGeometry height="50" width="110" x="40" y="110" as="geometry" />
+        <mxCell id="3nm18HlDRUqulT9RgQ8B-2" parent="1" style="html=1;whiteSpace=wrap;fontSize=10;" value="Landing page" vertex="1">
+          <mxGeometry height="20" width="110" x="30" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="MPfwvdz6KYzWW_T12X2h-2" edge="1" parent="1" source="3nm18HlDRUqulT9RgQ8B-1" style="edgeStyle=none;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;elbow=vertical;" target="MPfwvdz6KYzWW_T12X2h-1" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="85" y="30" as="sourcePoint" />
+            <mxPoint x="85" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MPfwvdz6KYzWW_T12X2h-1" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;shapeInside=1;fixedSize=1;fontSize=9;" value="JWT Token, Permissions" vertex="1">
+          <mxGeometry height="30" width="135" x="17.5" y="50" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
